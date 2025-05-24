@@ -39,13 +39,16 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
 
 const SignUp = () => {
 
-  // const [formData, setFormData] = useState({
-  //   name: '',
-  //   email: '',
-  //   password: '',
-  //   confirmPassword:'',
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: '',
+    terms: false,
+  });
 
-  // });
+  const roles = ['Admin', 'Brand', 'Agency'];
 
   const navigate = useNavigate();
 
@@ -55,16 +58,28 @@ const SignUp = () => {
     setChecked(event.target.checked);
   };
 
-  //const handleChange = (e) => setEmail(e.target.value);
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     await axios.post("https://api.marketincer.com/api/v1/signup", {email});
-  //     navigate("/login");
-  //   } catch (error) {
-  //     console.error("Signup failed", error);
-  //   }
-  // };
+  const handleSubmit = async () => {
+    try {
+      await axios.post('https://your-api.com/signup', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword:formData.confirmPassword,
+        role: formData.role,
+      });
+      navigate('/login');
+    } catch (error) {
+      console.error("Signup failed", error);
+    }
+  };
 
   const handleSignupRedirect = () => {
     navigate('/login'); // or the path you have set in routes
@@ -96,25 +111,15 @@ const SignUp = () => {
        Start your 30-days free trail
       </Typography>
 
-      
-      {/* <TextField
-            fullWidth
-            name="name"
-            label="Name"
-            //value={setEmail}
-            variant="outlined"
-            margin="normal"
-            onChange={handleChange}
-            InputLabelProps={{ style: { color: '#ccc' } }}
-            InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px', height:'40px' } }}
-          /> */}
         <TextField 
         fullWidth 
         id="outlined-basic" 
         label="Name" 
         name="name"
+        value={formData.name}
         variant="filled" 
         size='small'
+        onChange={handleChange}
         InputLabelProps={{ style: { color: '#dfdfd' } }}
         InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px' } }}
         />
@@ -123,11 +128,11 @@ const SignUp = () => {
             fullWidth
             name="email"
             size='small'
-            //value={setEmail}
+            value={formData.email}
             variant="filled"
             margin="normal"
             label="Email"
-            //onChange={handleChange}
+            onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px'} }}
           />
@@ -135,14 +140,13 @@ const SignUp = () => {
         
           <TextField
             fullWidth
-            name="Password"
+            name="password"
             label="password"
-            
-            //value={setEail}
+            value={formData.password}
             size="small"
             variant="filled"
             margin="normal"
-            //onChange={handleChange}
+            onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px' } }}
           />
@@ -150,51 +154,43 @@ const SignUp = () => {
         
           <TextField
             fullWidth
-            name="Confirm Password"
+            name="confirmPassword"
             label=" Confirm Password"
-            
-            //value={setEail}
+            value={formData.confirmPassword}
             size="small"
             variant="filled"
             margin="normal"
-           // onChange={handleChange}
+            onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px',  } }}
           />
 
           
       <FormControl variant="filled" size='small' margin="normal" sx={{ minWidth:'100%', background:'#fff',borderRadius:'5px', }}>
-        <InputLabel id="demo-simple-select-filled-label">Role</InputLabel>
-        <Select
-          labelId="demo-simple-select-filled-label"
-          id="demo-simple-select-filled"
-          //value={age}
-          //onChange={handleChange}
-        >
-          
-          <MenuItem value={10}>Admin</MenuItem>
-          <MenuItem value={20}>Brand</MenuItem>
-          <MenuItem value={30}>Agency</MenuItem>
-        </Select>
+        
+        <select style={{height:'45px', borderRadius:'5px'}} name="role" value={formData.role} onChange={handleChange} >
+            <option value="">Select Role</option>
+            {roles.map((role) => (
+              <option key={role} value={role}>{role}</option>
+            ))}
+          </select>
         </FormControl>
 
-       
-        <FormControlLabel
-        sx={{
-          '& .MuiFormControlLabel-label': {
-            
-            color: '#fff',
-          },
-        }}
-          control={
-            <Checkbox checked={checked} onChange={handleCheckChange} sx={{color:'#FFF'}}/>
-          }
-          label="Terms and Condition"
-        />
+        <label style={{color:'#fff', textAlign:'left'}}>
+            <input
+              type="checkbox"
+              name="terms"
+              checked={formData.terms}
+              onChange={handleChange}
+              
+            />
+            Accept terms and conditions
+          </label>
+
           <Button
             fullWidth
             variant="contained"
-            //onClick={handleSubmit}
+            onClick={handleSubmit}
             sx={{
               mt: 2,
               mb: 1,
