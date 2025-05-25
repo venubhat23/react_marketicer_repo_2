@@ -37,6 +37,9 @@ const Login = () => {
   //   navigate("/dashboard");
   // };
 
+  const handleSignupRedirect = () => {
+    navigate('/'); // or the path you have set in routes
+  };
   return (
     <Grid container spacing={2} className="login_section"
     sx={{
@@ -129,11 +132,12 @@ const Login = () => {
             Sign in with Google
           </Button>
 
+
+
           <Typography variant="body2" align="center" sx={{color:'#fff'}}>
             Don’t have an account?{' '}
-            <span style={{ color: '#90caf9', cursor: 'pointer' }}>Sign up</span>
+            <span style={{ color: '#90caf9', cursor: 'pointer' }} onClick={handleSignupRedirect}>Signup</span>
           </Typography>
-
       
     </Box>
     

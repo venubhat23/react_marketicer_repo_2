@@ -220,7 +220,7 @@ const SignUp = () => {
 
           <Typography variant="body2" align="center" sx={{color:'#fff'}}>
             Don’t have an account?{' '}
-            <span style={{ color: '#90caf9', cursor: 'pointer' }} onClick={handleSignupRedirect}>Sign up</span>
+            <span style={{ color: '#90caf9', cursor: 'pointer' }} onClick={handleSignupRedirect}>Login</span>
           </Typography>
 
       
