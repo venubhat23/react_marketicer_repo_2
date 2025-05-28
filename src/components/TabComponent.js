@@ -26,7 +26,7 @@ const TabComponent = ({ tabs, defaultIndex = 0 }) => {
   };
 
   return (
-    <Box sx={{ width: '100%', p:2 }}>
+    <Box sx={{ width: '100%', }}>
       <Tabs value={value} onChange={handleChange} aria-label="Reusable Tabs" sx={{bgcolor:'#fff'}}>
         {tabs.map((tab, index) => (
           <Tab

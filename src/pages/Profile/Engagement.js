@@ -26,7 +26,7 @@ import React from "react";
     
       <Card
       sx={{
-        width: "100%",
+        //width: "100%",
         borderRadius: "20px",
         border: "1px solid #d6d6d6",
         boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
@@ -59,7 +59,7 @@ import React from "react";
           <FormControl
             size="small"
             sx={{
-              width: 156,
+              width: 250,
               "& .MuiOutlinedInput-root": {
                 borderRadius: "8px",
                 bgcolor: "#fafafa",

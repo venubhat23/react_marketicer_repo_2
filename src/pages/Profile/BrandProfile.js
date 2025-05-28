@@ -39,21 +39,11 @@ const BrandProfile = () => {
       links: "122",
       date: "13March",
     },
-    {
-      id: 3,
-      image: "https://c.animaapp.com/mavezxjciUNcPR/img/rectangle-75-2.png",
-      username: "@name",
-      content: "Lorem ipsum dolor sit....",
-      likes: "37.8K",
-      comments: "248",
-      shares: "234",
-      links: "122",
-      date: "13March",
-    },
+
   ];
 
   return (
-    <Box sx={{ width: "100%", p: 2 }}>
+   
       <Stack spacing={2}>
         {influencerPosts.map((post) => (
           <Card
@@ -64,9 +54,10 @@ const BrandProfile = () => {
               border: "1px solid #d6d6d6",
               boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.25)",
               bgcolor: "#fffdfd",
+              width:'100%', 
             }}
           >
-            <CardContent sx={{ p: 0 }}>
+            <CardContent sx={{ p: 0, }}>
               <Grid container spacing={2}>
                 <Grid item>
                   <Box
@@ -165,7 +156,7 @@ const BrandProfile = () => {
           </Card>
         ))}
       </Stack>
-    </Box>
+    
   );
 };
 

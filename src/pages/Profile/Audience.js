@@ -1,8 +1,16 @@
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import React from "react";
+import { Box, Card, CardContent, Stack, Typography,Grid,List,ListItem,ListItemIcon, Toolbar } from "@mui/material";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 
 const Audience = () => {
   // Data for engagement metrics
+  const COLORS = ['#3f51b5', '#9c27b0', '#03a9f4'];
+  const ageData = [
+    { name: '18-24', value: 300 },
+    { name: '24-30', value: 400 },
+    { name: '>30',   value: 300 },
+  ];
+
   const engagementData = [
     { type: "Likes", percentage: "60%", color: "brand.600" },
     { type: "Comments", percentage: "35%", color: "brand.100" },
@@ -13,8 +21,8 @@ const Audience = () => {
     <Box sx={{ width: "100%", height: "310px", }}>
       <Card
         sx={{
-          width: "100%",
-          height: "304px",
+          // width: "100%",
+          // height: "304px",
           borderRadius: "20px",
           border: "1px solid #d6d6d6",
           boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
@@ -48,50 +56,36 @@ const Audience = () => {
               ml: 4.9,
             }}
           >
-            <Box
-              sx={{
-                position: "relative",
-                width: "240px",
-                height: "240px",
-                backgroundImage:
-                  "url(https://c.animaapp.com/mavezxjciUNcPR/img/background.svg)",
-                backgroundSize: "100% 100%",
-              }}
-            >
-              <Box
-                sx={{
-                  position: "relative",
-                  width: "157px",
-                  height: "240px",
-                  left: "83px",
-                }}
-              >
-                <Box
-                  component="img"
-                  sx={{
-                    position: "absolute",
-                    width: "114px",
-                    height: "101px",
-                    top: 0,
-                    left: "37px",
-                  }}
-                  alt="Series"
-                  src="https://c.animaapp.com/mavezxjciUNcPR/img/series-1.svg"
-                />
-                <Box
-                  component="img"
-                  sx={{
-                    position: "absolute",
-                    width: "157px",
-                    height: "157px",
-                    top: "83px",
-                    left: 0,
-                  }}
-                  alt="Series"
-                  src="https://c.animaapp.com/mavezxjciUNcPR/img/series-2.svg"
-                />
+           
+          <Card>
+            <CardContent>
+              <Typography variant="subtitle1">Audience Age</Typography>
+              <ResponsiveContainer width="100%" height={120}>
+                <PieChart>
+                  <Pie
+                    data={ageData}
+                    innerRadius={40}
+                    outerRadius={60}
+                    dataKey="value"
+                    startAngle={90}
+                    endAngle={-270}
+                  >
+                    {ageData.map((_, idx) => (
+                      <Cell key={idx} fill={COLORS[idx]} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <Box display="flex" justifyContent="space-around" mt={1}>
+                {ageData.map((d) => (
+                  <Typography key={d.name} variant="caption">
+                    {d.name}
+                  </Typography>
+                ))}
               </Box>
-            </Box>
+            </CardContent>
+          </Card>
+        
 
             <Stack spacing={1}>
               {engagementData.map((item, index) => (
