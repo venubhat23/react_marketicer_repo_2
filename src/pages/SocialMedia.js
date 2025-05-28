@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useEffect, useState} from 'react'
 import PlusCircleIcon from "@mui/icons-material/AddCircle";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -34,6 +34,7 @@ import SocialConnect from './SocialConnect';
 import SocialDisConnect from './SocialDisConnect';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import axios from "axios";
 
 const style = {
   position: 'absolute',
@@ -48,7 +49,7 @@ const style = {
 };
 
 const SocialMedia =()=>{
-  const socialAccounts = [
+  const socialAccountss = [
     {
       id: 1,
       platform: "LinkedIn",
@@ -101,8 +102,20 @@ const SocialMedia =()=>{
     },
   ];
 
+  const icons = {
+    "linkedin": {
+      "name": "LinkedIn",
+      "icon":"https://c.animaapp.com/mayvvv0wua9Y41/img/avatar.png",
+    },
+    "instagram": {
+      "name": "Instagram",
+      "icon":"https://c.animaapp.com/mayvvv0wua9Y41/img/avatar-1.png",
+    },
+  }
+
   const [openConnect, setOpenConnect] = useState(false);
   const [open, setOpen] = useState(false)
+  const [socialAccounts, setSocialAccounts] = useState([]);
 
   const handleConnectOpen = () => {setOpenConnect(true)};
 
@@ -111,6 +124,46 @@ const SocialMedia =()=>{
   const handleClose = () => setOpen(false);
 
   const handleConnectClose=() => setOpenConnect(false)
+
+  const getAccounts = async () => {
+    try {
+      const res = await axios.get("https://api.marketincer.com/api/v1/social_pages/connected_pages", {
+        headers: {
+            'Authorization': localStorage.getItem('token'),
+            'Content-Type': 'application/json'
+        }
+      });
+      console.log("Response from API:", res);
+      let accounts = res?.data?.data?.accounts;
+      console.log(("Fetched accounts:", accounts));
+      accounts = accounts?.map((account) => {
+        let new_account = {}
+        // Map the fetched accounts to the desired structure
+        new_account['id'] = account.id;
+        new_account['platform'] = icons[account.page_type].name;
+        new_account['icon'] = icons[account.page_type].icon;
+        new_account['user'] = {
+          name: account.name,
+          username: account.username,
+          avatar: account.picture_url,
+          status: "Active",
+        }
+        return new_account;
+      });
+      setSocialAccounts(accounts)
+      console.log("Mapped accounts:", accounts);
+      // navigate('/dashboard');
+      
+    } catch (error) {
+      console.error("Login failed", error);
+    }
+  };
+
+  useEffect(() => { 
+    // Fetch social media accounts data if needed
+    // This is a placeholder for any data fetching logic
+    getAccounts();
+  }, []);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -190,7 +243,7 @@ const SocialMedia =()=>{
 
             <Stack spacing={2}>
               {/* LinkedIn Account */}
-              <Paper
+              {/* <Paper
                 elevation={0}
                 sx={{
                   p: 2,
@@ -198,10 +251,10 @@ const SocialMedia =()=>{
                   borderRadius: 4,
                   boxShadow: "2px 2px 4px rgba(0,0,0,0.06)",
                 }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              > */}
+                {/* <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   <Avatar
-                    src={socialAccounts[0].icon}
+                    src={socialAccounts[0]?.icon}
                     sx={{ width: 41, height: 41, mr: 2 }}
                   />
                   <Typography variant="h6">LinkedIn</Typography>
@@ -246,10 +299,10 @@ const SocialMedia =()=>{
                       <SocialDisConnect />
                     </Box>
                   </Modal>
-                </Box>
+                </Box> */}
 
-                <Stack spacing={2} sx={{ ml: 2 }}>
-                  {socialAccounts[0].users.map((user, index) => (
+                {/* <Stack spacing={2} sx={{ ml: 2 }}>
+                  {socialAccounts[0]?.users.map((user, index) => (
                     <Box
                       key={index}
                       sx={{ display: "flex", alignItems: "center" }}
@@ -287,11 +340,11 @@ const SocialMedia =()=>{
                       </Box>
                     </Box>
                   ))}
-                </Stack>
-              </Paper>
+                </Stack> */}
+              {/* </Paper> */}
 
-              {/* Other Social Media Accounts */}
-              {socialAccounts.slice(1).map((account) => (
+              {/* Other Social Media Accounts */} 
+              {socialAccounts.map((account) => (
                 <Paper
                   key={account.id}
                   elevation={0}
