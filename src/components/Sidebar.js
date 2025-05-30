@@ -107,7 +107,7 @@ const Sidebar = () => {
   //         },
   //       }}
   //     >
-        <Box sx={{ bgcolor: "#091a48", flexDirection: "column", width:"80px", height: "100%" }}>
+        <Box sx={{ bgcolor: "#091a48", flexDirection: "column", width:"100%", height: "100%" }}>
           {/* Logo */}
           <Box sx={{ p: 2, pt: 4, pb: 2 }}>
             <img
