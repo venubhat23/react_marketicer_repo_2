@@ -40,7 +40,7 @@ const COLORS = ['#3f51b5', '#9c27b0', '#03a9f4'];
 
 const  AudienceInsights=()=> {
   return (
-    <Box p={2}>
+    
       <Grid container spacing={2}>
         {/* Top row: 3 / 4 / 5 */}
         <Grid item xs={12} md={3} size={3}>
@@ -98,7 +98,7 @@ const  AudienceInsights=()=> {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={5} size={5}>
+        <Grid item xs={12} md={5} size={5} >
           <Card>
             <CardContent>
               <Typography variant="subtitle1" gutterBottom>
@@ -188,7 +188,7 @@ const  AudienceInsights=()=> {
           </Card>
         </Grid>
       </Grid>
-    </Box>
+   
   );
 }
 

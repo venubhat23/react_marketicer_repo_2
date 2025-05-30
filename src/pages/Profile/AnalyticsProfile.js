@@ -29,7 +29,7 @@ import {
     };
   
     return (
-      <Box sx={{ width: "100%", ml: 2, my: 2 }}>
+      <Box sx={{  my: 2 }}>
         <Card
           sx={{
             width: "100%",

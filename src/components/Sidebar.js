@@ -94,20 +94,20 @@ const Sidebar = () => {
 
   return(
     
-  <Drawer
-        variant="permanent"
-        sx={{
-          //width: 80,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            //width: 80,
-            boxSizing: "border-box",
-            bgcolor: "#091a48",
-            border: "none",
-          },
-        }}
-      >
-        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+  // <Drawer
+  //       variant="permanent"
+  //       sx={{
+  //         width: 85,
+  //         flexShrink: 0,
+  //         "& .MuiDrawer-paper": {
+  //           width: 85,
+  //           boxSizing: "border-box",
+  //           bgcolor: "#091a48",
+  //           border: "none",
+  //         },
+  //       }}
+  //     >
+        <Box sx={{ bgcolor: "#091a48", flexDirection: "column", width:"80px", height: "100%" }}>
           {/* Logo */}
           <Box sx={{ p: 2, pt: 4, pb: 2 }}>
             <img
@@ -117,7 +117,6 @@ const Sidebar = () => {
               height={21}
             />
           </Box>
-
           {/* Navigation Icons */}
           <List className="sidebar-list">
 
@@ -298,7 +297,7 @@ const Sidebar = () => {
           </Box>
           
         </Box>
-      </Drawer>
+      // </Drawer>
   
 
       
