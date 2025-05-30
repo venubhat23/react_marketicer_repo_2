@@ -116,10 +116,14 @@ const SocialMedia =()=>{
   const [openConnect, setOpenConnect] = useState(false);
   const [open, setOpen] = useState(false)
   const [socialAccounts, setSocialAccounts] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleConnectOpen = () => {setOpenConnect(true)};
 
-  const handleDisconnectOpen=()=>{setOpen(true)}
+  const handleDisconnectOpen=(user)=>{
+    setSelectedUser(user);
+    setOpen(true);
+  }
   
   const handleClose = () => setOpen(false);
 
@@ -142,15 +146,16 @@ const SocialMedia =()=>{
         new_account['id'] = account.id;
         new_account['platform'] = icons[account.page_type].name;
         new_account['icon'] = icons[account.page_type].icon;
-        new_account['user'] = {
+        new_account['users'] = [{
+          social_id: account.social_id,
           name: account.name,
           username: account.username,
           avatar: account.picture_url,
           status: "Active",
-        }
+        }]
         return new_account;
       });
-      setSocialAccounts(accounts)
+      setSocialAccounts(socialAccounts => [...socialAccounts, ...accounts]);
       console.log("Mapped accounts:", accounts);
       // navigate('/dashboard');
       
@@ -159,10 +164,22 @@ const SocialMedia =()=>{
     }
   };
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const authCode = urlParams.get("code");
+  const authState = urlParams.get("state");
+
   useEffect(() => { 
     // Fetch social media accounts data if needed
     // This is a placeholder for any data fetching logic
-    getAccounts();
+    if (authCode && authState) {
+      // Handle the authentication code and state
+      console.log("Auth Code:", authCode);
+      console.log("Auth State:", authState);
+      setOpenConnect(true);
+      // You can call your API to exchange the code for tokens here
+    } else {
+      getAccounts();
+    }
   }, []);
 
   return (
@@ -210,7 +227,7 @@ const SocialMedia =()=>{
           </Box>
 
           {/* Connect New Account Button */}
-          <Box sx={{ alignSelf: "flex-end", mb: 2 }}>
+          {/* <Box sx={{ alignSelf: "flex-end", mb: 2 }}>
             <Button
               variant="contained"
               sx={{
@@ -224,7 +241,7 @@ const SocialMedia =()=>{
             >
               Connect New Account
             </Button>
-          </Box>
+          </Box> */}
 
           {/* Accounts List */}
           <Paper
@@ -237,13 +254,13 @@ const SocialMedia =()=>{
             }}
           >
             
-            <Typography variant="h6" sx={{ mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 2, ml: 2, textAlign: "start" }}>
               Connected Accounts List
             </Typography>
 
             <Stack spacing={2}>
               {/* LinkedIn Account */}
-              {/* <Paper
+              <Paper
                 elevation={0}
                 sx={{
                   p: 2,
@@ -251,10 +268,10 @@ const SocialMedia =()=>{
                   borderRadius: 4,
                   boxShadow: "2px 2px 4px rgba(0,0,0,0.06)",
                 }}
-              > */}
-                {/* <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   <Avatar
-                    src={socialAccounts[0]?.icon}
+                    src={icons["linkedin"].icon}
                     sx={{ width: 41, height: 41, mr: 2 }}
                   />
                   <Typography variant="h6">LinkedIn</Typography>
@@ -279,11 +296,11 @@ const SocialMedia =()=>{
                   </Button>
                   <Modal open={openConnect} onClose={handleConnectClose}>
                     <Box sx={style}>
-                      <SocialConnect />
+                      <SocialConnect onClose={handleConnectClose} authCode={authCode} authState={authState}/>
                     </Box>
                   </Modal>
 
-                  <Button
+                  {/* <Button
                     variant="contained"
                     onClick={handleDisconnectOpen}
                     sx={{
@@ -293,16 +310,128 @@ const SocialMedia =()=>{
                     }}
                   >
                     Disconnect
-                  </Button>
+                  </Button> */}
                   <Modal open={open} onClose={handleClose}>
                     <Box sx={style}>
-                      <SocialDisConnect />
+                      <SocialDisConnect onClose={handleClose} account={selectedUser}/>
                     </Box>
                   </Modal>
-                </Box> */}
+                </Box>
 
-                {/* <Stack spacing={2} sx={{ ml: 2 }}>
-                  {socialAccounts[0]?.users.map((user, index) => (
+                <Stack spacing={2} sx={{ ml: 2 }}>
+                  {socialAccounts?.filter(account => account.platform == "LinkedIn")[0]?.users.map((user, index) => (
+                    <Box
+                      key={index}
+                      sx={{ display: "flex", alignItems: "center" }}
+                    >
+                      <Avatar
+                        src={user.avatar}
+                        sx={{ width: 34, height: 34, mr: 2 }}
+                      />
+                      <Box>
+                        <Typography variant="body1" fontWeight={500}>
+                          {user.name}
+                        </Typography>
+                        <Chip
+                          size="small"
+                          label={user.status}
+                          sx={{
+                            color: "#21d548",
+                            bgcolor: "white",
+                            border: "0.5px solid #21d548",
+                            textAlign: 'start',
+                            height: 20,
+                            "& .MuiChip-label": { px: 1 },
+                          }}
+                          icon={
+                            <Box
+                              sx={{
+                                width: 6,
+                                height: 6,
+                                bgcolor: "#21d548",
+                                borderRadius: "50%",
+                                ml: 0.5,
+                              }}
+                            />
+                          }
+                        />
+                      </Box>
+                      <Button
+                        variant="contained"
+                        onClick={() => handleDisconnectOpen(user)}
+                        sx={{
+                          bgcolor: "#d92c20",
+                          borderColor: "#d92c20",
+                          ml: "auto",
+                          "&:hover": { bgcolor: "#b82318" },
+                        }}
+                      >
+                        Disconnect
+                      </Button>
+                    </Box>
+                  ))}
+                </Stack>
+              </Paper>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  border: "1px solid #d2d2d2",
+                  borderRadius: 4,
+                  boxShadow: "2px 2px 4px rgba(0,0,0,0.06)",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                  <Avatar
+                    src={icons["instagram"].icon}
+                    sx={{ width: 30, height: 30, mr: 2 }}
+                  />
+                  <Typography variant="h6">Instagram</Typography>
+                  <IconButton sx={{ ml: 1 }}>
+                    <ChevronDownIcon />
+                  </IconButton>
+                  <Box sx={{ flexGrow: 1 }} />
+                  <Button
+                    variant="outlined"
+                    // onClick={handleConnectOpen}
+                    sx={{
+                      color: "#21d548",
+                      borderColor: "#21d548",
+                      mr: 2,
+                      "&:hover": {
+                        borderColor: "#1bb33e",
+                        bgcolor: "rgba(33, 213, 72, 0.04)",
+                      },
+                    }}
+                  >
+                    Connect
+                  </Button>
+                  {/* <Modal open={openConnect} onClose={handleConnectClose}>
+                    <Box sx={style}>
+                      <SocialConnect onClose={handleConnectClose} authCode={authCode} authState={authState}/>
+                    </Box>
+                  </Modal> */}
+
+                  {/* <Button
+                    variant="contained"
+                    onClick={handleDisconnectOpen}
+                    sx={{
+                      bgcolor: "#d92c20",
+                      borderColor: "#d92c20",
+                      "&:hover": { bgcolor: "#b82318" },
+                    }}
+                  >
+                    Disconnect
+                  </Button> */}
+                  {/* <Modal open={open} onClose={handleClose}>
+                    <Box sx={style}>
+                      <SocialDisConnect onClose={handleClose}/>
+                    </Box>
+                  </Modal> */}
+                </Box>
+
+                <Stack spacing={2} sx={{ ml: 2 }}>
+                  {socialAccounts?.filter(account => account.platform == "Instagram")[0]?.users.map((user, index) => (
                     <Box
                       key={index}
                       sx={{ display: "flex", alignItems: "center" }}
@@ -338,13 +467,25 @@ const SocialMedia =()=>{
                           }
                         />
                       </Box>
+                      <Button
+                        variant="contained"
+                        onClick={handleDisconnectOpen}
+                        sx={{
+                          bgcolor: "#d92c20",
+                          borderColor: "#d92c20",
+                          ml: "auto",
+                          "&:hover": { bgcolor: "#b82318" },
+                        }}
+                      >
+                        Disconnect
+                      </Button>
                     </Box>
                   ))}
-                </Stack> */}
-              {/* </Paper> */}
+                </Stack>
+              </Paper>
 
               {/* Other Social Media Accounts */} 
-              {socialAccounts.map((account) => (
+              {/* {socialAccounts.map((account) => (
                 <Paper
                   key={account.id}
                   elevation={0}
@@ -432,8 +573,8 @@ const SocialMedia =()=>{
                       Disconnect
                     </Button>
                   </Box>
-                </Paper>
-              ))}
+                </Paper> 
+              ))}*/}
             </Stack>
           </Paper>
         </Box>
