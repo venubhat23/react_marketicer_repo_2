@@ -28,8 +28,9 @@ import {
   Stack,
   Toolbar,
   Typography,
-  Modal
+  Modal, Grid,
 } from "@mui/material";
+import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
 import SocialConnect from './SocialConnect';
 import SocialDisConnect from './SocialDisConnect';
 import Sidebar from '../components/Sidebar';
@@ -183,31 +184,50 @@ const SocialMedia =()=>{
   }, []);
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Sidebar/>
-      <Navbar/>
-        {/* Header */}
-        {/* <AppBar
-          position="static"
-          sx={{ bgcolor: "#091a48", boxShadow: "none" }}
-        >
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="back"
-              sx={{ mr: 2 }}
-            >
-              <ArrowLeftIcon />
-            </IconButton>
-            <Typography variant="h5" component="div" fontWeight={500}>
-              Social Media Accounts
-            </Typography>
-          </Toolbar>
-        </AppBar> */}
 
-        {/* Content */}
-        <Box
+    <><Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100%' }}>
+      <Grid container>
+        <Grid size={{ md: 1 }}> <Sidebar /></Grid>
+        <Grid size={{ md: 11 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              display: { xs: 'none', md: 'block' },
+              p: 1,
+              backgroundColor: '#091a48',
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 0
+            }}
+          >
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+
+              <Typography variant="h6" sx={{ color: '#fff' }}>
+                <IconButton
+                  edge="start"
+                  color="inherit"
+                  aria-label="back"
+                  sx={{ mr: 2, color: '#fff' }}
+                >
+                  <ArrowLeftIcon />
+                </IconButton>
+                Socail Media Accounts
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <IconButton size="large" sx={{ color: '#fff' }}>
+                  <NotificationsIcon />
+                </IconButton>
+                <IconButton size="large" sx={{ color: '#fff' }}>
+                  <AccountCircleIcon />
+                </IconButton>
+              </Box>
+            </Box>
+          </Paper>
+          <Box
           sx={{
             p: 4,
             display: "flex",
@@ -216,7 +236,7 @@ const SocialMedia =()=>{
           }}
         >
           {/* Title */}
-          <Box sx={{ textAlign: "center", mb:2, maxWidth: 600 }}>
+          <Box sx={{ textAlign: "center", mb: 2, maxWidth: 600 }}>
             <Typography variant="h5" gutterBottom>
               Manage Your Social Media Accounts
             </Typography>
@@ -228,20 +248,20 @@ const SocialMedia =()=>{
 
           {/* Connect New Account Button */}
           {/* <Box sx={{ alignSelf: "flex-end", mb: 2 }}>
-            <Button
-              variant="contained"
-              sx={{
-                bgcolor: "#7e56d8",
-                borderColor: "#7e56d8",
-                "&:hover": { bgcolor: "#6a46c0" },
-                left:'-42%'
-                // px: 1,
-                // py: 1,
-              }}
-            >
-              Connect New Account
-            </Button>
-          </Box> */}
+      <Button
+        variant="contained"
+        sx={{
+          bgcolor: "#7e56d8",
+          borderColor: "#7e56d8",
+          "&:hover": { bgcolor: "#6a46c0" },
+          left:'-42%'
+          // px: 1,
+          // py: 1,
+        }}
+      >
+        Connect New Account
+      </Button>
+    </Box> */}
 
           {/* Accounts List */}
           <Paper
@@ -253,7 +273,7 @@ const SocialMedia =()=>{
               border: "1px solid #a1a1a1",
             }}
           >
-            
+
             <Typography variant="h6" sx={{ mb: 2, ml: 2, textAlign: "start" }}>
               Connected Accounts List
             </Typography>
@@ -272,8 +292,7 @@ const SocialMedia =()=>{
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   <Avatar
                     src={icons["linkedin"].icon}
-                    sx={{ width: 41, height: 41, mr: 2 }}
-                  />
+                    sx={{ width: 41, height: 41, mr: 2 }} />
                   <Typography variant="h6">LinkedIn</Typography>
                   <IconButton sx={{ ml: 1 }}>
                     <ChevronDownIcon />
@@ -296,24 +315,24 @@ const SocialMedia =()=>{
                   </Button>
                   <Modal open={openConnect} onClose={handleConnectClose}>
                     <Box sx={style}>
-                      <SocialConnect onClose={handleConnectClose} authCode={authCode} authState={authState}/>
+                      <SocialConnect onClose={handleConnectClose} authCode={authCode} authState={authState} />
                     </Box>
                   </Modal>
 
                   {/* <Button
-                    variant="contained"
-                    onClick={handleDisconnectOpen}
-                    sx={{
-                      bgcolor: "#d92c20",
-                      borderColor: "#d92c20",
-                      "&:hover": { bgcolor: "#b82318" },
-                    }}
-                  >
-                    Disconnect
-                  </Button> */}
+      variant="contained"
+      onClick={handleDisconnectOpen}
+      sx={{
+        bgcolor: "#d92c20",
+        borderColor: "#d92c20",
+        "&:hover": { bgcolor: "#b82318" },
+      }}
+    >
+      Disconnect
+    </Button> */}
                   <Modal open={open} onClose={handleClose}>
                     <Box sx={style}>
-                      <SocialDisConnect onClose={handleClose} account={selectedUser}/>
+                      <SocialDisConnect onClose={handleClose} account={selectedUser} />
                     </Box>
                   </Modal>
                 </Box>
@@ -326,8 +345,7 @@ const SocialMedia =()=>{
                     >
                       <Avatar
                         src={user.avatar}
-                        sx={{ width: 34, height: 34, mr: 2 }}
-                      />
+                        sx={{ width: 34, height: 34, mr: 2 }} />
                       <Box>
                         <Typography variant="body1" fontWeight={500}>
                           {user.name}
@@ -343,18 +361,14 @@ const SocialMedia =()=>{
                             height: 20,
                             "& .MuiChip-label": { px: 1 },
                           }}
-                          icon={
-                            <Box
-                              sx={{
-                                width: 6,
-                                height: 6,
-                                bgcolor: "#21d548",
-                                borderRadius: "50%",
-                                ml: 0.5,
-                              }}
-                            />
-                          }
-                        />
+                          icon={<Box
+                            sx={{
+                              width: 6,
+                              height: 6,
+                              bgcolor: "#21d548",
+                              borderRadius: "50%",
+                              ml: 0.5,
+                            }} />} />
                       </Box>
                       <Button
                         variant="contained"
@@ -384,8 +398,7 @@ const SocialMedia =()=>{
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   <Avatar
                     src={icons["instagram"].icon}
-                    sx={{ width: 30, height: 30, mr: 2 }}
-                  />
+                    sx={{ width: 30, height: 30, mr: 2 }} />
                   <Typography variant="h6">Instagram</Typography>
                   <IconButton sx={{ ml: 1 }}>
                     <ChevronDownIcon />
@@ -407,27 +420,27 @@ const SocialMedia =()=>{
                     Connect
                   </Button>
                   {/* <Modal open={openConnect} onClose={handleConnectClose}>
-                    <Box sx={style}>
-                      <SocialConnect onClose={handleConnectClose} authCode={authCode} authState={authState}/>
-                    </Box>
-                  </Modal> */}
+      <Box sx={style}>
+        <SocialConnect onClose={handleConnectClose} authCode={authCode} authState={authState}/>
+      </Box>
+    </Modal> */}
 
                   {/* <Button
-                    variant="contained"
-                    onClick={handleDisconnectOpen}
-                    sx={{
-                      bgcolor: "#d92c20",
-                      borderColor: "#d92c20",
-                      "&:hover": { bgcolor: "#b82318" },
-                    }}
-                  >
-                    Disconnect
-                  </Button> */}
+      variant="contained"
+      onClick={handleDisconnectOpen}
+      sx={{
+        bgcolor: "#d92c20",
+        borderColor: "#d92c20",
+        "&:hover": { bgcolor: "#b82318" },
+      }}
+    >
+      Disconnect
+    </Button> */}
                   {/* <Modal open={open} onClose={handleClose}>
-                    <Box sx={style}>
-                      <SocialDisConnect onClose={handleClose}/>
-                    </Box>
-                  </Modal> */}
+      <Box sx={style}>
+        <SocialDisConnect onClose={handleClose}/>
+      </Box>
+    </Modal> */}
                 </Box>
 
                 <Stack spacing={2} sx={{ ml: 2 }}>
@@ -438,8 +451,7 @@ const SocialMedia =()=>{
                     >
                       <Avatar
                         src={user.avatar}
-                        sx={{ width: 34, height: 34, mr: 2 }}
-                      />
+                        sx={{ width: 34, height: 34, mr: 2 }} />
                       <Box>
                         <Typography variant="body1" fontWeight={500}>
                           {user.name}
@@ -454,18 +466,14 @@ const SocialMedia =()=>{
                             height: 20,
                             "& .MuiChip-label": { px: 1 },
                           }}
-                          icon={
-                            <Box
-                              sx={{
-                                width: 6,
-                                height: 6,
-                                bgcolor: "#21d548",
-                                borderRadius: "50%",
-                                ml: 0.5,
-                              }}
-                            />
-                          }
-                        />
+                          icon={<Box
+                            sx={{
+                              width: 6,
+                              height: 6,
+                              bgcolor: "#21d548",
+                              borderRadius: "50%",
+                              ml: 0.5,
+                            }} />} />
                       </Box>
                       <Button
                         variant="contained"
@@ -484,102 +492,131 @@ const SocialMedia =()=>{
                 </Stack>
               </Paper>
 
-              {/* Other Social Media Accounts */} 
+              {/* Other Social Media Accounts */}
               {/* {socialAccounts.map((account) => (
-                <Paper
-                  key={account.id}
-                  elevation={0}
+      <Paper
+        key={account.id}
+        elevation={0}
+        sx={{
+          p: 2,
+          border: "1px solid #d2d2d2",
+          borderRadius: 4,
+          boxShadow: "2px 2px 4px rgba(0,0,0,0.06)",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Avatar
+            src={account.user.avatar}
+            sx={{ width: 50, height: 50, mr: 2 }}
+          />
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography variant="body1" fontWeight={500}>
+                {account.user.name}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ ml: 1 }}
+              >
+                {account.user.username}
+              </Typography>
+              <Avatar
+                src={account.icon}
+                sx={{
+                  width: 31,
+                  height: 31,
+                  ml: 2,
+                  border: "0.5px solid #d6bbfb",
+                }}
+              />
+            </Box>
+            <Chip
+              size="small"
+              label={account.user.status}
+              sx={{
+                color: "#21d548",
+                bgcolor: "white",
+                border: "0.5px solid #21d548",
+                height: 20,
+                mt: 0.5,
+                "& .MuiChip-label": { px: 1 },
+              }}
+              icon={
+                <Box
                   sx={{
-                    p: 2,
-                    border: "1px solid #d2d2d2",
-                    borderRadius: 4,
-                    boxShadow: "2px 2px 4px rgba(0,0,0,0.06)",
+                    width: 6,
+                    height: 6,
+                    bgcolor: "#21d548",
+                    borderRadius: "50%",
+                    ml: 0.5,
                   }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Avatar
-                      src={account.user.avatar}
-                      sx={{ width: 50, height: 50, mr: 2 }}
-                    />
-                    <Box>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Typography variant="body1" fontWeight={500}>
-                          {account.user.name}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ ml: 1 }}
-                        >
-                          {account.user.username}
-                        </Typography>
-                        <Avatar
-                          src={account.icon}
-                          sx={{
-                            width: 31,
-                            height: 31,
-                            ml: 2,
-                            border: "0.5px solid #d6bbfb",
-                          }}
-                        />
-                      </Box>
-                      <Chip
-                        size="small"
-                        label={account.user.status}
-                        sx={{
-                          color: "#21d548",
-                          bgcolor: "white",
-                          border: "0.5px solid #21d548",
-                          height: 20,
-                          mt: 0.5,
-                          "& .MuiChip-label": { px: 1 },
-                        }}
-                        icon={
-                          <Box
-                            sx={{
-                              width: 6,
-                              height: 6,
-                              bgcolor: "#21d548",
-                              borderRadius: "50%",
-                              ml: 0.5,
-                            }}
-                          />
-                        }
-                      />
-                    </Box>
-                    <Box sx={{ flexGrow: 1 }} />
-                    <Button
-                      variant="outlined"
-                      sx={{
-                        color: "#21d548",
-                        borderColor: "#21d548",
-                        mr: 2,
-                        "&:hover": {
-                          borderColor: "#1bb33e",
-                          bgcolor: "rgba(33, 213, 72, 0.04)",
-                        },
-                      }}
-                    >
-                      Connect
-                    </Button>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        bgcolor: "#d92c20",
-                        borderColor: "#d92c20",
-                        "&:hover": { bgcolor: "#b82318" },
-                      }}
-                    >
-                      Disconnect
-                    </Button>
-                  </Box>
-                </Paper> 
-              ))}*/}
+                />
+              }
+            />
+          </Box>
+          <Box sx={{ flexGrow: 1 }} />
+          <Button
+            variant="outlined"
+            sx={{
+              color: "#21d548",
+              borderColor: "#21d548",
+              mr: 2,
+              "&:hover": {
+                borderColor: "#1bb33e",
+                bgcolor: "rgba(33, 213, 72, 0.04)",
+              },
+            }}
+          >
+            Connect
+          </Button>
+          <Button
+            variant="contained"
+            sx={{
+              bgcolor: "#d92c20",
+              borderColor: "#d92c20",
+              "&:hover": { bgcolor: "#b82318" },
+            }}
+          >
+            Disconnect
+          </Button>
+        </Box>
+      </Paper>
+    ))}*/}
             </Stack>
           </Paper>
         </Box>
-       
-      </Box>
+        </Grid>
+      </Grid>
+    </Box>
+    
+    
+    <Box sx={{ flexGrow: 1 }}>
+        
+        {/* Header */}
+        {/* <AppBar
+      position="static"
+      sx={{ bgcolor: "#091a48", boxShadow: "none" }}
+    >
+      <Toolbar>
+        <IconButton
+          edge="start"
+          color="inherit"
+          aria-label="back"
+          sx={{ mr: 2 }}
+        >
+          <ArrowLeftIcon />
+        </IconButton>
+        <Typography variant="h5" component="div" fontWeight={500}>
+          Social Media Accounts
+        </Typography>
+      </Toolbar>
+    </AppBar> */}
+
+        {/* Content */}
+        
+
+      </Box></>
   )
 }
 

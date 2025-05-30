@@ -75,12 +75,13 @@ const Login = () => {
           <TextField
             fullWidth
             //label="Email"
+            size='small'
             name="email"
             variant="outlined"
             margin="normal"
             onChange={handleChange}
-            InputLabelProps={{ style: { color: '#ccc' } }}
-            InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px', height:'40px' } }}
+            InputLabelProps={{ style: { color: '#ccc'} }}
+            InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px' } }}
           />
 
         <Typography 
@@ -95,11 +96,12 @@ const Login = () => {
             //label="Password"
             type="password"
             name="password"
-            variant="filled"
+            size='small'
+            variant="outlined"
             margin="normal"
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#ccc' } }}
-            InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px', height:'40px' } }}
+            InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px'} }}
           />
 
           <Button

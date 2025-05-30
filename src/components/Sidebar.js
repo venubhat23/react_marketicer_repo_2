@@ -115,6 +115,7 @@ const Sidebar = () => {
               alt="Marketincer logo"
               width={29}
               height={21}
+              style={{display:'block', margin:'auto'}}
             />
           </Box>
           {/* Navigation Icons */}

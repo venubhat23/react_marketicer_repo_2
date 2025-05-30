@@ -86,72 +86,50 @@ const Analytics =()=>{
 
     return(
       <>
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-        <Box
-          component="nav"
-          sx={{ 
-            width: { md: '5.333%' }, 
-            minWidth: { md: '80px' },
-            flexShrink: 0 
-          }}
-        >
-          <Sidebar />
-        </Box>
 
-        {/* Main Content - 11/12 */}
-        <Box
-          component="main"
-          sx={{ 
-            flexGrow: 1,
-            width: { md: '92.667%' },
-            backgroundColor: '#f4edf8',
-            mt: { xs: 8, md: 0 }
-          }}
-        >
-
+<Box sx={{ flexGrow: 1, bgcolor:'#f5edf8' }} >
+    <Grid container>
+      <Grid size={{ md: 1 }}> <Sidebar/></Grid>
+      <Grid size={{ md: 11 }}> 
         <Paper
-          elevation={0}
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            p: 1,
-            backgroundColor: '#091a48',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 0
-          }}
-        >
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            
-            <Typography variant="h6" sx={{ color:'#fff' }}>
-              <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="back"
-              sx={{ mr: 2, color:'#fff' }}
+              elevation={0}
+              sx={{
+                display: { xs: 'none', md: 'block' },
+                p: 1,
+                backgroundColor: '#091a48',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 0
+              }}
             >
-              <ArrowLeftIcon />
-            </IconButton>
-              Analytics
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <IconButton size="large" sx={{ color:'#fff' }}>
-                <NotificationsIcon />
-              </IconButton>
-              <IconButton size="large" sx={{ color:'#fff' }}>
-                <AccountCircleIcon />
-              </IconButton>
-            </Box>
-          </Box>
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+
+                <Typography variant="h6" sx={{ color: '#fff' }}>
+                  <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="back"
+                    sx={{ mr: 2, color: '#fff' }}
+                  >
+                    <ArrowLeftIcon />
+                  </IconButton>
+                  Create Post
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <IconButton size="large" sx={{ color: '#fff' }}>
+                    <NotificationsIcon />
+                  </IconButton>
+                  <IconButton size="large" sx={{ color: '#fff' }}>
+                    <AccountCircleIcon />
+                  </IconButton>
+                </Box>
+              </Box>
         </Paper>
-
-          {/* Content Container */}
-          <Container maxWidth={false} sx={{ py: 2, px: { xs: 2, sm: 3 } }}>
-
-          <Box
+        <Box
           sx={{
             display: 'flex',
             flexDirection: 'row',
@@ -240,102 +218,96 @@ const Analytics =()=>{
                     },
                   }} />
           </Box>
+      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, padding:'20px'}}>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 2, sm: 4, md: 4 }} spacing={2}>
+            <AnalyticsProfile />
+          </Grid>
 
+          <Grid size={{ xs: 2, sm: 4, md: 8 }} spacing={2}>
+            <Box sx={{  p: 2 }}>
+            <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    textAlign: "left",
+                    display:'table-cell',
+                    mt: 2,
+                    mb: 2,
+                    ml: 61,
+                  }}
+                >
+                  Campaign Analytics
+                </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <AnalyticsProfile />
-              </Grid>
-
-              <Grid item xs={6} spacing={2}>
-      
-              <Box sx={{  p: 2 }}>
-
-              <Typography
-                    variant="h6"
+            {analyticsCards.slice(0, 4).map((card, index) => (
+              <Grid item xs={3}>
+                <Card
                     sx={{
-                      fontWeight: 600,
-                      textAlign: "left",
-                      display:'table-cell',
-                      mt: 2,
-                      mb: 2,
-                      ml: 61,
+                      width: 150,
+                      height: 86,
+                      border: "1px solid #b6b6b6",
+                      borderRadius: "10px",
                     }}
                   >
-                    Campaign Analytics
-                  </Typography>
-                  <Grid container spacing={2}>
-                  {analyticsCards.slice(0, 4).map((card, index) => (
-                    <Grid item xs={3}>
-                      <Card
-                          sx={{
-                            width: 150,
-                            height: 86,
-                            border: "1px solid #b6b6b6",
-                            borderRadius: "10px",
-                          }}
-                        >
-                          <CardContent sx={{ textAlign: "center", p: 1 }}>
-                            <Typography variant="h6">{card.value}</Typography>
-                            <Typography variant="body2" sx={{ mt: 2 }}>
-                              {card.label}
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                    </Grid>
-                    ))}
-                    
-                    
-                  </Grid>
-                  <Grid container spacing={2} sx={{mt:5}}>
-                  {analyticsCards.slice(0, 4).map((card, index) => (
-                    <Grid item xs={3}>
-                      <Card
-                          sx={{
-                            width: 150,
-                            height: 86,
-                            border: "1px solid #b6b6b6",
-                            borderRadius: "10px",
-                          }}
-                        >
-                          <CardContent sx={{ textAlign: "center", p: 1 }}>
-                            <Typography variant="h6">{card.value}</Typography>
-                            <Typography variant="body2" sx={{ mt: 2 }}>
-                              {card.label}
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                    </Grid>
-                    ))}  
-                  </Grid>
-                </Box>
-            </Grid>
-
-            <Grid item xs={6} md={6} lg={6} >
-              <Engagement/>
-            </Grid>
-
-            <Grid item xs={6} md={6} lg={6} >
-              <Audience />
-            </Grid>
-
-            {/* Engagement section */}
-            <Grid item xs={12} md={12} lg={12} spacing={2}>
-               <TabComponent tabs={tabs} defaultIndex={0} />
-            </Grid>
-            
-            {/* Brand section */}
-            
-           <Grid item xs={12} md={12} lg={12} spacing={2}>
-                <BrandProfile/>
-            </Grid> 
-            
-            
+                    <CardContent sx={{ textAlign: "center", p: 1 }}>
+                      <Typography variant="h6">{card.value}</Typography>
+                      <Typography variant="body2" sx={{ mt: 2 }}>
+                        {card.label}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+              </Grid>
+              ))}
               
-          
+              
             </Grid>
-          </Container>
-        </Box>
+            <Grid container spacing={2} sx={{mt:5}}>
+            {analyticsCards.slice(0, 4).map((card, index) => (
+              <Grid item xs={3}>
+                <Card
+                    sx={{
+                      width: 150,
+                      height: 86,
+                      border: "1px solid #b6b6b6",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    <CardContent sx={{ textAlign: "center", p: 1 }}>
+                      <Typography variant="h6">{card.value}</Typography>
+                      <Typography variant="body2" sx={{ mt: 2 }}>
+                        {card.label}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+              </Grid>
+              ))}  
+            </Grid>
+            </Box>
+          </Grid>
+
+          <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2}>
+            <Engagement/>
+          </Grid>
+
+          <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2}>
+            <Audience />
+            
+          </Grid>
+
+          <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2}>
+            <TabComponent tabs={tabs} defaultIndex={0} />
+          </Grid>
+
+          <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2}>
+          <BrandProfile/>
+          </Grid>
+
+        </Grid>
       </Box>
+    </Grid>
+    </Grid>
+  </Box>
               
       </>  
     )

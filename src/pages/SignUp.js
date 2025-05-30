@@ -10,6 +10,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormGroup from '@mui/material/FormGroup';
+import { toast } from "react-toastify";
 
 
 const BootstrapInput = styled(InputBase)(({ theme }) => ({
@@ -40,7 +41,7 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
 const SignUp = () => {
 
   const [formData, setFormData] = useState({
-    name: '',
+    user: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -68,16 +69,21 @@ const SignUp = () => {
 
   const handleSubmit = async () => {
     try {
-      await axios.post('https://your-api.com/signup', {
-        name: formData.name,
+      const response= await axios.post('https://api.marketincer.com/api/v1/signup', {
+        user: formData.user,
         email: formData.email,
         password: formData.password,
         confirmPassword:formData.confirmPassword,
         role: formData.role,
       });
+      toast.success('Signup successful!');
+      console.log(response.data);
       navigate('/login');
     } catch (error) {
-      console.error("Signup failed", error);
+      toast.error(
+        error.response?.data?.message || 'Signup failed. Please try again.'
+      );
+      console.error(error);
     }
   };
 
@@ -115,8 +121,8 @@ const SignUp = () => {
         fullWidth 
         id="outlined-basic" 
         label="Name" 
-        name="name"
-        value={formData.name}
+        name="user"
+        value={formData.user}
         variant="filled" 
         size='small'
         onChange={handleChange}

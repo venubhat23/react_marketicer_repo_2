@@ -213,8 +213,6 @@ const CreatePost = () => {
       setFile(selectedFile);
       console.log('11111', file)
       setUploadedFileName(selectedFile.name);
-
-
       //  Auto-upload the file after selection
       handleFileUpload(selectedFile);
     }
@@ -231,7 +229,7 @@ const CreatePost = () => {
       social_page_ids: selectedPages,  // Only sending the first selected page for now
       post: {
         s3_url: uploadedImageUrl,
-        note: stripHtmlTags(postContent),        //  Apply to postContent
+        note: stripHtmlTags(postContent),        // ✅ Apply to postContent
         comments: stripHtmlTags(postContent),
         brand_name: brandName,
         status: "publish"
@@ -339,7 +337,7 @@ const CreatePost = () => {
 
 
   const handleAvatarClick = (pageId) => {
-    debugger
+    
     console.log("Page ID clicked:", pageId, selectedPages);
     setSelectedPages((selectedPages) =>
       selectedPages.includes(pageId)
@@ -368,7 +366,7 @@ const CreatePost = () => {
 
   return (
 
-  <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8' }} >
+  <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100%' }} >
     <Grid container>
       <Grid size={{ md: 1 }}> <Sidebar/></Grid>
       <Grid size={{ md: 11 }}> 
@@ -552,8 +550,8 @@ const CreatePost = () => {
                   marginLeft: "0px",
                 }}
                 onClick={handleBoxClick}
-                onDrop={handleDrop} //  Handles dropped files
-                onDragOver={(e) => e.preventDefault()} //  Prevents default drag behavior
+                onDrop={handleDrop} // ✅ Handles dropped files
+                onDragOver={(e) => e.preventDefault()} // ✅ Prevents default drag behavior
               >
 
 
@@ -563,8 +561,8 @@ const CreatePost = () => {
 
                 {uploadedFileName && (
                   <Typography variant="body2" sx={{
-                    color: "#444", mt: 1, whiteSpace: "nowrap", //  Ensures text does not wrap
-                    overflow: "hidden", //  Hides overflow text
+                    color: "#444", mt: 1, whiteSpace: "nowrap", // ✅ Ensures text does not wrap
+                    overflow: "hidden", // ✅ Hides overflow text
                     textOverflow: "ellipsis", maxWidth: "400px",
                   }}>
                     Selected File: {uploadedFileName}
@@ -625,10 +623,10 @@ const CreatePost = () => {
                 <TabPanel value={tabValue} index={0}>
                   <Grid item xs={12} md={12} lg={12}>
                     <Card sx={{ borderRadius: 2 , padding:'10px'}}>
-                      {!selectedPages.length || !uploadedImageUrl || !postContent ? (
+                      { !uploadedImageUrl || !postContent ? (
                         <Skeleton animation="wave" variant="circular" width={100} height={100} sx={{ display: 'block', margin: 'auto' }} />
                       ) : (
-                        <Avatar src={uploadedImageUrl} alt="Uploaded" sx={{ width: 300, height: 300 }} />
+                        <Avatar src={uploadedImageUrl} alt="Uploaded" sx={{ width: 300, height: 300,display: 'block', margin: 'auto' }} />
                       )}
                       <CardContent>
                         {!selectedPages.length || !uploadedImageUrl && postContent && (

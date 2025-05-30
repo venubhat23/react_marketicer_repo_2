@@ -23,6 +23,7 @@ import {
   createTheme,
   styled
 } from '@mui/material';
+import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
 import {
   Dashboard as DashboardIcon,
   Analytics as AnalyticsIcon,
@@ -30,15 +31,14 @@ import {
   People as PeopleIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
-  Menu as MenuIcon,
-  Notifications as NotificationsIcon,
-  AccountCircle as AccountCircleIcon,
   TrendingUp as TrendingUpIcon,
   AttachMoney as AttachMoneyIcon,
   Group as GroupIcon,
   Assessment as AssessmentIcon,
   Close as CloseIcon
+  
 } from '@mui/icons-material';
+import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
@@ -85,149 +85,59 @@ const Dashboard = () => {
 
 
   return (
+    <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100%' }} >
+    <Grid container>
+      <Grid size={{ md: 1 }}> <Sidebar/></Grid>
+      <Grid size={{ md: 11 }}> 
+        <Paper
+              elevation={0}
+              sx={{
+                display: { xs: 'none', md: 'block' },
+                p: 1,
+                backgroundColor: '#091a48',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 0
+              }}
+            >
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
 
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-        <Box
-          component="nav"
-          sx={{ 
-            width: { md: '6.333%' }, 
-            minWidth: { md: '80px' },
-            flexShrink: 0 
-          }}
-        >
-          <Sidebar />
-        </Box>
-
-        {/* Main Content - 11/12 */}
-        <Box
-          component="main"
-          sx={{ 
-            flexGrow: 1,
-            width: { md: '91.667%' },
-            backgroundColor: 'background.default',
-            mt: { xs: 8, md: 0 }
-          }}
-        >
-          {/* Desktop Header */}
-          <Navbar/>
-
-          {/* Content Container */}
-          <Container maxWidth={false} sx={{ py: 3, px: { xs: 2, sm: 3 } }}>
-            <Grid container spacing={3}>
-              {/* Main Content Placeholder */}
-              <Grid item xs={12}>
-                <Paper elevation={1} sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Main Content Area
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    This layout uses Material-UI Grid system with:
-                  </Typography>
-                  <Box component="ul" sx={{ 
-                    mt: 2, 
-                    pl: 3,
-                    '& li': { mb: 1 }
-                  }}>
-                    <Typography component="li" variant="body2" color="text.secondary">
-                      Sidebar: 1 column (8.333% width, min-width: 240px)
-                    </Typography>
-                    <Typography component="li" variant="body2" color="text.secondary">
-                      Main content: 11 columns (91.667% width)
-                    </Typography>
-                    <Typography component="li" variant="body2" color="text.secondary">
-                      Responsive design with mobile drawer
-                    </Typography>
-                    <Typography component="li" variant="body2" color="text.secondary">
-                      Dark themed sidebar with Material-UI components
-                    </Typography>
-                  </Box>
-                </Paper>
-              </Grid>
-
-              {/* Stat Cards */}
-              <Grid item xs={12} sm={6} md={3}>
-                <Card>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <TrendingUpIcon sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
-                    <Typography variant="h6" color="text.secondary">
-                      Growth
-                    </Typography>
-                    <Typography variant="h4" fontWeight="bold">
-                      +23%
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <Card>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <AttachMoneyIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                    <Typography variant="h6" color="text.secondary">
-                      Revenue
-                    </Typography>
-                    <Typography variant="h4" fontWeight="bold">
-                      $45.2K
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <Card>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <GroupIcon sx={{ fontSize: 48, color: 'warning.main', mb: 1 }} />
-                    <Typography variant="h6" color="text.secondary">
-                      Users
-                    </Typography>
-                    <Typography variant="h4" fontWeight="bold">
-                      1,234
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <Card>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <AssessmentIcon sx={{ fontSize: 48, color: 'secondary.main', mb: 1 }} />
-                    <Typography variant="h6" color="text.secondary">
-                      Analytics
-                    </Typography>
-                    <Typography variant="h4" fontWeight="bold">
-                      89%
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              {/* Content Area */}
-              <Grid item xs={12}>
-                <Paper elevation={1} sx={{ p: 4, minHeight: 400 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Your Content Goes Here
-                  </Typography>
-                  <Box 
-                    sx={{ 
-                      border: '2px dashed',
-                      borderColor: 'divider',
-                      borderRadius: 1,
-                      p: 4, 
-                      textAlign: 'center',
-                      bgcolor: 'grey.50'
-                    }}
+                <Typography variant="h6" sx={{ color: '#fff' }}>
+                  <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="back"
+                    sx={{ mr: 2, color: '#fff' }}
                   >
-                    <Typography color="text.secondary">
-                      Replace this section with your actual content components.
-                      The grid system is ready for your implementation.
-                    </Typography>
-                  </Box>
-                </Paper>
-              </Grid>
-            </Grid>
-          </Container>
-        </Box>
-      </Box>
+                    <ArrowLeftIcon />
+                  </IconButton>
+                  Dashboard
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <IconButton size="large" sx={{ color: '#fff' }}>
+                    <NotificationsIcon />
+                  </IconButton>
+                  <IconButton size="large" sx={{ color: '#fff' }}>
+                    <AccountCircleIcon />
+                  </IconButton>
+                </Box>
+              </Box>
+        </Paper>
+      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, padding:'20px'}}>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', }}>
+          <Typography variant="h6" align='center'>Welcome to Dashboard !!</Typography>
+          </Grid>
+          </Grid>
+          </Box>
+          </Grid>
+          </Grid>
+          </Box>
+          
   );
 };
 

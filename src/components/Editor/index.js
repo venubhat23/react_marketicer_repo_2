@@ -6,7 +6,7 @@ const MyEditor = ({ value, onChange }) => {
 
   return (
     <Editor
-      apiKey="kyzi2iw9mxwjzebfqfbv9ppb8h8iz3oh99he954kmgy1y53t"
+      apiKey="lr517sywoeyu3m8oui2nykf4dxhz0f86mlxhanfmpj2bd99m"
       value={value} // Bind the value to the parent state (postContent)
       init={{
         plugins: 'emoticons',
