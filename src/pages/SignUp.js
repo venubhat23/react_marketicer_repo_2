@@ -1,5 +1,5 @@
 import React,{useState} from 'react'
-import { Button,MenuItem, TextField, Box,styled,InputBase,Typography,Stack, Grid,Select, Divider, InputLabel} from "@mui/material";
+import { Button,MenuItem, TextField, Box,styled,ListItemText, OutlinedInput,InputBase,Typography,Stack, Grid,Select, Divider, InputLabel} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import LoginBg from '../assets/images/loginBG.png';
 import GoogleIcon from '../assets/images/google_icon.png'
@@ -123,7 +123,7 @@ const SignUp = () => {
         label="Name" 
         name="user"
         value={formData.user}
-        variant="filled" 
+        variant="outlined" 
         size='small'
         onChange={handleChange}
         InputLabelProps={{ style: { color: '#dfdfd' } }}
@@ -135,7 +135,7 @@ const SignUp = () => {
             name="email"
             size='small'
             value={formData.email}
-            variant="filled"
+            variant="outlined"
             margin="normal"
             label="Email"
             onChange={handleChange}
@@ -150,7 +150,7 @@ const SignUp = () => {
             label="password"
             value={formData.password}
             size="small"
-            variant="filled"
+            variant="outlined"
             margin="normal"
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
@@ -164,7 +164,7 @@ const SignUp = () => {
             label=" Confirm Password"
             value={formData.confirmPassword}
             size="small"
-            variant="filled"
+            variant="outlined"
             margin="normal"
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
@@ -172,14 +172,33 @@ const SignUp = () => {
           />
 
           
-      <FormControl variant="filled" size='small' margin="normal" sx={{ minWidth:'100%', background:'#fff',borderRadius:'5px', }}>
-        
+      {/* <FormControl variant="outlined" fullWidth size='small' margin="normal" sx={{  background:'#fff',borderRadius:'5px', }}>
         <select style={{height:'45px', borderRadius:'5px'}} name="role" value={formData.role} onChange={handleChange} >
             <option value="">Select Role</option>
             {roles.map((role) => (
               <option key={role} value={role}>{role}</option>
             ))}
           </select>
+        </FormControl> */}
+
+        <FormControl fullWidth>
+          <InputLabel id="select_label">Select Role</InputLabel>
+          <Select
+            labelId="select_label"
+            size="small"
+            name="role"
+            margin="normal"
+            value={formData.role}
+            onChange={handleChange}
+            //input={<OutlinedInput label="Select Role" />}
+            sx={{bgcolor:'#fff', mb:'10px', mt:'10px'}}
+          >
+            {roles.map((role) => (
+              <MenuItem value={role}>
+                <ListItemText primary={role} />
+              </MenuItem>
+            ))}
+          </Select>
         </FormControl>
 
         <label style={{color:'#fff', textAlign:'left'}}>

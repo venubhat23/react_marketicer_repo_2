@@ -32,7 +32,7 @@ const Sidebar = () => {
 
   return(
     
-        <Box sx={{ bgcolor: "#091a48", flexDirection: "column", width:"100%", height: "100%" }}>
+        <Box sx={{ bgcolor: "#091a48", flexDirection: "column", width:"100%", height: "100vh" }}>
           {/* Logo */}
           <Box sx={{ p: 2, pt: 4, pb: 2 }}>
             <img
@@ -58,7 +58,7 @@ const Sidebar = () => {
                 }}
               >
                 <AddCircleOutlineIcon fontSize="medium" />
-                <Typography variant="body2" sx={{fontSize:'12px', whiteSpace:'nowrap'}}>Create Posts</Typography>
+                <Typography variant="body2" sx={{fontSize:'12px', whiteSpace:'nowrap', }}>Create Posts</Typography>
               </Box>
               </Link>
             </ListItemButton>

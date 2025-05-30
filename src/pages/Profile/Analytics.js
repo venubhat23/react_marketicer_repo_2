@@ -87,7 +87,7 @@ const Analytics =()=>{
     return(
       <>
 
-<Box sx={{ flexGrow: 1, bgcolor:'#f5edf8' }} >
+<Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} >
     <Grid container>
       <Grid size={{ md: 1 }}> <Sidebar/></Grid>
       <Grid size={{ md: 11 }}> 
@@ -117,7 +117,7 @@ const Analytics =()=>{
                   >
                     <ArrowLeftIcon />
                   </IconButton>
-                  Create Post
+                  Analytics
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <IconButton size="large" sx={{ color: '#fff' }}>
@@ -134,7 +134,7 @@ const Analytics =()=>{
             display: 'flex',
             flexDirection: 'row',
             gap: 2, // spacing between items
-            alignItems: 'center',bgcolor: '#B1C6FF',padding: '15px' 
+            alignItems: 'center',bgcolor: '#B1C6FF',padding: '15px',
           }}>
                     
                 <FormControl >
@@ -150,6 +150,7 @@ const Analytics =()=>{
                       '& .MuiInputBase-input': {
                         padding: '9px',
                         border: 'none',
+                        
                       },
                     }} />
 

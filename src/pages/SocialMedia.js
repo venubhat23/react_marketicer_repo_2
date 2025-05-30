@@ -185,7 +185,7 @@ const SocialMedia =()=>{
 
   return (
 
-    <><Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100%' }}>
+    <><Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100vh' }}>
       <Grid container>
         <Grid size={{ md: 1 }}> <Sidebar /></Grid>
         <Grid size={{ md: 11 }}>
@@ -215,7 +215,7 @@ const SocialMedia =()=>{
                 >
                   <ArrowLeftIcon />
                 </IconButton>
-                Socail Media Accounts
+                Social Media Accounts
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <IconButton size="large" sx={{ color: '#fff' }}>

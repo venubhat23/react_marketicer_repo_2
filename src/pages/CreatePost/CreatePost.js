@@ -366,7 +366,7 @@ const CreatePost = () => {
 
   return (
 
-  <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100%' }} >
+  <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} >
     <Grid container>
       <Grid size={{ md: 1 }}> <Sidebar/></Grid>
       <Grid size={{ md: 11 }}> 
@@ -419,7 +419,7 @@ const CreatePost = () => {
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
                     label="Brand"
-
+                    size="small"
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
                   >
@@ -434,6 +434,7 @@ const CreatePost = () => {
                   <Select
                     labelId="multi-user-label"
                     multiple
+                    size="small"
                     value={selectedUsers.map((user) => user.name)}
                     onChange={handleUsersChange}
                     input={<OutlinedInput label="Select Users" />}

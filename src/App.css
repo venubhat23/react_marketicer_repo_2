@@ -38,11 +38,6 @@
   }
 }
 
-.typo_primary{
-  padding: 5px 0;
-}
-.loginContent{
-  background-color: #091a4894;
-  padding: 20px;
-  border-radius: 15px;
+.MuiButtonBase-root.MuiListItemButton-root.MuiListItemButton-gutters a {
+  text-decoration: none !important;
 }
