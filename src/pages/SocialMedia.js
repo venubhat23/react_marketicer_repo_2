@@ -115,11 +115,13 @@ const SocialMedia =()=>{
   }
 
   const [openConnect, setOpenConnect] = useState(false);
+  const [openInstaConnect, setOpenInstaConnect] = useState(false);
   const [open, setOpen] = useState(false)
   const [socialAccounts, setSocialAccounts] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
 
   const handleConnectOpen = () => {setOpenConnect(true)};
+  const handleInstaConnectOpen = () => {setOpenInstaConnect(true)};
 
   const handleDisconnectOpen=(user)=>{
     setSelectedUser(user);
@@ -129,6 +131,7 @@ const SocialMedia =()=>{
   const handleClose = () => setOpen(false);
 
   const handleConnectClose=() => setOpenConnect(false)
+  const handleInstaConnectClose=() => setOpenInstaConnect(false)
 
   const getAccounts = async () => {
     try {
@@ -406,7 +409,7 @@ const SocialMedia =()=>{
                   <Box sx={{ flexGrow: 1 }} />
                   <Button
                     variant="outlined"
-                    // onClick={handleConnectOpen}
+                    onClick={handleInstaConnectOpen}
                     sx={{
                       color: "#21d548",
                       borderColor: "#21d548",
@@ -419,11 +422,11 @@ const SocialMedia =()=>{
                   >
                     Connect
                   </Button>
-                  {/* <Modal open={openConnect} onClose={handleConnectClose}>
-      <Box sx={style}>
-        <SocialConnect onClose={handleConnectClose} authCode={authCode} authState={authState}/>
-      </Box>
-    </Modal> */}
+                  <Modal open={openInstaConnect} onClose={handleInstaConnectClose}>
+                    <Box sx={style}>
+                      <SocialConnect onClose={handleInstaConnectClose} authCode={authCode} authState={authState} socialMediaType="Instagram"/>
+                    </Box>
+                  </Modal>
 
                   {/* <Button
       variant="contained"
