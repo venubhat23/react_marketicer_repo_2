@@ -315,7 +315,7 @@ const SocialMedia =()=>{
                   </Button>
                   <Modal open={openConnect} onClose={handleConnectClose}>
                     <Box sx={style}>
-                      <SocialConnect onClose={handleConnectClose} authCode={authCode} authState={authState} />
+                      <SocialConnect onClose={handleConnectClose} authCode={authCode} authState={authState} socialMediaType="Linkedin"/>
                     </Box>
                   </Modal>
 
