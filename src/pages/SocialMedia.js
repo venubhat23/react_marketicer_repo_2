@@ -151,7 +151,8 @@ const SocialMedia =()=>{
         new_account['platform'] = icons[account.page_type].name;
         new_account['icon'] = icons[account.page_type].icon;
         new_account['users'] = [{
-          social_id: account.social_id,
+          id: account.id,
+          social_account_id: account.social_account_id,
           name: account.name,
           username: account.username,
           avatar: account.picture_url,
