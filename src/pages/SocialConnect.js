@@ -196,13 +196,13 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
         }
     };
 
-    // const handleAuthRedirect = (platform) => {
-    //     let authURL = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=pages_show_list,instagram_basic,instagram_content_publish&response_type=code`;
+    const handleAuthRedirect = (platform) => {
+        let authURL = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=pages_show_list,instagram_basic,instagram_content_publish&response_type=code`;
 
-    //     if (platform === "facebook" || platform === "instagram") {
-    //     window.location.href = authURL;
-    //     }
-    // };
+        if (platform === "facebook" || platform === "instagram") {
+        window.location.href = authURL;
+        }
+    };
 
     const handleLinkedinRedirect = () => {
         const clientId = LINKEDIN_CRED.clientId;
@@ -674,7 +674,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                         if(instagramType && authCode) {
                             window.location.href = "/social-pages";
                         } else {
-                            // handleInstagramRedirect();
+                            handleAuthRedirect("instagram");
                         }
                     }}
                 >
