@@ -230,131 +230,198 @@ const SocialConnect = ({onClose, authCode, authState}) => {
             flexDirection: 'column',
             alignItems: 'flex-start',
             paddingTop: "15px",
-            paddingBottom: "3px"
+            paddingBottom: "24px"
         }}
         >
         {/* Close Button */}
         <IconButton
-            onClick={onClose}  // Close the modal on click
+            onClick={onClose}
             sx={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            color: "#888",  // Light gray color for the close button
+                position: "absolute",
+                top: 16,
+                right: 16,
+                color: "#666",
+                '&:hover': {
+                    backgroundColor: '#f5f5f5'
+                }
             }}
         >
             <CloseIcon />
         </IconButton>
 
-
+        {/* Header */}
         <Box
             sx={{
-            display: "flex",
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                width: "100%",
             }}
         >
-            <LinkedInIcon fontSize="large" sx={{ color: "#1778f4" }} />
-            <Typography variant="h6" fontWeight="bold" mb={2} sx={{ textAlign: 'center', marginTop: "5px" }}>
-            LinkedIn
+            <Box
+                sx={{
+                    width: 40,
+                    height: 40,
+                    backgroundColor: "#0077b5",
+                    borderRadius: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                }}
+            >
+                <LinkedInIcon sx={{ color: "white", fontSize: 28 }} />
+            </Box>
+            <Typography variant="h6" fontWeight="600" sx={{ color: "#333" }}>
+                LinkedIn
             </Typography>
         </Box>
 
-        <Divider sx={{ margin: 0, width: "100%", backgroundColor: "#bbbbbb" }} />
+        {/* Follow Button */}
+        <Box sx={{ mb: 2, ml: 7 }}>
+            <Button
+                variant="contained"
+                sx={{
+                    backgroundColor: "#0077b5",
+                    color: "white",
+                    borderRadius: "24px",
+                    padding: "2px 7px",
+                    textTransform: "none",
+                    fontWeight: "600",
+                    fontSize: "10px",
+                    // '&:hover': {
+                    //     backgroundColor: "#005885"
+                    // }
+                }}
+            >
+                <LinkedInIcon sx={{ fontSize: 18, mr: 1 }} />
+                Follow
+            </Button>
+        </Box>
+
+        <Divider sx={{ width: "100%", backgroundColor: "#e0e0e0", mb: 2 }} />
 
         {loading ? (
-            <CircularProgress sx={{ 'margin': '50px auto' }}/>
+            <CircularProgress sx={{ margin: '50px auto' }}/>
         ) : (
             <>
             {linkedinType && authCode && authState == LINKEDIN_CRED.state ? (
-                <Box sx={{ margin: 0, width: "100%", }} >
+                <Box sx={{ width: "100%", mb: 3 }} >
                     <Typography sx={{
-                    fontSize: "14px",
-                    color: "#373737",
-                    padding: "20px",
-                    border: "1px solid #ddd",
-                    margin: "20px 0",
+                        fontSize: "14px",
+                        color: "#373737",
+                        padding: "20px",
+                        border: "1px solid #ddd",
+                        borderRadius: "12px",
+                        backgroundColor: "#f9f9f9"
                     }}>
-                    {linkedinAccounts["name"]}
-                    <span style={{ "color": "green", "fontWeight": 700, "float": "right" }}>Connected</span>
+                        {linkedinAccounts["name"]}
+                        <span style={{ color: "green", fontWeight: 700, float: "right" }}>Connected</span>
                     </Typography>           
                 </Box>
-                ) : (
-                <Box sx={{ margin: 0, width: "100%", display: "flex", gap: 2 }}>
-                    {["profile", "pages"].map((type) => (
-                    <Box
-                        key={type}
-                        sx={{
-                        flex: 1,
-                        padding: "12px 24px",
-                        border: linkedinType === type ? "1px solid #1976d2" : "1px solid",
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        transition: "0.3s",
-                        backgroundColor: linkedinType === type ? "#e3f2fd" : "white",
-                        margin: "20px 0",
-                        "&:hover": {
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                            borderColor: "#1976d2",
-                            backgroundColor: "#f5faff",
-                        },
-                        }}
-                        onClick={() => {
-                        setLinkedinType(type);
-                        }}
-                    >
-                        <Typography
-                        sx={{
-                            fontSize: "14px",
-                            color: "#373737",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                        }}
+            ) : (
+                <Box sx={{ width: "100%", display: "flex", gap: 7, mb: 2, justifyContent: "center" }}>
+                    {["profile", "page"].map((type) => (
+                        <Box
+                            key={type}
+                            sx={{
+                                padding: "20px 30px",
+                                border: linkedinType === type ? "2px solid #0077b5" : "1px solid #e0e0e0",
+                                borderRadius: "16px",
+                                cursor: "pointer",
+                                transition: "all 0.2s ease",
+                                backgroundColor: linkedinType === type ? "#f0f8ff" : "white",
+                                textAlign: "center",
+                                position: "relative",
+                                "&:hover": {
+                                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                                    borderColor: "#0077b5",
+                                    backgroundColor: "#f8fbff",
+                                    transform: "translateY(-2px)"
+                                }
+                            }}
+                            onClick={() => {
+                                setLinkedinType(type);
+                            }}
                         >
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                        {linkedinType == type && (
-                            <CheckCircleIcon sx={{ fontSize: 20, color: "#1976d2" }} />
-                        )}
-                        </Typography>
-                    </Box>
+                            {/* Placeholder Icon Circle */}
+                            <Box
+                                sx={{
+                                    width: 50,
+                                    height: 50,
+                                    borderRadius: "50%",
+                                    backgroundColor: "#f5f5f5",
+                                    margin: "0 auto 16px auto",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 4px, #ddd 4px, #ddd 8px)",
+                                    opacity: 0.6
+                                }}
+                            />
+                            
+                            <Typography
+                                sx={{
+                                    fontSize: "16px",
+                                    fontWeight: "600",
+                                    color: "#333",
+                                    textTransform: "capitalize"
+                                }}
+                            >
+                                {type}
+                            </Typography>
+                            
+                            {linkedinType === type && (
+                                <CheckCircleIcon 
+                                    sx={{ 
+                                        position: "absolute",
+                                        top: 12,
+                                        right: 12,
+                                        fontSize: 24, 
+                                        color: "#0077b5" 
+                                    }} 
+                                />
+                            )}
+                        </Box>
                     ))}
                 </Box>
-                )
-            }
+            )}
+            
             <Box
                 sx={{
-                display: "flex",
-                justifyContent: "flex-end", // ✅ Aligns buttons to the right
-                alignItems: "center",
-                gap: "1rem",
-                width: "100%", // Prevents overflow
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    width: "100%",
+                    mt: 2
                 }}
             >
-
                 <Button
-                    variant="gradient"
+                    variant="contained"
                     sx={{
-                        margin: "0.09375rem 1px",
-                        mb: 2,
-                        backgroundColor: "#01cbc6 !important", // Ensures background color applies
-                        color: "white !important", // ✅ Forces white text
+                        backgroundColor: "#0077b5",
+                        color: "white",
+                        borderRadius: "8px",
+                        padding: "6px 16px",
+                        textTransform: "none",
+                        fontWeight: "600",
+                        fontSize: "14px",
                         "&:hover": {
-                        backgroundColor: "#00b3ad !important", // Slightly darker on hover
-                        },
+                            backgroundColor: "#005885",
+                        }
                     }}
                     onClick={() => {
                         if(linkedinType && authCode && authState == LINKEDIN_CRED.state) {
-                        window.location.href = "/social-pages";
+                            window.location.href = "/social-pages";
                         } else {
-                        handleLinkedinRedirect();
+                            handleLinkedinRedirect();
                         }
                     }}
-                    >
+                >
                     Continue
                 </Button>
             </Box>
-
             </>
-        )}
+          )}
         </Box>
     );
 }
