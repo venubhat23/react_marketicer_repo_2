@@ -1,7 +1,7 @@
 import React, {useCallback} from 'react';
 import {Button, Typography, Stack} from '@mui/material';
 
-const handleDisConnect = async (account, onClose) => {
+const handleDisConnect = async (account, onClose, getAccounts) => {
 
   const token = localStorage.getItem("token");
   try {
