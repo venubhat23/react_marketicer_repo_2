@@ -269,7 +269,7 @@ const CreatePost = () => {
   };
 
   const handlePublish = async () => {
-    if (!selectedPages.length || !uploadedImageUrl || !postContent) {
+    if (!selectedPages.length || !postContent) {
       alert("Please make sure all fields are filled out!");
       return;
     }
