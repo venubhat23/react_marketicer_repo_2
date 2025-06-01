@@ -101,7 +101,7 @@ const CreatePost = () => {
     }
   };
 
-  // Function to get the selected user's page type
+  // Function to get the selected user's page types
   const getSelectedUserPageType = () => {
     const selectedUser = selectedUsers.find(user => user.social_id === selectedChipId);
     return selectedUser ? selectedUser.page_type : null;
