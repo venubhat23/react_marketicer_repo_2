@@ -172,16 +172,19 @@ const SocialMedia =()=>{
   const urlParams = new URLSearchParams(window.location.search);
   const authCode = urlParams.get("code");
   const authState = urlParams.get("state");
-  console.log("Auth Code, Auth State:", authCode, authState);
 
   useEffect(() => { 
     // Fetch social media accounts data if needed
     // This is a placeholder for any data fetching logic
-    if (authCode && authState) {
+    console.log("Auth Code:", authCode);
+    console.log("Auth State:", authState);
+    if (authCode) {
       // Handle the authentication code and state
-      console.log("Auth Code:", authCode);
-      console.log("Auth State:", authState);
-      setOpenConnect(true);
+      if(authState) {
+        setOpenConnect(true);
+      } else {
+        setOpenInstaConnect(true);
+      }
       // You can call your API to exchange the code for tokens here
     } else {
       getAccounts();
