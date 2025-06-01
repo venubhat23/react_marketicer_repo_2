@@ -21,6 +21,7 @@ const handleDisConnect = async (account, onClose) => {
     console.log("Connect API Response:", data);
     onClose()
     if (data.status) {
+      getAccounts()
       alert(`${account.name} disconnected successfully!`);
     } else {
       alert(`Failed to disconnect ${account.name}`);
@@ -32,7 +33,7 @@ const handleDisConnect = async (account, onClose) => {
   }
 };
 
-const SocialDisConnect =({onClose, account}) =>{
+const SocialDisConnect =({onClose, account, getAccounts}) =>{
    console.log("account", account);
   
     return (
@@ -47,7 +48,7 @@ const SocialDisConnect =({onClose, account}) =>{
           <Button variant="contained" color="error" onClick={onClose}>
             No
           </Button>
-          <Button variant="contained" color="primary" onClick={() => handleDisConnect(account, onClose)}>
+          <Button variant="contained" color="primary" onClick={() => handleDisConnect(account, onClose, getAccounts)}>
             Yes
           </Button>
         </Stack>

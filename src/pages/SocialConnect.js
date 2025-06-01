@@ -18,7 +18,7 @@ import AxiosManager from '../utils/api';
 
 const FACEBOOK_APP_ID = "499798672825129";
 const FACEBOOK_APP_SECRET = "0972b471f1d251f8db7762be1db4613c";
-const REDIRECT_URI = "https://www.marketincer.com/social";
+const REDIRECT_URI = "https://app.marketincer.com/socialMedia";
 
 const LINKEDIN_CRED = {
   clientId: "77ufne14jzxbbc",
@@ -57,11 +57,11 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
           console.log('Access Token:', response);
           const data =  response.data;
           if (data.status == "success") {
-              // Store the access token in localStorage
-              localStorage.setItem("linkedin_access_token", data["accessToken"]);
+            // Store the access token in localStorage
+            localStorage.setItem("linkedin_access_token", data["access_token"]);
       
-          //     // Proceed with fetching the LinkedIn accounts
-          //     // fetchAccountsFromAPI(accessToken);
+            // Proceed with fetching the LinkedIn accounts
+            fetchAccountsFromAPI(data["access_token"]);
           }
           return data;
         } catch (error) {

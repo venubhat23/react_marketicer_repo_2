@@ -41,3 +41,10 @@
 .MuiButtonBase-root.MuiListItemButton-root.MuiListItemButton-gutters a {
   text-decoration: none !important;
 }
+.profilecontent ul{
+    list-style: none;
+    padding: 0;
+    margin: 5px;
+} 
+
+.profilecontent li{padding: 5px}

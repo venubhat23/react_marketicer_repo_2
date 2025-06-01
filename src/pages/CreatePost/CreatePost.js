@@ -87,6 +87,42 @@ const CreatePost = () => {
   const [selectedUsers, setSelectedUsers] = useState([])
   const [selectedChipId, setSelectedChipId] = useState(null);
 
+  // Function to get tab index based on page type
+  const getTabIndexByPageType = (pageType) => {
+    switch(pageType) {
+      case 'instagram':
+        return 0;
+      case 'linkedin':
+        return 1;
+      case 'facebook':
+        return 2;
+      default:
+        return 0;
+    }
+  };
+
+  // Function to get the selected user's page types
+  const getSelectedUserPageType = () => {
+    const selectedUser = selectedUsers.find(user => user.social_id === selectedChipId);
+    return selectedUser ? selectedUser.page_type : null;
+  };
+
+  // Function to get available tabs based on selected users
+  const getAvailableTabs = () => {
+    if (selectedUsers.length === 0) return ['instagram', 'linkedin', 'facebook'];
+    
+    const uniquePageTypes = [...new Set(selectedUsers.map(user => user.page_type))];
+    return uniquePageTypes;
+  };
+
+  // Function to check if current tab content should be shown
+  const shouldShowTabContent = (tabIndex) => {
+    const availableTabs = getAvailableTabs();
+    const tabTypes = ['instagram', 'linkedin', 'facebook'];
+    const currentTabType = tabTypes[tabIndex];
+    
+    return availableTabs.includes(currentTabType);
+  };
 
   const handleOptionChange = (event) => {
     const value = event.target.value;
@@ -96,13 +132,9 @@ const CreatePost = () => {
 
   };
 
-
-
-
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
-
 
   const fetchAccountsFromAPI = async () => {
 
@@ -136,6 +168,24 @@ const CreatePost = () => {
     fetchAccountsFromAPI();
   }, []);
 
+  // Update tab when selected chip changes or when first user is selected
+  useEffect(() => {
+    if (selectedUsers.length > 0) {
+      // Auto-switch to the first selected user's page type tab
+      const firstUserPageType = selectedUsers[0].page_type;
+      const newTabIndex = getTabIndexByPageType(firstUserPageType);
+      setTabValue(newTabIndex);
+    }
+  }, [selectedUsers]);
+
+  // Additional effect for chip selection
+  useEffect(() => {
+    const selectedPageType = getSelectedUserPageType();
+    if (selectedPageType) {
+      const newTabIndex = getTabIndexByPageType(selectedPageType);
+      setTabValue(newTabIndex);
+    }
+  }, [selectedChipId, selectedUsers]);
 
   useEffect(() => {
     setEditorLoaded(true);
@@ -363,6 +413,113 @@ const CreatePost = () => {
 
   };
 
+  // Render preview content based on tab and availability
+  const renderPreviewContent = (tabIndex) => {
+    if (!shouldShowTabContent(tabIndex)) {
+      return (
+        <Box 
+          display="flex" 
+          justifyContent="center" 
+          alignItems="center" 
+          height="300px"
+          sx={{ 
+            backgroundColor: '#f5f5f5', 
+            borderRadius: 2,
+            border: '1px dashed #ccc' 
+          }}
+        >
+          <Typography variant="h6" color="text.secondary">
+            There is no preview available
+          </Typography>
+        </Box>
+      );
+    }
+
+    return (
+      <Card sx={{ borderRadius: 2, padding: '10px' }}>
+        {!uploadedImageUrl || !postContent ? (
+          <Skeleton animation="wave" variant="circular" width={100} height={100} sx={{ display: 'block', margin: 'auto' }} />
+        ) : (
+          <Avatar src={uploadedImageUrl} alt="Uploaded" sx={{ width: 300, height: 300, display: 'block', margin: 'auto' }} />
+        )}
+        <CardContent>
+          {uploadedImageUrl && postContent && (
+            <Typography variant="body2" color="text.secondary" sx={{ display: "flex" }}>
+              <span dangerouslySetInnerHTML={{ __html: postContent }} />
+            </Typography>
+          )}
+
+          {/* Platform-specific interaction buttons */}
+          <Box display="flex" alignItems="center" mt={2} gap={3}>
+            {tabIndex === 0 && ( // Instagram
+              <>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <FavoriteBorderIcon fontSize="small" />
+                  <Typography variant="body2">37.8K</Typography>
+                </Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <ChatBubbleOutlineIcon fontSize="small" />
+                  <Typography variant="body2">248</Typography>
+                </Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <SendIcon fontSize="small" />
+                  <Typography variant="body2">234</Typography>
+                </Box>
+              </>
+            )}
+            {tabIndex === 1 && ( // LinkedIn
+              <>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <FavoriteBorderIcon fontSize="small" />
+                  <Typography variant="body2">👍 Like</Typography>
+                </Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <ChatBubbleOutlineIcon fontSize="small" />
+                  <Typography variant="body2">Comment</Typography>
+                </Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <SendIcon fontSize="small" />
+                  <Typography variant="body2">Share</Typography>
+                </Box>
+              </>
+            )}
+            {tabIndex === 2 && ( // Facebook
+              <>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <FavoriteBorderIcon fontSize="small" />
+                  <Typography variant="body2">Like</Typography>
+                </Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <ChatBubbleOutlineIcon fontSize="small" />
+                  <Typography variant="body2">Comment</Typography>
+                </Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <SendIcon fontSize="small" />
+                  <Typography variant="body2">Share</Typography>
+                </Box>
+              </>
+            )}
+          </Box>
+
+          {/* Metadata */}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mt={2}
+          >
+            <Typography variant="body2" color="text.secondary">
+              {selectUser.name || 'Select a user'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Just Now
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  };
+
 
   return (
 
@@ -424,7 +581,7 @@ const CreatePost = () => {
                     onChange={(e) => setBrandName(e.target.value)}
                   >
                     {Brands.map((brand) => (
-                      <MenuItem value={brand}>{brand}</MenuItem>
+                      <MenuItem key={brand} value={brand}>{brand}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -435,11 +592,13 @@ const CreatePost = () => {
                     labelId="multi-user-label"
                     multiple
                     size="small"
-                    value={selectedUsers.map((user) => user.name)}
+                    value={selectedUsers.map((user) => user.id)}
                     onChange={handleUsersChange}
                     input={<OutlinedInput label="Select Users" />}
                     //sx={{width:'300px', height:'40px'}}
-                    renderValue={(selected) => selected.join(', ')}
+                    renderValue={(selected) => 
+                      selectedUsers.map(user => user.name).join(', ')
+                    }
                   >
                     {pages.map((user) => (
                       <MenuItem key={user.id} value={user.id}>
@@ -459,15 +618,21 @@ const CreatePost = () => {
 
                 {selectedUsers.map((user) => (
                   <Chip
-                    avatar={user.name}
-                    //avatar={selectedOption}
+                    key={user.id}
+                    avatar={<Avatar src={user.picture_url} />}
                     label={user.name}
-                    //onClick={() => handleAvatarClick(user.social_id) }
                     onClick={() => {
                       handleAvatarClick(user.social_id);
                       setSelectedChipId(user.social_id);
+                      setSelectUser(user); // Set the selected user for preview
                     }}
-                    onDelete={() => { } } 
+                    onDelete={() => { 
+                      setSelectedUsers(prev => prev.filter(u => u.id !== user.id));
+                      if (selectedChipId === user.social_id) {
+                        setSelectedChipId(null);
+                        setSelectUser('');
+                      }
+                    }} 
                     sx={{
                       border: selectedChipId === user.social_id ? '2px solid #5ebfa6' : 'none',
                       backgroundColor: selectedChipId === user.social_id ? '#ddd' : 'default',
@@ -509,27 +674,32 @@ const CreatePost = () => {
 
               {/* Uploaded Images */}
               <Box display="flex" gap={1} mb={2}>
-                {/* {file.map((img, i) => ( */}
-                <Box position="relative">
-                  <Avatar
-                    variant="rounded"
-                    src={uploadedImageUrl}
-                    sx={{ width: 80, height: 80 }}
-                  />
-                  <IconButton
-                    size="small"
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      right: 0,
-                      bgcolor: 'white',
-                      borderRadius: '50%',
-                    }}
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-                {/* ))} */}
+                {uploadedImageUrl && (
+                  <Box position="relative">
+                    <Avatar
+                      variant="rounded"
+                      src={uploadedImageUrl}
+                      sx={{ width: 80, height: 80 }}
+                    />
+                    <IconButton
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bgcolor: 'white',
+                        borderRadius: '50%',
+                      }}
+                      onClick={() => {
+                        setUploadedImageUrl("");
+                        setUploadedFileName("");
+                        setFile(null);
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                )}
 
               </Box>
 
@@ -623,63 +793,18 @@ const CreatePost = () => {
 
                 <TabPanel value={tabValue} index={0}>
                   <Grid item xs={12} md={12} lg={12}>
-                    <Card sx={{ borderRadius: 2 , padding:'10px'}}>
-                      { !uploadedImageUrl || !postContent ? (
-                        <Skeleton animation="wave" variant="circular" width={100} height={100} sx={{ display: 'block', margin: 'auto' }} />
-                      ) : (
-                        <Avatar src={uploadedImageUrl} alt="Uploaded" sx={{ width: 300, height: 300,display: 'block', margin: 'auto' }} />
-                      )}
-                      <CardContent>
-                        {!selectedPages.length || !uploadedImageUrl && postContent && (
-                          <Typography variant="body2" color="text.secondary" sx={{ display: "flex", }}>
-                            <span
-                              dangerouslySetInnerHTML={{ __html: postContent }} // Render the HTML content
-                            />
-                          </Typography>
-                        )}
-
-
-                        {/* Post Footer */}
-                        <Box display="flex" alignItems="center" mt={2} gap={3}>
-                          <Box display="flex" alignItems="center" gap={0.5}>
-                            <FavoriteBorderIcon fontSize="small" />
-                            <Typography variant="body2">37.8K</Typography>
-                          </Box>
-                          <Box display="flex" alignItems="center" gap={0.5}>
-                            <ChatBubbleOutlineIcon fontSize="small" />
-                            <Typography variant="body2">248</Typography>
-                          </Box>
-                          <Box display="flex" alignItems="center" gap={0.5}>
-                            <SendIcon fontSize="small" />
-                            <Typography variant="body2">234</Typography>
-                          </Box>
-                        </Box>
-
-                        {/* Metadata */}
-                        <Box
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                          mt={2}
-                        >
-
-                          <Typography variant="body2" color="text.secondary">
-                            {selectUser.name}
-                          </Typography>
-
-                          <Typography variant="body2" color="text.secondary">
-                            Just Now
-                          </Typography>
-                        </Box>
-                      </CardContent>
-                    </Card>
+                    {renderPreviewContent(0)}
                   </Grid>
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  this is Linkedin section
+                  <Grid item xs={12} md={12} lg={12}>
+                    {renderPreviewContent(1)}
+                  </Grid>
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
-                  this is Facebook section
+                  <Grid item xs={12} md={12} lg={12}>
+                    {renderPreviewContent(2)}
+                  </Grid>
                 </TabPanel>
           </Grid>
         </Grid>

@@ -1,16 +1,15 @@
-import React from 'react'
+import React, {useEffect, useState } from 'react'
 import {
-   Box, Typography, FormControl, Avatar, Divider,
+   Box, Typography, FormControl, Avatar,
   List,
   ListItem,
   ListItemIcon,
-  ListItemText,
   Autocomplete,
-  Grid,
-  TextField,Stack,
-  InputAdornment,
-  Card,AppBar,Toolbar,Paper,
-  CardContent, Chip,IconButton,Container
+  Grid,Select,
+  TextField,MenuItem,
+  InputAdornment,ListItemText,
+  Card,AppBar,Toolbar,Paper,InputLabel,
+  CardContent, IconButton,OutlinedInput,
   } from "@mui/material";
   import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
   import AnalyticsProfile from '../Profile/AnalyticsProfile'
@@ -23,12 +22,10 @@ import TabComponent from '../../components/TabComponent';
 import PaidPerformance from '../Profile/PaidPerformance';
 import ContentInsight from '../Profile/ContentInsight';
 import {
-  
-  Menu as MenuIcon,
   Notifications as NotificationsIcon,
   AccountCircle as AccountCircleIcon,
-  
 } from '@mui/icons-material';
+import axios from 'axios';
 
 
   const top100Films = [
@@ -84,233 +81,277 @@ const Analytics =()=>{
         { value: "829", label: "Profile Visits" },
       ];
 
+    const [profileData, setProfileData] = useState([])
+    const [brandData, setBrandData] = useState([])
+    const [platformOption, setPlatformOption] = useState('')
+
+    
+
+    useEffect(() => {
+      axios.get('https://api.marketincer.com/api/v1/influencer/analytics')
+        .then((response) => {
+          setProfileData(response?.data?.data || []);
+          setBrandData(response?.data?.data?.recent_posts || [])
+          
+          
+          //setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching analytics:', error);
+          //setLoading(false);
+        });
+    }, []);
+    console.log('datata', profileData)
+    console.log('11', brandData)
+
+
     return(
-      <>
 
-<Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} >
-    <Grid container>
-      <Grid size={{ md: 1 }}> <Sidebar/></Grid>
-      <Grid size={{ md: 11 }}> 
-        <Paper
-              elevation={0}
-              sx={{
-                display: { xs: 'none', md: 'block' },
-                p: 1,
-                backgroundColor: '#091a48',
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                borderRadius: 0
-              }}
-            >
-              <Box sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-
-                <Typography variant="h6" sx={{ color: '#fff' }}>
-                  <IconButton
-                    edge="start"
-                    color="inherit"
-                    aria-label="back"
-                    sx={{ mr: 2, color: '#fff' }}
-                  >
-                    <ArrowLeftIcon />
-                  </IconButton>
-                  Analytics
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <IconButton size="large" sx={{ color: '#fff' }}>
-                    <NotificationsIcon />
-                  </IconButton>
-                  <IconButton size="large" sx={{ color: '#fff' }}>
-                    <AccountCircleIcon />
-                  </IconButton>
-                </Box>
-              </Box>
-        </Paper>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: 2, // spacing between items
-            alignItems: 'center',bgcolor: '#B1C6FF',padding: '15px',
-          }}>
-                    
-                <FormControl >
-                  <TextField
-                  fullWidth
-                    type="date"
-                    variant="outlined"
-                    size="small"
-                    sx={{
-                      width: 250,
-                      borderRadius: '50px',
-                      backgroundColor: '#fff',
-                      '& .MuiInputBase-input': {
-                        padding: '9px',
-                        border: 'none',
-                        
-                      },
-                    }} />
-
-                </FormControl>
-
-              
-                <Autocomplete
-                  disablePortal
-                  options={top100Films}
-                  renderInput={(params) => <TextField {...params} label="Platform Instagram" />}
+    <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} >
+        <Grid container>
+          <Grid size={{ md: 1 }}> <Sidebar/></Grid>
+          <Grid size={{ md: 11 }}> 
+            <Paper
+                  elevation={0}
                   sx={{
-                    width: 250,
-                    '& .MuiInputBase-root': {
-                      height: 40,
-                      paddingRight: '8px', // optional padding
-                    },
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '50px',
-                      bgcolor: '#fff',
-                      padding: '0px'
-                    },
-                    '& .MuiInputLabel-root': {
-                      top: '-5px', // optional: adjust label position
-                    },
-                  }} />
-
-              
-                <Autocomplete
-                  disablePortal
-                  options={top100Films}
-                  renderInput={(params) => <TextField {...params} label="Influencer" />}
-                  sx={{
-                    '& .MuiInputBase-root': {
-                      height: 40,
-                      width: 250,
-                      paddingRight: '8px', // optional padding
-                    },
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '50px',
-                      bgcolor: '#fff',
-                      padding: '0px'
-                    },
-                    '& .MuiInputLabel-root': {
-                      top: '-5px', // optional: adjust label position
-                    },
-                  }} />
-
-              
-                <Autocomplete
-                  disablePortal
-                  options={top100Films}
-                  renderInput={(params) => <TextField {...params} label="Post Type" />}
-                  sx={{
-                    '& .MuiInputBase-root': {
-                      height: 40,
-                      width: 250,
-                      paddingRight: '8px', // optional padding
-                    },
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '50px',
-                      bgcolor: '#fff',
-                      padding: '0px'
-                    },
-                    '& .MuiInputLabel-root': {
-                      top: '-5px', // optional: adjust label position
-                    },
-                  }} />
-          </Box>
-      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, padding:'20px'}}>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 2, sm: 4, md: 4 }} spacing={2}>
-            <AnalyticsProfile />
-          </Grid>
-
-          <Grid size={{ xs: 2, sm: 4, md: 8 }} spacing={2}>
-            <Box sx={{  p: 2 }}>
-            <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    textAlign: "left",
-                    display:'table-cell',
-                    mt: 2,
-                    mb: 2,
-                    ml: 61,
+                    display: { xs: 'none', md: 'block' },
+                    p: 1,
+                    backgroundColor: '#091a48',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 0
                   }}
                 >
-                  Campaign Analytics
-                </Typography>
+                  <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+
+                    <Typography variant="h6" sx={{ color: '#fff' }}>
+                      <IconButton
+                        edge="start"
+                        color="inherit"
+                        aria-label="back"
+                        sx={{ mr: 2, color: '#fff' }}
+                      >
+                        <ArrowLeftIcon />
+                      </IconButton>
+                      Influencer Analytics
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <IconButton size="large" sx={{ color: '#fff' }}>
+                        <NotificationsIcon />
+                      </IconButton>
+                      <IconButton size="large" sx={{ color: '#fff' }}>
+                        <AccountCircleIcon />
+                      </IconButton>
+                    </Box>
+                  </Box>
+            </Paper>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 2, // spacing between items
+                alignItems: 'center',bgcolor: '#B1C6FF',padding: '15px',
+              }}>
+                        
+                    <FormControl fullWidth>
+                    
+                      <TextField
+                        type="date"
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          //width: 250,
+                          borderRadius: '50px',
+                          backgroundColor: '#fff',
+                          '& .MuiInputBase-input': {
+                            padding: '9px',
+                            border: 'none',
+                            
+                          },
+                        }} />
+
+                    </FormControl>
+
+
+                <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Platform Instagram</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="Platform Instagram"
+                    size="small"
+                    value={platformOption}
+                    onChange={(e) => setPlatformOption(e.target.value)}
+                    sx={{bgcolor:'#fff',borderRadius:'50px'}}
+                  >
+                    {top100Films.map((platform) => (
+                      <MenuItem value={platform}>{platform.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                  
+                <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Influencer</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="Influencer"
+                    size="small"
+                    value={platformOption}
+                    onChange={(e) => setPlatformOption(e.target.value)}
+                    sx={{bgcolor:'#fff', borderRadius:'50px'}}
+                  >
+                    {top100Films.map((platform) => (
+                      <MenuItem value={platform}>{platform.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+  
+                <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Post Type</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="Post Type"
+                    size="small"
+                    value={platformOption}
+                    onChange={(e) => setPlatformOption(e.target.value)}
+                    sx={{bgcolor:'#fff', borderRadius:'50px'}}
+                  >
+                    {top100Films.map((platform) => (
+                      <MenuItem value={platform}>{platform.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+
+          <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, padding:'20px'}}>
             <Grid container spacing={2}>
-            {analyticsCards.slice(0, 4).map((card, index) => (
-              <Grid item xs={3}>
-                <Card
-                    sx={{
-                      width: 150,
-                      height: 86,
-                      border: "1px solid #b6b6b6",
-                      borderRadius: "10px",
-                    }}
-                  >
-                    <CardContent sx={{ textAlign: "center", p: 1 }}>
-                      <Typography variant="h6">{card.value}</Typography>
-                      <Typography variant="body2" sx={{ mt: 2 }}>
-                        {card.label}
-                      </Typography>
-                    </CardContent>
-                  </Card>
+              <Grid size={{ xs: 2, sm: 4, md: 4 }} spacing={2}>
+                <AnalyticsProfile profile={profileData} />
               </Grid>
-              ))}
-              
-              
-            </Grid>
-            <Grid container spacing={2} sx={{mt:5}}>
-            {analyticsCards.slice(0, 4).map((card, index) => (
-              <Grid item xs={3}>
-                <Card
-                    sx={{
-                      width: 150,
-                      height: 86,
-                      border: "1px solid #b6b6b6",
-                      borderRadius: "10px",
-                    }}
-                  >
-                    <CardContent sx={{ textAlign: "center", p: 1 }}>
-                      <Typography variant="h6">{card.value}</Typography>
-                      <Typography variant="body2" sx={{ mt: 2 }}>
-                        {card.label}
-                      </Typography>
-                    </CardContent>
-                  </Card>
+
+              <Grid size={{ xs: 2, sm: 4, md: 8 }} spacing={2}>
+                <Box sx={{  p: 2 }}>
+                <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        textAlign: "left",
+                        display:'table-cell',
+                        mt: 2,
+                        mb: 2,
+                        ml: 61,
+                      }}
+                    >
+                      Campaign Analytics
+                    </Typography>
+                <Grid container spacing={2}>
+                
+                  <Grid item xs={3}>
+                      <Card
+                      sx={{
+                        width: 150,
+                        height: 86,
+                        border: "1px solid #b6b6b6",
+                        borderRadius: "10px",
+                      }}
+                    >
+                      <CardContent sx={{ textAlign: "center", p: 1 }}>
+                        <Typography variant="h6">{profileData?.campaign_analytics?.total_likes}</Typography>
+                        <Typography variant="body2" sx={{ mt: 2 }}>
+                          Total Likes
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  <Grid item xs={3}>
+                      <Card
+                      sx={{
+                        width: 150,
+                        height: 86,
+                        border: "1px solid #b6b6b6",
+                        borderRadius: "10px",
+                      }}
+                    >
+                      <CardContent sx={{ textAlign: "center", p: 1 }}>
+                        <Typography variant="h6">{profileData?.campaign_analytics?.total_comments}</Typography>
+                        <Typography variant="body2" sx={{ mt: 2 }}>
+                          Total Comments
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  <Grid item xs={3}>
+                      <Card
+                      sx={{
+                        width: 150,
+                        height: 86,
+                        border: "1px solid #b6b6b6",
+                        borderRadius: "10px",
+                      }}
+                    >
+                      <CardContent sx={{ textAlign: "center", p: 1 }}>
+                        <Typography variant="h6">{profileData?.campaign_analytics?.total_engagement}</Typography>
+                        <Typography variant="body2" sx={{ mt: 2 }}>
+                          Total Engagemnet
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  <Grid item xs={3}>
+                      <Card
+                      sx={{
+                        width: 150,
+                        height: 86,
+                        border: "1px solid #b6b6b6",
+                        borderRadius: "10px",
+                      }}
+                    >
+                      <CardContent sx={{ textAlign: "center", p: 1 }}>
+                        <Typography variant="h6">{profileData?.campaign_analytics?.total_reach}</Typography>
+                        <Typography variant="body2" sx={{ mt: 2 }}>
+                          Total Reach
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+               
+                </Box>
               </Grid>
-              ))}  
+
+              <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{display:'none'}}>
+                <Engagement/>
+              </Grid>
+
+              <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{display:'none'}}>
+                <Audience />
+                
+              </Grid>
+
+              <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2} sx={{display:'none'}}>
+                <TabComponent tabs={tabs} defaultIndex={0} />
+              </Grid>
+
+              <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2}>
+
+                <BrandProfile brand={brandData} />
+              </Grid>
+
             </Grid>
-            </Box>
-          </Grid>
-
-          <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2}>
-            <Engagement/>
-          </Grid>
-
-          <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2}>
-            <Audience />
-            
-          </Grid>
-
-          <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2}>
-            <TabComponent tabs={tabs} defaultIndex={0} />
-          </Grid>
-
-          <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2}>
-          <BrandProfile/>
-          </Grid>
-
+          </Box>
+        </Grid>
         </Grid>
       </Box>
-    </Grid>
-    </Grid>
-  </Box>
               
-      </>  
     )
 }
 
