@@ -336,7 +336,7 @@ const SocialMedia =()=>{
     </Button> */}
                   <Modal open={open} onClose={handleClose}>
                     <Box sx={style}>
-                      <SocialDisConnect onClose={handleClose} account={selectedUser} />
+                      <SocialDisConnect onClose={handleClose} account={selectedUser} getAccounts={getAccounts} />
                     </Box>
                   </Modal>
                 </Box>
