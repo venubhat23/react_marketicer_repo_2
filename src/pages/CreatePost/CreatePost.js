@@ -101,7 +101,7 @@ const CreatePost = () => {
     }
   };
 
-  // Function to get the selected user's page types
+  // Function to get the selected user's page type
   const getSelectedUserPageType = () => {
     const selectedUser = selectedUsers.find(user => user.social_id === selectedChipId);
     return selectedUser ? selectedUser.page_type : null;
@@ -269,7 +269,7 @@ const CreatePost = () => {
   };
 
   const handlePublish = async () => {
-    if (!selectedPages.length || !postContent) {
+    if (!uploadedImageUrl || !postContent) {
       alert("Please make sure all fields are filled out!");
       return;
     }
@@ -311,7 +311,7 @@ const CreatePost = () => {
 
   const draftHandler = async () => {
 
-    if (!selectedPages.length || !uploadedImageUrl || !postContent) {
+    if ( !uploadedImageUrl || !postContent) {
       alert("Please make sure all fields are filled out!");
       return;
     }
