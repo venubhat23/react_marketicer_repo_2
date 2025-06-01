@@ -61,7 +61,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
             localStorage.setItem("linkedin_access_token", data["access_token"]);
       
             // Proceed with fetching the LinkedIn accounts
-            fetchAccountsFromAPI(data["access_token"]);
+            // fetchAccountsFromAPI(data["access_token"]);
           }
           return data;
         } catch (error) {
