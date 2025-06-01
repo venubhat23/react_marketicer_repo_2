@@ -346,7 +346,7 @@ const SocialMedia =()=>{
                 </Box>
 
                 <Stack spacing={2} sx={{ ml: 2 }}>
-                  {socialAccounts?.filter(account => account.platform == "LinkedIn")[0]?.users.map((user, index) => (
+                  {socialAccounts?.filter(account => account.platform == "LinkedIn")?.map(account => account.users.map((user, index) => (
                     <Box
                       key={index}
                       sx={{ display: "flex", alignItems: "center" }}
@@ -391,7 +391,7 @@ const SocialMedia =()=>{
                         Disconnect
                       </Button>
                     </Box>
-                  ))}
+                  )))}
                 </Stack>
               </Paper>
               <Paper
@@ -452,7 +452,7 @@ const SocialMedia =()=>{
                 </Box>
 
                 <Stack spacing={2} sx={{ ml: 2 }}>
-                  {socialAccounts?.filter(account => account.platform == "Instagram")[0]?.users.map((user, index) => (
+                  {socialAccounts?.filter(account => account.platform == "Instagram")?.map(account => account.users.map((user, index) => (
                     <Box
                       key={index}
                       sx={{ display: "flex", alignItems: "center" }}
@@ -485,7 +485,7 @@ const SocialMedia =()=>{
                       </Box>
                       <Button
                         variant="contained"
-                        onClick={handleDisconnectOpen}
+                        onClick={() => handleDisconnectOpen(user)}
                         sx={{
                           bgcolor: "#d92c20",
                           borderColor: "#d92c20",
@@ -496,7 +496,7 @@ const SocialMedia =()=>{
                         Disconnect
                       </Button>
                     </Box>
-                  ))}
+                  )))}
                 </Stack>
               </Paper>
 
