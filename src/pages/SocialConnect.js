@@ -18,7 +18,7 @@ import AxiosManager from '../utils/api';
 
 const FACEBOOK_APP_ID = "499798672825129";
 const FACEBOOK_APP_SECRET = "0972b471f1d251f8db7762be1db4613c";
-const REDIRECT_URI = "https://www.marketincer.com/social";
+const REDIRECT_URI = "https://app.marketincer.com/socialMedia";
 
 const LINKEDIN_CRED = {
   clientId: "77ufne14jzxbbc",

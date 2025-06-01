@@ -11,7 +11,12 @@ import {
   } from "@mui/material";
   
   
-  const AnalyticsProfile = () => {
+  const AnalyticsProfile = ({profile}) => {
+
+    // if (!Array.isArray(profile) || profile.length === 0) {
+    //   return <p>No data available</p>;
+    // }
+
     // Influencer data
     const influencerData = {
       name: "Alice",
@@ -39,6 +44,7 @@ import {
             boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
           }}
         >
+        
           <CardContent sx={{ position: "relative", p: 2 }}>
             {/* Profile Image */}
             <Avatar
@@ -64,7 +70,7 @@ import {
                   lineHeight: "24px",
                 }}
               >
-                {influencerData.name}
+                {profile.name}
               </Typography>
   
               <Box sx={{ mt: 1 }}>
@@ -79,7 +85,7 @@ import {
                     display: "inline",
                   }}
                 >
-                  {influencerData.followers}{" "}
+                  {profile.followers}{" "}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -106,7 +112,7 @@ import {
                     mx: 2,
                   }}
                 >
-                  {influencerData.following}{" "}
+                  {profile.following}{" "}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -134,11 +140,11 @@ import {
                   mt: 1,
                 }}
               >
-                {influencerData.bio}
+                {profile.bio}
               </Typography>
   
               <Chip
-                label={influencerData.category}
+                label={profile.category}
                 variant="outlined"
                 sx={{
                   mt: 1,
@@ -162,7 +168,7 @@ import {
                   mt: 2,
                 }}
               >
-                {influencerData.location}
+                {profile.location}
               </Typography>
             </Box>
   
@@ -171,8 +177,8 @@ import {
   
             {/* Metrics */}
             <Grid container direction="column" spacing={2} sx={{ pl: 2 , textAlign:'justify'}}>
-              {influencerData.metrics.map((metric, index) => (
-                <Grid item key={index}>
+              
+                <Grid item>
                   <Typography
                     variant="body1"
                     sx={{
@@ -184,15 +190,23 @@ import {
                     }}
                   >
                     <Box
-                      component="span"
-                      sx={{ display: "inline-block", width: 160 }}
+                      component="div"
+                      className='profilecontent'
+                      sx={{ display: "inline-block", width: 260 }}
                     >
-                      {metric.label}
+                      <ul>
+                        <li>Engagement Rate: {profile.engagement_rate} </li>
+                        <li>Earned Media: {profile.earned_media}</li>
+                        <li> Average Interactions: {profile.average_interactions}</li>
+                      </ul>
+                      
+                      
+                      
                     </Box>
-                    {metric.value}
+                    
                   </Typography>
                 </Grid>
-              ))}
+             
             </Grid>
           </CardContent>
         </Card>

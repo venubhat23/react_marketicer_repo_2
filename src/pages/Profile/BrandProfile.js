@@ -1,3 +1,4 @@
+import React, {useState} from "react";
 import ChatBubbleOutline from "@mui/icons-material/ChatBubbleOutline";
 import Favorite from "@mui/icons-material/Favorite";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
@@ -12,9 +13,16 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import React from "react";
 
-const BrandProfile = () => {
+
+const BrandProfile = ({brand}) => {
+
+  console.log('bbbb', brand)
+  
+
+  //setBrandData(brand)
+  
+
   // Data for the influencer posts
   const influencerPosts = [
     {
@@ -45,9 +53,9 @@ const BrandProfile = () => {
   return (
    
       <Stack spacing={2}>
-        {influencerPosts.map((post) => (
+        {brand.map((post) => (
           <Card
-            key={post.id}
+            //key={post.id}
             sx={{
               p: 2,
               borderRadius: "10px",
@@ -59,28 +67,28 @@ const BrandProfile = () => {
           >
             <CardContent sx={{ p: 0, }}>
               <Grid container spacing={2}>
-                <Grid item>
+                <Grid size={{xs:2, md:2}}>
                   <Box
                     component="img"
                     src={post.image}
-                    alt="Post thumbnail"
+                    alt="Post image"
                     sx={{
                       width: 75,
-                      height: post.id === 3 ? 24 : 85,
+                      //height: post.id === 3 ? 24 : 85,
                       objectFit: "cover",
                     }}
                   />
                 </Grid>
 
-                <Grid item xs>
+                <Grid size={{xs:5, md:5}}>
                   <Box sx={{ mb: 1 }}>
                     <Typography
                       variant="body1"
                       sx={{ display: "flex", justifyContent: "space-between" }}
                     >
-                      <span>Influencer</span>
+                      <span>{post.platform}</span>
                       <Typography component="span" color="text.secondary">
-                        @anybrand
+                        {post.brand}
                       </Typography>
                       <Typography component="span" color="text.secondary">
                         {post.date}
@@ -88,7 +96,7 @@ const BrandProfile = () => {
                     </Typography>
 
                     <Box sx={{ mt: 1 }}>
-                      <Typography variant="body2">{post.username}</Typography>
+                      <Typography variant="body2">{post.brand}</Typography>
                       <Typography variant="body2">{post.content}</Typography>
                     </Box>
                   </Box>
@@ -136,7 +144,7 @@ const BrandProfile = () => {
                   </Stack>
                 </Grid>
 
-                <Grid item>
+                <Grid size={{xs:5, md:5}}>
                   <Button
                     variant="text"
                     endIcon={<KeyboardArrowDown />}
