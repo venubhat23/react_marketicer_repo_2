@@ -45,12 +45,12 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     const openSuccessSB = () => setSuccessSB(true);
     const closeSuccessSB = () => setSuccessSB(false);
 
-    async function fetchLinkedInProfile(code, redirectUri, type) {
+    async function fetchLinkedInProfile(code, redirectUri) {
         try {
           const paylod = {
               code: code,
               redirect_uri: redirectUri,
-              type: type,
+              type: linkedinType,
           };
           console.log('Payload:', paylod);
           const response = await AxiosManager.post('/api/v1/linkedin/exchange-token', paylod);
@@ -85,7 +85,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
         if (code) {
             if(authState == LINKEDIN_CRED.state) {
                 console.log("LinkedIn auth code:", code);
-                let response = await fetchLinkedInProfile(code, LINKEDIN_CRED.redirectUri, linkedinType);
+                let response = await fetchLinkedInProfile(code, LINKEDIN_CRED.redirectUri);
                 setOpenModal(true);
                 console.log("LinkedIn response:", response);
                 setLinkedinAccounts(response.user_profile)
@@ -307,7 +307,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
             <CircularProgress sx={{ margin: '50px auto' }}/>
         ) : (
             <>
-            {linkedinType && authCode && authState == LINKEDIN_CRED.state ? (
+            {linkedinAccounts && authCode && authState == LINKEDIN_CRED.state ? (
                 <Box sx={{ width: "100%", mb: 3 }} >
                     <Typography sx={{
                         fontSize: "14px",
@@ -413,8 +413,8 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                         }
                     }}
                     onClick={() => {
-                        if(linkedinType && authCode && authState == LINKEDIN_CRED.state) {
-                            window.location.href = "/social-pages";
+                        if(linkedinAccounts && authCode && authState == LINKEDIN_CRED.state) {
+                            window.location.href = "/socialMedia";
                         } else {
                             handleLinkedinRedirect();
                         }
