@@ -172,6 +172,7 @@ const SocialMedia =()=>{
   const urlParams = new URLSearchParams(window.location.search);
   const authCode = urlParams.get("code");
   const authState = urlParams.get("state");
+  console.log("Auth Code, Auth State:", authCode, authState);
 
   useEffect(() => { 
     // Fetch social media accounts data if needed
