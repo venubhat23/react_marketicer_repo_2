@@ -1,13 +1,19 @@
 import React, {useEffect, useState} from 'react'
-//import { XIcon } from "lucide-react";
-import { Button,Card, CardContent, DialogClose,DialogHeader,
-    DialogTitle,InputSelect,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue, } from "@mui/material";
+import { 
+    Button, 
+    Card, 
+    CardContent, 
+    TextField,
+    Box, 
+    IconButton, 
+    Modal, 
+    Typography, 
+    CircularProgress, 
+    Grid,
+    Snackbar,
+    Alert
+} from "@mui/material";
 
-import { Box, IconButton, Modal, Typography, CircularProgress, Grid } from "@mui/material";
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
@@ -28,8 +34,6 @@ const LINKEDIN_CRED = {
   state: "marketincer-linkedin", // Should be random & stored for verification
 }
 
-
-
 const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     const [openModal, setOpenModal] = useState(false);
     const [linkedinOpenModal, setLinkedinOpenModal] = useState(false);
@@ -41,35 +45,33 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     const [linkedinType, setLinkedinType] = useState("");
     const [instagramType, setInstagramType] = useState("");
     const [gettingPage, setGettingPage] = useState(false);
-        const [successSB, setSuccessSB] = useState(false);
+    const [successSB, setSuccessSB] = useState(false);
+    const [showAccountsList, setShowAccountsList] = useState(false);
+    
     const openSuccessSB = () => setSuccessSB(true);
     const closeSuccessSB = () => setSuccessSB(false);
 
     async function fetchLinkedInProfile(code, redirectUri) {
         try {
-          const paylod = {
+          const payload = {
               code: code,
               redirect_uri: redirectUri,
               type: linkedinType,
           };
-          console.log('Payload:', paylod);
-          const response = await AxiosManager.post('/api/v1/linkedin/exchange-token', paylod);
+          console.log('Payload:', payload);
+          const response = await AxiosManager.post('/api/v1/linkedin/exchange-token', payload);
           console.log('Access Token:', response);
-          const data =  response.data;
+          const data = response.data;
           if (data.status == "success") {
             // Store the access token in localStorage
             localStorage.setItem("linkedin_access_token", data["access_token"]);
-      
-            // Proceed with fetching the LinkedIn accounts
-            // fetchAccountsFromAPI(data["access_token"]);
           }
           return data;
         } catch (error) {
           console.error('Failed to fetch LinkedIn access token:', error);
           throw error;
         }
-      }
-
+    }
 
     useEffect(() => {
         console.log("SocialConnect mounted", authCode, authState);
@@ -79,10 +81,12 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     }, []);
 
     const fetchAccessToken = async (code, authState='') => {
+
         setLoading(true);
 
         try {
         if (code) {
+
             if(authState == LINKEDIN_CRED.state) {
                 console.log("LinkedIn auth code:", code);
                 let response = await fetchLinkedInProfile(code, LINKEDIN_CRED.redirectUri);
@@ -107,7 +111,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                     const longLivedToken = longTokenData.access_token;
 
                     if (longLivedToken) {
-                    // Store the long-lived access token in localStorage
+                    // Store the long-lived access token
                     localStorage.setItem("fb_access_token", longLivedToken);
 
                     // Proceed with fetching the Facebook pages and Instagram accounts
@@ -127,8 +131,8 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
         }
     };
 
-
     const fetchAccountsFromAPI = async (authCode) => {
+
         setGettingPage(true);
         const token = localStorage.getItem("token");
         try {
@@ -145,12 +149,12 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
             })
             }
         );
-    
+
         const data = await response.json();
         console.log("Fetched accounts:", data);
         setPages(data.data.accounts);
-        setOpenModal(true);
-    
+        setShowAccountsList(true);
+
         // Automatically connect if only 1 account exists
         if (data.data.accounts.length === 1) {
             await handleConnect(data.data.accounts[0]);
@@ -164,6 +168,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     
     // Update handleConnect to use functional update
     const handleConnect = async (account) => {
+
         const token = localStorage.getItem("token");
         try {
         const response = await fetch("https://api.marketincer.com/api/v1/social_pages/connect", {
@@ -176,7 +181,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
             page: account
             }),
         });
-    
+
         const data = await response.json();
     
         if (data.status) {
@@ -197,6 +202,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     };
 
     const handleAuthRedirect = (platform) => {
+
         let authURL = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=pages_show_list,instagram_basic,instagram_content_publish&response_type=code`;
 
         if (platform === "facebook" || platform === "instagram") {
@@ -214,6 +220,23 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
         window.location.href = authUrl;
     };
 
+    // Render success snackbar with standard Material-UI components
+    const renderSuccessSB = (
+        <Snackbar
+            open={successSB}
+            autoHideDuration={6000}
+            onClose={closeSuccessSB}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+            <Alert 
+                onClose={closeSuccessSB} 
+                severity="success" 
+                sx={{ width: '100%' }}
+            >
+                Account connected successfully!
+            </Alert>
+        </Snackbar>
+    );
 
     const LinkedInComponent = (
         <Box
@@ -291,9 +314,6 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                     textTransform: "none",
                     fontWeight: "600",
                     fontSize: "10px",
-                    // '&:hover': {
-                    //     backgroundColor: "#005885"
-                    // }
                 }}
             >
                 <LinkedInIcon sx={{ fontSize: 18, mr: 1 }} />
@@ -457,10 +477,6 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                 top: 16,
                 right: 16,
                 color: "#666",
-                position: "absolute",
-                top: 16,
-                right: 16,
-                color: "#666",
                 '&:hover': {
                     backgroundColor: '#f5f5f5'
                 }
@@ -508,19 +524,6 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                 }}
             >
                 Follow us on Instagram
-                {/* <Box
-                    sx={{
-                        width: 20,
-                        height: 20,
-                        borderRadius: "50%",
-                        backgroundColor: "#e0e0e0",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                    }}
-                >
-                    <Typography sx={{ fontSize: "12px", color: "#999" }}>i</Typography>
-                </Box> */}
             </Typography>
         </Box>
 
@@ -530,121 +533,230 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
             <CircularProgress sx={{ margin: '50px auto' }}/>
         ) : (
             <>
-            {instagramType && authCode ? (
-                <Box sx={{ width: "100%", mb: 3 }} >
-                    <Typography sx={{
-                        fontSize: "14px",
-                        color: "#373737",
-                        padding: "20px",
-                        border: "1px solid #ddd",
-                        borderRadius: "12px",
-                        backgroundColor: "#f9f9f9"
-                    }}>
-                        {instagramAccounts["name"]}
-                        <span style={{ color: "green", fontWeight: 700, float: "right" }}>Connected</span>
-                    </Typography>           
-                </Box>
-            ) : (
-                <Box sx={{ width: "100%", display: "flex", gap: 7, mb: 2, justifyContent: "center" }}>
-                    {[
-                        { type: "facebook", label: "Professional\nvia Facebook", hasSubIcon: true },
-                        { type: "instagram", label: "Professional\nvia Instagram", hasSubIcon: false }
-                    ].map((item) => (
-                        <Box
-                            key={item.type}
-                            sx={{
-                                padding: "20px 30px",
-                                border: instagramType === item.type ? "2px solid #e91e63" : "1px solid #e0e0e0",
-                                borderRadius: "16px",
-                                cursor: "pointer",
-                                transition: "all 0.2s ease",
-                                backgroundColor: instagramType === item.type ? "#fce4ec" : "white",
-                                textAlign: "center",
-                                position: "relative",
-                                "&:hover": {
-                                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                                    borderColor: "#e91e63",
-                                    backgroundColor: "#fef7f7",
-                                    transform: "translateY(-2px)"
-                                }
-                            }}
-                            onClick={() => {
-                                setInstagramType(item.type);
-                            }}
-                        >
-                            {/* Instagram Icon with optional Facebook overlay */}
+            {/* Show accounts list after authentication */}
+            {showAccountsList && pages.length > 0 ? (
+                <>
+                    <Box sx={{ margin: 0, width: "100%" }}>
+                        <Typography sx={{
+                            fontSize: "14px",
+                            color: "#373737",
+                            paddingTop: "20px",
+                        }}>
+                            Select the accounts that you want to add.
+                        </Typography>
+                        {pages.length > 1 && (
+                            <TextField 
+                                label="Search here" 
+                                variant="outlined"
+                                size="small"
+                                sx={{ 
+                                    margin: "10px 0", 
+                                    width: "100%" 
+                                }} 
+                            />
+                        )}
+                    </Box>
+                    
+                    <Box
+                        sx={{
+                            maxHeight: "40vh",
+                            overflowY: "auto",
+                            listStyleType: "none",
+                            paddingLeft: 0,
+                            paddingRight: 0,
+                            marginTop: "20px",
+                            width: "100%"
+                        }}
+                    >
+                        {pages.map((account) => (
                             <Box
+                                key={account.page_id}
                                 sx={{
-                                    position: "relative",
-                                    width: 64,
-                                    height: 64,
-                                    margin: "0 auto 16px auto",
                                     display: "flex",
                                     alignItems: "center",
-                                    justifyContent: "center"
+                                    padding: "10px",
+                                    marginBottom: "10px",
+                                    borderRadius: "8px",
+                                    border: "1px solid #ddd",
+                                    backgroundColor: "#f9f9f9",
+                                    transition: "background-color 0.3s ease",
+                                    "&:hover": {
+                                        backgroundColor: "#f1f1f1",
+                                    },
                                 }}
                             >
+                                <img
+                                    src={account?.user?.picture?.data?.url}
+                                    alt={account.name}
+                                    style={{
+                                        borderRadius: "50%",
+                                        width: "40px",
+                                        height: "40px",
+                                        marginRight: "15px",
+                                    }}
+                                />
+                                <Box sx={{ flexGrow: 1 }}>
+                                    <Typography variant="body1" fontWeight="bold" sx={{
+                                        fontSize: "14px",
+                                        color: "#373737",
+                                    }}>
+                                        {account.name}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{
+                                        fontSize: "12px",
+                                    }}>
+                                        {account.username}
+                                    </Typography>
+                                </Box>
+
+                                {/* Show "Connected" label for connected accounts */}
+                                {account.connected ? (
+                                    <Typography
+                                        sx={{
+                                            color: "green",
+                                            fontSize: "14px",
+                                            fontWeight: "bold",
+                                            display: "flex",
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        Connected
+                                    </Typography>
+                                ) : (
+                                    <Button
+                                        variant="text"
+                                        color="primary"
+                                        onClick={() => handleConnect(account)}
+                                        sx={{
+                                            textDecoration: "underline",
+                                            padding: 0,
+                                            minWidth: "auto",
+                                            "&:hover": {
+                                                backgroundColor: "transparent",
+                                            },
+                                        }}
+                                    >
+                                        Connect
+                                    </Button>
+                                )}
+                            </Box>
+                        ))}
+                    </Box>
+
+                    <Box sx={{ margin: 0, width: "100%" }}>
+                        <Typography sx={{
+                            fontSize: "14px",
+                            color: "#373737",
+                            paddingTop: "20px",
+                        }}>
+                            You can only add Facebook Profiles, Facebook Groups, and Facebook Pages, including Instagram Business accounts linked to Facebook Pages.
+                        </Typography>
+                    </Box>
+                </>
+            ) : (
+                // Show type selection if no accounts list yet
+                !authCode && (
+                    <Box sx={{ width: "100%", display: "flex", gap: 7, mb: 2, justifyContent: "center" }}>
+                        {[
+                            { type: "facebook", label: "Professional\nvia Facebook", hasSubIcon: true },
+                            { type: "instagram", label: "Professional\nvia Instagram", hasSubIcon: false }
+                        ].map((item) => (
+                            <Box
+                                key={item.type}
+                                sx={{
+                                    padding: "20px 30px",
+                                    border: instagramType === item.type ? "2px solid #e91e63" : "1px solid #e0e0e0",
+                                    borderRadius: "16px",
+                                    cursor: "pointer",
+                                    transition: "all 0.2s ease",
+                                    backgroundColor: instagramType === item.type ? "#fce4ec" : "white",
+                                    textAlign: "center",
+                                    position: "relative",
+                                    "&:hover": {
+                                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                                        borderColor: "#e91e63",
+                                        backgroundColor: "#fef7f7",
+                                        transform: "translateY(-2px)"
+                                    }
+                                }}
+                                onClick={() => {
+                                    setInstagramType(item.type);
+                                }}
+                            >
+                                {/* Instagram Icon with optional Facebook overlay */}
                                 <Box
                                     sx={{
-                                        width: 50,
-                                        height: 50,
-                                        background: "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
-                                        borderRadius: "16px",
+                                        position: "relative",
+                                        width: 64,
+                                        height: 64,
+                                        margin: "0 auto 16px auto",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center"
                                     }}
                                 >
-                                    <InstagramIcon sx={{ color: "white", fontSize: 32 }} />
-                                </Box>
-                                
-                                {item.hasSubIcon && (
                                     <Box
                                         sx={{
-                                            position: "absolute",
-                                            bottom: -4,
-                                            right: -4,
-                                            width: 28,
-                                            height: 28,
-                                            backgroundColor: "#1877f2",
-                                            borderRadius: "50%",
+                                            width: 50,
+                                            height: 50,
+                                            background: "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
+                                            borderRadius: "16px",
                                             display: "flex",
                                             alignItems: "center",
-                                            justifyContent: "center",
-                                            border: "2px solid white"
+                                            justifyContent: "center"
                                         }}
                                     >
-                                        <FacebookIcon sx={{ color: "white", fontSize: 16 }} />
+                                        <InstagramIcon sx={{ color: "white", fontSize: 32 }} />
                                     </Box>
+                                    
+                                    {item.hasSubIcon && (
+                                        <Box
+                                            sx={{
+                                                position: "absolute",
+                                                bottom: -4,
+                                                right: -4,
+                                                width: 28,
+                                                height: 28,
+                                                backgroundColor: "#1877f2",
+                                                borderRadius: "50%",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                border: "2px solid white"
+                                            }}
+                                        >
+                                            <FacebookIcon sx={{ color: "white", fontSize: 16 }} />
+                                        </Box>
+                                    )}
+                                </Box>
+                                
+                                <Typography
+                                    sx={{
+                                        fontSize: "12px",
+                                        fontWeight: "600",
+                                        color: "#333",
+                                        whiteSpace: "pre-line",
+                                        lineHeight: 1.3
+                                    }}
+                                >
+                                    {item.label}
+                                </Typography>
+                                
+                                {instagramType === item.type && (
+                                    <CheckCircleIcon 
+                                        sx={{ 
+                                            position: "absolute",
+                                            top: 12,
+                                            right: 12,
+                                            fontSize: 24, 
+                                            color: "#e91e63" 
+                                        }} 
+                                    />
                                 )}
                             </Box>
-                            
-                            <Typography
-                                sx={{
-                                    fontSize: "12px",
-                                    fontWeight: "600",
-                                    color: "#333",
-                                    whiteSpace: "pre-line",
-                                    lineHeight: 1.3
-                                }}
-                            >
-                                {item.label}
-                            </Typography>
-                            
-                            {instagramType === item.type && (
-                                <CheckCircleIcon 
-                                    sx={{ 
-                                        position: "absolute",
-                                        top: 12,
-                                        right: 12,
-                                        fontSize: 24, 
-                                        color: "#e91e63" 
-                                    }} 
-                                />
-                            )}
-                        </Box>
-                    ))}
-                </Box>
+                        ))}
+                    </Box>
+                )
             )}
             
             <Box
@@ -659,7 +771,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                 <Button
                     variant="contained"
                     sx={{
-                        backgroundColor: "#0077b5",
+                        backgroundColor: "#e91e63",
                         color: "white",
                         borderRadius: "8px",
                         padding: "6px 16px",
@@ -667,12 +779,13 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                         fontWeight: "600",
                         fontSize: "14px",
                         "&:hover": {
-                            backgroundColor: "#005885",
+                            backgroundColor: "#c2185b",
                         }
                     }}
                     onClick={() => {
-                        if(instagramType && authCode) {
-                            window.location.href = "/social-pages";
+                        if(showAccountsList && pages.length > 0) {
+                            // Navigate to dashboard or next page
+                            window.location.href = "/socialMedia";
                         } else {
                             handleAuthRedirect("instagram");
                         }
@@ -684,17 +797,32 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
             </>
           )}
         </Box>
-    )
+    );
 
-    if(socialMediaType == "Linkedin") {
-        return LinkedInComponent
-    } else {
-        return InstagramComponent
-    }
+    return (
+        <>
+            {socialMediaType === "Linkedin" ? LinkedInComponent : InstagramComponent}
+            {renderSuccessSB}
+            {gettingPage && (
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        zIndex: 9999,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}
+                >
+                    <CircularProgress size={60} />
+                </Box>
+            )}
+        </>
+    );
 }
+
 export default SocialConnect
-
-
-
-
-
