@@ -23,7 +23,7 @@ const handleDisConnect = async (account, onClose, getAccounts) => {
     if (data.status) {
       getAccounts()
       window.location.reload();
-      alert(`${account.name} disconnected successfully!`);
+      // alert(`${account.name} disconnected successfully!`);
     } else {
       alert(`Failed to disconnect ${account.name}`);
     }
