@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import ChatBubbleOutline from "@mui/icons-material/ChatBubbleOutline";
 import Favorite from "@mui/icons-material/Favorite";
-import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import LinkIcon from "@mui/icons-material/Link";
 import Send from "@mui/icons-material/Send";
 import {
@@ -13,15 +13,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 
 
 const BrandProfile = ({brand}) => {
-
-  console.log('bbbb', brand)
-  
-
-  //setBrandData(brand)
-  
 
   // Data for the influencer posts
   const influencerPosts = [
@@ -80,7 +75,7 @@ const BrandProfile = ({brand}) => {
                   />
                 </Grid>
 
-                <Grid size={{xs:5, md:5}}>
+                <Grid size={{xs:5, md:7}}>
                   <Box sx={{ mb: 1 }}>
                     <Typography
                       variant="body1"
@@ -144,20 +139,22 @@ const BrandProfile = ({brand}) => {
                   </Stack>
                 </Grid>
 
-                <Grid size={{xs:5, md:5}}>
+                <Grid size={{xs:5, md:3}}>
+                <Link to="/fullAnalytics">
                   <Button
                     variant="text"
-                    endIcon={<KeyboardArrowDown />}
+                    endIcon={<KeyboardArrowRightIcon />}
                     sx={{
                       bgcolor: "#fffdfd",
                       borderRadius: "8px",
-                      color: "text.primary",
+                      color: "#882AFF",
                       textTransform: "none",
                       p: 1,
                     }}
                   >
                     View full Analytics
                   </Button>
+                  </Link>
                 </Grid>
               </Grid>
             </CardContent>

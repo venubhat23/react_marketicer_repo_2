@@ -10,6 +10,19 @@ import {
   ListItemButton,
   IconButton,
 } from "@mui/material";
+import {
+  Dashboard as DashboardIcon,
+  Analytics as AnalyticsIcon,
+  Campaign as CampaignIcon,
+  People as PeopleIcon,
+  //Settings as SettingsIcon,
+  //Logout as LogoutIcon,
+  TrendingUp as TrendingUpIcon,
+  AttachMoney as AttachMoneyIcon,
+  Group as GroupIcon,
+  Assessment as AssessmentIcon,
+  Close as CloseIcon,  
+} from '@mui/icons-material';
 
 import {
   People,
@@ -18,6 +31,7 @@ import {
 import MessageSquareIcon from "@mui/icons-material/Message";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
+import AppsIcon from '@mui/icons-material/Apps';
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 
@@ -64,10 +78,35 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
 
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Link to="/analytics">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#FFFFFF' }}>
+          <ListItem disablePadding  sx={{display:'none'}}>
+            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Link to="/dashboard">
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  color: '#FFFFFF',
+                }}
+              >
+                <AppsIcon fontSize="medium" />
+                <Typography variant="body2" sx={{fontSize:'12px', whiteSpace:'nowrap'}}>Dashboard</Typography>
+              </Box>
+              </Link>
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Link to="/analytics">
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  color: '#FFFFFF',
+                }}
+              >
                 <EqualizerIcon fontSize="medium" />
                 <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Analytics</Typography>
               </Box>

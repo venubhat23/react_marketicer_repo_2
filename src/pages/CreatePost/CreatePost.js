@@ -12,7 +12,7 @@ import {
   Tab, Tabs, Checkbox,
   Grid, Modal, Paper,
   AppBar, Toolbar, Container, InputLabel, ListItemText,
-  CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack
+  CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack,ListItemIcon,
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from '@mui/icons-material/Close';
@@ -391,7 +391,6 @@ const CreatePost = () => {
 
 
   const handleAvatarClick = (pageId) => {
-    
     console.log("Page ID clicked:", pageId, selectedPages);
     setSelectedPages((selectedPages) =>
       selectedPages.includes(pageId)
@@ -413,7 +412,10 @@ const CreatePost = () => {
       selectedIds.includes(user.id)
     );
 
+    const socialId = selectedUserObjects.map(user => user.social_id);
+
     setSelectedUsers(selectedUserObjects);
+    handleAvatarClick(socialId)
 
   };
 
@@ -469,6 +471,11 @@ const CreatePost = () => {
                   py={1.5}
                 >
                   <Stack direction="row" spacing={1} alignItems="center">
+                    <Avatar
+                      src={selectUser.picture_url || "https://c.animaapp.com/mbg09e7nzklgMf/img/marketincer-logo-1.svg"}
+                      alt="Profile"
+                      sx={{ width: 29, height: 29 }}
+                    />
                     <Avatar
                       src={selectUser.picture_url || "https://c.animaapp.com/mbg09e7nzklgMf/img/marketincer-logo-1.svg"}
                       alt="Profile"
@@ -768,10 +775,15 @@ const CreatePost = () => {
                   >
                     {pages.map((user) => (
                       <MenuItem key={user.id} value={user.id}>
-                        <Checkbox
+                        <ListItemIcon sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {/* {(user.name)} */}
+                          <Avatar src={user.picture_url} alt={user.name} sx={{ width: 24, height: 24 }} />
+                        </ListItemIcon>
+                        
+                        <ListItemText primary={user.name} />
+                        <Checkbox className="custom-checkbox"
                           checked={selectedUsers.some((selected) => selected.id === user.id)}
                         />
-                        <ListItemText primary={user.name} />
                       </MenuItem>
                     ))}
                   </Select>
@@ -784,12 +796,13 @@ const CreatePost = () => {
 
                 {selectedUsers.map((user) => (
                   <Chip
+                    className="custom-chip"
                     key={user.id}
                     avatar={<Avatar src={user.picture_url} />}
                     label={user.name}
                     onClick={() => {
-                      handleAvatarClick(user.social_id);
-                      setSelectedChipId(user.social_id);
+                      //handleAvatarClick(user.social_id);
+                      //setSelectedChipId(user.social_id);
                       setSelectUser(user); // Set the selected user for preview
                     }}
                     onDelete={() => { 
@@ -941,7 +954,7 @@ const CreatePost = () => {
                   </Box>
                   <Button
                     variant="contained"
-                    color="primary"
+                    //color=""
                     fullWidth
                     onClick={handlePublish}
                     sx={{ mt: 2, bgcolor: '#7F56D9', color: '#fff' }}

@@ -39,22 +39,7 @@ import axios from 'axios';
   ]
 
 const Analytics =()=>{
-  const tabs = [
-    {
-      label: 'Audience Insights',
-      content: <div><AudienceInsights /></div>,
-    },
-    {
-      label: 'Paid Performance',
-      content: <div>< PaidPerformance /></div>,
-    },
-    {
-      label: 'Content Insights',
-      content: <div>< ContentInsight /></div>,
-    },
-  ];
-
-
+  
     const influencerData = {
         name: "Alice",
         profileImage: "https://c.animaapp.com/mavezxjciUNcPR/img/ellipse-121-1.png",
@@ -84,16 +69,28 @@ const Analytics =()=>{
     const [profileData, setProfileData] = useState([])
     const [brandData, setBrandData] = useState([])
     const [platformOption, setPlatformOption] = useState('')
+    const [engagementData, setEngagementData] = useState([]);
+    const [audienceInsight, setAudienceInsight] = useState([]);
+    const [audienceEngagement, setAudienceEngagement] = useState([])
+    const [audienceAge, setAudienceAge] = useState([]);
+    const [reachability, setReachability] = useState([]);
+    const [gender, setGender]= useState([]);
+    const [location, setLocation] = useState([]);
 
     
-
+    
     useEffect(() => {
       axios.get('https://api.marketincer.com/api/v1/influencer/analytics')
         .then((response) => {
           setProfileData(response?.data?.data || []);
           setBrandData(response?.data?.data?.recent_posts || [])
-          
-          
+          setEngagementData(response?.data?.data?.engagement_over_time.daily || {})
+          setAudienceEngagement(response?.data?.data?.audience_engagement || {})
+          setAudienceAge(response?.data?.data?.audience_age || {})
+          setReachability(response?.data?.data?.audience_reachability.notable_followers || {})
+          setGender(response?.data?.data?.audience_gender || {})
+          setLocation(response?.data?.data?.audience_location.countries || {})
+
           //setLoading(false);
         })
         .catch((error) => {
@@ -101,13 +98,44 @@ const Analytics =()=>{
           //setLoading(false);
         });
     }, []);
-    console.log('datata', profileData)
-    console.log('11', brandData)
+    
+    const notableNo = profileData?.audience_reachability?.notable_followers_count
+    const cities = profileData?.audience_location?.cities
+    const language = profileData?.audience_details?.languages
+    const intrest = profileData?.audience_details?.interests
+    const brand_affinity = profileData?.audience_details?.brand_affinity
+
+
+    const tabs = [
+      {
+        label: 'Audience Insights',
+        content: <div>
+          <AudienceInsights 
+            audienceAge={audienceAge} 
+            reachability={reachability} 
+            brand_affinity={brand_affinity} 
+            intrest={intrest} cities={cities} 
+            language={language} 
+            notableNo={notableNo}  
+            gender={gender}  
+            location={location}
+          />
+        </div>,
+      },
+      {
+        label: 'Paid Performance',
+        content: <div>< PaidPerformance /></div>,
+      },
+      {
+        label: 'Content Insights',
+        content: <div>< ContentInsight /></div>,
+      },
+    ];
 
 
     return(
 
-    <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} >
+    <Box sx={{ flexGrow: 1 }} >
         <Grid container>
           <Grid size={{ md: 1 }}> <Sidebar/></Grid>
           <Grid size={{ md: 11 }}> 
@@ -164,8 +192,8 @@ const Analytics =()=>{
                         variant="outlined"
                         size="small"
                         sx={{
-                          //width: 250,
-                          borderRadius: '50px',
+                         
+                          borderRadius: '50px !important',
                           backgroundColor: '#fff',
                           '& .MuiInputBase-input': {
                             padding: '9px',
@@ -328,21 +356,20 @@ const Analytics =()=>{
                 </Box>
               </Grid>
 
-              <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{display:'none'}}>
-                <Engagement/>
+              <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2} >
+                <Engagement engagement={engagementData} />
               </Grid>
 
-              <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{display:'none'}}>
-                <Audience />
+              <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2}>
+                <Audience audienceData={audienceEngagement} />
                 
               </Grid>
 
-              <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2} sx={{display:'none'}}>
+              <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2}>
                 <TabComponent tabs={tabs} defaultIndex={0} />
               </Grid>
 
-              <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2}>
-
+              <Grid size={{ xs: 2, sm: 6, md: 12 }} spacing={2}>
                 <BrandProfile brand={brandData} />
               </Grid>
 

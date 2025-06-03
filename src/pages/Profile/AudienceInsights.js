@@ -9,7 +9,13 @@ import {
   Divider,
   Chip,
 } from '@mui/material';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import { PieChart, Pie, Cell,  BarChart, Bar, XAxis, YAxis, CartesianGrid, } from 'recharts';
+import {
+  RadialBarChart, RadialBar, Legend, Tooltip, ResponsiveContainer
+} from 'recharts';
 
 const ageData = [
   { name: '18-24', value: 300 },
@@ -36,40 +42,69 @@ const locationData = [
   { name: 'Dubai',         value: 70 },
 ];
 
-const COLORS = ['#3f51b5', '#9c27b0', '#03a9f4'];
+// Data for engagement metrics
+const COLORS = ['#882AFF', '#a063ec', '#dcc3fa'];
 
-const  AudienceInsights=()=> {
+const  AudienceInsights= ({audienceAge, reachability, notableNo, gender, location, cities, brand_affinity,intrest,language})=> {
+  console.log('qaqa', reachability)
+
+  // Convert data for the chart
+  const ageData = Object.entries(audienceAge).map(([key, value], index) => ({
+    name: key,
+    value: parseFloat(value.replace('%', '')),
+    fill: ['#8884d8', '#83a6ed', '#8dd1e1'][index]  // Optional colors
+  }));
+
+  const reachdata = reachability.map((entry) => {
+    const match = entry.match(/^([a-zA-Z]+)([\d.]+)K$/);
+    return {
+      name: match[1],
+      value: parseFloat(match[2]) * 1000
+    };
+  });
+
+  const GenderData = Object.entries(gender).map(([key, value]) => ({
+    name: key.charAt(0).toUpperCase() + key.slice(1),
+    value: parseFloat(value)
+  }));
+
+  // Convert countries object to array for recharts
+  const locationData = Object.entries(location).map(([country, value]) => ({
+    country,
+    value
+  }));
+
+  
+
   return (
     
       <Grid container spacing={2}>
         {/* Top row: 3 / 4 / 5 */}
+
+
         <Grid item xs={12} md={3} size={3}>
           <Card>
             <CardContent>
               <Typography variant="subtitle1">Audience Age</Typography>
-              <ResponsiveContainer width="100%" height={120}>
-                <PieChart>
-                  <Pie
-                    data={ageData}
-                    innerRadius={40}
-                    outerRadius={60}
+              <ResponsiveContainer width="100%" height={300}>
+                <RadialBarChart
+                  innerRadius="20%"
+                  outerRadius="90%"
+                  data={ageData}
+                  startAngle={180}
+                  endAngle={0}
+                >
+                  <RadialBar
+                    minAngle={15}
+                    label={{ position: 'insideStart', fill: '#fff' }}
+                    background
+                    clockWise
                     dataKey="value"
-                    startAngle={90}
-                    endAngle={-270}
-                  >
-                    {ageData.map((_, idx) => (
-                      <Cell key={idx} fill={COLORS[idx]} />
-                    ))}
-                  </Pie>
-                </PieChart>
+                  />
+                  <Legend iconSize={10} layout="horizontal" verticalAlign="bottom" align="center" />
+                  <Tooltip />
+                </RadialBarChart>
               </ResponsiveContainer>
-              <Box display="flex" justifyContent="space-around" mt={1}>
-                {ageData.map((d) => (
-                  <Typography key={d.name} variant="caption">
-                    {d.name}
-                  </Typography>
-                ))}
-              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -78,7 +113,7 @@ const  AudienceInsights=()=> {
           <Card>
             <CardContent>
               <Typography variant="subtitle1">Audience Reachability</Typography>
-              <ResponsiveContainer width="100%" height={150}>
+              <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
                         data={reachData}
@@ -100,21 +135,21 @@ const  AudienceInsights=()=> {
 
         <Grid item xs={12} md={5} size={5} >
           <Card>
-            <CardContent>
+            <CardContent width="100%" sx={{height:'325px'}}>
               <Typography variant="subtitle1" gutterBottom>
-                Notable Followers: 132
+                Notable Followers: {notableNo}
               </Typography>
               <Grid container spacing={1}>
-                {['Alice','Sophia','Allana','Sam','Julia'].map((name) => (
+                {reachability.map((name) => (
                   <Grid item xs={4} sm={2} key={name} textAlign="center">
                     <Avatar
                       src={`https://i.pravatar.cc/40?u=${name}`}
                       sx={{ mx: 'auto' }}
                     />
-                    <Typography variant="caption">{name}</Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" component='div'>{name}</Typography>
+                    {/* <Typography variant="caption" color="text.secondary">
                       32.5K
-                    </Typography>
+                    </Typography> */}
                   </Grid>
                 ))}
               </Grid>
@@ -127,20 +162,23 @@ const  AudienceInsights=()=> {
           <Card>
             <CardContent>
               <Typography variant="subtitle1">Audience Gender</Typography>
-              <ResponsiveContainer width="100%" height={120}>
+              <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
-                        data={genderData}
-                        innerRadius={30}
-                        outerRadius={50}
+                        data={GenderData}
+                        outerRadius={80}
+                        innerRadius={60}
+                        paddingAngle={5}
                         dataKey="value"
                         startAngle={90}
                         endAngle={-270}
                       >
-                        {genderData.map((_, idx) => (
+                        {GenderData.map((_, idx) => (
                           <Cell key={idx} fill={COLORS[idx]} />
                         ))}
                       </Pie>
+                      <Tooltip />
+                      <Legend verticalAlign="top" height={36}/>
                     </PieChart>
                   </ResponsiveContainer>
             </CardContent>
@@ -151,38 +189,58 @@ const  AudienceInsights=()=> {
           <Card>
             <CardContent>
               <Typography variant="subtitle1">Audience Location</Typography>
-              <ResponsiveContainer width="100%" height={140}>
-                    <BarChart data={locationData} layout="vertical" margin={{ left: 20 }}>
-                      <XAxis type="number" hide />
-                      <Tooltip />
-                      <Bar dataKey="value" fill={COLORS[0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                  {locationData.map((d, i) => (
-                    <Typography key={i} variant="caption" display="block">
-                      {d.name}
-                    </Typography>
-                  ))}
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  layout="vertical"
+                  data={locationData}
+                  width={250} height={50}
+                  margin={{ top: 10, right: 5, left: 15, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="country" type="category" />
+                  <Tooltip />
+                 
+                  <Bar dataKey="value"  barSize={10} fill="#882AFF"  name="Location" />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} md={5} size={5}>
           <Card>
-            <CardContent>
+            <CardContent width="100%" sx={{height:'325px'}}>
               <Typography variant="subtitle1">Audience Details</Typography>
               <Divider sx={{ my: 1 }} />
-              <Typography variant="body2">
-                <strong>Cities:</strong> New York, Mumbai, Berlin, Noida
+              <Typography variant="body2" className='audDeatils'>
+                <strong>Aduience Cities: </strong> 
+                {/* <List> */}
+                  {cities?.map((city,index)=>(
+                    <Typography variant="body2" key={index} sx={{display:'inline-flex', color:'#a5a9a9'}}>{city},</Typography>
+                    // <ListItem key={index} disableGutters>
+                    // <ListItemText>{city}</ListItemText>
+                    // </ListItem>
+                  ))}
+                {/* </List> */}
               </Typography>
-              <Typography variant="body2">
-                <strong>Language:</strong> English, Hindi
+              <Typography variant="body2" className='audDeatils'>
+                <strong>Aduience Language: </strong> 
+                {language?.map((lang,index)=>(
+                   <Typography variant="body2" key={index} sx={{display:'inline-flex', color:'#a5a9a9'}}>{lang}</Typography>
+                ))}
               </Typography>
-              <Typography variant="body2">
-                <strong>Interests:</strong> Music, Food, Lifestyle
+              <Typography variant="body2" className='audDeatils'>
+                <strong>Aduience Interests: </strong>
+                {intrest?.map((int, index)=>(
+                  <Typography variant="body2" key={index} sx={{display:'inline-flex', color:'#a5a9a9'}}>{int}</Typography>
+                ))}
               </Typography>
-              <Typography variant="body2">
-                <strong>Brand Affinity:</strong> Nike, Sony, Apple
+              <Typography variant="body2" className='audDeatils'>
+                <strong>Aduience Brand Affinity: </strong>
+                {brand_affinity?.map((brand, index)=>(
+                  <Typography variant="body2" key={index} sx={{display:'inline-flex', color:'#a5a9a9'}}>{brand}</Typography>
+                ))}
               </Typography>
             </CardContent>
           </Card>

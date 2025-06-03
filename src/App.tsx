@@ -20,6 +20,7 @@ import Sidebar from './components/Sidebar';
 import CreatePost from './pages/CreatePost/CreatePost';
 import Analytics  from './pages/Profile/Analytics';
 import SocialMedia from './pages/SocialMedia';
+import FullAnalytics from './pages/Profile/FullAnalytics';
 
 
 
@@ -28,7 +29,7 @@ function App() {
 
   return (
     <>
-   
+   <div style={{ minHeight: '100%' }}>
     <ThemeProvider theme={theme}>
       
       {/* <div className="App"> */}
@@ -51,10 +52,12 @@ function App() {
           <Route path="/createPost" element={<CreatePost />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/socialMedia" element={<SocialMedia />} />
+          <Route path="/fullAnalytics" element={<FullAnalytics />} />
         </Routes>
       </AuthProvider>    
     {/* </div> */}
     </ThemeProvider>
+    </div>
     </>
   );
 }

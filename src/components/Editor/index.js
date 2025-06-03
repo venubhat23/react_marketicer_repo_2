@@ -12,7 +12,7 @@ const MyEditor = ({ value, onChange }) => {
         plugins: 'emoticons',
         toolbar: 'bold italic emoticons',
         menubar: false,
-        height: 200,
+        height: 300,
         statusbar: false, // Removes the status bar at the bottom
         branding: false,  // Removes the "Build with" branding
       }}

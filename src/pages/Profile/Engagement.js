@@ -1,3 +1,4 @@
+import React from "react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import {
   Box,
@@ -10,17 +11,26 @@ import {
   Typography,
   Paper,
 } from "@mui/material";
-import React from "react";
 
- const Engagement = () => {
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { curveCardinal } from 'd3-shape';
+
+const cardinal = curveCardinal.tension(0.2);
+
+ const Engagement = ({engagement}) => {
+
+  const engageData = Object.entries(engagement).map(([day, value]) => ({
+    day,
+    engagement: value,
+  }));
+
+
   const [timeRange, setTimeRange] = React.useState("last7days");
 
   const handleTimeRangeChange = (event: SelectChangeEvent) => {
     setTimeRange(event.target.value);
   };
 
-  // Days of the week for the chart
-  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
     
@@ -91,46 +101,27 @@ import React from "react";
         <Box sx={{ mt: 2, height: 218 }}>
           <Box sx={{ position: "relative", height: "100%" }}>
             {/* Grid lines */}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-                justifyContent: "space-between",
-              }}
-            >
-              {Array(6)
-                .fill(0)
-                .map((_, index) => (
-                  <Box
-                    key={`divider-${index}`}
-                    sx={{
-                      width: "100%",
-                      height: "1px",
-                      backgroundImage:
-                        "url(https://c.animaapp.com/mavezxjciUNcPR/img/divider.svg)",
-                      backgroundRepeat: "repeat-x",
-                    }}
-                  />
-                ))}
-            </Box>
+          
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={engageData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="engagement"
+                  stroke="#882AFF"
+                  fill="#F9F5FF"
+                  strokeWidth={2}
+                  activeDot={{ r: 6 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
 
-            {/* Chart data */}
-            <Box
-              component="img"
-              src="https://c.animaapp.com/mavezxjciUNcPR/img/-chart-data.svg"
-              alt="Chart showing engagement data"
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "192px",
-              }}
-            />
 
             {/* Days of week labels */}
-            <Box
+            {/* <Box
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -153,7 +144,7 @@ import React from "react";
                   {day}
                 </Typography>
               ))}
-            </Box>
+            </Box> */}
           </Box>
         </Box>
       </CardContent>
