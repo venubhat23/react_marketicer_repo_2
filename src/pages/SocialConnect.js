@@ -26,13 +26,6 @@ const FACEBOOK_APP_ID = "499798672825129";
 const FACEBOOK_APP_SECRET = "0972b471f1d251f8db7762be1db4613c";
 const REDIRECT_URI = "https://app.marketincer.com/socialMedia";
 
-const LINKEDIN_CRED = {
-  clientId: "77ufne14jzxbbc",
-  clientSecret: "k0a1Jt5K0iZx7l7Y",
-  redirectUri: "https://app.marketincer.com/socialMedia",
-  scope: "openid profile email w_member_social",
-  state: "marketincer-linkedin", // Should be random & stored for verification
-}
 
 const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     const [openModal, setOpenModal] = useState(false);
@@ -42,7 +35,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     const [pages, setPages] = useState([]);
     const [instagramAccounts, setInstagramAccounts] = useState([]);
     const [linkedinAccounts, setLinkedinAccounts] = useState({});
-    const [linkedinType, setLinkedinType] = useState("");
+    const [linkedinType, setLinkedinType] = useState(localStorage.getItem("linkedin_type")); // Default to "profile" if not set
     const [instagramType, setInstagramType] = useState("");
     const [gettingPage, setGettingPage] = useState(false);
     const [successSB, setSuccessSB] = useState(false);
@@ -50,6 +43,26 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     
     const openSuccessSB = () => setSuccessSB(true);
     const closeSuccessSB = () => setSuccessSB(false);
+    
+    // profile
+    let LINKEDIN_CRED = {
+        clientId: "77ufne14jzxbbc",
+        clientSecret: "k0a1Jt5K0iZx7l7Y",
+        redirectUri: "https://app.marketincer.com/socialMedia",
+        scope: "openid profile email w_member_social",
+        state: "marketincer-linkedin", // Should be random & stored for verification
+    }
+    
+    // pages
+    if(linkedinType === "pages") {
+        LINKEDIN_CRED = {
+            clientId: "780iu7cgaok1lf",
+            clientSecret: "WPL_AP1.pBnxoZgtOaxFkqeN.4Z42vA==",
+            redirectUri: "http://localhost:3000/socialMedia",
+            scope: "r_member_postAnalytics r_organization_followers r_organization_social rw_organization_admin r_organization_social_feed w_member_social r_member_profileAnalytics w_organization_social r_basicprofile w_organization_social_feed w_member_social_feed r_1st_connections_size",
+            state: "marketincer-linkedin", // Should be random & stored for verification
+        }
+    }
 
     async function fetchLinkedInProfile(code, redirectUri) {
         try {
@@ -327,23 +340,129 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
             <CircularProgress sx={{ margin: '50px auto' }}/>
         ) : (
             <>
-            {linkedinAccounts && authCode && authState == LINKEDIN_CRED.state ? (
-                <Box sx={{ width: "100%", mb: 3 }} >
-                    <Typography sx={{
-                        fontSize: "14px",
-                        color: "#373737",
-                        padding: "20px",
-                        border: "1px solid #ddd",
-                        borderRadius: "12px",
-                        backgroundColor: "#f9f9f9"
-                    }}>
-                        {linkedinAccounts["name"]}
-                        <span style={{ color: "green", fontWeight: 700, float: "right" }}>Connected</span>
-                    </Typography>           
-                </Box>
+            {/* Show accounts list after authentication */}
+            {showAccountsList && linkedinAccounts.length > 0 ? (
+                <>
+                    <Box sx={{ margin: 0, width: "100%" }}>
+                        <Typography sx={{
+                            fontSize: "14px",
+                            color: "#373737",
+                            paddingTop: "20px",
+                        }}>
+                            Select the accounts that you want to add.
+                        </Typography>
+                        {linkedinAccounts.length > 1 && (
+                            <TextField 
+                                label="Search here" 
+                                variant="outlined"
+                                size="small"
+                                sx={{ 
+                                    margin: "10px 0", 
+                                    width: "100%" 
+                                }} 
+                            />
+                        )}
+                    </Box>
+                    
+                    <Box
+                        sx={{
+                            maxHeight: "40vh",
+                            overflowY: "auto",
+                            listStyleType: "none",
+                            paddingLeft: 0,
+                            paddingRight: 0,
+                            marginTop: "20px",
+                            width: "100%"
+                        }}
+                    >
+                        {linkedinAccounts.map((account) => (
+                            <Box
+                                key={account.page_id}
+                                sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "10px",
+                                    marginBottom: "10px",
+                                    borderRadius: "8px",
+                                    border: "1px solid #ddd",
+                                    backgroundColor: "#f9f9f9",
+                                    transition: "background-color 0.3s ease",
+                                    "&:hover": {
+                                        backgroundColor: "#f1f1f1",
+                                    },
+                                }}
+                            >
+                                <img
+                                    src={account?.user?.picture?.data?.url}
+                                    alt={account.name}
+                                    style={{
+                                        borderRadius: "50%",
+                                        width: "40px",
+                                        height: "40px",
+                                        marginRight: "15px",
+                                    }}
+                                />
+                                <Box sx={{ flexGrow: 1 }}>
+                                    <Typography variant="body1" fontWeight="bold" sx={{
+                                        fontSize: "14px",
+                                        color: "#373737",
+                                    }}>
+                                        {account.name}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{
+                                        fontSize: "12px",
+                                    }}>
+                                        {account.username}
+                                    </Typography>
+                                </Box>
+
+                                {/* Show "Connected" label for connected accounts */}
+                                {account.connected ? (
+                                    <Typography
+                                        sx={{
+                                            color: "green",
+                                            fontSize: "14px",
+                                            fontWeight: "bold",
+                                            display: "flex",
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        Connected
+                                    </Typography>
+                                ) : (
+                                    <Button
+                                        variant="text"
+                                        color="primary"
+                                        onClick={() => handleConnect(account)}
+                                        sx={{
+                                            textDecoration: "underline",
+                                            padding: 0,
+                                            minWidth: "auto",
+                                            "&:hover": {
+                                                backgroundColor: "transparent",
+                                            },
+                                        }}
+                                    >
+                                        Connect
+                                    </Button>
+                                )}
+                            </Box>
+                        ))}
+                    </Box>
+
+                    <Box sx={{ margin: 0, width: "100%" }}>
+                        <Typography sx={{
+                            fontSize: "14px",
+                            color: "#373737",
+                            paddingTop: "20px",
+                        }}>
+                            You can only add Facebook Profiles, Facebook Groups, and Facebook Pages, including Instagram Business accounts linked to Facebook Pages.
+                        </Typography>
+                    </Box>
+                </>
             ) : (
                 <Box sx={{ width: "100%", display: "flex", gap: 7, mb: 2, justifyContent: "center" }}>
-                    {["profile", "page"].map((type) => (
+                    {["profile", "pages"].map((type) => (
                         <Box
                             key={type}
                             sx={{
@@ -364,6 +483,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                             }}
                             onClick={() => {
                                 setLinkedinType(type);
+                                localStorage.setItem("linkedin_type", type);
                             }}
                         >
                             {/* Placeholder Icon Circle */}
