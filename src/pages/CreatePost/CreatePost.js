@@ -36,6 +36,9 @@ import "flatpickr/dist/themes/material_green.css";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Skeleton from "@mui/material/Skeleton";
 import OutlinedInput from '@mui/material/OutlinedInput';
+import FacebookIcon from '../../assets/images/facebook.png';
+import InstaIcon from '../../assets/images/instagram.jpg';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -688,6 +691,20 @@ const CreatePost = () => {
     );
   };
 
+  const getPlatformIcon = (postType) => {
+    
+    switch (postType?.toLowerCase()) {
+      case 'instagram':
+        return <img src={InstaIcon} alt="my image" width='20' height='20'  />
+      case 'facebook':
+        return <img src={FacebookIcon} alt="my image" width='20' height='20'  />
+      case 'linkedin':
+        return <LinkedInIcon style={{ color: '#0A66C2' }} />;
+      default:
+        return null;
+    }
+  };
+
 
   return (
 
@@ -772,7 +789,8 @@ const CreatePost = () => {
                       <MenuItem key={user.id} value={user.id}>
                         <ListItemIcon sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {/* {(user.name)} */}
-                          <Avatar src={user.picture_url} alt={user.name} sx={{ width: 24, height: 24 }} />
+                          <Avatar src={user.picture_url} alt={user.name} sx={{ width: 22, height: 22 }} />
+                          {getPlatformIcon(user.page_type)}
                         </ListItemIcon>
                         
                         <ListItemText primary={user.name} />
@@ -793,7 +811,7 @@ const CreatePost = () => {
                   <Chip
                     className="custom-chip"
                     key={user.id}
-                    avatar={<Avatar src={user.picture_url} />}
+                    avatar={<>  {getPlatformIcon(user.page_type)} <Avatar src={user.picture_url} />  </>}
                     label={user.name}
                     onClick={() => {
                       //handleAvatarClick(user.social_id);
