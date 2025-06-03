@@ -476,11 +476,6 @@ const CreatePost = () => {
                       alt="Profile"
                       sx={{ width: 29, height: 29 }}
                     />
-                    <Avatar
-                      src={selectUser.picture_url || "https://c.animaapp.com/mbg09e7nzklgMf/img/marketincer-logo-1.svg"}
-                      alt="Profile"
-                      sx={{ width: 29, height: 29 }}
-                    />
                     <Box>
                       <Typography
                         variant="body1"
