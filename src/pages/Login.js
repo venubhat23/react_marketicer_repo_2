@@ -113,6 +113,7 @@ const Login = () => {
               mb: 1,
               background: '#882AFF',
               textTransform: 'none',
+              color:'#fff',
             }}
           >
             Sign in
