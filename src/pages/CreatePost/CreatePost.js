@@ -12,13 +12,17 @@ import {
   Tab, Tabs, Checkbox,
   Grid, Modal, Paper,
   AppBar, Toolbar, Container, InputLabel, ListItemText,
-  CardContent, Autocomplete
+  CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from '@mui/icons-material/Close';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import SendIcon from '@mui/icons-material/Send';
+import MoreVert from "@mui/icons-material/MoreVert";
+import Repeat from "@mui/icons-material/Repeat";
+import ThumbUp from "@mui/icons-material/ThumbUp";
+import MessageCircle from "@mui/icons-material/Star"; // Placeholder for MessageCircle
 import Editor from "../../components/Editor";
 import TabComponent from "../../components/TabComponent";
 import InstagramPost from "../../components/InstagramPost"
@@ -101,7 +105,7 @@ const CreatePost = () => {
     }
   };
 
-  // Function to get the selected user's page types
+  // Function to get the selected user's page type
   const getSelectedUserPageType = () => {
     const selectedUser = selectedUsers.find(user => user.social_id === selectedChipId);
     return selectedUser ? selectedUser.page_type : null;
@@ -269,7 +273,7 @@ const CreatePost = () => {
   };
 
   const handlePublish = async () => {
-    if (!selectedPages.length || !uploadedImageUrl || !postContent) {
+    if (!uploadedImageUrl || !postContent) {
       alert("Please make sure all fields are filled out!");
       return;
     }
@@ -311,7 +315,7 @@ const CreatePost = () => {
 
   const draftHandler = async () => {
 
-    if (!selectedPages.length || !uploadedImageUrl || !postContent) {
+    if ( !uploadedImageUrl || !postContent) {
       alert("Please make sure all fields are filled out!");
       return;
     }
@@ -413,6 +417,178 @@ const CreatePost = () => {
 
   };
 
+  // LinkedIn Preview Component
+  const LinkedinPreview = () => {
+    const interactionButtons = [
+      { icon: <ThumbUp />, text: "Like" },
+      { icon: <MessageCircle />, text: "Comment" },
+      { icon: <Repeat />, text: "Repost" },
+      { icon: <SendIcon />, text: "Send" },
+    ];
+
+    return (
+      <Box display="flex" justifyContent="center" width="100%">
+        <Box width="515px" height="644px" overflow="hidden">
+          <Card
+            sx={{
+              width: "518px",
+              height: "644px",
+              position: "relative",
+              borderRadius: 2,
+              border: "1px solid #e3e3e3",
+              boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            {/* Header */}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+            </Box>
+
+            {/* LinkedIn Post */}
+            <Card
+              sx={{
+                width: "443px",
+                position: "absolute",
+                top: "90px",
+                left: "35px",
+                border: "1px solid #b5b5b5",
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+            >
+              <CardContent sx={{ p: 0 }}>
+                {/* Post Header */}
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  px={2.5}
+                  py={1.5}
+                >
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Avatar
+                      src={selectUser.picture_url || "https://c.animaapp.com/mbg09e7nzklgMf/img/marketincer-logo-1.svg"}
+                      alt="Profile"
+                      sx={{ width: 29, height: 29 }}
+                    />
+                    <Box>
+                      <Typography
+                        variant="body1"
+                        fontWeight="600"
+                        color="#414651"
+                      >
+                        {selectUser.name || 'Marketincer'}
+                      </Typography>
+                      <Box display="flex" alignItems="center">
+                        <Typography
+                          variant="body2"
+                          color="#d9d9d9"
+                          fontSize="14px"
+                        >
+                          now
+                        </Typography>
+                        <Box
+                          component="img"
+                          src="https://c.animaapp.com/mbg09e7nzklgMf/img/globe.svg"
+                          alt="Globe"
+                          width="14px"
+                          height="14px"
+                          sx={{ ml: 0.5 }}
+                        />
+                      </Box>
+                    </Box>
+                  </Stack>
+                  <IconButton size="small">
+                    <MoreVert />
+                  </IconButton>
+                </Box>
+
+                {/* Post Content */}
+                {postContent && (
+                  <Box px={2.5} pb={1}>
+                    <Typography variant="body2" color="text.primary">
+                      <span dangerouslySetInnerHTML={{ __html: postContent }} />
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Post Image */}
+                {uploadedImageUrl ? (
+                  <CardMedia
+                    component="img"
+                    image={uploadedImageUrl}
+                    alt="LinkedIn post image"
+                    sx={{ height: 336 }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      height: 336,
+                      backgroundColor: '#f5f5f5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      No image uploaded
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Image Indicators */}
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  gap={1}
+                  mt={-3}
+                  mb={1.5}
+                >
+                  <Box
+                    width="10px"
+                    height="10px"
+                    bgcolor="#7F56D9"
+                    borderRadius="4px"
+                  />
+                  <Box
+                    width="10px"
+                    height="10px"
+                    bgcolor="#E7D3FF"
+                    borderRadius="4px"
+                  />
+                </Box>
+
+                {/* Post Actions */}
+                <Divider />
+                <CardActions
+                  sx={{ justifyContent: "space-between", px: 2, py: 1 }}
+                >
+                  {interactionButtons.map((button, index) => (
+                    <Stack
+                      key={index}
+                      direction="row"
+                      spacing={1}
+                      alignItems="center"
+                      sx={{ cursor: "pointer" }}
+                    >
+                      <Box sx={{ "& svg": { width: 20, height: 20 } }}>
+                        {button.icon}
+                      </Box>
+                      <Typography fontWeight="medium">{button.text}</Typography>
+                    </Stack>
+                  ))}
+                </CardActions>
+              </CardContent>
+            </Card>
+          </Card>
+        </Box>
+      </Box>
+    );
+  };
+
   // Render preview content based on tab and availability
   const renderPreviewContent = (tabIndex) => {
     if (!shouldShowTabContent(tabIndex)) {
@@ -435,6 +611,12 @@ const CreatePost = () => {
       );
     }
 
+    // LinkedIn Preview
+    if (tabIndex === 1) {
+      return <LinkedinPreview />;
+    }
+
+    // Instagram and Facebook Preview (existing logic)
     return (
       <Card sx={{ borderRadius: 2, padding: '10px' }}>
         {!uploadedImageUrl || !postContent ? (
@@ -464,22 +646,6 @@ const CreatePost = () => {
                 <Box display="flex" alignItems="center" gap={0.5}>
                   <SendIcon fontSize="small" />
                   <Typography variant="body2">234</Typography>
-                </Box>
-              </>
-            )}
-            {tabIndex === 1 && ( // LinkedIn
-              <>
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <FavoriteBorderIcon fontSize="small" />
-                  <Typography variant="body2">👍 Like</Typography>
-                </Box>
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <ChatBubbleOutlineIcon fontSize="small" />
-                  <Typography variant="body2">Comment</Typography>
-                </Box>
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <SendIcon fontSize="small" />
-                  <Typography variant="body2">Share</Typography>
                 </Box>
               </>
             )}
