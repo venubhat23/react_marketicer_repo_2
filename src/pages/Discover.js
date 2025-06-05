@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, {useState } from 'react';
 import {
   Box,
-
   AppBar,
   Toolbar,
   Typography,
@@ -16,15 +15,18 @@ import {
   CssBaseline,
   ThemeProvider,
   createTheme,
+  
   MenuItem,FromControl,TextField,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
-  styled
+  styled,Button,
+  Select,Popover,FormControl,InputLabel,selectedFilters,
 } from '@mui/material';
 import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
+import CloseIcon from "@mui/icons-material/Close";
 // import {
 //   Dashboard as DashboardIcon,
 //   Analytics as AnalyticsIcon,
@@ -88,7 +90,75 @@ const data = [
   { name: 'D', value: 30 },
 ];
 
-const Dashboard = () => {
+
+
+
+const Discover = () => {
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedFilters, setSelectedFilters] = useState([]);
+  const [filterType, setFilterType] = useState("");
+
+  const handleSelectChange = (event) => {
+    debugger
+    setFilterType(event.target.value);
+   
+   // setSelectedFilters([]); // reset selections on filter change
+  };
+  console.log('1212', filterType)
+
+  // const handleGridItemClick = (item: string) => {
+  //   setSelectedFilters((prev) =>
+  //     prev.includes(item)
+  //       ? prev.filter((val) => val !== item)
+  //       : [...prev, item]
+  //   );
+  // };
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  
+  const handleClear = () => {
+    setSelectedFilters([]);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+
+  const handleToggleFilter =(e)=>{
+
+  }
+
+  const allFilters = {
+    Influencer: [
+      "Influencer Size",
+      "Influencer Gender",
+      "Account Type",
+      "Search by Category",
+      "Influencer Location",
+      "Age"
+    ],
+    Audience: [
+      "Audience Quality Score",
+      "Audience Age",
+      "Audience Interest",
+      "Audience Interest 2",
+      "Audience Interest 3",
+      "Audience Location"
+    ],
+    Performance: [
+      "Average Views",
+      "Comment Rate",
+      "Followers Growth",
+      "Recent Post",
+      "Recent Post 2",
+      "Recent Post 3"
+    ]
+  };
 
 
   return (
@@ -122,7 +192,7 @@ const Dashboard = () => {
                   >
                     <ArrowLeftIcon />
                   </IconButton>
-                  Dashboard
+                  Discover
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <IconButton size="large" sx={{ color: '#fff' }}>
@@ -144,60 +214,90 @@ const Dashboard = () => {
                     
                 <TextField size="small" variant="outlined" placeholder="Search" />
               
-                <TextField select size="small" defaultValue="last_7_days">
-                  <MenuItem value="last_7_days">Last 7 days</MenuItem>
-                  <MenuItem value="last_30_days">Last 30 days</MenuItem>
-                </TextField>
+                <FormControl fullWidth>
+                  <Select
+                    labelId="filter-label"
+                    value={filterType}
+                    //label="Filter"
+                    onChange={handleSelectChange}
+                  >
+                    <Grid container>
+                    <Grid container spacing={3}>
+                      {Object.entries(allFilters).map(([section, items]) => (
+                        <Grid size xs={4} key={section}>
+                          <Typography variant="subtitle2">{section}</Typography>
+                          {items.map((item) => (
+                            <Typography
+                              key={item}
+                              variant="body2"
+                              sx={{
+                                mt: 1,
+                                cursor: "pointer",
+                                // color: isSelected(item) ? "primary.main" : "text.primary",
+                                // fontWeight: isSelected(item) ? "bold" : "normal"
+                              }}
+                              onClick={() => handleToggleFilter(item)}
+                            >
+                              {item}
+                            </Typography>
+                          ))}
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Grid>
+                  <Grid size md={4} >
+                  <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+                      <Button variant="text" onClick={handleClear}>
+                        Clear All
+                      </Button>
+                      <Button variant="contained" onClick={handleClose}>
+                        Search
+                      </Button>
+                    </Box>
+                  </Grid>
+                 
+                </Select>
+              </FormControl>
+
+      {/* Grid Filters */}
+      {filterType === "Custom Filter" && (
+        <Box mt={3}>
+          
+         
+
+          {/* Show selected filters */}
+          {selectedFilters.length > 0 && (
+            <Box mt={3}>
+              <Typography variant="body2">Selected:</Typography>
+              <Box display="flex" gap={1} flexWrap="wrap" mt={1}>
+                {selectedFilters.map((filter) => (
+                  <Paper
+                    key={filter}
+                    sx={{
+                      px: 2,
+                      py: 0.5,
+                      borderRadius: "16px",
+                      bgcolor: "primary.main",
+                      color: "#fff",
+                      fontSize: "0.875rem"
+                    }}
+                  >
+                    {filter}
+                  </Paper>
+                ))}
+              </Box>
+            </Box>
+          )}
+        </Box>
+      )}
                
               </Box>
               <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, padding:'20px'}}>
                 <Grid container spacing={2}>
                   
-                  {stats.map((stat, index) => (
-                    <Grid size={{ xs: 2, sm: 4, md: 3 }} key={index}>
-                      <Card sx={{
-                          borderRadius: 5,
-                          border: "1px solid #e2e2e2",
-                          boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",}}>
-                        <CardContent>
-                          <Typography variant="h5">{stat.value}</Typography>
-                          <Typography variant="subtitle2">{stat.label}</Typography>
-                          <Typography variant="caption" color="green">
-                            {stat.change}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-
-                  
-                    {chartCards.map((chart, index) => (
-                      <Grid size={{ xs: 2, sm: 4, md: 4 }} key={index}>
-                        <Card sx={{
-                          borderRadius: 5,
-                          border: "1px solid #e2e2e2",
-                          boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",}}>
-                          <CardContent>
-                            <Typography variant="subtitle2">{chart.label}</Typography>
-                            <Typography variant="h6" color="primary">{chart.change} this week</Typography>
-                            <ResponsiveContainer width="100%" height={300}>
-                            <BarChart width={500} height={300} data={data}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="name" />
-                              <YAxis />
-                              <Tooltip />
-                              <Legend />
-                              <Bar dataKey="value" barSize={10} fill="#8884d8" />
-                            </BarChart>
-                            </ResponsiveContainer>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  
                   <Grid size={{ xs: 2, sm: 4, md: 12 }}>
                   <Box mt={4}>
-                    <Typography variant="h6" gutterBottom>Top performing Posts</Typography>
+                    <Typography variant="h6" gutterBottom>1887 Influencer Found</Typography>
                     <Table width="100%" sx={{
                           borderRadius: 5,
                           bgcolor:'#fff',
@@ -230,10 +330,6 @@ const Dashboard = () => {
                     </Table>
                   </Box>
                   </Grid>
-                  
-                  
-                  
-
                 </Grid>
               </Box>
           </Grid>
@@ -243,4 +339,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Discover;

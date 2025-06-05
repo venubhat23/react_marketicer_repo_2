@@ -21,6 +21,7 @@ import CreatePost from './pages/CreatePost/CreatePost';
 import Analytics  from './pages/Profile/Analytics';
 import SocialMedia from './pages/SocialMedia';
 import FullAnalytics from './pages/Profile/FullAnalytics';
+import Discover from './pages/Discover';
 
 
 
@@ -53,6 +54,7 @@ function App() {
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/socialMedia" element={<SocialMedia />} />
           <Route path="/fullAnalytics" element={<FullAnalytics />} />
+          <Route path="/discover" element={<Discover />} />
         </Routes>
       </AuthProvider>    
     {/* </div> */}

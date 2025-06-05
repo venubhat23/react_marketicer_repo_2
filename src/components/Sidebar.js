@@ -36,6 +36,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import { Link, useNavigate } from "react-router-dom";
+import LanguageIcon from '@mui/icons-material/Language';
 
 const footerItems = [
   { icon: <MessageSquareIcon />, active: true },
@@ -70,7 +71,7 @@ const Sidebar = () => {
         <ListItem disablePadding>
           <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
             <Link to="/createPost">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#FFFFFF' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <AddCircleOutlineIcon fontSize="medium" />
                 <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Create Posts</Typography>
               </Box>
@@ -78,7 +79,7 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
 
-          <ListItem disablePadding  sx={{display:'none'}}>
+          <ListItem disablePadding >
             <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
               <Link to="/dashboard">
               <Box
@@ -86,11 +87,29 @@ const Sidebar = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  color: '#FFFFFF',
+                  color: '#cbaef7',
                 }}
               >
                 <AppsIcon fontSize="medium" />
                 <Typography variant="body2" sx={{fontSize:'12px', whiteSpace:'nowrap'}}>Dashboard</Typography>
+              </Box>
+              </Link>
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding >
+            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Link to="/discover">
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  color: '#cbaef7',
+                }}
+              >
+                <LanguageIcon fontSize="medium" />
+                <Typography variant="body2" sx={{fontSize:'12px', whiteSpace:'nowrap'}}>Discover</Typography>
               </Box>
               </Link>
             </ListItemButton>
@@ -104,7 +123,7 @@ const Sidebar = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  color: '#FFFFFF',
+                  color: '#cbaef7',
                 }}
               >
                 <EqualizerIcon fontSize="medium" />
@@ -117,7 +136,7 @@ const Sidebar = () => {
         <ListItem disablePadding>
           <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
             <Link to="/socialMedia">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#FFFFFF' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <People fontSize="medium" />
                 <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Social Media</Typography>
               </Box>
@@ -138,7 +157,7 @@ const Sidebar = () => {
           {/* Logout item */}
           <ListItem disablePadding>
             <ListItemButton onClick={handleLogout} sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#FFFFFF' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <LogoutIcon fontSize="medium" />
                 <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Logout</Typography>
               </Box>

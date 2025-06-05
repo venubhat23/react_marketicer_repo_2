@@ -766,7 +766,7 @@ const CreatePost = () => {
                     onChange={(e) => setBrandName(e.target.value)}
                   >
                     {Brands.map((brand) => (
-                      <MenuItem key={brand} value={brand}>{brand}</MenuItem>
+                      <MenuItem key={brand} value={brand} sx={{color:'#882AFF'}} >{brand}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -787,14 +787,15 @@ const CreatePost = () => {
                   >
                     {pages.map((user) => (
                       <MenuItem key={user.id} value={user.id}>
-                        <ListItemIcon sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <ListItemIcon sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
                           {/* {(user.name)} */}
-                          <Avatar src={user.picture_url} alt={user.name} sx={{ width: 22, height: 22 }} />
+                          <Avatar src={user.picture_url} alt={user.name} sx={{ width: '20px', height: '20px' }} />
                           {getPlatformIcon(user.page_type)}
                         </ListItemIcon>
                         
-                        <ListItemText primary={user.name} />
+                        <ListItemText primary={user.name} sx={{color:'#882AFF'}} />
                         <Checkbox className="custom-checkbox"
+                        sx={{bgcolor:'#cbaef7', width:'10px', height:'10px', color:'#cbaef7'}}
                           checked={selectedUsers.some((selected) => selected.id === user.id)}
                         />
                       </MenuItem>
@@ -811,7 +812,7 @@ const CreatePost = () => {
                   <Chip
                     className="custom-chip"
                     key={user.id}
-                    avatar={<>  {getPlatformIcon(user.page_type)} <Avatar src={user.picture_url} />  </>}
+                    avatar={<>  {getPlatformIcon(user.page_type)} <Avatar src={user.picture_url} sx={{ width: '20px', height: '20px' }} />  </>}
                     label={user.name}
                     onClick={() => {
                       //handleAvatarClick(user.social_id);

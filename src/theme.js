@@ -62,9 +62,9 @@ const theme = createTheme({
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          color: '#555',
+          color: '#882AFF',
           '&.Mui-focused': {
-            color: '#1976d2',
+            color: '#882AFF',
             backgroundColor:'#ccc !important'
           },
         },
