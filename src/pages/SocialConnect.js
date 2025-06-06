@@ -58,7 +58,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
         LINKEDIN_CRED = {
             clientId: "780iu7cgaok1lf",
             clientSecret: "WPL_AP1.pBnxoZgtOaxFkqeN.4Z42vA==",
-            redirectUri: "http://localhost:3000/socialMedia",
+            redirectUri: "https://app.marketincer.com/socialMedia",
             scope: "r_member_postAnalytics r_organization_followers r_organization_social rw_organization_admin r_organization_social_feed w_member_social r_member_profileAnalytics w_organization_social r_basicprofile w_organization_social_feed w_member_social_feed r_1st_connections_size",
             state: "marketincer-linkedin", // Should be random & stored for verification
         }
