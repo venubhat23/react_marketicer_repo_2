@@ -105,7 +105,18 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                 let response = await fetchLinkedInProfile(code, LINKEDIN_CRED.redirectUri);
                 setOpenModal(true);
                 console.log("LinkedIn response:", response);
-                setLinkedinAccounts(response.user_profile)
+                if(linkedinType == "pages") {
+                    const result = response.organizations.map(org => ({
+                        page_id: org.id,
+                        name: org.localizedName|| "Unnamed",
+                        username: org.vanityName || "",
+                        logo: org.logoV2?.original || "No logo"
+                      }));
+                    setLinkedinAccounts(result);
+                    setShowAccountsList(true);
+                } else {
+                    setLinkedinAccounts(response.user_profile)
+                }
             } else {
                 // Step 1: Exchange the code for a short-lived access token
                 const tokenResponse = await fetch(
