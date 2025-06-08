@@ -18,6 +18,7 @@ import { curveCardinal } from 'd3-shape';
 const cardinal = curveCardinal.tension(0.2);
 
  const Engagement = ({engagement}) => {
+  console.log('ene', engagement)
 
   const engageData = Object.entries(engagement).map(([day, value]) => ({
     day,
@@ -75,6 +76,7 @@ const cardinal = curveCardinal.tension(0.2);
                 bgcolor: "#fafafa",
                 border: "1px solid #d5d6da",
                 boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)",
+                display:'none'
               },
             }}
           >
@@ -96,6 +98,7 @@ const cardinal = curveCardinal.tension(0.2);
               <MenuItem value="last90days">Last 90 days</MenuItem>
             </Select>
           </FormControl>
+          <Typography sx={{width:'100px'}}>Last 7 days</Typography>
         </Box>
 
         <Box sx={{ mt: 2, height: 218 }}>

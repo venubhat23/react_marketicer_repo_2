@@ -41,13 +41,13 @@ const theme = createTheme({
           backgroundColor: '#fff',
           borderRadius: '8px',
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#882AFF',
+            borderColor: '#ccc',
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
             borderColor: '#882AFF',
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#882AFF',
+            borderColor: '#ddd',
             borderWidth: '1px',
             backgroundColor:'#fff'
           },

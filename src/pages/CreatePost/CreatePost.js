@@ -37,8 +37,9 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Skeleton from "@mui/material/Skeleton";
 import OutlinedInput from '@mui/material/OutlinedInput';
 import FacebookIcon from '../../assets/images/facebook.png';
-import InstaIcon from '../../assets/images/instagram.jpg';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import InstaIcon from '../../assets/images/instagram.png';
+import LinkedInIcon from '../../assets/images/linkedin.png';
+
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -93,6 +94,8 @@ const CreatePost = () => {
 
   const [selectedUsers, setSelectedUsers] = useState([])
   const [selectedChipId, setSelectedChipId] = useState(null);
+
+  console.log('hereree', selectUser)
 
   // Function to get tab index based on page type
   const getTabIndexByPageType = (pageType) => {
@@ -427,13 +430,13 @@ const CreatePost = () => {
     const interactionButtons = [
       { icon: <ThumbUp />, text: "Like" },
       { icon: <MessageCircle />, text: "Comment" },
-      { icon: <Repeat />, text: "Repost" },
+      // { icon: <Repeat />, text: "Repost" },
       { icon: <SendIcon />, text: "Send" },
     ];
 
     return (
       <Box display="flex" justifyContent="center" width="100%">
-        <Box width="515px" height="644px" overflow="hidden">
+        {/* <Box width="515px" height="644px" overflow="hidden"> */}
           <Card
             sx={{
               width: "518px",
@@ -466,50 +469,7 @@ const CreatePost = () => {
             >
               <CardContent sx={{ p: 0 }}>
                 {/* Post Header */}
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  px={2.5}
-                  py={1.5}
-                >
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Avatar
-                      src={selectUser.picture_url || "https://c.animaapp.com/mbg09e7nzklgMf/img/marketincer-logo-1.svg"}
-                      alt="Profile"
-                      sx={{ width: 29, height: 29 }}
-                    />
-                    <Box>
-                      <Typography
-                        variant="body1"
-                        fontWeight="600"
-                        color="#414651"
-                      >
-                        {selectUser.name || 'Marketincer'}
-                      </Typography>
-                      <Box display="flex" alignItems="center">
-                        <Typography
-                          variant="body2"
-                          color="#d9d9d9"
-                          fontSize="14px"
-                        >
-                          now
-                        </Typography>
-                        <Box
-                          component="img"
-                          src="https://c.animaapp.com/mbg09e7nzklgMf/img/globe.svg"
-                          alt="Globe"
-                          width="14px"
-                          height="14px"
-                          sx={{ ml: 0.5 }}
-                        />
-                      </Box>
-                    </Box>
-                  </Stack>
-                  <IconButton size="small">
-                    <MoreVert />
-                  </IconButton>
-                </Box>
+                
 
                 {/* Post Content */}
                 {postContent && (
@@ -589,7 +549,7 @@ const CreatePost = () => {
               </CardContent>
             </Card>
           </Card>
-        </Box>
+        {/* </Box> */}
       </Box>
     );
   };
@@ -602,7 +562,7 @@ const CreatePost = () => {
           display="flex" 
           justifyContent="center" 
           alignItems="center" 
-          height="300px"
+          height="200px"
           sx={{ 
             backgroundColor: '#f5f5f5', 
             borderRadius: 2,
@@ -671,7 +631,6 @@ const CreatePost = () => {
               </>
             )}
           </Box>
-
           {/* Metadata */}
           <Box
             display="flex"
@@ -680,26 +639,29 @@ const CreatePost = () => {
             mt={2}
           >
             <Typography variant="body2" color="text.secondary">
-              {selectUser.name || 'Select a user'}
+              {selectUser?.name || 'Select a user'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Just Now
             </Typography>
           </Box>
+
+          
         </CardContent>
       </Card>
     );
   };
+  
 
   const getPlatformIcon = (postType) => {
     
     switch (postType?.toLowerCase()) {
       case 'instagram':
-        return <img src={InstaIcon} alt="my image" width='20' height='20'  />
+        return <img src={InstaIcon} alt="instagram" width='25' height='25'  />
       case 'facebook':
-        return <img src={FacebookIcon} alt="my image" width='20' height='20'  />
+        return <img src={FacebookIcon} alt="facebook" width='25' height='25'  />
       case 'linkedin':
-        return <LinkedInIcon style={{ color: '#0A66C2' }} />;
+        return <img src={LinkedInIcon} alt="linkedin" width='25' height='25'  />
       default:
         return null;
     }
@@ -764,6 +726,7 @@ const CreatePost = () => {
                     size="small"
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
+                    sx={{ height:'40px',mt:'6px'}}
                   >
                     {Brands.map((brand) => (
                       <MenuItem key={brand} value={brand} sx={{color:'#882AFF'}} >{brand}</MenuItem>
@@ -780,7 +743,7 @@ const CreatePost = () => {
                     value={selectedUsers.map((user) => user.id)}
                     onChange={handleUsersChange}
                     input={<OutlinedInput label="Select Users" />}
-                    //sx={{width:'300px', height:'40px'}}
+                    sx={{ height:'40px',mt:'6px'}}
                     renderValue={(selected) => 
                       selectedUsers.map(user => user.name).join(', ')
                     }
@@ -789,7 +752,7 @@ const CreatePost = () => {
                       <MenuItem key={user.id} value={user.id}>
                         <ListItemIcon sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
                           {/* {(user.name)} */}
-                          <Avatar src={user.picture_url} alt={user.name} sx={{ width: '20px', height: '20px' }} />
+                          <Avatar src={user.picture_url} alt={user.name} sx={{ width: '22px', height: '22px' }} />
                           {getPlatformIcon(user.page_type)}
                         </ListItemIcon>
                         
@@ -812,7 +775,7 @@ const CreatePost = () => {
                   <Chip
                     className="custom-chip"
                     key={user.id}
-                    avatar={<>  {getPlatformIcon(user.page_type)} <Avatar src={user.picture_url} sx={{ width: '20px', height: '20px' }} />  </>}
+                    avatar={<>  {getPlatformIcon(user.page_type)}  <Avatar src={user.picture_url} sx={{ width: '22px', height: '22px' }} />  </>}
                     label={user.name}
                     onClick={() => {
                       //handleAvatarClick(user.social_id);

@@ -1,5 +1,7 @@
 import React, {useCallback} from 'react';
 import {Button, Typography, Stack} from '@mui/material';
+import warnIcon from '../assets/images/warn.png';
+
 
 const handleDisConnect = async (account, onClose, getAccounts) => {
 
@@ -39,18 +41,23 @@ const SocialDisConnect =({onClose, account, getAccounts}) =>{
   
     return (
       <>
-        <Typography variant="h6" component="h2">
-          Are you sure?
+        <Typography>
+          <img src={warnIcon} className="warnButton" alt="instagram" width='25' height='25'  />
+        </Typography>
+        <Typography variant="h6" component="h2" sx={{color:'#882AFF'}}>
+          Disconnect Account 
         </Typography>
         <Typography sx={{ mt: 2 }}>
-          Do you really want to perform this action?
+          Are you sure you wnat to disconnect this account ?<br></br>
+          This action cannot be undone
         </Typography>
-        <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
-          <Button variant="contained" color="error" onClick={onClose}>
-            No
+        
+        <Stack direction="row" spacing={2} sx={{ mt: 2, justifyContent: 'flex-end' }}>
+          <Button variant="outlined" className="disconnectBtn" onClick={onClose} sx={{color:'#000'}} >
+            Cancel
           </Button>
-          <Button variant="contained" color="primary" onClick={() => handleDisConnect(account, onClose, getAccounts)}>
-            Yes
+          <Button variant="contained" className="disconnectBtn" color="error" sx={{color:'#fff'}} onClick={() => handleDisConnect(account, onClose, getAccounts)}>
+            Disconnect
           </Button>
         </Stack>
       </>

@@ -255,21 +255,22 @@ const SocialMedia =()=>{
           </Box>
 
           {/* Connect New Account Button */}
-          {/* <Box sx={{ alignSelf: "flex-end", mb: 2 }}>
-      <Button
-        variant="contained"
-        sx={{
-          bgcolor: "#7e56d8",
-          borderColor: "#7e56d8",
-          "&:hover": { bgcolor: "#6a46c0" },
-          left:'-42%'
-          // px: 1,
-          // py: 1,
-        }}
-      >
-        Connect New Account
-      </Button>
-    </Box> */}
+          <Box sx={{ alignSelf: "flex-end", mb: 2 }}>
+            <Button
+              variant="contained"
+              sx={{
+                bgcolor: "#7e56d8",
+                borderColor: "#7e56d8",
+                "&:hover": { bgcolor: "#6a46c0", color:'#fff' },
+                color:'#fff',
+                left:'-40%'
+                // px: 1,
+                // py: 1,
+              }}
+            >
+              Connect New Account
+            </Button>
+          </Box>
 
           {/* Accounts List */}
           <Paper
@@ -312,6 +313,7 @@ const SocialMedia =()=>{
                     sx={{
                       color: "#21d548",
                       borderColor: "#21d548",
+                      width:'15%',
                       mr: 2,
                       "&:hover": {
                         borderColor: "#1bb33e",
@@ -375,7 +377,7 @@ const SocialMedia =()=>{
                               height: 6,
                               bgcolor: "#21d548",
                               borderRadius: "50%",
-                              ml: 0.5,
+                              //ml: 0.5,
                             }} />} />
                       </Box>
                       <Button
@@ -384,8 +386,10 @@ const SocialMedia =()=>{
                         sx={{
                           bgcolor: "#d92c20",
                           borderColor: "#d92c20",
+                          color:'#fff !important',
                           ml: "auto",
-                          "&:hover": { bgcolor: "#b82318" },
+                          width:'15%',
+                          "&:hover": { bgcolor: "#b82318", color:'#fff' },
                         }}
                       >
                         Disconnect
@@ -418,7 +422,8 @@ const SocialMedia =()=>{
                     sx={{
                       color: "#21d548",
                       borderColor: "#21d548",
-                      mr: 2,
+                      width:'15%',
+                      //mr: 2,
                       "&:hover": {
                         borderColor: "#1bb33e",
                         bgcolor: "rgba(33, 213, 72, 0.04)",
@@ -480,7 +485,8 @@ const SocialMedia =()=>{
                               height: 6,
                               bgcolor: "#21d548",
                               borderRadius: "50%",
-                              ml: 0.5,
+                              //ml: 0.5,
+                              mr:'auto'
                             }} />} />
                       </Box>
                       <Button
@@ -489,8 +495,10 @@ const SocialMedia =()=>{
                         sx={{
                           bgcolor: "#d92c20",
                           borderColor: "#d92c20",
+                          color:'#fff',
                           ml: "auto",
-                          "&:hover": { bgcolor: "#b82318" },
+                          width:'15%',
+                          "&:hover": { bgcolor: "#b82318", color:'#fff' },
                         }}
                       >
                         Disconnect

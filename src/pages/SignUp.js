@@ -11,6 +11,8 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormGroup from '@mui/material/FormGroup';
 import { toast } from "react-toastify";
+//import { Controller, useForm } from "react-hook-form";
+
 
 
 const BootstrapInput = styled(InputBase)(({ theme }) => ({
@@ -48,6 +50,13 @@ const SignUp = () => {
     role: '',
     terms: false,
   });
+
+  // const {
+  //   control,
+  //   watch,
+  //   handleSubmit,
+  //   formState: { errors },
+  // } = useForm();
 
   const roles = ['Admin', 'Brand', 'Agency'];
 

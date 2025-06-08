@@ -11,7 +11,9 @@ import {
   } from "@mui/material";
   
   
-  const AnalyticsProfile = ({profile}) => {
+  const AnalyticsProfile = ({profile, selectedData}) => {
+
+    console.log('apa', profile, selectedData)
 
     // if (!Array.isArray(profile) || profile.length === 0) {
     //   return <p>No data available</p>;
@@ -44,8 +46,8 @@ import {
             boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
           }}
         >
-        
-          <CardContent sx={{ position: "relative", p: 2 }}>
+          {selectedData.map((profile)=>(
+            <CardContent sx={{ position: "relative", p: 2 }}>
             {/* Profile Image */}
             <Avatar
               src={influencerData.profileImage}
@@ -154,6 +156,7 @@ import {
                   fontWeight: 400,
                   fontSize: "14px",
                   height: "24px",
+                  display:'none'
                 }}
               />
   
@@ -166,6 +169,7 @@ import {
                   fontSize: "16px",
                   lineHeight: "14px",
                   mt: 2,
+                  display:'none'
                 }}
               >
                 {profile.location}
@@ -209,6 +213,8 @@ import {
              
             </Grid>
           </CardContent>
+          ))}
+          
         </Card>
       </Box>
     );

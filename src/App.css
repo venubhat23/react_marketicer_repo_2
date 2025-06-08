@@ -67,3 +67,11 @@ body {
 .MuiTypography-body2.audDeatils{
   margin: 20px 0
 }
+.warnButton{
+  border: 4px solid #fa685b;
+  padding: 10px;
+  border-radius: 30px;
+}
+.disconnectBtn{
+  width: 50%
+}
