@@ -75,7 +75,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
           const response = await AxiosManager.post('/api/v1/linkedin/exchange-token', payload);
           console.log('Access Token:', response);
           const data = response.data;
-          if (data.status == "success") {
+          if (data.status == "complete") {
             // Store the access token in localStorage
             localStorage.setItem("linkedin_access_token", data["access_token"]);
           }
@@ -106,12 +106,13 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                 setOpenModal(true);
                 console.log("LinkedIn response:", response);
                 if(linkedinType == "pages") {
-                    const result = response.organizations.map(org => ({
-                        page_id: org.id,
-                        name: org.localizedName|| "Unnamed",
-                        username: org.vanityName || "",
-                        logo: org.logoV2?.original || "No logo"
-                      }));
+                    // const result = response.organizations.map(org => ({
+                    //     page_id: org.id,
+                    //     name: org.localizedName|| "Unnamed",
+                    //     username: org.vanityName || "",
+                    //     logo: org.logoV2?.original || "No logo"
+                    //   }));
+                    const result = response?.data?.accounts;
                     setLinkedinAccounts(result);
                     setShowAccountsList(true);
                 } else {
@@ -187,6 +188,39 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
         console.error("Error fetching accounts:", error);
         } finally {
         setGettingPage(false);
+        }
+    };
+
+    // Update handleConnect to use functional update
+    const handleLinkedinConnect = async (account) => {
+
+        const token = localStorage.getItem("token");
+        try {
+        const response = await fetch("http://localhost:3001/api/v1/linkedin/connect", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(account),
+        });
+
+        const data = await response.json();
+    
+        if (data.status) {
+            // Use functional update to ensure state consistency
+            setPages(prevPages => 
+            prevPages.map(pg =>
+                pg.page_id === account.page_id ? { ...pg, connected: true } : pg
+            )
+            );
+            openSuccessSB();
+        } else {
+            alert(`Failed to connect ${account.name}`);
+        }
+        } catch (error) {
+        console.error("Error connecting account:", error);
+        alert("Failed to connect account.");
         }
     };
     
@@ -404,7 +438,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                                 }}
                             >
                                 <img
-                                    src={account?.user?.picture?.data?.url}
+                                    src={account?.user?.logoV2?.original}
                                     alt={account.name}
                                     style={{
                                         borderRadius: "50%",
@@ -444,7 +478,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                                     <Button
                                         variant="text"
                                         color="primary"
-                                        onClick={() => handleConnect(account)}
+                                        onClick={() => handleLinkedinConnect(account)}
                                         sx={{
                                             textDecoration: "underline",
                                             padding: 0,
@@ -461,7 +495,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                         ))}
                     </Box>
 
-                    <Box sx={{ margin: 0, width: "100%" }}>
+                    {/* <Box sx={{ margin: 0, width: "100%" }}>
                         <Typography sx={{
                             fontSize: "14px",
                             color: "#373737",
@@ -469,7 +503,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                         }}>
                             You can only add Facebook Profiles, Facebook Groups, and Facebook Pages, including Instagram Business accounts linked to Facebook Pages.
                         </Typography>
-                    </Box>
+                    </Box> */}
                 </>
             ) : (
                 <Box sx={{ width: "100%", display: "flex", gap: 7, mb: 2, justifyContent: "center" }}>
