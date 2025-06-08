@@ -55,7 +55,7 @@ const Analytics = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
 
   useEffect(() => {
-    axios.get('http://localhost:3001/api/v1/influencer/analytics')
+    axios.get('https://api.marketincer.com/api/v1/influencer/analytics')
       .then((response) => {
         setProfileData(response?.data?.data || []);
         setBrandData(response?.data?.data?.recent_posts || []);
@@ -126,7 +126,7 @@ const Analytics = () => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              {value || '0'}
+              {value || 'N/A'}
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.9rem' }}>
               {title}
@@ -194,7 +194,33 @@ const Analytics = () => {
               overflow: 'hidden'
             }}
           >
-
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'relative',
+              zIndex: 2
+            }}>
+              <Typography variant="h5" sx={{ color: '#fff', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+                <IconButton
+                  edge="start"
+                  color="inherit"
+                  aria-label="back"
+                  sx={{ mr: 2, color: '#fff' }}
+                >
+                  <ArrowLeftIcon />
+                </IconButton>
+                📊 Influencer Analytics Dashboard
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <IconButton size="large" sx={{ color: '#fff' }}>
+                  <NotificationsIcon />
+                </IconButton>
+                <IconButton size="large" sx={{ color: '#fff' }}>
+                  <AccountCircleIcon />
+                </IconButton>
+              </Box>
+            </Box>
             {/* Decorative elements */}
             <Box sx={{
               position: 'absolute',
@@ -324,62 +350,159 @@ const Analytics = () => {
                   📈 Campaign Performance
                 </Typography>
                 <Grid container spacing={3}>
-                  <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-                    <MetricCard
-                      title="Total Likes"
-                      value={profileData?.campaign_analytics?.total_likes}
-                      change={12.5}
-                      icon={getMetricIcon('total likes')}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-                    <MetricCard
-                      title="Total Comments"
-                      value={profileData?.campaign_analytics?.total_comments}
-                      change={-2.3}
-                      icon={getMetricIcon('total comments')}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-                    <MetricCard
-                      title="Total Engagement"
-                      value={profileData?.campaign_analytics?.total_engagement}
-                      change={8.7}
-                      icon={getMetricIcon('total engagement')}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-                    <MetricCard
-                      title="Total Reach"
-                      value={profileData?.campaign_analytics?.total_reach}
-                      change={15.2}
-                      icon={getMetricIcon('total reach')}
-                    />
-                  </Grid>
+                  {profileData?.campaign_analytics && (
+                    <>
+                      <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+                        <MetricCard
+                          title="Total Likes"
+                          value={profileData.campaign_analytics.total_likes}
+                          icon={getMetricIcon('total likes')}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+                        <MetricCard
+                          title="Total Comments"
+                          value={profileData.campaign_analytics.total_comments}
+                          icon={getMetricIcon('total comments')}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+                        <MetricCard
+                          title="Total Engagement"
+                          value={profileData.campaign_analytics.total_engagement}
+                          icon={getMetricIcon('total engagement')}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+                        <MetricCard
+                          title="Total Reach"
+                          value={profileData.campaign_analytics.total_reach}
+                          icon={getMetricIcon('total reach')}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                  
+                  {/* Additional metrics if available in API */}
+                  {profileData?.campaign_analytics?.total_shares && (
+                    <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+                      <MetricCard
+                        title="Total Shares"
+                        value={profileData.campaign_analytics.total_shares}
+                        icon={getMetricIcon('total shares')}
+                      />
+                    </Grid>
+                  )}
+                  
+                  {profileData?.campaign_analytics?.total_saves && (
+                    <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+                      <MetricCard
+                        title="Total Saves"
+                        value={profileData.campaign_analytics.total_saves}
+                        icon={getMetricIcon('total saves')}
+                      />
+                    </Grid>
+                  )}
+                  
+                  {profileData?.campaign_analytics?.total_clicks && (
+                    <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+                      <MetricCard
+                        title="Total Clicks"
+                        value={profileData.campaign_analytics.total_clicks}
+                        icon={getMetricIcon('total clicks')}
+                      />
+                    </Grid>
+                  )}
+                  
+                  {profileData?.campaign_analytics?.profile_visits && (
+                    <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+                      <MetricCard
+                        title="Profile Visits"
+                        value={profileData.campaign_analytics.profile_visits}
+                        icon={getMetricIcon('profile visits')}
+                      />
+                    </Grid>
+                  )}
+
+                  {/* If no campaign analytics data available, show message */}
+                  {!profileData?.campaign_analytics && (
+                    <Grid size={{ xs: 12 }}>
+                      <Card sx={{ 
+                        borderRadius: '20px', 
+                        p: 4, 
+                        textAlign: 'center',
+                        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                        color: 'white'
+                      }}>
+                        <Typography variant="h6">
+                          📊 Campaign Analytics Loading...
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
+                          Fetching your latest campaign performance data
+                        </Typography>
+                      </Card>
+                    </Grid>
+                  )}
                 </Grid>
               </Grid>
 
               {/* Engagement and Audience Charts */}
               <Grid size={{ xs: 12, md: 6 }}>
-                <Card sx={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1a202c' }}>
-                      📊 Engagement Overview
-                    </Typography>
-                    <Engagement engagement={engagementData} />
-                  </CardContent>
-                </Card>
+                {engagementData && Object.keys(engagementData).length > 0 ? (
+                  <Card sx={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1a202c' }}>
+                        📊 Engagement Overview
+                      </Typography>
+                      <Engagement engagement={engagementData} />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card sx={{ 
+                    borderRadius: '20px', 
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                    background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                    color: '#1a202c'
+                  }}>
+                    <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                        📊 Engagement Data
+                      </Typography>
+                      <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                        No engagement data available yet
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                )}
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
-                <Card sx={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1a202c' }}>
-                      👥 Audience Engagement
-                    </Typography>
-                    <Audience audienceData={audienceEngagement} />
-                  </CardContent>
-                </Card>
+                {audienceEngagement && Object.keys(audienceEngagement).length > 0 ? (
+                  <Card sx={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1a202c' }}>
+                        👥 Audience Engagement
+                      </Typography>
+                      <Audience audienceData={audienceEngagement} />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card sx={{ 
+                    borderRadius: '20px', 
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                    background: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                    color: '#1a202c'
+                  }}>
+                    <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                        👥 Audience Data
+                      </Typography>
+                      <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                        No audience engagement data available yet
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                )}
               </Grid>
 
               {/* Advanced Analytics Tabs */}
@@ -394,10 +517,27 @@ const Analytics = () => {
                       🔍 Advanced Analytics
                     </Typography>
                     <Typography variant="body2" sx={{ opacity: 0.9, mt: 1 }}>
-                      Deep dive into audience insights, paid performance, and content analytics
+                      {audienceAge && Object.keys(audienceAge).length > 0 || 
+                       reachability && Object.keys(reachability).length > 0 ||
+                       brand_affinity || intrest || cities || language
+                        ? "Deep dive into audience insights, paid performance, and content analytics"
+                        : "Analytics data will appear here once available"}
                     </Typography>
                   </Box>
-                  <TabComponent tabs={tabs} defaultIndex={0} />
+                  {(audienceAge && Object.keys(audienceAge).length > 0) || 
+                   (reachability && Object.keys(reachability).length > 0) ||
+                   brand_affinity || intrest || cities || language ? (
+                    <TabComponent tabs={tabs} defaultIndex={0} />
+                  ) : (
+                    <Box sx={{ p: 4, textAlign: 'center' }}>
+                      <Typography variant="body1" sx={{ color: '#666', mb: 2 }}>
+                        🔄 Loading advanced analytics data...
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#999' }}>
+                        Audience insights, paid performance, and content analytics will be displayed here
+                      </Typography>
+                    </Box>
+                  )}
                 </Card>
               </Grid>
 
@@ -408,7 +548,24 @@ const Analytics = () => {
                     <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1a202c' }}>
                       🏢 Brand Collaborations
                     </Typography>
-                    <BrandProfile brand={brandData} />
+                    {brandData && brandData.length > 0 ? (
+                      <BrandProfile brand={brandData} />
+                    ) : (
+                      <Box sx={{ 
+                        textAlign: 'center', 
+                        p: 4,
+                        background: 'linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%)',
+                        borderRadius: '15px',
+                        color: '#1a202c'
+                      }}>
+                        <Typography variant="h6" sx={{ mb: 1 }}>
+                          🤝 Brand Collaborations
+                        </Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                          No brand collaboration data available yet
+                        </Typography>
+                      </Box>
+                    )}
                   </CardContent>
                 </Card>
               </Grid>
