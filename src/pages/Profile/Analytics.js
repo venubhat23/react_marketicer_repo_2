@@ -138,6 +138,12 @@ const Analytics = () => {
 
   const handleProfileChange = (e) => {
     const name = e.target.value;
+    
+    // Don't proceed if empty value is selected
+    if (!name) {
+      return;
+    }
+    
     setPlatformOption(name);
     const user = profileData.find(item => item.name === name);
     setSelectedUser(user);
@@ -296,21 +302,54 @@ const Analytics = () => {
                 onChange={handleProfileChange}
                 displayEmpty
                 sx={{
-                  width: '300px', bgcolor: '#fff', borderRadius: '50px', height: '40px',
+                  width: '300px', 
+                  bgcolor: '#fff', 
+                  borderRadius: '50px', 
+                  height: '40px',
                   mt: '6px',
                 }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 300,
+                      '& .MuiMenuItem-root': {
+                        '&.Mui-selected': {
+                          backgroundColor: '#1976d2 !important',
+                          color: 'white !important',
+                          '&:hover': {
+                            backgroundColor: '#1565c0 !important',
+                          },
+                        },
+                        '&:hover': {
+                          backgroundColor: '#f5f5f5',
+                        },
+                      },
+                    },
+                  },
+                }}
               >
-                {profileData.length === 0 && (
-                  <MenuItem value="">
+                {profileData.length === 0 ? (
+                  <MenuItem value="" disabled>
                     <em>No profiles available</em>
                   </MenuItem>
+                ) : (
+                  profileData.map((item, index) => (
+                    <MenuItem 
+                      key={`${item.name}-${index}`}
+                      value={item.name}
+                      sx={{
+                        backgroundColor: platformOption === item.name ? '#1976d2 !important' : 'transparent',
+                        color: platformOption === item.name ? 'white !important' : 'inherit',
+                        '&:hover': {
+                          backgroundColor: platformOption === item.name ? '#1565c0 !important' : '#f5f5f5 !important',
+                        },
+                      }}
+                    >
+                      {item.name}
+                      {item.username !== "@unknown" && ` (${item.username})`}
+                    </MenuItem>
+                  ))
                 )}
-                {profileData.map((item, index) => (
-                  <MenuItem key={index} value={item.name}>
-                    {item.name}
-                    {item.username !== "@unknown" && ` (${item.username})`}
-                  </MenuItem>
-                ))}
               </Select>
             </FormControl>
 
