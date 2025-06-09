@@ -196,7 +196,8 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
 
         const token = localStorage.getItem("token");
         try {
-        const response = await fetch("http://localhost:3001/api/v1/linkedin/connect", {
+        account = {...account, user_info: account.user}; // Ensure account has type
+        const response = await fetch("https://api.marketincer.com/api/v1/linkedin/connect", {
             method: "POST",
             headers: {
             "Content-Type": "application/json",
