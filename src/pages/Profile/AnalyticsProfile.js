@@ -50,7 +50,7 @@ import {
             <CardContent sx={{ position: "relative", p: 2 }}>
             {/* Profile Image */}
             <Avatar
-              src={influencerData.profileImage}
+              src={profile.image_url}
               alt={`${influencerData.name}'s profile`}
               sx={{
                 width: 80,
