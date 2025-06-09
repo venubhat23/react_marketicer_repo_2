@@ -13,6 +13,7 @@ import {
   Grid, Modal, Paper,
   AppBar, Toolbar, Container, InputLabel, ListItemText,
   CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack,ListItemIcon,
+  CircularProgress, // Add this import
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from '@mui/icons-material/Close';
@@ -931,12 +932,27 @@ const CreatePost = () => {
                   </Box>
                   <Button
                     variant="contained"
-                    //color=""
                     fullWidth
                     onClick={handlePublish}
-                    sx={{ mt: 2, bgcolor: '#7F56D9', color: '#fff' }}
+                    disabled={posting || uploading} // Disable when posting or uploading
+                    sx={{ 
+                      mt: 2, 
+                      bgcolor: '#7F56D9', 
+                      color: '#fff',
+                      '&:disabled': {
+                        bgcolor: '#9575cd', // Lighter purple when disabled
+                        color: '#fff'
+                      }
+                    }}
                   >
-                    Publish Now
+                    {posting ? (
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <CircularProgress size={20} sx={{ color: '#fff' }} />
+                        Publishing...
+                      </Box>
+                    ) : (
+                      'Publish Now'
+                    )}
                   </Button>
           </Grid>
 
