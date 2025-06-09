@@ -80,7 +80,7 @@ const Sidebar = () => {
         </ListItem>
 
           <ListItem disablePadding >
-            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
               <Link to="/dashboard">
               <Box
                 sx={{
@@ -98,7 +98,7 @@ const Sidebar = () => {
           </ListItem>
 
           <ListItem disablePadding >
-            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
               <Link to="/discover">
               <Box
                 sx={{

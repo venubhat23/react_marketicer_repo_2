@@ -307,7 +307,8 @@ const Analytics = () => {
                 )}
                 {profileData.map((item, index) => (
                   <MenuItem key={index} value={item.name}>
-                    {item.name} ({item.username})
+                    {item.name}
+                    {item.username !== "@unknown" && ` (${item.username})`}
                   </MenuItem>
                 ))}
               </Select>
