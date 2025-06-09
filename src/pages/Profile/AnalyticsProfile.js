@@ -201,7 +201,13 @@ import {
                       <ul>
                         <li>Engagement Rate: {profile.engagement_rate} </li>
                         <li>Earned Media: {profile.earned_media}</li>
-                        <li> Average Interactions: {profile.average_interactions}</li>
+                        <li> Total Posts: {profile.recent_posts.length}</li>
+                        <li>
+                          Total Clicks: {
+                            profile.campaign_analytics.find(item => item.label === "Total Clicks")?.value || 0
+                          }
+                        </li>
+
                       </ul>
                       
                       

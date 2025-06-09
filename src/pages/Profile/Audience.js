@@ -1,49 +1,68 @@
-import React,{useState} from "react";
-import { Box, Card, CardContent, Stack, Typography,Grid,List,ListItem,ListItemIcon, Toolbar } from "@mui/material";
-//import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
+import React from "react";
 import {
-  PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer
-} from 'recharts';
+  Box,
+  Card,
+  CardContent,
+  Typography,
+} from "@mui/material";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from "recharts";
 
-const Audience = ({audienceData}) => {
+const Audience = ({ audienceData }) => {
+  // Convert the input audienceData to chart-friendly format
+  const audData =
+    audienceData && Object.keys(audienceData).length > 0
+      ? Object.entries(audienceData).map(([key, value]) => ({
+          name: key.charAt(0).toUpperCase() + key.slice(1),
+          value: parseFloat(value.replace("%", "")),
+        }))
+      : [];
 
-  const audData = Object.entries(audienceData).map(([key, value]) => ({
-    name: key.charAt(0).toUpperCase() + key.slice(1),
-    value: parseFloat(value.replace('%', '')),
-  }));
+  const COLORS = ["#882AFF", "#a063ec", "#dcc3fa"];
 
-  // Data for engagement metrics
-  const COLORS = ['#882AFF', '#a063ec', '#dcc3fa'];
-
-  const ageData = [
-    { name: '18-24', value: 300 },
-    { name: '24-30', value: 400 },
-    { name: '>30',   value: 300 },
-  ];
-
-  const engagementData = [
-    { type: "Likes", percentage: "60%", color: "brand.600" },
-    { type: "Comments", percentage: "35%", color: "brand.100" },
-    { type: "Share", percentage: "5%", color: "brand.500" },
-  ];
+  // Show message if data is empty
+  if (audData.length === 0) {
+    return (
+      <Card
+        sx={{
+          borderRadius: "20px",
+          border: "1px solid #d6d6d6",
+          boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
+          position: "relative",
+          bgcolor: "#fffdfd",
+          p: 3,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="h6" color="text.secondary">
+          No audience data available
+        </Typography>
+      </Card>
+    );
+  }
 
   return (
-    <Card 
-    sx={{
-      //width: "100%",
-      borderRadius: "20px",
-      border: "1px solid #d6d6d6",
-      boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
-      position: "relative",
-      bgcolor: "#fffdfd",
-    }}
+    <Card
+      sx={{
+        borderRadius: "20px",
+        border: "1px solid #d6d6d6",
+        boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
+        position: "relative",
+        bgcolor: "#fffdfd",
+      }}
     >
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Audience Engagement
         </Typography>
         <ResponsiveContainer width="100%" height={250}>
-          <PieChart width={200} height={200}>
+          <PieChart>
             <Pie
               data={audData}
               dataKey="value"
@@ -53,15 +72,17 @@ const Audience = ({audienceData}) => {
               outerRadius={80}
               innerRadius={60}
               paddingAngle={5}
-              fill="green"
               label
             >
               {audData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
               ))}
             </Pie>
             <Tooltip />
-            <Legend verticalAlign="top" height={36}/>
+            <Legend verticalAlign="top" height={36} />
           </PieChart>
         </ResponsiveContainer>
       </CardContent>
@@ -69,4 +90,4 @@ const Audience = ({audienceData}) => {
   );
 };
 
-export default Audience
+export default Audience;
