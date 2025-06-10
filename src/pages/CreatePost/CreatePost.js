@@ -736,7 +736,7 @@ const CreatePost = () => {
                 </FormControl>
 
                 <FormControl fullWidth>
-                  <InputLabel id="multi-user-label">Select Brand</InputLabel>
+                  <InputLabel id="multi-user-label">Social Media</InputLabel>
                   <Select
                     labelId="multi-user-label"
                     multiple
