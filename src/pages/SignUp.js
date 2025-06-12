@@ -78,13 +78,32 @@ const SignUp = () => {
 
   const handleSubmit = async () => {
     try {
-      const response= await axios.post('https://api.marketincer.com/api/v1/signup', {
-        user: formData.user,
-        email: formData.email,
-        password: formData.password,
-        confirmPassword:formData.confirmPassword,
-        role: formData.role,
+      // Validate form data
+      if (!formData.user || !formData.email || !formData.password || !formData.confirmPassword || !formData.role) {
+        toast.error('Please fill in all required fields');
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        toast.error('Passwords do not match');
+        return;
+      }
+
+      if (!formData.terms) {
+        toast.error('Please accept the terms and conditions');
+        return;
+      }
+
+      const response = await axios.post('http://localhost:3001/api/v1/signup', {
+        user: {
+          name: formData.user,
+          email: formData.email,
+          password: formData.password,
+          password_confirmation: formData.confirmPassword,
+          role: formData.role
+        }
       });
+
       toast.success('Signup successful!');
       console.log(response.data);
       navigate('/login');
@@ -147,6 +166,8 @@ const SignUp = () => {
             variant="outlined"
             margin="normal"
             label="Email"
+            type="email"
+            required
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px'} }}
@@ -156,11 +177,13 @@ const SignUp = () => {
           <TextField
             fullWidth
             name="password"
-            label="password"
+            label="Password"
             value={formData.password}
             size="small"
+            type="password"
             variant="outlined"
             margin="normal"
+            required
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px' } }}
@@ -170,11 +193,13 @@ const SignUp = () => {
           <TextField
             fullWidth
             name="confirmPassword"
-            label=" Confirm Password"
+            label="Confirm Password"
             value={formData.confirmPassword}
             size="small"
+            type="password"
             variant="outlined"
             margin="normal"
+            required
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px',  } }}
@@ -203,7 +228,7 @@ const SignUp = () => {
             sx={{bgcolor:'#fff', mb:'10px', mt:'10px'}}
           >
             {roles.map((role) => (
-              <MenuItem value={role}>
+              <MenuItem key={role} value={role}>
                 <ListItemText primary={role} />
               </MenuItem>
             ))}
@@ -254,7 +279,7 @@ const SignUp = () => {
           
 
           <Typography variant="body2" align="center" sx={{color:'#fff'}}>
-            Don’t have an account?{' '}
+            Already have an account?{' '}
             <span style={{ color: '#90caf9', cursor: 'pointer' }} onClick={handleSignupRedirect}>Login</span>
           </Typography>
 
