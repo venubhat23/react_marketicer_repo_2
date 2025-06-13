@@ -94,7 +94,7 @@ const SignUp = () => {
         return;
       }
 
-      const response = await axios.post('http://localhost:3001/api/v1/signup', {
+      const response = await axios.post('https://api.marketincer.com/api/v1/signup', {
         user: {
           name: formData.user,
           email: formData.email,
