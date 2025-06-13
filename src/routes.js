@@ -263,6 +263,12 @@ const routes = [
     route: "/",
     component: <Home />,
   },
+{
+    name: "Contract",
+    key: "contract",
+    route: "/contract",
+    component: <ContractPage />,
+  },
 ];
 
 export default routes;
