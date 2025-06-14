@@ -30,12 +30,14 @@ import {
 } from '@mui/icons-material';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import Sidebar from "../../components/Sidebar";
+import AIContractGenerator from "./AIContractGenerator"; // Import the AI Contract Generator
 
 const ContractPage = () => {
   const [viewMode, setViewMode] = useState('list');
   const [filterType, setFilterType] = useState('All');
   const [sortBy, setSortBy] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showContractGenerator, setShowContractGenerator] = useState(false); // State to control AI generator visibility
 
   const contracts = [
     {
@@ -106,8 +108,17 @@ const ContractPage = () => {
   };
 
   const handleCreateContract = () => {
-    console.log('Create new contract');
+    setShowContractGenerator(true); // Show the AI Contract Generator
   };
+
+  const handleBackToContracts = () => {
+    setShowContractGenerator(false); // Go back to contract list
+  };
+
+  // If showing contract generator, render it instead of the main page
+  if (showContractGenerator) {
+    return <AIContractGenerator onBack={handleBackToContracts} />;
+  }
 
   return (
     <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100%' }}>
@@ -151,6 +162,7 @@ const ContractPage = () => {
                   onClick={handleCreateContract}
                   sx={{
                     bgcolor: '#ded6e9',
+                    color: '#091a48',
                     '&:hover': {
                       bgcolor: '#F3F6FF',
                     },
