@@ -1,7 +1,5 @@
 import React, { useEffect } from "react";
 import { Box, Container, Typography, Link, Grid } from "@mui/material";
-import MDBox from "@/components/MDBox";
-import MDTypography from "@/components/MDTypography";
 
 const PrivacyPolicy = () => {
   // Apply styles to the entire document/body when component mounts
@@ -154,16 +152,16 @@ const PrivacyPolicy = () => {
       <Container maxWidth="md" style={styles.container}>
         {/* Company Header */}
         <Box style={styles.companyHeader}>
-          <MDTypography variant="h1" style={styles.companyName}>
+          <Typography variant="h1" style={styles.companyName}>
             Marketincer
-          </MDTypography>
+          </Typography>
         </Box>
         
         {/* Header */}
         <Box style={styles.header}>
-          <MDTypography variant="h4" style={styles.headerTitle}>
+          <Typography variant="h4" style={styles.headerTitle}>
             Privacy Policy
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             This Privacy Policy explains how <strong style={styles.bold}>SRI SUPARNA MARKETING SOLUTIONS PRIVATE LIMITED</strong> ("Marketincer," "we," "our," or "us") collects, uses, and discloses personally identifiable information from users of our website, <Link href="https://marketincer.com" target="_blank" style={styles.link} onMouseOver={(e) => e.target.style.color = styles.linkHover.color} onMouseOut={(e) => e.target.style.color = styles.link.color}>https://marketincer.com</Link>, and all related services.
           </Typography>
@@ -171,9 +169,9 @@ const PrivacyPolicy = () => {
 
         {/* Introduction */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             1. Introduction
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             Since Marketincer integrates with various social networks, the information you provide or we collect may be shared with these platforms and is subject to their respective privacy policies. We do not control their data practices. To understand how your information is used by them, please review their privacy policies.
           </Typography>
@@ -181,21 +179,21 @@ const PrivacyPolicy = () => {
 
         {/* Information Collection */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             2. Information Collection and Use
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             We collect personally identifiable information primarily to provide our services, communicate with you, and manage your registered account if you have one. If you choose not to provide the requested information, certain features may not be available to you.
           </Typography>
-          <MDTypography variant="h6" style={{...styles.sectionTitle, fontSize: "1.1rem", marginTop: "16px"}}>
+          <Typography variant="h6" style={{...styles.sectionTitle, fontSize: "1.1rem", marginTop: "16px"}}>
             Information Collected During Registration
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             To access restricted sections of our Site, you may need to register and provide certain personal details, including your full name, email address, and time zone.
           </Typography>
-          <MDTypography variant="h6" style={{...styles.sectionTitle, fontSize: "1.1rem", marginTop: "16px"}}>
+          <Typography variant="h6" style={{...styles.sectionTitle, fontSize: "1.1rem", marginTop: "16px"}}>
             Use of Contact Information
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             We may use your contact details to send marketing communications regarding our services. If you wish to opt out, you can unsubscribe via email instructions.
           </Typography>
@@ -203,9 +201,9 @@ const PrivacyPolicy = () => {
 
         {/* Cookies */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             3. Cookies
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             We use cookies to enhance website functionality. Cookies do not collect personally identifiable information. Marketincer may use session cookies (temporary) and persistent cookies (remain after closing the browser).
           </Typography>
@@ -213,9 +211,9 @@ const PrivacyPolicy = () => {
 
         {/* Information Sharing */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             4. Information Sharing
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             Our primary use of your data is to publish your content on the social networks you have authenticated with. If you link your Marketincer account to a third-party social platform, your information may be shared with that service.
           </Typography>
@@ -223,9 +221,9 @@ const PrivacyPolicy = () => {
 
         {/* Access to Information */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             5. Access to Information
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             You can access and update your personal information via your account settings. To delete your data, contact us at <strong style={styles.bold}>info@marketincer.com</strong>.
           </Typography>
@@ -233,9 +231,9 @@ const PrivacyPolicy = () => {
 
         {/* Data Security */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             6. Data Security
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             We use <strong style={styles.bold}>AWS</strong> servers and security measures to protect your data from unauthorized access. In case of a data breach, affected users will be notified as per legal requirements.
           </Typography>
@@ -243,9 +241,9 @@ const PrivacyPolicy = () => {
 
         {/* External Links */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             7. External Links
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             Our website may contain links to third-party sites. We are not responsible for their privacy practices and encourage you to review their policies before providing personal information.
           </Typography>
@@ -253,9 +251,9 @@ const PrivacyPolicy = () => {
 
         {/* Data Transfer */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             8. Data Transfer
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             By using Marketincer, you consent to your data being processed on <strong style={styles.bold}>AWS servers</strong>, which may be located outside your country.
           </Typography>
@@ -263,9 +261,9 @@ const PrivacyPolicy = () => {
 
         {/* Children's Privacy */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             9. Children's Privacy
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             We do not knowingly collect information from individuals under 13. If we discover that a child under 13 has provided us with personal data, we will delete it immediately.
           </Typography>
@@ -273,9 +271,9 @@ const PrivacyPolicy = () => {
 
         {/* Policy Updates */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             10. Changes to This Policy
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             We may update this Privacy Policy periodically. Any significant changes will be announced on our Site.
           </Typography>
@@ -283,9 +281,9 @@ const PrivacyPolicy = () => {
 
         {/* Contact Information */}
         <Box style={styles.section}>
-          <MDTypography variant="h5" style={styles.sectionTitle}>
+          <Typography variant="h5" style={styles.sectionTitle}>
             11. Contact Information
-          </MDTypography>
+          </Typography>
           <Typography variant="body1" style={styles.sectionContent}>
             If you have any questions, contact us at:
           </Typography>
