@@ -23,9 +23,10 @@ import SocialMedia from './pages/SocialMedia';
 import FullAnalytics from './pages/Profile/FullAnalytics';
 import ContractPage from './pages/Contract/ContractPage';
 import Discover from './pages/Discover';
-
-
-
+import Home from './pages/Home';
+import DataDeletion from './pages/DataDeletion'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsAndConditions from './pages/TermsAndConditions'
 
 function App() { 
 
@@ -45,7 +46,7 @@ function App() {
         <Routes>
           {/* <Route path="/" element={<LandingPage />} /> */}
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<SignUp />} /> 
+          <Route path="/" element={<Home />} /> 
           <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
@@ -57,6 +58,11 @@ function App() {
           <Route path="/socialMedia" element={<SocialMedia />} />
           <Route path="/fullAnalytics" element={<FullAnalytics />} />
           <Route path="/discover" element={<Discover />} />
+
+          <Route path="/data-deletion" element={<DataDeletion />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+
         </Routes>
       </AuthProvider>    
     {/* </div> */}

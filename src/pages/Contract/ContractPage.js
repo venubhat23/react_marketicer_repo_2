@@ -472,7 +472,6 @@ const ContractPage = () => {
                             <TableCell>
                               <Chip
                                 label={contract.status}
-                                color={getStatusColor(contract.status)}
                                 size="small"
                                 variant="outlined"
                               />
