@@ -58,6 +58,8 @@ function App() {
           <Route path="/socialMedia" element={<SocialMedia />} />
           <Route path="/fullAnalytics" element={<FullAnalytics />} />
           <Route path="/discover" element={<Discover />} />
+          <Route path="/sign-up" element={<SignUp />} />
+
 
           <Route path="/data-deletion" element={<DataDeletion />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />

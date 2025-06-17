@@ -38,7 +38,7 @@ const Login = () => {
   // };
 
   const handleSignupRedirect = () => {
-    navigate('/'); // or the path you have set in routes
+    navigate('/sign-up'); // or the path you have set in routes
   };
   return (
     <Grid container spacing={2} className="login_section"
