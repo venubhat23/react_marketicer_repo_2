@@ -75,3 +75,16 @@ body {
 .disconnectBtn{
   width: 50%
 }
+.side_section{
+  background-color: #091a48;
+}
+.loginContent{
+  background: #091a4859;
+  padding: 20px;
+  border-radius: 30px;
+}
+.MuiTypography-h6.form_header {
+  color: #fff;
+  font-size: 12px;
+  margin-top: 12px;
+}
