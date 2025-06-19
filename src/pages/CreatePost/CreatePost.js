@@ -446,21 +446,9 @@ const CreatePost = () => {
               <Avatar 
               src={uploadedImageUrl} 
               alt="LinkedIn post image" 
-              sx={{ width: 350, height: 350, display: 'block', margin: 'auto',borderRadius:'inherit' }} />
+              sx={{ width: 300, height: 350, display: 'block', margin: 'auto',borderRadius:'inherit' }} />
             ) : (
-              <Box
-                sx={{
-                  height: 400,
-                  //backgroundColor: '#f5f5f5',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  No image uploaded
-                </Typography>
-              </Box>
+              <Skeleton animation="wave" variant="circular" width={300} height={350} sx={{ display: 'block', margin: 'auto', borderRadius:'inherit' }} />
             )}
 
             {/* Image Indicators */}
@@ -550,11 +538,11 @@ const CreatePost = () => {
     return (
       <Card sx={{ borderRadius: 2, padding: '10px' }}>
         {!uploadedImageUrl || !postContent ? (
-          <Skeleton animation="wave" variant="circular" width={300} height={300} sx={{ display: 'block', margin: 'auto', borderRadius:'inherit' }} />
+          <Skeleton animation="wave" variant="circular" width={300} height={350} sx={{ display: 'block', margin: 'auto', borderRadius:'inherit' }} />
         ) : (
-          <Avatar src={uploadedImageUrl} alt="Uploaded" sx={{ width: 300, height: 300, display: 'block', margin: 'auto',borderRadius:'inherit' }} />
+          <Avatar src={uploadedImageUrl} alt="Uploaded" sx={{ width: 300, height: 350, display: 'block', margin: 'auto',borderRadius:'inherit' }} />
         )}
-        <CardContent>
+        <CardContent sx={{ p: 0 }}>
           {uploadedImageUrl && postContent && (
             <Typography variant="body2" color="text.secondary" sx={{ display: "flex" }}>
               <span dangerouslySetInnerHTML={{ __html: postContent }} />
