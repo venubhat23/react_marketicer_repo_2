@@ -145,18 +145,6 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
 
-        {/* NEW CONTRACT NAVIGATION ITEM */}
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Link to="/contracts">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <DescriptionIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Contracts</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
-
       </List>
 
       {/* Footer */}
