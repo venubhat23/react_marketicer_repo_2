@@ -135,7 +135,7 @@ const SocialMedia =()=>{
 
   const getAccounts = async () => {
     try {
-      const res = await axios.get("https://api.marketincer.com/api/v1/social_pages/connected_pages", {
+      const res = await axios.get("http://localhost:3001/api/v1/social_pages/connected_pages", {
         headers: {
             'Authorization': localStorage.getItem('token'),
             'Content-Type': 'application/json'
@@ -254,23 +254,7 @@ const SocialMedia =()=>{
             </Typography>
           </Box>
 
-          {/* Connect New Account Button */}
-          <Box sx={{ alignSelf: "flex-end", mb: 2 }}>
-            <Button
-              variant="contained"
-              sx={{
-                bgcolor: "#7e56d8",
-                borderColor: "#7e56d8",
-                "&:hover": { bgcolor: "#6a46c0", color:'#fff' },
-                color:'#fff',
-                left:'-40%'
-                // px: 1,
-                // py: 1,
-              }}
-            >
-              Connect New Account
-            </Button>
-          </Box>
+     
 
           {/* Accounts List */}
           <Paper
