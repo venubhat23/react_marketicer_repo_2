@@ -10,6 +10,8 @@ import {
   InputAdornment, ListItemText,
   Card, AppBar, Toolbar, Paper, InputLabel,
   CardContent, IconButton, OutlinedInput, CircularProgress,
+  Modal,
+  Button
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import AnalyticsProfile from '../Profile/AnalyticsProfile'
@@ -67,12 +69,20 @@ const Analytics = () => {
   const [location, setLocation] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showNoAnalyticsModal, setShowNoAnalyticsModal] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     axios.get('https://api.marketincer.com/api/v1/influencer/analytics')
       .then((response) => {
         const profileRes = response?.data?.data || []
+
+        // Show modal if backend returns nil or empty array
+        if (!profileRes || profileRes.length === 0) {
+          setShowNoAnalyticsModal(true);
+          setLoading(false);
+          return;
+        }
 
         setProfileData(profileRes);
 
@@ -121,13 +131,10 @@ const Analytics = () => {
       })
       .catch((error) => {
         console.error('Error fetching analytics:', error);
+        setShowNoAnalyticsModal(true);
         setLoading(false);
       });
   }, []);
-
-  console.log('platformOption', platformOption);
-  console.log('selectedUser', selectedUser);
-  console.log('engagementData', engagementData);
 
   // Extract additional data for AudienceInsights
   const notableNo = selectedUser?.audience_reachability?.notable_followers_count || 0;
@@ -220,6 +227,48 @@ const Analytics = () => {
       <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
       </Box>
+    );
+  }
+
+  // Show "No Analytics Found" modal
+  if (showNoAnalyticsModal) {
+    return (
+      <Modal
+        open={showNoAnalyticsModal}
+        onClose={() => setShowNoAnalyticsModal(false)}
+        aria-labelledby="no-analytics-modal-title"
+        aria-describedby="no-analytics-modal-description"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            border: '2px solid #1976d2',
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+            textAlign: 'center'
+          }}
+        >
+          <Typography id="no-analytics-modal-title" variant="h6" component="h2" color="error">
+            No Analytics Found
+          </Typography>
+          <Typography id="no-analytics-modal-description" sx={{ mt: 2 }}>
+            We couldn't find any analytics data to display. Please try again later or check your data source.
+          </Typography>
+          <Button
+            variant="contained"
+            sx={{ mt: 3, backgroundColor: "#1976d2" }}
+            onClick={() => window.location.reload()}
+          >
+            Refresh
+          </Button>
+        </Box>
+      </Modal>
     );
   }
 
