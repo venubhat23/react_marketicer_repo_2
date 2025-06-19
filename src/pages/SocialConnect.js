@@ -155,11 +155,14 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     // --- UPDATED LINKEDIN CONNECT FUNCTION ---
     const handleLinkedinConnect = async (account) => {
         const token = localStorage.getItem("token");
+        const isPage = linkedinType === "pages"; // will be true if user selected Pages
         try {
             const payload = {
                 access_token: account.access_token,
                 user_info: account.user || account, // For single profile, the whole object is user_info
-                picture_url: account.user?.logoV2?.original || account.logoV2?.original || ""
+                picture_url: account.user?.logoV2?.original || account.logoV2?.original || "",
+                is_page: isPage, // <-- add this line
+
             };
             const response = await fetch("https://api.marketincer.com/api/v1/linkedin/connect", {
                 method: "POST",
