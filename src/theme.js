@@ -1,5 +1,6 @@
 
 import { createTheme } from '@mui/material/styles';
+import '@fontsource/poppins';
 
 const theme = createTheme({
   palette: {
@@ -8,30 +9,30 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: `'Helvetica Neue', Arial, sans-serif`,
+    fontFamily: `'Poppins', Arial, sans-serif`,
     h1: {
-      fontFamily: `'Helvetica Neue', Arial, sans-serif`,
+      fontFamily: `'Poppins', Arial, sans-serif`,
     },
     h2: {
-      fontFamily: `'Helvetica Neue', Arial, sans-serif`,
+      fontFamily: `'Poppins', Arial, sans-serif`,
     },
     h3: {
-        fontFamily: `'Helvetica Neue', Arial, sans-serif`,
+        fontFamily: `'Poppins', Arial, sans-serif`,
       },
     h4: {
-      fontFamily: `'Helvetica Neue', Arial, sans-serif`,
+      fontFamily: `'Poppins', Arial, sans-serif`,
     },
     h5: {
-        fontFamily: `'Helvetica Neue', Arial, sans-serif`,
+        fontFamily: `'Poppins', Arial, sans-serif`,
       },
     h6: {
-        fontFamily: `'Helvetica Neue', Arial, sans-serif`,
+        fontFamily: `'Poppins', Arial, sans-serif`,
     },
     body1: {
-      fontFamily: `'Helvetica Neue', Arial, sans-serif`,
+      fontFamily: `'Poppins', Arial, sans-serif`,
     },
     body2: {
-      fontFamily: `'Helvetica Neue', Arial, sans-serif`,
+      fontFamily: `'Poppins', Arial, sans-serif`,
     },
   },
   components: {
@@ -49,7 +50,7 @@ const theme = createTheme({
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
             borderColor: '#ddd',
             borderWidth: '1px',
-            backgroundColor:'#fff'
+            //backgroundColor:'#fff'
           },
           
         },
@@ -65,14 +66,14 @@ const theme = createTheme({
           color: '#882AFF',
           '&.Mui-focused': {
             color: '#882AFF',
-            backgroundColor:'#ccc !important'
+            backgroundColor:'#fff !important'
           },
         },
       },
     },
     '&.Mui-selected': {
-      backgroundColor: 'red',
-      color: '#fff',
+      backgroundColor: '#ddd',
+      color: '#882AFF',
     },
     MuiTab: {
       styleOverrides: {

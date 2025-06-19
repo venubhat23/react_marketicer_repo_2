@@ -54,13 +54,13 @@ const Login = () => {
     
     <Box className="loginContent" sx={{ maxWidth: 400, margin: "auto", mt: 15 }}>
 
-    <Typography variant='h5' className="typo_primary" sx={{color:'#fff'}}>Log in to your account </Typography>
+    <Typography variant='h5' className="typo_primary" sx={{color:'#fff', textAlign:'center'}}>Log in to your account </Typography>
       <Typography
         variant="h6"
         color="white"          
         fontWeight="light" 
-        verticalAlign="middle"
-        sx={{textAlign:'center', fontSize:'12px'}}
+        //verticalAlign="middle"
+        sx={{textAlign:'center', fontSize:'12px', letterSpacing:'0.6px'}}
         mb={2}>
 
         Welcome back! Please enter your details
@@ -69,18 +69,17 @@ const Login = () => {
          variant="h6" 
          fontWeight="400"
          align="left" 
-         sx={{ color:'#fff', fontSize:'14px', mb:'-5px' }}>
+         className="form_header"
+         >
           Email 
          </Typography>
           <TextField
             fullWidth
-            //label="Email"
             size='small'
             name="email"
             variant="outlined"
-            margin="normal"
             onChange={handleChange}
-            InputLabelProps={{ style: { color: '#ccc'} }}
+            InputLabelProps={{ style: { color: '#882AFF'} }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px' } }}
           />
 
@@ -88,19 +87,18 @@ const Login = () => {
           variant="h6" 
           fontWeight="400"
           align="left" 
-          sx={{ color:'#fff', fontSize:'14px', mb:'-5px' }}>
+          className="form_header"
+          >
             Password 
          </Typography>
           <TextField
             fullWidth
-            //label="Password"
             type="password"
             name="password"
             size='small'
             variant="outlined"
-            margin="normal"
             onChange={handleChange}
-            InputLabelProps={{ style: { color: '#ccc' } }}
+            InputLabelProps={{ style: { color: '#882AFF' } }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px'} }}
           />
 

@@ -94,7 +94,7 @@ const Dashboard = () => {
   return (
     <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100%' }} >
     <Grid container>
-      <Grid size={{ md: 1 }}> <Sidebar/></Grid>
+      <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
       <Grid size={{ md: 11 }}> 
         <Paper
               elevation={0}

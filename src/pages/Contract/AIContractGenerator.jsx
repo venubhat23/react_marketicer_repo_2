@@ -337,7 +337,7 @@ const AIContractGenerator = ({ onBack }) => {
   return (
     <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100vh' }}>
       <Grid container>
-        <Grid size={{ md: 1 }}>
+        <Grid size={{ md: 1 }} className="side_section">
           <Sidebar />
         </Grid>
         <Grid size={{ md: 11 }}>

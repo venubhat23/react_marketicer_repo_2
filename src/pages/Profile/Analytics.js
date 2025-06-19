@@ -275,7 +275,7 @@ const Analytics = () => {
   return (
     <Box sx={{ flexGrow: 1 }} >
       <Grid container>
-        <Grid size={{ md: 1 }}> <Sidebar /></Grid>
+        <Grid size={{ md: 1 }} className="side_section"> <Sidebar /></Grid>
         <Grid size={{ md: 11 }}>
           <Paper
             elevation={0}
@@ -440,14 +440,14 @@ const Analytics = () => {
               </Grid>
 
               {selectedUser && (
-                <Grid size={{ xs: 2, sm: 4, md: 8 }} spacing={1}>
+                <Grid size={{ xs: 4, sm: 4, md: 8 }} spacing={1}>
                   <Box>
                     <Grid container spacing={1}>
                       {selectedUser?.campaign_analytics?.slice(0, 12).map((profile, index) => (
                         <Grid key={index} item xs={12} sm={6} md={4}>
                           <Card
                             sx={{
-                              width: 250,
+                              width: 220,
                               height: 86,
                               border: "1px solid #b6b6b6",
                               borderRadius: "10px",

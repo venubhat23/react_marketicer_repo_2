@@ -131,9 +131,9 @@ const SignUp = () => {
     >
     <Grid size={12} >
     
-    <Box className="loginContent" sx={{ maxWidth: 400, margin:'auto', marginTop:'20px' }}>
+    <Box className="loginContent" sx={{ maxWidth: 400, margin:'auto', marginTop:'15px' }}>
 
-    <Typography variant='h6' className="typo_primary" sx={{color:'#fff'}}>Create an account </Typography>
+    <Typography variant='h6' className="typo_primary" sx={{color:'#fff', textAlign:'center'}}>Create an account </Typography>
       <Typography
         variant="h6"
         color="white"          
@@ -145,10 +145,18 @@ const SignUp = () => {
        Start your 30-days free trail
       </Typography>
 
+      <Typography 
+         variant="h6" 
+         fontWeight="400"
+         align="left" 
+         className="form_header">
+          Name 
+         </Typography>
+
         <TextField 
         fullWidth 
-        id="outlined-basic" 
-        label="Name" 
+        //id="outlined-basic" 
+        //label="Name" 
         name="user"
         value={formData.user}
         variant="outlined" 
@@ -158,14 +166,21 @@ const SignUp = () => {
         InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px' } }}
         />
 
+        <Typography 
+         variant="h6" 
+         fontWeight="400"
+         align="left" 
+         className="form_header">
+          Email 
+         </Typography>
+
         <TextField
             fullWidth
             name="email"
             size='small'
             value={formData.email}
             variant="outlined"
-            margin="normal"
-            label="Email"
+            //label="Email"
             type="email"
             required
             onChange={handleChange}
@@ -173,32 +188,44 @@ const SignUp = () => {
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px'} }}
           />
 
-        
+        <Typography 
+         variant="h6" 
+         fontWeight="400"
+         align="left" 
+         className="form_header">
+          Password 
+         </Typography>    
           <TextField
             fullWidth
             name="password"
-            label="Password"
+            //label="Password"
             value={formData.password}
             size="small"
             type="password"
             variant="outlined"
-            margin="normal"
+            
             required
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px' } }}
           />
 
-        
+        <Typography 
+         variant="h6" 
+         fontWeight="400"
+         align="left" 
+         className="form_header">
+          Confirm Password 
+         </Typography> 
           <TextField
             fullWidth
             name="confirmPassword"
-            label="Confirm Password"
+            //label="Confirm Password"
             value={formData.confirmPassword}
             size="small"
             type="password"
             variant="outlined"
-            margin="normal"
+            //margin="normal"
             required
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
@@ -215,17 +242,24 @@ const SignUp = () => {
           </select>
         </FormControl> */}
 
+        <Typography 
+         variant="h6" 
+         fontWeight="400"
+         align="left" 
+         className="form_header">
+          Select Role 
+         </Typography> 
         <FormControl fullWidth>
-          <InputLabel id="select_label">Select Role</InputLabel>
+          {/* <InputLabel id="select_label">Select Role</InputLabel> */}
           <Select
             labelId="select_label"
             size="small"
             name="role"
-            margin="normal"
+            //margin="normal"
             value={formData.role}
             onChange={handleChange}
             //input={<OutlinedInput label="Select Role" />}
-            sx={{bgcolor:'#fff', mb:'10px', mt:'10px'}}
+            sx={{bgcolor:'#fff', mb:'10px'}}
           >
             {roles.map((role) => (
               <MenuItem key={role} value={role}>
@@ -261,10 +295,10 @@ const SignUp = () => {
             Get Started
           </Button>
 
-          <Divider sx={{ my: 2, borderColor: '#fff', color:'#fff', fontSize:'14px' }}>OR</Divider>
+          <Divider sx={{ my: 1, borderColor: '#fff', color:'#fff', fontSize:'14px' }}>OR</Divider>
 
-          <Stack direction="row" spacing={2}
-            sx={{padding: '10px',justifyContent: 'center',alignItems: 'center',}}>
+          <Stack direction="row" spacing={1}
+            sx={{padding: '8px',justifyContent: 'center',alignItems: 'center',}}>
             <Button>
                 <img src={GoogleIcon} alt="my image" width='20' height='20'  />
             </Button>

@@ -441,32 +441,32 @@ const CreatePost = () => {
           <Card
             sx={{
               width: "518px",
-              height: "644px",
+              height: "400px",
               position: "relative",
-              borderRadius: 2,
-              border: "1px solid #e3e3e3",
-              boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.2)",
+              //borderRadius: 2,
+              //border: "1px solid #e3e3e3",
+              //boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.2)",
             }}
           >
             {/* Header */}
-            <Box
+            {/* <Box
               display="flex"
               justifyContent="space-between"
               alignItems="center"
             >
-            </Box>
+            </Box> */}
 
             {/* LinkedIn Post */}
             <Card
-              sx={{
-                width: "443px",
-                position: "absolute",
-                top: "90px",
-                left: "35px",
-                border: "1px solid #b5b5b5",
-                borderRadius: 2,
-                overflow: "hidden",
-              }}
+              // sx={{
+              //   width: "443px",
+              //   position: "absolute",
+              //   top: "90px",
+              //   left: "35px",
+              //   border: "1px solid #b5b5b5",
+              //   borderRadius: 2,
+              //   overflow: "hidden",
+              // }}
             >
               <CardContent sx={{ p: 0 }}>
                 {/* Post Header */}
@@ -487,13 +487,13 @@ const CreatePost = () => {
                     component="img"
                     image={uploadedImageUrl}
                     alt="LinkedIn post image"
-                    sx={{ height: 336 }}
+                    //sx={{ height: 336 }}
                   />
                 ) : (
                   <Box
                     sx={{
-                      height: 336,
-                      backgroundColor: '#f5f5f5',
+                      height: 400,
+                      //backgroundColor: '#f5f5f5',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -564,11 +564,11 @@ const CreatePost = () => {
           justifyContent="center" 
           alignItems="center" 
           height="200px"
-          sx={{ 
-            backgroundColor: '#f5f5f5', 
-            borderRadius: 2,
-            border: '1px dashed #ccc' 
-          }}
+          // sx={{ 
+          //   backgroundColor: '#f5f5f5', 
+          //   borderRadius: 2,
+          //   border: '1px dashed #ccc' 
+          // }}
         >
           <Typography variant="h6" color="text.secondary">
             There is no preview available
@@ -603,15 +603,15 @@ const CreatePost = () => {
               <>
                 <Box display="flex" alignItems="center" gap={0.5}>
                   <FavoriteBorderIcon fontSize="small" />
-                  <Typography variant="body2">37.8K</Typography>
+                  {/* <Typography variant="body2">37.8K</Typography> */}
                 </Box>
                 <Box display="flex" alignItems="center" gap={0.5}>
                   <ChatBubbleOutlineIcon fontSize="small" />
-                  <Typography variant="body2">248</Typography>
+                  {/* <Typography variant="body2">248</Typography> */}
                 </Box>
                 <Box display="flex" alignItems="center" gap={0.5}>
                   <SendIcon fontSize="small" />
-                  <Typography variant="body2">234</Typography>
+                  {/* <Typography variant="body2">234</Typography> */}
                 </Box>
               </>
             )}
@@ -672,8 +672,8 @@ const CreatePost = () => {
   return (
 
   <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} >
-    <Grid container>
-      <Grid size={{ md: 1 }}> <Sidebar/></Grid>
+    <Grid container sx={{overflow:'hidden !important'}}>
+      <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
       <Grid size={{ md: 11 }}> 
         <Paper
               elevation={0}
@@ -713,9 +713,9 @@ const CreatePost = () => {
                 </Box>
               </Box>
         </Paper>
-      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, padding:'20px'}}>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', }}>
+      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'20px'}}>
+        <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
+          <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%' }}>
               {/* Dropdowns */}
               <Box display="flex" gap={2} mb={2} >
                 <FormControl fullWidth>
@@ -727,7 +727,7 @@ const CreatePost = () => {
                     size="small"
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
-                    sx={{ height:'40px',mt:'6px'}}
+                    sx={{ height:'40px',mt:'6px', color:'#882AFF'}}
                   >
                     {Brands.map((brand) => (
                       <MenuItem key={brand} value={brand} sx={{color:'#882AFF'}} >{brand}</MenuItem>
@@ -744,7 +744,7 @@ const CreatePost = () => {
                     value={selectedUsers.map((user) => user.id)}
                     onChange={handleUsersChange}
                     input={<OutlinedInput label="Select Users" />}
-                    sx={{ height:'40px',mt:'6px'}}
+                    sx={{ height:'40px',mt:'6px', color:'#882AFF'}}
                     renderValue={(selected) => 
                       selectedUsers.map(user => user.name).join(', ')
                     }
@@ -845,7 +845,7 @@ const CreatePost = () => {
                         top: 0,
                         right: 0,
                         bgcolor: 'white',
-                        borderRadius: '50%',
+                        //borderRadius: '50%',
                       }}
                       onClick={() => {
                         setUploadedImageUrl("");
@@ -868,14 +868,15 @@ const CreatePost = () => {
                 sx={{
                   //width: "100%",
                   padding: "16px",
-                  border: "1px dashed #ccc",
+                  border: "1px solid #f0f0f0",
                   borderRadius: "8px",
-                  backgroundColor: "#f9f9f9",
+                  backgroundColor: "#fff",
                   textAlign: "center",
                   cursor: "pointer",
                   my: 2,
                   margin: "10px",
                   marginLeft: "0px",
+                  boxShadow: '0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12)'
                 }}
                 onClick={handleBoxClick}
                 onDrop={handleDrop} // ✅ Handles dropped files
@@ -883,7 +884,7 @@ const CreatePost = () => {
               >
 
 
-                <Typography variant="body1" sx={{ color: "#666", }}>
+                <Typography variant="body1" sx={{ color: "#000", }}>
                   +  Upload Media
                 </Typography>
 
@@ -956,7 +957,7 @@ const CreatePost = () => {
                   </Button>
           </Grid>
 
-          <Grid  size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', }}>
+          <Grid  size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height:'100%' }}>
           <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
                   <Tab label="Instagram" />
                   <Tab label="Linkedin" />
