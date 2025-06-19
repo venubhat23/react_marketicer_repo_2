@@ -135,7 +135,7 @@ const SocialMedia =()=>{
 
   const getAccounts = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/api/v1/social_pages/connected_pages", {
+      const res = await axios.get("https://api.marketincer.com/api/v1/social_pages/connected_pages", {
         headers: {
             'Authorization': localStorage.getItem('token'),
             'Content-Type': 'application/json'
