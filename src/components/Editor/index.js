@@ -22,6 +22,11 @@ const MyEditor = ({ value, onChange }) => {
         height: 250,
         statusbar: false, // Removes the status bar at the bottom
         branding: false,  // Removes the "Build with" branding
+        content_style: `
+          body { 
+            color:#882AFF; 
+          }
+        `,
         // Adding custome AI 
         setup: (editor) => {
           editor.ui.registry.addButton('generate_ai_button', {

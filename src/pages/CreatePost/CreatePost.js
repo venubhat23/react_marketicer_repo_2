@@ -429,129 +429,93 @@ const CreatePost = () => {
   // LinkedIn Preview Component
   const LinkedinPreview = () => {
     const interactionButtons = [
-      { icon: <ThumbUp />, text: "Like" },
-      { icon: <MessageCircle />, text: "Comment" },
+      { icon: <FavoriteBorderIcon />  },
+      { icon: <ChatBubbleOutlineIcon /> },
       // { icon: <Repeat />, text: "Repost" },
-      { icon: <SendIcon />, text: "Send" },
+      { icon: <SendIcon /> },
     ];
 
     return (
-      <Box display="flex" justifyContent="center" width="100%">
-        {/* <Box width="515px" height="644px" overflow="hidden"> */}
-          <Card
-            sx={{
-              width: "518px",
-              height: "400px",
-              position: "relative",
-              //borderRadius: 2,
-              //border: "1px solid #e3e3e3",
-              //boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.2)",
-            }}
-          >
-            {/* Header */}
-            {/* <Box
+        <Card
+          sx={{ borderRadius: 2, padding: '10px' }}
+        >
+          <CardContent sx={{ p: 0 }}>
+            
+            {/* Post Image */}
+            {uploadedImageUrl ? (
+              <Avatar 
+              src={uploadedImageUrl} 
+              alt="LinkedIn post image" 
+              sx={{ width: 350, height: 350, display: 'block', margin: 'auto',borderRadius:'inherit' }} />
+            ) : (
+              <Box
+                sx={{
+                  height: 400,
+                  //backgroundColor: '#f5f5f5',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  No image uploaded
+                </Typography>
+              </Box>
+            )}
+
+            {/* Image Indicators */}
+            <Box
               display="flex"
-              justifyContent="space-between"
-              alignItems="center"
+              justifyContent="center"
+              gap={1}
+              mt={-3}
+              mb={1.5}
             >
-            </Box> */}
+              <Box
+                width="10px"
+                height="10px"
+                bgcolor="#7F56D9"
+                borderRadius="4px"
+              />
+              <Box
+                width="10px"
+                height="10px"
+                bgcolor="#E7D3FF"
+                borderRadius="4px"
+              />
+            </Box>
 
-            {/* LinkedIn Post */}
-            <Card
-              // sx={{
-              //   width: "443px",
-              //   position: "absolute",
-              //   top: "90px",
-              //   left: "35px",
-              //   border: "1px solid #b5b5b5",
-              //   borderRadius: 2,
-              //   overflow: "hidden",
-              // }}
+            {/* Post Actions */}
+
+            {postContent && (
+              <Box px={2.5} pb={1} mt={3}>
+                <Typography variant="body2" color="#882AFF" sx={{textAlign:'justify'}}>
+                  <span dangerouslySetInnerHTML={{ __html: postContent }} />
+                </Typography>
+              </Box>
+            )}
+
+            <CardActions
+              
             >
-              <CardContent sx={{ p: 0 }}>
-                {/* Post Header */}
-                
-
-                {/* Post Content */}
-                {postContent && (
-                  <Box px={2.5} pb={1}>
-                    <Typography variant="body2" color="text.primary">
-                      <span dangerouslySetInnerHTML={{ __html: postContent }} />
-                    </Typography>
-                  </Box>
-                )}
-
-                {/* Post Image */}
-                {uploadedImageUrl ? (
-                  <CardMedia
-                    component="img"
-                    image={uploadedImageUrl}
-                    alt="LinkedIn post image"
-                    //sx={{ height: 336 }}
-                  />
-                ) : (
-                  <Box
-                    sx={{
-                      height: 400,
-                      //backgroundColor: '#f5f5f5',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <Typography variant="body2" color="text.secondary">
-                      No image uploaded
-                    </Typography>
-                  </Box>
-                )}
-
-                {/* Image Indicators */}
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  gap={1}
-                  mt={-3}
-                  mb={1.5}
+              {interactionButtons.map((button, index) => (
+                <Stack
+                  key={index}
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  sx={{ cursor: "pointer" }}
                 >
-                  <Box
-                    width="10px"
-                    height="10px"
-                    bgcolor="#7F56D9"
-                    borderRadius="4px"
-                  />
-                  <Box
-                    width="10px"
-                    height="10px"
-                    bgcolor="#E7D3FF"
-                    borderRadius="4px"
-                  />
-                </Box>
-
-                {/* Post Actions */}
-                <Divider />
-                <CardActions
-                  sx={{ justifyContent: "space-between", px: 2, py: 1 }}
-                >
-                  {interactionButtons.map((button, index) => (
-                    <Stack
-                      key={index}
-                      direction="row"
-                      spacing={1}
-                      alignItems="center"
-                      sx={{ cursor: "pointer" }}
-                    >
-                      <Box sx={{ "& svg": { width: 20, height: 20 } }}>
-                        {button.icon}
-                      </Box>
-                      <Typography fontWeight="medium">{button.text}</Typography>
-                    </Stack>
-                  ))}
-                </CardActions>
-              </CardContent>
-            </Card>
-          </Card>
-        {/* </Box> */}
-      </Box>
+                  <Box sx={{ "& svg": { width: 20, height: 20 } }}>
+                    {button.icon}
+                  </Box>
+                  <Typography fontWeight="medium">{button.text}</Typography>
+                </Stack>
+              ))}
+            </CardActions>
+          </CardContent>
+        </Card>
+      
     );
   };
 
@@ -586,9 +550,9 @@ const CreatePost = () => {
     return (
       <Card sx={{ borderRadius: 2, padding: '10px' }}>
         {!uploadedImageUrl || !postContent ? (
-          <Skeleton animation="wave" variant="circular" width={100} height={100} sx={{ display: 'block', margin: 'auto' }} />
+          <Skeleton animation="wave" variant="circular" width={300} height={300} sx={{ display: 'block', margin: 'auto', borderRadius:'inherit' }} />
         ) : (
-          <Avatar src={uploadedImageUrl} alt="Uploaded" sx={{ width: 300, height: 300, display: 'block', margin: 'auto' }} />
+          <Avatar src={uploadedImageUrl} alt="Uploaded" sx={{ width: 300, height: 300, display: 'block', margin: 'auto',borderRadius:'inherit' }} />
         )}
         <CardContent>
           {uploadedImageUrl && postContent && (
@@ -619,15 +583,15 @@ const CreatePost = () => {
               <>
                 <Box display="flex" alignItems="center" gap={0.5}>
                   <FavoriteBorderIcon fontSize="small" />
-                  <Typography variant="body2">Like</Typography>
+                  {/* <Typography variant="body2">Like</Typography> */}
                 </Box>
                 <Box display="flex" alignItems="center" gap={0.5}>
                   <ChatBubbleOutlineIcon fontSize="small" />
-                  <Typography variant="body2">Comment</Typography>
+                  {/* <Typography variant="body2">Comment</Typography> */}
                 </Box>
                 <Box display="flex" alignItems="center" gap={0.5}>
                   <SendIcon fontSize="small" />
-                  <Typography variant="body2">Share</Typography>
+                  {/* <Typography variant="body2">Share</Typography> */}
                 </Box>
               </>
             )}
@@ -803,7 +767,6 @@ const CreatePost = () => {
                   <Box
                     sx={{
                       background: "white",
-                      borderRadius: "50%",
                       width: 20,
                       height: 20,
                       alignItems: "center",
@@ -845,7 +808,6 @@ const CreatePost = () => {
                         top: 0,
                         right: 0,
                         bgcolor: 'white',
-                        //borderRadius: '50%',
                       }}
                       onClick={() => {
                         setUploadedImageUrl("");
@@ -876,7 +838,7 @@ const CreatePost = () => {
                   my: 2,
                   margin: "10px",
                   marginLeft: "0px",
-                  boxShadow: '0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12)'
+                  boxShadow: '0px 2px 1px -1px rgb(247 247 247 / 12%), 0px 1px 1px 0px rgb(247 247 247 / 12%), 0px 1px 3px 0px rgb(247 247 247 / 12%)'
                 }}
                 onClick={handleBoxClick}
                 onDrop={handleDrop} // ✅ Handles dropped files

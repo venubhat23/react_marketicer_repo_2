@@ -509,14 +509,14 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                         <Button
                             variant="contained"
                             sx={{
-                                backgroundColor: "#0077b5",
+                                backgroundColor: "#882AFF",
                                 color: "white",
                                 borderRadius: "8px",
                                 padding: "6px 16px",
                                 textTransform: "none",
                                 fontWeight: "600",
                                 fontSize: "14px",
-                                "&:hover": { backgroundColor: "#005885" }
+                                "&:hover": { backgroundColor: "#fff" }
                             }}
                             onClick={() => {
                                 if (linkedinAccounts && authCode && authState === LINKEDIN_CRED.state) {
@@ -821,14 +821,14 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                         <Button
                             variant="contained"
                             sx={{
-                                backgroundColor: "#e91e63",
+                                backgroundColor: "#882AFF",
                                 color: "white",
                                 borderRadius: "8px",
                                 padding: "6px 16px",
                                 textTransform: "none",
                                 fontWeight: "600",
                                 fontSize: "14px",
-                                "&:hover": { backgroundColor: "#c2185b" }
+                                "&:hover": { backgroundColor: "#fff" }
                             }}
                             onClick={() => {
                                 if (showAccountsList && pages.length > 0) {
