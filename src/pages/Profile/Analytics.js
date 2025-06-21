@@ -71,47 +71,45 @@ const Analytics = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showNoAnalyticsModal, setShowNoAnalyticsModal] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     setLoading(true);
-    axios.get('https://api.marketincer.com/api/v1/influencer/analytics')
+    const token = localStorage.getItem("token");
+    axios.get('https://api.marketincer.com/api/v1/influencer/analytics', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    })
       .then((response) => {
         const profileRes = response?.data?.data || []
-
         // Show modal if backend returns nil or empty array
         if (!profileRes || profileRes.length === 0) {
           setShowNoAnalyticsModal(true);
           setLoading(false);
           return;
         }
-
         setProfileData(profileRes);
-
         if (profileRes.length > 0) {
           const firstUser = profileRes[0];
           setPlatformOption(firstUser.name);
           setSelectedUser(firstUser);
-
           // Extract engagement data from the first user
           if (firstUser.engagement_over_time?.daily) {
             setEngagementData(firstUser.engagement_over_time.daily);
           } else {
             setEngagementData({});
           }
-
           // Extract audience engagement data
           if (firstUser.audience_engagement) {
             setAudienceEngagement(firstUser.audience_engagement);
           } else {
             setAudienceEngagement({});
           }
-
           // Extract recent posts
           if (firstUser.recent_posts) {
             setBrandData(firstUser.recent_posts);
           } else {
             setBrandData([]);
           }
-
           // Extract other audience data (if available in API response)
           if (firstUser.audience_age) {
             setAudienceAge(firstUser.audience_age);
@@ -126,7 +124,6 @@ const Analytics = () => {
             setLocation(firstUser.audience_location.countries);
           }
         }
-
         setLoading(false);
       })
       .catch((error) => {
