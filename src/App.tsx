@@ -41,18 +41,40 @@ function App() {
       <AuthProvider>
         <Routes>
           {/* <Route path="/" element={<LandingPage />} /> */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<SignUp />} /> 
+          
           <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             } />
-          <Route path="/createPost" element={<CreatePost />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/socialMedia" element={<SocialMedia />} />
-          <Route path="/fullAnalytics" element={<FullAnalytics />} />
-          <Route path="/discover" element={<Discover />} />
+          <Route path="/createPost" element={
+            <ProtectedRoute>
+              <CreatePost />
+            </ProtectedRoute>
+            
+            } />
+          <Route path="/analytics" element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          } />
+          <Route path="/socialMedia" element={
+            <ProtectedRoute>
+            <SocialMedia />
+            </ProtectedRoute>
+          } />
+          <Route path="/fullAnalytics" element={
+            <ProtectedRoute>
+            <FullAnalytics />
+            </ProtectedRoute>
+          } />
+          <Route path="/discover" element={
+            <ProtectedRoute>
+            <Discover />
+            </ProtectedRoute>
+            } />
+            
+          <Route path="/login" element={<Login />} />
           <Route path="/sign-up" element={<SignUp />} />
 
 
