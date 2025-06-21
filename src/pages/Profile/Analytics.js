@@ -270,7 +270,7 @@ if (showNoAnalyticsModal) {
           }}
           onClick={() => window.location.href = "https://app.marketincer.com/createPost"}
         >
-          Refresh
+          Close
         </Button>
       </Box>
     </Modal>
