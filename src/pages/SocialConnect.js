@@ -649,7 +649,11 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                                         }}
                                     >
                                         <img
-                                            src={account?.user?.picture?.data?.url}
+                                            src={
+                                                account.page_type === "facebook"
+                                                    ? account.page_info?.picture?.data?.url
+                                                    : account?.user?.picture?.data?.url
+                                            }
                                             alt={account.name}
                                             style={{
                                                 borderRadius: "50%",
