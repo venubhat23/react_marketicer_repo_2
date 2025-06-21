@@ -227,48 +227,55 @@ useEffect(() => {
     );
   }
 
-  // Show "No Analytics Found" modal
-  if (showNoAnalyticsModal) {
-    return (
-      <Modal
-        open={showNoAnalyticsModal}
-        onClose={() => setShowNoAnalyticsModal(false)}
-        aria-labelledby="no-analytics-modal-title"
-        aria-describedby="no-analytics-modal-description"
+// Show "No Analytics Found" modal
+if (showNoAnalyticsModal) {
+  return (
+    <Modal
+      open={showNoAnalyticsModal}
+      onClose={() => setShowNoAnalyticsModal(false)}
+      aria-labelledby="no-analytics-modal-title"
+      aria-describedby="no-analytics-modal-description"
+    >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: 'background.paper',
+          border: '2px solid #1976d2',
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2,
+          textAlign: 'center'
+        }}
       >
-        <Box
+        <Typography id="no-analytics-modal-title" variant="h6" component="h2" color="error">
+          No Analytics Found
+        </Typography>
+        <Typography id="no-analytics-modal-description" sx={{ mt: 2 }}>
+          We couldn't find any analytics data to display. Please try again later or check your data source.
+        </Typography>
+        <Button
+          variant="contained"
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 400,
-            bgcolor: 'background.paper',
-            border: '2px solid #1976d2',
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 2,
-            textAlign: 'center'
+            mt: 3,
+            backgroundColor: "#fff",
+            color: "#1976d2",
+            border: "1px solid #1976d2",
+            '&:hover': {
+              backgroundColor: "#f5f5f5"
+            }
           }}
+          onClick={() => window.location.href = "https://app.marketincer.com/createPost"}
         >
-          <Typography id="no-analytics-modal-title" variant="h6" component="h2" color="error">
-            No Analytics Found
-          </Typography>
-          <Typography id="no-analytics-modal-description" sx={{ mt: 2 }}>
-            We couldn't find any analytics data to display. Please try again later or check your data source.
-          </Typography>
-          <Button
-            variant="contained"
-            sx={{ mt: 3, backgroundColor: "#1976d2" }}
-            onClick={() => window.location.reload()}
-          >
-            Refresh
-          </Button>
-        </Box>
-      </Modal>
-    );
-  }
-
+          Refresh
+        </Button>
+      </Box>
+    </Modal>
+  );
+}
   return (
     <Box sx={{ flexGrow: 1 }} >
       <Grid container>

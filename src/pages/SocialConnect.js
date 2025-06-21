@@ -652,7 +652,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                                             src={
                                                 account.page_type === "facebook"
                                                     ? account.page_info?.picture?.data?.url
-                                                    : account?.user?.picture?.data?.url
+                                                    : account?.user_profile?.picture?.data?.url
                                             }
                                             alt={account.name}
                                             style={{
