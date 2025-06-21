@@ -25,7 +25,7 @@ const Login = () => {
       const res = await axios.post("https://api.marketincer.com/api/v1/login", form);
       //localStorage.setItem("token", res.data.token); // Save token
       login(res.data.token);
-      navigate('/dashboard');
+      navigate('/createPost');
       
     } catch (error) {
       console.error("Login failed", error);
