@@ -218,7 +218,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     };
 
     const handleAuthRedirect = (platform) => {
-        let authURL = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=pages_show_list,instagram_basic,instagram_manage_insights,instagram_manage_comments,pages_read_engagement,instagram_content_publish&response_type=code`;
+        let authURL = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=instagram_basic&response_type=code`;
         if (platform === "facebook" || platform === "instagram") {
             window.location.href = authURL;
         }
