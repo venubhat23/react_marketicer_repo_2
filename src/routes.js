@@ -93,7 +93,7 @@ const routes = [
     name: "Contract",
     key: "contract",
     icon: <Icon fontSize="small">analytics</Icon>,
-    route: "/contract",
+    route: "/contracts",
     // component: <Analytics />,
     component: <ProtectedRoute element={<Analytics />} />, // Protected
     roles: ["brand", "admin", "influencer"]
@@ -267,7 +267,7 @@ const routes = [
     name: "Contract",
     key: "contract",
     route: "/contract",
-    component: <ContractPage />,
+    component: <ContractPa />,
   },
 ];
 

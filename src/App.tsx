@@ -21,8 +21,9 @@ import CreatePost from './pages/CreatePost/CreatePost';
 import Analytics  from './pages/Profile/Analytics';
 import SocialMedia from './pages/SocialMedia';
 import FullAnalytics from './pages/Profile/FullAnalytics';
-// import ContractPage from './pages/Contract/ContractPage';
+import ContractPage from './pages/Contract/ContractPage';
 import Discover from './pages/Discover';
+import AIContractGenerator from './pages/Contract/AIContractGenerator';
 
 function App() { 
 
@@ -73,7 +74,17 @@ function App() {
             <Discover />
             </ProtectedRoute>
             } />
-            
+          <Route path="/contracts" element={
+            <ProtectedRoute>
+            <ContractPage />
+            </ProtectedRoute>
+            } />
+
+          <Route path="/ai-generator" element={
+            <ProtectedRoute>
+              <AIContractGenerator />
+            </ProtectedRoute>
+          } />
           <Route path="/login" element={<Login />} />
           <Route path="/sign-up" element={<SignUp />} />
 
