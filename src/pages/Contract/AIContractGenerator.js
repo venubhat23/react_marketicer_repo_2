@@ -54,8 +54,21 @@ const AIContractGenerator = () => {
       : !!description.trim();
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f3f4fa' }}>
-      {/* Sidebar */}
+    <Box sx={{
+      display: 'flex',
+      minHeight: '100vh',
+      minWidth: '100vw',
+      bgcolor: '#f3f4fa',
+      m: 0,
+      p: 0,
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      overflow: 'hidden'
+    }}>
+      {/* Sidebar as overlay, or remove if not wanted */}
       <Box
         sx={{
           width: 80,
@@ -63,16 +76,32 @@ const AIContractGenerator = () => {
           color: 'white',
           display: { xs: 'none', sm: 'flex' },
           flexDirection: 'column',
-          minHeight: '100vh',
+          alignItems: 'center',
+          height: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 10,
         }}
       >
         <Sidebar />
       </Box>
       {/* Content Area */}
-      <Box sx={{ flex: 1, minHeight: '100vh', bgcolor: '#f3f4fa', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{
+        flex: 1,
+        minHeight: '100vh',
+        minWidth: '100vw',
+        bgcolor: '#f3f4fa',
+        display: 'flex',
+        flexDirection: 'column',
+        ml: { sm: '80px' }, // shift content for sidebar on desktop
+        p: 0,
+        m: 0,
+      }}>
         {/* TopBar */}
         <Box
           sx={{
+            width: '100%',
             height: 64,
             bgcolor: '#232c85',
             color: 'white',
@@ -82,12 +111,19 @@ const AIContractGenerator = () => {
             fontWeight: 700,
             fontSize: 28,
             letterSpacing: '0.03em',
+            position: 'relative',
           }}
         >
           AI Contract Generator
         </Box>
         {/* Split Layout */}
-        <Grid container sx={{ flex: 1, p: 0, m: 0, height: 'calc(100vh - 64px)' }}>
+        <Grid container sx={{
+          flex: 1,
+          p: 0,
+          m: 0,
+          height: 'calc(100vh - 64px)',
+          width: '100vw',
+        }}>
           {/* Form Side */}
           <Grid
             item
@@ -97,7 +133,8 @@ const AIContractGenerator = () => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-start',
-              px: { xs: 2, md: 8 },
+              justifyContent: 'flex-start',
+              px: { xs: 2, md: 10 },
               pt: 6,
               bgcolor: '#fff',
               minHeight: '100%',
@@ -133,7 +170,7 @@ const AIContractGenerator = () => {
                 mb: 3,
                 borderRadius: 3,
                 width: '100%',
-                maxWidth: 400,
+                maxWidth: 500,
                 minWidth: { xs: '90%', md: 360 },
                 boxShadow: '0px 2px 16px 0px #eee',
               }}
@@ -180,7 +217,7 @@ const AIContractGenerator = () => {
               fullWidth
               sx={{
                 mb: 2,
-                maxWidth: 400,
+                maxWidth: 500,
                 background: '#fafaff',
                 borderRadius: 2,
                 '& .MuiOutlinedInput-root': {
@@ -207,7 +244,7 @@ const AIContractGenerator = () => {
                   minRows={5}
                   sx={{
                     mb: 2,
-                    maxWidth: 400,
+                    maxWidth: 500,
                     background: '#fafaff',
                     borderRadius: 2,
                     '& .MuiOutlinedInput-root': {
@@ -222,14 +259,13 @@ const AIContractGenerator = () => {
               </>
             )}
 
-            {/* Generate Button style */}
             <Button
               fullWidth
               variant="contained"
               disabled={!canGenerate}
               sx={{
                 mt: 2,
-                maxWidth: 400,
+                maxWidth: 500,
                 py: 1.4,
                 fontWeight: 700,
                 fontSize: 16,

@@ -36,6 +36,7 @@ import {
 } from '@mui/icons-material';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import Sidebar from "../../components/Sidebar";
+import { useNavigate } from "react-router-dom";
 
 // AI Contract Generator Component (embedded to fix import issues)
 const AIContractGenerator = ({ onBack }) => {
@@ -704,7 +705,7 @@ const ContractPage = () => {
         return 'default';
     }
   };
-
+const navigate = useNavigate();
   const getActionColor = (action) => {
     switch (action?.toLowerCase()) {
       case 'pending':
@@ -719,7 +720,7 @@ const ContractPage = () => {
   };
 
   const handleCreateContract = () => {
-    setShowContractGenerator(true);
+      navigate("/ai-generator"); // <-- navigate to your contract creation route
   };
 
   const handleBackToContracts = () => {
