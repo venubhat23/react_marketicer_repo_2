@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -13,6 +13,10 @@ import {
   IconButton,
   Alert,
   CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -29,18 +33,74 @@ const AIContractGenerator = ({ onBack = null }) => {
     contractName: '',
     description: '',
     useTemplate: false,
+    selectedTemplate: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [generatedContract, setGeneratedContract] = useState('');
+  const [templates, setTemplates] = useState([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [showContractContent, setShowContractContent] = useState(false);
 
   const API_BASE_URL = 'http://localhost:3001/api/v1';
+
+  // Fetch templates from API
+  const fetchTemplates = async () => {
+    try {
+      setLoadingTemplates(true);
+      setError('');
+      
+      const response = await fetch(`${API_BASE_URL}/contracts/templates`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch templates: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      setTemplates(data.templates || []);
+    } catch (err) {
+      setError(`Error fetching templates: ${err.message}`);
+      console.error('Error fetching templates:', err);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  // Load templates when use template is toggled on
+  useEffect(() => {
+    if (formData.useTemplate) {
+      fetchTemplates();
+    } else {
+      // Reset template selection when toggled off
+      setFormData(prev => ({
+        ...prev,
+        selectedTemplate: '',
+      }));
+      setGeneratedContract('');
+      setShowContractContent(false);
+    }
+  }, [formData.useTemplate]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+
+    // If template is selected, load its data
+    if (field === 'selectedTemplate' && value) {
+      const selectedTemplate = templates.find(template => template.id === value);
+      if (selectedTemplate) {
+        setFormData(prev => ({
+          ...prev,
+          contractName: selectedTemplate.name || '',
+          description: selectedTemplate.description || '',
+        }));
+        // Load template content to the right side
+        setGeneratedContract(selectedTemplate.template || selectedTemplate.content || selectedTemplate.description || 'Template content loaded successfully');
+        setShowContractContent(true);
+      }
+    }
   };
 
   const handleBack = () => {
@@ -48,6 +108,49 @@ const AIContractGenerator = ({ onBack = null }) => {
       onBack();
     } else {
       navigate('/contracts');
+    }
+  };
+
+  const handleSaveContract = async (isDraft = false) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await fetch(`${API_BASE_URL}/contracts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contract: {
+            name: formData.contractName,
+            description: formData.description,
+            content: generatedContract,
+            status: isDraft ? 'draft' : 'active',
+            contract_type: formData.useTemplate ? 'template' : 'service',
+            category: 'freelancer',
+            action: isDraft ? 'draft' : 'pending'
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to save contract: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Show success message or redirect
+      alert(isDraft ? 'Contract saved as draft!' : 'Contract saved successfully!');
+      
+      // Navigate back to contracts page
+      handleBack();
+      
+    } catch (err) {
+      setError(`Error saving contract: ${err.message}`);
+      console.error('Error saving contract:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,7 +172,7 @@ const AIContractGenerator = ({ onBack = null }) => {
         body: JSON.stringify({
           name: formData.contractName,
           description: formData.description,
-          use_template: formData.useTemplate,
+          use_template: false,
         }),
       });
 
@@ -78,7 +181,8 @@ const AIContractGenerator = ({ onBack = null }) => {
       }
 
       const data = await response.json();
-      setGeneratedContract(data.contract || 'Contract generated successfully');
+      setGeneratedContract(data.contract?.content || 'Contract generated successfully');
+      setShowContractContent(true);
       
     } catch (err) {
       setError(`Error generating contract: ${err.message}`);
@@ -86,6 +190,131 @@ const AIContractGenerator = ({ onBack = null }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderRightPanel = () => {
+    if (showContractContent) {
+      return (
+        <Box>
+          <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+            {formData.useTemplate ? 'Template Content' : 'Generated Contract'}
+          </Typography>
+          <Paper
+            sx={{
+              p: 3,
+              bgcolor: '#f8f9fa',
+              borderRadius: 2,
+              textAlign: 'left',
+              maxHeight: '400px',
+              overflow: 'auto',
+            }}
+          >
+            <TextField
+              fullWidth
+              multiline
+              rows={15}
+              value={generatedContract}
+              onChange={(e) => setGeneratedContract(e.target.value)}
+              variant="outlined"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  bgcolor: 'white',
+                  '& fieldset': {
+                    border: 'none',
+                  },
+                  '&:hover fieldset': {
+                    border: 'none',
+                  },
+                  '&.Mui-focused fieldset': {
+                    border: '1px solid #2196f3',
+                  },
+                },
+              }}
+            />
+          </Paper>
+          <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              onClick={() => handleSaveContract(false)}
+              disabled={loading}
+              sx={{
+                bgcolor: '#2196f3',
+                textTransform: 'none',
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                fontWeight: 600,
+                '&:hover': {
+                  bgcolor: '#1976d2',
+                },
+              }}
+            >
+              {loading ? <CircularProgress size={20} /> : 'Save'}
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => handleSaveContract(true)}
+              disabled={loading}
+              sx={{
+                color: '#2196f3',
+                borderColor: '#2196f3',
+                textTransform: 'none',
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                fontWeight: 600,
+                '&:hover': {
+                  borderColor: '#1976d2',
+                  bgcolor: 'rgba(33, 150, 243, 0.04)',
+                },
+              }}
+            >
+              {loading ? <CircularProgress size={20} /> : 'Save as Draft'}
+            </Button>
+          </Box>
+        </Box>
+      );
+    }
+
+    // Empty state
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        minHeight: '400px'
+      }}>
+        {/* Document Icon */}
+        <Box sx={{ 
+          mb: 3,
+          p: 4,
+          borderRadius: '50%',
+          bgcolor: '#e3f2fd'
+        }}>
+          <DescriptionIcon sx={{ fontSize: 64, color: '#90caf9' }} />
+        </Box>
+        
+        <Typography variant="h6" sx={{ mb: 1, color: '#999', fontWeight: 600 }}>
+          No Contract Generated
+        </Typography>
+        <Typography 
+          variant="body1" 
+          sx={{ 
+            mb: 3, 
+            color: '#999', 
+            maxWidth: 300,
+            textAlign: 'center',
+            lineHeight: 1.6
+          }}
+        >
+          {formData.useTemplate 
+            ? 'Select a template from the dropdown to load its content here.'
+            : 'Fill in the contract name and description, then click "Generate AI Contract" to create your contract.'
+          }
+        </Typography>
+      </Box>
+    );
   };
 
   return (
@@ -191,6 +420,48 @@ const AIContractGenerator = ({ onBack = null }) => {
                       />
                     </Box>
 
+                    {/* Template Selection Dropdown - Only show when Use Template is ON */}
+                    {formData.useTemplate && (
+                      <Box sx={{ mb: 3 }}>
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            mb: 1, 
+                            color: '#333', 
+                            fontWeight: 500 
+                          }}
+                        >
+                          Select Template
+                        </Typography>
+                        <FormControl fullWidth>
+                          <Select
+                            value={formData.selectedTemplate}
+                            onChange={(e) => handleInputChange('selectedTemplate', e.target.value)}
+                            displayEmpty
+                            sx={{
+                              borderRadius: 2,
+                              bgcolor: '#f8f9fa',
+                              '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#2196f3',
+                              },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#2196f3',
+                              },
+                            }}
+                          >
+                            <MenuItem value="" disabled>
+                              {loadingTemplates ? 'Loading templates...' : 'Choose a template'}
+                            </MenuItem>
+                            {templates.map((template) => (
+                              <MenuItem key={template.id} value={template.id}>
+                                {template.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Box>
+                    )}
+
                     {/* Contract Name Field */}
                     <Box sx={{ mb: 3 }}>
                       <Typography 
@@ -209,10 +480,11 @@ const AIContractGenerator = ({ onBack = null }) => {
                         variant="outlined"
                         value={formData.contractName}
                         onChange={(e) => handleInputChange('contractName', e.target.value)}
+                        disabled={formData.useTemplate && formData.selectedTemplate}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
-                            bgcolor: '#f8f9fa',
+                            bgcolor: formData.useTemplate && formData.selectedTemplate ? '#f5f5f5' : '#f8f9fa',
                             '&:hover fieldset': {
                               borderColor: '#2196f3',
                             },
@@ -244,10 +516,11 @@ const AIContractGenerator = ({ onBack = null }) => {
                         variant="outlined"
                         value={formData.description}
                         onChange={(e) => handleInputChange('description', e.target.value)}
+                        disabled={formData.useTemplate && formData.selectedTemplate}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
-                            bgcolor: '#f8f9fa',
+                            bgcolor: formData.useTemplate && formData.selectedTemplate ? '#f5f5f5' : '#f8f9fa',
                             '&:hover fieldset': {
                               borderColor: '#2196f3',
                             },
@@ -259,32 +532,34 @@ const AIContractGenerator = ({ onBack = null }) => {
                       />
                     </Box>
 
-                    {/* Generate Button */}
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      onClick={handleGenerateContract}
-                      disabled={loading}
-                      sx={{
-                        bgcolor: '#e0e0e0',
-                        color: '#666',
-                        textTransform: 'none',
-                        py: 2,
-                        borderRadius: 2,
-                        fontWeight: 600,
-                        fontSize: '1rem',
-                        '&:hover': {
-                          bgcolor: '#d0d0d0',
-                        },
-                        '&:disabled': {
-                          bgcolor: '#f5f5f5',
-                          color: '#999',
-                        },
-                      }}
-                      startIcon={loading ? <CircularProgress size={20} /> : null}
-                    >
-                      {loading ? 'Generating...' : 'Generate AI Contract'}
-                    </Button>
+                    {/* Generate Button - Only show when Use Template is OFF */}
+                    {!formData.useTemplate && (
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        onClick={handleGenerateContract}
+                        disabled={loading}
+                        sx={{
+                          bgcolor: '#2196f3',
+                          color: 'white',
+                          textTransform: 'none',
+                          py: 2,
+                          borderRadius: 2,
+                          fontWeight: 600,
+                          fontSize: '1rem',
+                          '&:hover': {
+                            bgcolor: '#1976d2',
+                          },
+                          '&:disabled': {
+                            bgcolor: '#f5f5f5',
+                            color: '#999',
+                          },
+                        }}
+                        startIcon={loading ? <CircularProgress size={20} /> : null}
+                      >
+                        {loading ? 'Generating...' : 'Generate AI Contract'}
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               </Grid>
@@ -300,97 +575,7 @@ const AIContractGenerator = ({ onBack = null }) => {
                   }}
                 >
                   <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                    {generatedContract ? (
-                      <Box>
-                        <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
-                          Generated Contract
-                        </Typography>
-                        <Paper
-                          sx={{
-                            p: 3,
-                            bgcolor: '#f8f9fa',
-                            borderRadius: 2,
-                            textAlign: 'left',
-                            maxHeight: '400px',
-                            overflow: 'auto',
-                          }}
-                        >
-                          <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', color: '#333' }}>
-                            {generatedContract}
-                          </Typography>
-                        </Paper>
-                        <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
-                          <Button
-                            variant="contained"
-                            sx={{
-                              bgcolor: '#2196f3',
-                              textTransform: 'none',
-                              px: 3,
-                              py: 1,
-                              borderRadius: 2,
-                              fontWeight: 600,
-                              '&:hover': {
-                                bgcolor: '#1976d2',
-                              },
-                            }}
-                          >
-                            Save Contract
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            sx={{
-                              color: '#2196f3',
-                              borderColor: '#2196f3',
-                              textTransform: 'none',
-                              px: 3,
-                              py: 1,
-                              borderRadius: 2,
-                              fontWeight: 600,
-                              '&:hover': {
-                                borderColor: '#1976d2',
-                                bgcolor: 'rgba(33, 150, 243, 0.04)',
-                              },
-                            }}
-                          >
-                            Edit Contract
-                          </Button>
-                        </Box>
-                      </Box>
-                    ) : (
-                      <Box sx={{ 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        minHeight: '400px'
-                      }}>
-                        {/* Document Icon */}
-                        <Box sx={{ 
-                          mb: 3,
-                          p: 4,
-                          borderRadius: '50%',
-                          bgcolor: '#e3f2fd'
-                        }}>
-                          <DescriptionIcon sx={{ fontSize: 64, color: '#90caf9' }} />
-                        </Box>
-                        
-                        <Typography variant="h6" sx={{ mb: 1, color: '#999', fontWeight: 600 }}>
-                          No Contract Generated
-                        </Typography>
-                        <Typography 
-                          variant="body1" 
-                          sx={{ 
-                            mb: 3, 
-                            color: '#999', 
-                            maxWidth: 300,
-                            textAlign: 'center',
-                            lineHeight: 1.6
-                          }}
-                        >
-                          Fill in the contract name and description, then click "Generate AI Contract" to create your contract.
-                        </Typography>
-                      </Box>
-                    )}
+                    {renderRightPanel()}
                   </CardContent>
                 </Card>
               </Grid>
