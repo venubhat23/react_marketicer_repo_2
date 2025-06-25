@@ -35,7 +35,7 @@ import AppsIcon from '@mui/icons-material/Apps';
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DescriptionIcon from '@mui/icons-material/Description';
-
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import { Link, useNavigate } from "react-router-dom";
 import LanguageIcon from '@mui/icons-material/Language';
 
@@ -152,6 +152,17 @@ const Sidebar = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <DescriptionIcon fontSize="medium" />
                 <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Contracts</Typography>
+              </Box>
+            </Link>
+          </ListItemButton>
+        </ListItem>
+        
+        <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/marketplace">
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                <StorefrontIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Marketplace</Typography>
               </Box>
             </Link>
           </ListItemButton>
