@@ -42,7 +42,7 @@ const AIContractGenerator = ({ onBack = null }) => {
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [showContractContent, setShowContractContent] = useState(false);
 
-  const API_BASE_URL = 'http://localhost:3001/api/v1';
+  const API_BASE_URL = 'https://api.marketincer.com/api/v1';
 
   // Fetch templates from API
   const fetchTemplates = async () => {

@@ -280,7 +280,7 @@ const CreatePost = () => {
   };
 
   const handlePublish = async () => {
-    if (!uploadedImageUrl || !postContent) {
+    if (!postContent) {
       alert("Please make sure all fields are filled out!");
       return;
     }
