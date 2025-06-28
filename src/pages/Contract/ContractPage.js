@@ -13,7 +13,6 @@ import {
   Paper,
   Chip,
   IconButton,
-  Checkbox,
   InputAdornment,
   Grid,
   Alert,
@@ -22,7 +21,6 @@ import {
 import {
   Add as AddIcon,
   Search as SearchIcon,
-  MoreVert as MoreVertIcon,
   ViewList as ViewListIcon,
   ViewModule as ViewModuleIcon,
   Description as DescriptionIcon,
@@ -32,7 +30,6 @@ import {
   CreateNewFolder as CreatedIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
-  FileCopy as DuplicateIcon,
 } from '@mui/icons-material';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import Sidebar from "../../components/Sidebar";
@@ -53,6 +50,24 @@ const ContractPage = () => {
   const [totalContracts, setTotalContracts] = useState(0);
 
   const API_BASE_URL = 'https://api.marketincer.com/api/v1';
+  const navigate = useNavigate();
+
+  // Helper function to get status display text and color
+  const getStatusDisplay = (status) => {
+    if (status === 1 || status === '1') {
+      return {
+        text: 'Draft',
+        bgcolor: '#f3e5f5',
+        color: '#7b1fa2'
+      };
+    } else {
+      return {
+        text: 'Active',
+        bgcolor: '#e8f5e8',
+        color: '#388e3c'
+      };
+    }
+  };
 
   // Fetch contracts from API
   const fetchContracts = async () => {
@@ -109,10 +124,56 @@ const ContractPage = () => {
     }
   };
 
-  // Delete contract
-  const deleteContract = async (contractId) => {
+  // Fetch single contract details for editing
+  const fetchContractDetails = async (contractId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/contracts/${contractId}`, {
+      setLoading(true);
+      setError('');
+      
+      const response = await fetch(`${API_BASE_URL}/contracts/${contractId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch contract details: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data.contract || data; // Return the contract data
+    } catch (err) {
+      setError(`Error fetching contract details: ${err.message}`);
+      console.error('Error fetching contract details:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch template details for creating contract from template
+  const fetchTemplateDetails = async (templateId) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await fetch(`${API_BASE_URL}/contracts/${templateId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch template details: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data.contract || data; // Return the template data
+    } catch (err) {
+      setError(`Error fetching template details: ${err.message}`);
+      console.error('Error fetching template details:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete contract or template
+  const deleteItem = async (itemId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/contracts/${itemId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -120,10 +181,10 @@ const ContractPage = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to delete contract: ${response.statusText}`);
+        throw new Error(`Failed to delete item: ${response.statusText}`);
       }
 
-      // Refresh the contracts list
+      // Refresh the list
       if (showTemplates) {
         fetchTemplates();
       } else {
@@ -132,31 +193,104 @@ const ContractPage = () => {
       
       setError('');
     } catch (err) {
-      setError(`Error deleting contract: ${err.message}`);
-      console.error('Error deleting contract:', err);
+      setError(`Error deleting item: ${err.message}`);
+      console.error('Error deleting item:', err);
     }
   };
 
-  // Duplicate contract
-  const duplicateContract = async (contractId) => {
+  // Edit contract - fetch details and navigate to AI generator
+  const editContract = async (contract) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/contracts/${contractId}/duplicate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to duplicate contract: ${response.statusText}`);
+      // Fetch complete contract details including content
+      const fullContractData = await fetchContractDetails(contract.id);
+      
+      if (fullContractData) {
+        navigate("/ai-generator", { 
+          state: { 
+            editMode: true, 
+            contractData: {
+              id: contract.id,
+              name: fullContractData.name || contract.name,
+              description: fullContractData.description || contract.description || '',
+              content: fullContractData.content || '',
+              status: fullContractData.status || contract.status,
+              contract_type: fullContractData.contract_type || contract.type,
+              category: fullContractData.category || 'freelancer',
+              date_created: fullContractData.date_created || contract.date_created,
+              created_at: fullContractData.created_at || contract.created_at
+            }
+          } 
+        });
+      } else {
+        // Fallback: use the basic contract data if API call fails
+        navigate("/ai-generator", { 
+          state: { 
+            editMode: true, 
+            contractData: {
+              id: contract.id,
+              name: contract.name,
+              description: contract.description || '',
+              content: contract.content || '',
+              status: contract.status,
+              contract_type: contract.type,
+              category: 'freelancer',
+              date_created: contract.date_created,
+              created_at: contract.created_at
+            }
+          } 
+        });
       }
-
-      // Refresh the contracts list
-      fetchContracts();
-      setError('');
     } catch (err) {
-      setError(`Error duplicating contract: ${err.message}`);
-      console.error('Error duplicating contract:', err);
+      setError(`Error preparing contract for editing: ${err.message}`);
+      console.error('Error in editContract:', err);
+    }
+  };
+
+  // Create contract from template
+  const createContractFromTemplate = async (template) => {
+    try {
+      // Fetch complete template details including content
+      const fullTemplateData = await fetchTemplateDetails(template.id);
+      
+      if (fullTemplateData) {
+        navigate("/ai-generator", { 
+          state: { 
+            createFromTemplate: true, 
+            templateData: {
+              id: template.id,
+              name: template.name,
+              description: template.description || '',
+              template_content: template.template_content || '', // This is the key field
+              content: template.template_content || '', // Also map to content for backward compatibility
+              contract_type: template.type,
+              type: template.type, // Keep both for compatibility
+              category: 'freelancer',
+              date_created: template.date_created
+            }
+          } 
+        });
+      } else {
+        // Fallback: use the basic template data if API call fails
+        navigate("/ai-generator", { 
+          state: { 
+            createFromTemplate: true, 
+            templateData: {
+                id: template.id,
+                name: template.name,
+                description: template.description || '',
+                template_content: template.template_content || '', // This is the key field
+                content: template.template_content || '', // Also map to content for backward compatibility
+                contract_type: template.type,
+                type: template.type, // Keep both for compatibility
+                category: 'freelancer',
+                date_created: template.date_created
+            }
+          } 
+        });
+      }
+    } catch (err) {
+      setError(`Error preparing template for contract creation: ${err.message}`);
+      console.error('Error in createContractFromTemplate:', err);
     }
   };
 
@@ -184,43 +318,12 @@ const ContractPage = () => {
   const contractCount = contracts.length;
   const templateCount = templates.length;
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'sent':
-        return 'primary';
-      case 'draft':
-        return 'default';
-      case 'signed':
-        return 'success';
-      case 'active':
-        return 'success';
-      case 'template':
-        return 'secondary';
-      default:
-        return 'default';
-    }
-  };
-const navigate = useNavigate();
-  const getActionColor = (action) => {
-    switch (action?.toLowerCase()) {
-      case 'pending':
-        return 'warning';
-      case 'ready':
-        return 'info';
-      case 'viewed':
-        return 'default';
-      default:
-        return 'default';
-    }
-  };
-
   const handleCreateContract = () => {
-      navigate("/ai-generator"); // <-- navigate to your contract creation route
+    navigate("/ai-generator");
   };
 
   const handleBackToContracts = () => {
     setShowContractGenerator(false);
-    // Refresh contracts when coming back from generator
     if (showTemplates) {
       fetchTemplates();
     } else {
@@ -228,19 +331,179 @@ const navigate = useNavigate();
     }
   };
 
-  const handleContractAction = (action, contractId) => {
+  const handleItemAction = (action, itemId, item) => {
     switch (action) {
       case 'delete':
-        if (window.confirm('Are you sure you want to delete this contract?')) {
-          deleteContract(contractId);
+        if (window.confirm(`Are you sure you want to delete this ${showTemplates ? 'template' : 'contract'}?`)) {
+          deleteItem(itemId);
         }
         break;
-      case 'duplicate':
-        duplicateContract(contractId);
+      case 'edit':
+        if (showTemplates) {
+          // Handle template editing - for now just log
+          console.log(`Edit template ${itemId}`);
+        } else {
+          editContract(item);
+        }
+        break;
+      case 'create-from-template':
+        // Create contract from template
+        createContractFromTemplate(item);
+        break;
+      case 'view':
+        // Handle view contract details
+        console.log(`View item ${itemId}`);
         break;
       default:
-        console.log(`Action ${action} for contract ${contractId}`);
+        console.log(`Action ${action} for item ${itemId}`);
     }
+  };
+
+  // Render table headers based on current view
+  const renderTableHeaders = () => {
+    if (showTemplates) {
+      return (
+        <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Template Name</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Type</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Date Created</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Actions</TableCell>
+        </TableRow>
+      );
+    } else {
+      return (
+        <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Contract Name</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Type</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Status</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Date Created</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Actions</TableCell>
+        </TableRow>
+      );
+    }
+  };
+
+  // Render table rows based on current view
+  const renderTableRows = () => {
+    return filteredData.map((item) => {
+      // Get status display for contracts
+      const statusDisplay = getStatusDisplay(item.status);
+      
+      return (
+        <TableRow
+          key={item.id}
+          hover
+          sx={{ 
+            '&:hover': { bgcolor: '#f8f9fa' },
+            borderBottom: '1px solid #e0e0e0'
+          }}
+        >
+          <TableCell>
+            <Typography
+              component="span"
+              sx={{
+                color: '#7c4dff',
+                cursor: 'pointer',
+                fontWeight: 500,
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
+              }}
+              onClick={() => handleItemAction('view', item.id, item)}
+            >
+              {item.name}
+            </Typography>
+          </TableCell>
+          <TableCell sx={{ color: '#666' }}>
+            {showTemplates 
+              ? (item.type || 'N/A')
+              : (item.type || item.contract_type || 'Template')
+            }
+          </TableCell>
+          {!showTemplates && (
+            <TableCell>
+              <Chip
+                label={statusDisplay.text}
+                size="small"
+                sx={{
+                  bgcolor: statusDisplay.bgcolor,
+                  color: statusDisplay.color,
+                  border: 'none',
+                  fontWeight: 500
+                }}
+              />
+            </TableCell>
+          )}
+          <TableCell sx={{ color: '#666' }}>
+            {item.date_created 
+              ? (typeof item.date_created === 'string' 
+                  ? item.date_created 
+                  : new Date(item.date_created).toLocaleDateString())
+              : (item.created_at 
+                  ? new Date(item.created_at).toLocaleDateString()
+                  : 'N/A')
+            }
+          </TableCell>
+          <TableCell>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {showTemplates ? (
+                // Template actions - Show "Create Contract" button
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={() => handleItemAction('create-from-template', item.id, item)}
+                  sx={{ 
+                    bgcolor: '#4caf50',
+                    color: 'white',
+                    textTransform: 'none',
+                    px: 2,
+                    py: 0.5,
+                    borderRadius: 1,
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    '&:hover': { 
+                      bgcolor: '#388e3c' 
+                    }
+                  }}
+                  startIcon={<AddIcon fontSize="small" />}
+                >
+                  Create Contract
+                </Button>
+              ) : (
+                // Contract actions - Show Edit and Delete buttons
+                <>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => handleItemAction('edit', item.id, item)}
+                    sx={{ 
+                      color: '#1976d2',
+                      '&:hover': { bgcolor: 'rgba(25, 118, 210, 0.1)' }
+                    }}
+                    title="Edit Contract"
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => handleItemAction('delete', item.id, item)}
+                    sx={{ 
+                      color: '#d32f2f',
+                      '&:hover': { bgcolor: 'rgba(211, 47, 47, 0.1)' }
+                    }}
+                    title="Delete Contract"
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </>
+              )}
+              
+              {/* Delete button for templates */}
+             
+            </Box>
+          </TableCell>
+        </TableRow>
+      );
+    });
   };
 
   // Render AI Contract Generator if showContractGenerator is true
@@ -255,12 +518,12 @@ const navigate = useNavigate();
           <Sidebar />
         </Grid>
         <Grid size={{ md: 11 }}>
-          {/* Header */}
+          {/* Header with updated background color */}
           <Paper
             elevation={0}
             sx={{
               p: 2,
-              backgroundColor: '#1a237e',
+              backgroundColor: '#091a48', // Updated header background color
               borderRadius: 0,
               color: 'white'
             }}
@@ -410,33 +673,8 @@ const navigate = useNavigate();
             </Box>
 
             {/* View Mode Toggle */}
-            <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
-              <IconButton 
-                onClick={() => setViewMode('list')}
-                sx={{ 
-                  bgcolor: viewMode === 'list' ? '#1976d2' : 'transparent',
-                  color: viewMode === 'list' ? 'white' : '#666',
-                  '&:hover': {
-                    bgcolor: viewMode === 'list' ? '#1565c0' : 'rgba(0,0,0,0.04)',
-                  }
-                }}
-              >
-                <ViewListIcon />
-              </IconButton>
-              <IconButton 
-                onClick={() => setViewMode('grid')}
-                sx={{ 
-                  bgcolor: viewMode === 'grid' ? '#1976d2' : 'transparent',
-                  color: viewMode === 'grid' ? 'white' : '#666',
-                  '&:hover': {
-                    bgcolor: viewMode === 'grid' ? '#1565c0' : 'rgba(0,0,0,0.04)',
-                  }
-                }}
-              >
-                <ViewModuleIcon />
-              </IconButton>
-            </Box>
           </Box>
+
           {/* Main Content */}
           <Box sx={{ padding: '24px' }}>
             {loading ? (
@@ -448,90 +686,10 @@ const navigate = useNavigate();
               <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                      <TableCell padding="checkbox">
-                        <Checkbox />
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#333' }}>Contract Name</TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#333' }}>Type</TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#333' }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#333' }}>Date Created</TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#333' }}>Action</TableCell>
-                      <TableCell></TableCell>
-                    </TableRow>
+                    {renderTableHeaders()}
                   </TableHead>
                   <TableBody>
-                    {filteredData.map((contract) => (
-                      <TableRow
-                        key={contract.id}
-                        hover
-                        sx={{ 
-                          '&:hover': { bgcolor: '#f8f9fa' },
-                          borderBottom: '1px solid #e0e0e0'
-                        }}
-                      >
-                        <TableCell padding="checkbox">
-                          <Checkbox />
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            component="span"
-                            sx={{
-                              color: '#7c4dff',
-                              cursor: 'pointer',
-                              fontWeight: 500,
-                              '&:hover': {
-                                textDecoration: 'underline',
-                              },
-                            }}
-                          >
-                            {contract.name}
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ color: '#666' }}>
-                          {contract.contract_type || contract.type || 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={contract.status}
-                            size="small"
-                            sx={{
-                              bgcolor: contract.status === 'Sent' ? '#e3f2fd' : 
-                                      contract.status === 'Draft' ? '#f3e5f5' :
-                                      contract.status === 'Signed' ? '#e8f5e8' : '#f5f5f5',
-                              color: contract.status === 'Sent' ? '#1976d2' : 
-                                     contract.status === 'Draft' ? '#7b1fa2' :
-                                     contract.status === 'Signed' ? '#388e3c' : '#666',
-                              border: 'none',
-                              fontWeight: 500
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell sx={{ color: '#666' }}>
-                          {contract.created_at 
-                            ? new Date(contract.created_at).toLocaleDateString()
-                            : contract.dateCreated || 'N/A'
-                          }
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={contract.action || 'Viewed'}
-                            size="small"
-                            sx={{
-                              bgcolor: contract.action === 'Pending' ? '#fff3e0' : '#f5f5f5',
-                              color: contract.action === 'Pending' ? '#ef6c00' : '#666',
-                              border: 'none',
-                              fontWeight: 500
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <IconButton size="small">
-                            <MoreVertIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {renderTableRows()}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -554,10 +712,10 @@ const navigate = useNavigate();
                   <DescriptionIcon sx={{ fontSize: 64, color: '#ccc' }} />
                 </Box>
                 <Typography variant="h5" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                  No Contracts Yet
+                  No {showTemplates ? 'Templates' : 'Contracts'} Yet
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 3, color: '#666', maxWidth: 400 }}>
-                  Start by creating your first Contract
+                  Start by creating your first {showTemplates ? 'Template' : 'Contract'}
                 </Typography>
                 <Button
                   variant="contained"
@@ -575,7 +733,7 @@ const navigate = useNavigate();
                     },
                   }}
                 >
-                  Create Contract
+                  Create {showTemplates ? 'Template' : 'Contract'}
                 </Button>
               </Box>
             )}

@@ -22,7 +22,6 @@ import {
   LocationOn as LocationOnIcon,
   Language as LanguageIcon,
   CloudUpload as CloudUploadIcon,
-  VideoLibrary as VideoLibraryIcon,
 } from '@mui/icons-material';
 import Sidebar from '../../components/Sidebar';
 
@@ -43,6 +42,20 @@ const MarketplaceModule = () => {
       ...formData,
       [field]: event.target.value,
     });
+  };
+
+  const handleImageUpload = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        console.log('Image uploaded:', file.name);
+        // Handle image upload logic here
+      }
+    };
+    input.click();
   };
 
   const handlePublish = () => {
@@ -106,15 +119,24 @@ const MarketplaceModule = () => {
           </Paper>
 
           {/* Main Content */}
-          <Box sx={{ flexGrow: 1, padding: '40px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+          <Box sx={{ 
+            flexGrow: 1, 
+            padding: { xs: '20px', md: '40px' }, 
+            backgroundColor: '#f8f9fa', 
+            minHeight: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'flex-start'
+          }}>
             <Paper
               elevation={0}
               sx={{
-                maxWidth: 900,
-                margin: '0 auto',
-                padding: '40px',
-                borderRadius: '12px',
+                width: '100%',
+                maxWidth: '900px',
+                padding: { xs: '20px', md: '40px' },
+                borderRadius: '16px',
                 backgroundColor: '#fff',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
               }}
             >
               {/* Company Header */}
@@ -122,17 +144,18 @@ const MarketplaceModule = () => {
                 variant="h5"
                 sx={{
                   fontWeight: 600,
-                  color: '#333',
+                  color: '#2c3e50',
                   marginBottom: '40px',
                   textAlign: 'left',
+                  fontSize: { xs: '1.5rem', md: '2rem' }
                 }}
               >
                 Roar On Wheels Pvt. Ltd.
               </Typography>
 
               <Grid container spacing={3}>
-                {/* Title Field - Full Width */}
-                <Grid item xs={12}>
+                {/* Title and Description Row */}
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     placeholder="Title"
@@ -141,10 +164,12 @@ const MarketplaceModule = () => {
                     onChange={handleInputChange('title')}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        borderRadius: '25px',
+                        borderRadius: '30px',
                         backgroundColor: '#fff',
-                        border: '2px solid #e0e0e0',
-                        height: '50px',
+                        border: '2px solid #e8ecf0',
+                        height: '56px',
+                        fontSize: '14px',
+                        color: '#8B5CF6',
                         '&:hover': {
                           borderColor: '#8B5CF6',
                         },
@@ -154,7 +179,12 @@ const MarketplaceModule = () => {
                         },
                       },
                       '& .MuiInputBase-input': {
-                        padding: '14px 20px',
+                        padding: '16px 24px',
+                        color: '#8B5CF6',
+                        '&::placeholder': {
+                          color: '#8B5CF6',
+                          opacity: 0.8,
+                        },
                       },
                       '& .MuiOutlinedInput-notchedOutline': {
                         border: 'none',
@@ -163,21 +193,23 @@ const MarketplaceModule = () => {
                   />
                 </Grid>
 
-                {/* Description Field - Full Width */}
-                <Grid item xs={12}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     placeholder="Enter a description..."
                     variant="outlined"
                     multiline
-                    rows={4}
+                    rows={2}
                     value={formData.description}
                     onChange={handleInputChange('description')}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        borderRadius: '15px',
+                        borderRadius: '20px',
                         backgroundColor: '#fff',
-                        border: '2px solid #e0e0e0',
+                        border: '2px solid #e8ecf0',
+                        minHeight: '56px',
+                        fontSize: '14px',
+                        color: '#8B5CF6',
                         '&:hover': {
                           borderColor: '#8B5CF6',
                         },
@@ -187,7 +219,12 @@ const MarketplaceModule = () => {
                         },
                       },
                       '& .MuiInputBase-input': {
-                        padding: '14px 20px',
+                        padding: '16px 24px',
+                        color: '#8B5CF6',
+                        '&::placeholder': {
+                          color: '#8B5CF6',
+                          opacity: 0.8,
+                        },
                       },
                       '& .MuiOutlinedInput-notchedOutline': {
                         border: 'none',
@@ -196,55 +233,34 @@ const MarketplaceModule = () => {
                   />
                 </Grid>
 
-                {/* Upload Buttons Row */}
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', gap: 2, marginBottom: '20px' }}>
-                    <Button
-                      variant="outlined"
-                      startIcon={<CloudUploadIcon />}
-                      sx={{
-                        flex: 1,
-                        height: '50px',
-                        borderRadius: '25px',
-                        borderColor: '#8B5CF6',
-                        color: '#8B5CF6',
-                        backgroundColor: '#faf5ff',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        textTransform: 'none',
-                        '&:hover': {
-                          backgroundColor: '#f3e8ff',
-                          borderColor: '#7C3AED',
-                        },
-                      }}
-                    >
-                      Upload Image
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<VideoLibraryIcon />}
-                      sx={{
-                        flex: 1,
-                        height: '50px',
-                        borderRadius: '25px',
-                        borderColor: '#8B5CF6',
-                        color: '#8B5CF6',
-                        backgroundColor: '#faf5ff',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        textTransform: 'none',
-                        '&:hover': {
-                          backgroundColor: '#f3e8ff',
-                          borderColor: '#7C3AED',
-                        },
-                      }}
-                    >
-                      Upload Video
-                    </Button>
-                  </Box>
+                {/* Upload Button Row */}
+                <Grid item xs={12} md={6}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<CloudUploadIcon />}
+                    onClick={handleImageUpload}
+                    fullWidth
+                    sx={{
+                      height: '56px',
+                      borderRadius: '30px',
+                      borderColor: '#8B5CF6',
+                      color: '#8B5CF6',
+                      backgroundColor: 'rgba(139, 92, 246, 0.05)',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      textTransform: 'none',
+                      border: '2px solid #8B5CF6',
+                      '&:hover': {
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderColor: '#7C3AED',
+                        transform: 'translateY(-1px)',
+                      },
+                    }}
+                  >
+                    Upload Image
+                  </Button>
                 </Grid>
 
-                {/* Dropdown Fields Row 1 */}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <Select
@@ -253,18 +269,21 @@ const MarketplaceModule = () => {
                       displayEmpty
                       startAdornment={
                         <InputAdornment position="start">
-                          <CategoryIcon sx={{ color: '#8B5CF6', mr: 1 }} />
+                          <CategoryIcon sx={{ color: '#8B5CF6', mr: 1, fontSize: '20px' }} />
                         </InputAdornment>
                       }
                       sx={{
-                        height: '50px',
-                        borderRadius: '25px',
+                        height: '56px',
+                        borderRadius: '30px',
                         backgroundColor: '#fff',
-                        border: '2px solid #e0e0e0',
+                        border: '2px solid #e8ecf0',
+                        color: '#8B5CF6',
+                        fontSize: '14px',
                         '& .MuiSelect-select': {
                           display: 'flex',
                           alignItems: 'center',
-                          padding: '14px 20px',
+                          padding: '16px 24px',
+                          color: '#8B5CF6',
                         },
                         '& .MuiOutlinedInput-notchedOutline': {
                           border: 'none',
@@ -290,6 +309,7 @@ const MarketplaceModule = () => {
                   </FormControl>
                 </Grid>
 
+                {/* Second Row of Dropdowns */}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <Select
@@ -298,18 +318,21 @@ const MarketplaceModule = () => {
                       displayEmpty
                       startAdornment={
                         <InputAdornment position="start">
-                          <PeopleIcon sx={{ color: '#8B5CF6', mr: 1 }} />
+                          <PeopleIcon sx={{ color: '#8B5CF6', mr: 1, fontSize: '20px' }} />
                         </InputAdornment>
                       }
                       sx={{
-                        height: '50px',
-                        borderRadius: '25px',
+                        height: '56px',
+                        borderRadius: '30px',
                         backgroundColor: '#fff',
-                        border: '2px solid #e0e0e0',
+                        border: '2px solid #e8ecf0',
+                        color: '#8B5CF6',
+                        fontSize: '14px',
                         '& .MuiSelect-select': {
                           display: 'flex',
                           alignItems: 'center',
-                          padding: '14px 20px',
+                          padding: '16px 24px',
+                          color: '#8B5CF6',
                         },
                         '& .MuiOutlinedInput-notchedOutline': {
                           border: 'none',
@@ -335,7 +358,6 @@ const MarketplaceModule = () => {
                   </FormControl>
                 </Grid>
 
-                {/* Dropdown Fields Row 2 */}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <Select
@@ -344,18 +366,21 @@ const MarketplaceModule = () => {
                       displayEmpty
                       startAdornment={
                         <InputAdornment position="start">
-                          <AttachMoneyIcon sx={{ color: '#8B5CF6', mr: 1 }} />
+                          <AttachMoneyIcon sx={{ color: '#8B5CF6', mr: 1, fontSize: '20px' }} />
                         </InputAdornment>
                       }
                       sx={{
-                        height: '50px',
-                        borderRadius: '25px',
+                        height: '56px',
+                        borderRadius: '30px',
                         backgroundColor: '#fff',
-                        border: '2px solid #e0e0e0',
+                        border: '2px solid #e8ecf0',
+                        color: '#8B5CF6',
+                        fontSize: '14px',
                         '& .MuiSelect-select': {
                           display: 'flex',
                           alignItems: 'center',
-                          padding: '14px 20px',
+                          padding: '16px 24px',
+                          color: '#8B5CF6',
                         },
                         '& .MuiOutlinedInput-notchedOutline': {
                           border: 'none',
@@ -389,18 +414,21 @@ const MarketplaceModule = () => {
                       displayEmpty
                       startAdornment={
                         <InputAdornment position="start">
-                          <LocationOnIcon sx={{ color: '#8B5CF6', mr: 1 }} />
+                          <LocationOnIcon sx={{ color: '#8B5CF6', mr: 1, fontSize: '20px' }} />
                         </InputAdornment>
                       }
                       sx={{
-                        height: '50px',
-                        borderRadius: '25px',
+                        height: '56px',
+                        borderRadius: '30px',
                         backgroundColor: '#fff',
-                        border: '2px solid #e0e0e0',
+                        border: '2px solid #e8ecf0',
+                        color: '#8B5CF6',
+                        fontSize: '14px',
                         '& .MuiSelect-select': {
                           display: 'flex',
                           alignItems: 'center',
-                          padding: '14px 20px',
+                          padding: '16px 24px',
+                          color: '#8B5CF6',
                         },
                         '& .MuiOutlinedInput-notchedOutline': {
                           border: 'none',
@@ -426,7 +454,7 @@ const MarketplaceModule = () => {
                   </FormControl>
                 </Grid>
 
-                {/* Dropdown Fields Row 3 */}
+                {/* Third Row of Dropdowns */}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <Select
@@ -437,15 +465,15 @@ const MarketplaceModule = () => {
                         <InputAdornment position="start">
                           <Box
                             sx={{
-                              width: 24,
-                              height: 24,
+                              width: 20,
+                              height: 20,
                               borderRadius: '50%',
                               backgroundColor: '#8B5CF6',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               color: 'white',
-                              fontSize: '12px',
+                              fontSize: '10px',
                               fontWeight: 'bold',
                               mr: 1,
                             }}
@@ -455,14 +483,17 @@ const MarketplaceModule = () => {
                         </InputAdornment>
                       }
                       sx={{
-                        height: '50px',
-                        borderRadius: '25px',
+                        height: '56px',
+                        borderRadius: '30px',
                         backgroundColor: '#fff',
-                        border: '2px solid #e0e0e0',
+                        border: '2px solid #e8ecf0',
+                        color: '#8B5CF6',
+                        fontSize: '14px',
                         '& .MuiSelect-select': {
                           display: 'flex',
                           alignItems: 'center',
-                          padding: '14px 20px',
+                          padding: '16px 24px',
+                          color: '#8B5CF6',
                         },
                         '& .MuiOutlinedInput-notchedOutline': {
                           border: 'none',
@@ -496,18 +527,21 @@ const MarketplaceModule = () => {
                       displayEmpty
                       startAdornment={
                         <InputAdornment position="start">
-                          <LanguageIcon sx={{ color: '#8B5CF6', mr: 1 }} />
+                          <LanguageIcon sx={{ color: '#8B5CF6', mr: 1, fontSize: '20px' }} />
                         </InputAdornment>
                       }
                       sx={{
-                        height: '50px',
-                        borderRadius: '25px',
+                        height: '56px',
+                        borderRadius: '30px',
                         backgroundColor: '#fff',
-                        border: '2px solid #e0e0e0',
+                        border: '2px solid #e8ecf0',
+                        color: '#8B5CF6',
+                        fontSize: '14px',
                         '& .MuiSelect-select': {
                           display: 'flex',
                           alignItems: 'center',
-                          padding: '14px 20px',
+                          padding: '16px 24px',
+                          color: '#8B5CF6',
                         },
                         '& .MuiOutlinedInput-notchedOutline': {
                           border: 'none',
@@ -541,17 +575,19 @@ const MarketplaceModule = () => {
                       onClick={handlePublish}
                       sx={{
                         width: '280px',
-                        height: '50px',
-                        borderRadius: '25px',
+                        height: '56px',
+                        borderRadius: '30px',
                         backgroundColor: '#8B5CF6',
                         fontSize: '16px',
                         fontWeight: 600,
                         textTransform: 'none',
-                        boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)',
+                        boxShadow: '0 8px 25px rgba(139, 92, 246, 0.35)',
                         '&:hover': {
                           backgroundColor: '#7C3AED',
-                          boxShadow: '0 6px 20px rgba(139, 92, 246, 0.4)',
+                          boxShadow: '0 10px 30px rgba(139, 92, 246, 0.45)',
+                          transform: 'translateY(-2px)',
                         },
+                        transition: 'all 0.3s ease',
                       }}
                     >
                       Publish
