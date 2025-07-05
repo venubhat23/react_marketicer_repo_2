@@ -535,321 +535,366 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     );
 
     // Instagram Modal (unchanged)
-    const InstagramComponent = (
-        <Box
+// Instagram Modal (updated with empty state handling)
+const InstagramComponent = (
+    <Box
+        sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 450,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: "16px",
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            paddingTop: "15px",
+            paddingBottom: "24px"
+        }}
+    >
+        {/* Close Button */}
+        <IconButton
+            onClick={onClose}
             sx={{
                 position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: 450,
-                bgcolor: "background.paper",
-                boxShadow: 24,
-                p: 4,
-                borderRadius: "16px",
-                maxHeight: '80vh',
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                paddingTop: "15px",
-                paddingBottom: "24px"
+                top: 16,
+                right: 16,
+                color: "#666",
+                '&:hover': { backgroundColor: '#f5f5f5' }
             }}
         >
-            {/* Close Button */}
-            <IconButton
-                onClick={onClose}
+            <CloseIcon />
+        </IconButton>
+        {/* Header */}
+        <Box sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            width: "100%",
+        }}>
+            <Box
                 sx={{
-                    position: "absolute",
-                    top: 16,
-                    right: 16,
-                    color: "#666",
-                    '&:hover': { backgroundColor: '#f5f5f5' }
+                    width: 40,
+                    height: 40,
+                    background: "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
+                    borderRadius: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
                 }}
             >
-                <CloseIcon />
-            </IconButton>
-            {/* Header */}
-            <Box sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                width: "100%",
-            }}>
-                <Box
-                    sx={{
-                        width: 40,
-                        height: 40,
-                        background: "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
-                        borderRadius: "12px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                    }}
-                >
-                    <InstagramIcon sx={{ color: "white", fontSize: 28 }} />
-                </Box>
-                <Typography variant="h6" fontWeight="600" sx={{ color: "#333" }}>
-                    Instagram
-                </Typography>
+                <InstagramIcon sx={{ color: "white", fontSize: 28 }} />
             </Box>
-            <Box sx={{ mb: 2, ml: 7 }}>
-                <Typography sx={{ fontSize: "14px", color: "#666", display: "flex", alignItems: "center", gap: 1 }}>
-                    Follow us on Instagram
-                </Typography>
-            </Box>
-            <Divider sx={{ width: "100%", backgroundColor: "#e0e0e0", mb: 2 }} />
-            {loading ? (
-                <CircularProgress sx={{ margin: '50px auto' }}/>
-            ) : (
-                <>
-                    {showAccountsList && pages.length > 0 ? (
-                        <>
-                            <Box sx={{ margin: 0, width: "100%" }}>
-                                <Typography sx={{
-                                    fontSize: "14px",
-                                    color: "#373737",
-                                    paddingTop: "20px",
-                                }}>
-                                    Select the accounts that you want to add.
-                                </Typography>
-                                {pages.length > 1 && (
-                                    <TextField 
-                                        label="Search here" 
-                                        variant="outlined"
-                                        size="small"
-                                        sx={{ margin: "10px 0", width: "100%" }} 
+            <Typography variant="h6" fontWeight="600" sx={{ color: "#333" }}>
+                Instagram
+            </Typography>
+        </Box>
+        <Box sx={{ mb: 2, ml: 7 }}>
+            <Typography sx={{ fontSize: "14px", color: "#666", display: "flex", alignItems: "center", gap: 1 }}>
+                Follow us on Instagram
+            </Typography>
+        </Box>
+        <Divider sx={{ width: "100%", backgroundColor: "#e0e0e0", mb: 2 }} />
+        {loading ? (
+            <CircularProgress sx={{ margin: '50px auto' }}/>
+        ) : (
+            <>
+                {showAccountsList && pages.length > 0 ? (
+                    <>
+                        <Box sx={{ margin: 0, width: "100%" }}>
+                            <Typography sx={{
+                                fontSize: "14px",
+                                color: "#373737",
+                                paddingTop: "20px",
+                            }}>
+                                Select the accounts that you want to add.
+                            </Typography>
+                            {pages.length > 1 && (
+                                <TextField 
+                                    label="Search here" 
+                                    variant="outlined"
+                                    size="small"
+                                    sx={{ margin: "10px 0", width: "100%" }} 
+                                />
+                            )}
+                        </Box>
+                        <Box
+                            sx={{
+                                maxHeight: "40vh",
+                                overflowY: "auto",
+                                listStyleType: "none",
+                                paddingLeft: 0,
+                                paddingRight: 0,
+                                marginTop: "20px",
+                                width: "100%"
+                            }}
+                        >
+                            {pages.map((account) => (
+                                <Box
+                                    key={account.page_id}
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "10px",
+                                        marginBottom: "10px",
+                                        borderRadius: "8px",
+                                        border: "1px solid #ddd",
+                                        backgroundColor: "#f9f9f9",
+                                        transition: "background-color 0.3s ease",
+                                        "&:hover": { backgroundColor: "#f1f1f1" }
+                                    }}
+                                >
+                                    <img
+                                        src={account?.user?.picture?.data?.url}
+                                        alt={account.name}
+                                        style={{
+                                            borderRadius: "50%",
+                                            width: "40px",
+                                            height: "40px",
+                                            marginRight: "15px",
+                                        }}
                                     />
-                                )}
+                                    <Box sx={{ flexGrow: 1 }}>
+                                        <Typography variant="body1" fontWeight="bold" sx={{
+                                            fontSize: "14px",
+                                            color: "#373737",
+                                        }}>
+                                            {account.name}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{
+                                            fontSize: "12px",
+                                        }}>
+                                            {account.username}
+                                        </Typography>
+                                    </Box>
+                                    {account.connected ? (
+                                        <Typography
+                                            sx={{
+                                                color: "green",
+                                                fontSize: "14px",
+                                                fontWeight: "bold",
+                                                display: "flex",
+                                                alignItems: "center",
+                                            }}
+                                        >
+                                            Connected
+                                        </Typography>
+                                    ) : (
+                                        <Button
+                                            variant="text"
+                                            color="primary"
+                                            onClick={() => handleConnect(account)}
+                                            sx={{
+                                                textDecoration: "underline",
+                                                padding: 0,
+                                                minWidth: "auto",
+                                                "&:hover": { backgroundColor: "transparent" }
+                                            }}
+                                        >
+                                            Connect
+                                        </Button>
+                                    )}
+                                </Box>
+                            ))}
+                        </Box>
+                        <Box sx={{ margin: 0, width: "100%" }}>
+                            <Typography sx={{
+                                fontSize: "14px",
+                                color: "#373737",
+                                paddingTop: "20px",
+                            }}>
+                                You can only add Facebook Profiles, Facebook Groups, and Facebook Pages, including Instagram Business accounts linked to Facebook Pages.
+                            </Typography>
+                        </Box>
+                    </>
+                ) : showAccountsList && pages.length === 0 ? (
+                    // Empty state when no accounts are found
+                    <Box sx={{ 
+                        width: "100%", 
+                        display: "flex", 
+                        flexDirection: "column", 
+                        alignItems: "center", 
+                        textAlign: "center",
+                        py: 4
+                    }}>
+                        <Typography variant="h6" sx={{ 
+                            color: "#333", 
+                            mb: 2, 
+                            fontSize: "18px", 
+                            fontWeight: "500" 
+                        }}>
+                            No eligible social accounts to add
+                        </Typography>
+                        <Typography sx={{ 
+                            color: "#666", 
+                            mb: 1, 
+                            fontSize: "14px",
+                            lineHeight: 1.5
+                        }}>
+                            You can only add Instagram{" "}
+                            <Box component="span" sx={{ color: "#1976d2", fontWeight: "500" }}>
+                                Business & Creator accounts
                             </Box>
-                            <Box
-                                sx={{
-                                    maxHeight: "40vh",
-                                    overflowY: "auto",
-                                    listStyleType: "none",
-                                    paddingLeft: 0,
-                                    paddingRight: 0,
-                                    marginTop: "20px",
-                                    width: "100%"
-                                }}
-                            >
-                                {pages.map((account) => (
+                            {" "}that have been connected to a{" "}
+                            <Box component="span" sx={{ color: "#1976d2", fontWeight: "500" }}>
+                                Facebook Page
+                            </Box>
+                            . Don't see an Instagram account that meets the criteria?{" "}
+                            <Box component="span" sx={{ color: "#1976d2", fontWeight: "500", cursor: "pointer" }}>
+                                Click here.
+                            </Box>
+                        </Typography>
+                        <Typography sx={{ 
+                            color: "#666", 
+                            fontSize: "14px",
+                            mt: 2,
+                            lineHeight: 1.5
+                        }}>
+                            If you need to add another Instagram account, simply log out of or switch facebook accounts first.
+                        </Typography>
+                    </Box>
+                ) : (
+                    !authCode && (
+                        <Box sx={{ width: "100%", display: "flex", gap: 7, mb: 2, justifyContent: "center" }}>
+                            {[
+                                { type: "facebook", label: "Professional\nvia Facebook", hasSubIcon: true },
+                                { type: "instagram", label: "Professional\nvia Instagram", hasSubIcon: false }
+                            ].map((item) => (
+                                <Box
+                                    key={item.type}
+                                    sx={{
+                                        padding: "20px 30px",
+                                        border: instagramType === item.type ? "2px solid #e91e63" : "1px solid #e0e0e0",
+                                        borderRadius: "16px",
+                                        cursor: "pointer",
+                                        transition: "all 0.2s ease",
+                                        backgroundColor: instagramType === item.type ? "#fce4ec" : "white",
+                                        textAlign: "center",
+                                        position: "relative",
+                                        "&:hover": {
+                                            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                                            borderColor: "#e91e63",
+                                            backgroundColor: "#fef7f7",
+                                            transform: "translateY(-2px)"
+                                        }
+                                    }}
+                                    onClick={() => setInstagramType(item.type)}
+                                >
                                     <Box
-                                        key={account.page_id}
                                         sx={{
+                                            position: "relative",
+                                            width: 64,
+                                            height: 64,
+                                            margin: "0 auto 16px auto",
                                             display: "flex",
                                             alignItems: "center",
-                                            padding: "10px",
-                                            marginBottom: "10px",
-                                            borderRadius: "8px",
-                                            border: "1px solid #ddd",
-                                            backgroundColor: "#f9f9f9",
-                                            transition: "background-color 0.3s ease",
-                                            "&:hover": { backgroundColor: "#f1f1f1" }
+                                            justifyContent: "center"
                                         }}
-                                    >
-                                        <img
-                                            src={
-                                                account.page_type === "facebook"
-                                                    ? account.page_info?.picture?.data?.url
-                                                    : account?.user_profile?.picture?.data?.url
-                                            }
-                                            alt={account.name}
-                                            style={{
-                                                borderRadius: "50%",
-                                                width: "40px",
-                                                height: "40px",
-                                                marginRight: "15px",
-                                            }}
-                                        />
-                                        <Box sx={{ flexGrow: 1 }}>
-                                            <Typography variant="body1" fontWeight="bold" sx={{
-                                                fontSize: "14px",
-                                                color: "#373737",
-                                            }}>
-                                                {account.name}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary" sx={{
-                                                fontSize: "12px",
-                                            }}>
-                                                {account.username}
-                                            </Typography>
-                                        </Box>
-                                        {account.connected ? (
-                                            <Typography
-                                                sx={{
-                                                    color: "green",
-                                                    fontSize: "14px",
-                                                    fontWeight: "bold",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                }}
-                                            >
-                                                Connected
-                                            </Typography>
-                                        ) : (
-                                            <Button
-                                                variant="text"
-                                                color="primary"
-                                                onClick={() => handleConnect(account)}
-                                                sx={{
-                                                    textDecoration: "underline",
-                                                    padding: 0,
-                                                    minWidth: "auto",
-                                                    "&:hover": { backgroundColor: "transparent" }
-                                                }}
-                                            >
-                                                Connect
-                                            </Button>
-                                        )}
-                                    </Box>
-                                ))}
-                            </Box>
-                            <Box sx={{ margin: 0, width: "100%" }}>
-                                <Typography sx={{
-                                    fontSize: "14px",
-                                    color: "#373737",
-                                    paddingTop: "20px",
-                                }}>
-                                    You can only add Facebook Profiles, Facebook Groups, and Facebook Pages, including Instagram Business accounts linked to Facebook Pages.
-                                </Typography>
-                            </Box>
-                        </>
-                    ) : (
-                        !authCode && (
-                            <Box sx={{ width: "100%", display: "flex", gap: 7, mb: 2, justifyContent: "center" }}>
-                                {[
-                                    { type: "facebook", label: "Professional\nvia Facebook", hasSubIcon: true },
-                                    { type: "instagram", label: "Professional\nvia Instagram", hasSubIcon: false }
-                                ].map((item) => (
-                                    <Box
-                                        key={item.type}
-                                        sx={{
-                                            padding: "20px 30px",
-                                            border: instagramType === item.type ? "2px solid #e91e63" : "1px solid #e0e0e0",
-                                            borderRadius: "16px",
-                                            cursor: "pointer",
-                                            transition: "all 0.2s ease",
-                                            backgroundColor: instagramType === item.type ? "#fce4ec" : "white",
-                                            textAlign: "center",
-                                            position: "relative",
-                                            "&:hover": {
-                                                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                                                borderColor: "#e91e63",
-                                                backgroundColor: "#fef7f7",
-                                                transform: "translateY(-2px)"
-                                            }
-                                        }}
-                                        onClick={() => setInstagramType(item.type)}
                                     >
                                         <Box
                                             sx={{
-                                                position: "relative",
-                                                width: 64,
-                                                height: 64,
-                                                margin: "0 auto 16px auto",
+                                                width: 50,
+                                                height: 50,
+                                                background: "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
+                                                borderRadius: "16px",
                                                 display: "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center"
                                             }}
                                         >
+                                            <InstagramIcon sx={{ color: "white", fontSize: 32 }} />
+                                        </Box>
+                                        {item.hasSubIcon && (
                                             <Box
                                                 sx={{
-                                                    width: 50,
-                                                    height: 50,
-                                                    background: "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
-                                                    borderRadius: "16px",
+                                                    position: "absolute",
+                                                    bottom: -4,
+                                                    right: -4,
+                                                    width: 28,
+                                                    height: 28,
+                                                    backgroundColor: "#1877f2",
+                                                    borderRadius: "50%",
                                                     display: "flex",
                                                     alignItems: "center",
-                                                    justifyContent: "center"
+                                                    justifyContent: "center",
+                                                    border: "2px solid white"
                                                 }}
                                             >
-                                                <InstagramIcon sx={{ color: "white", fontSize: 32 }} />
+                                                <FacebookIcon sx={{ color: "white", fontSize: 16 }} />
                                             </Box>
-                                            {item.hasSubIcon && (
-                                                <Box
-                                                    sx={{
-                                                        position: "absolute",
-                                                        bottom: -4,
-                                                        right: -4,
-                                                        width: 28,
-                                                        height: 28,
-                                                        backgroundColor: "#1877f2",
-                                                        borderRadius: "50%",
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        justifyContent: "center",
-                                                        border: "2px solid white"
-                                                    }}
-                                                >
-                                                    <FacebookIcon sx={{ color: "white", fontSize: 16 }} />
-                                                </Box>
-                                            )}
-                                        </Box>
-                                        <Typography
-                                            sx={{
-                                                fontSize: "12px",
-                                                fontWeight: "600",
-                                                color: "#333",
-                                                whiteSpace: "pre-line",
-                                                lineHeight: 1.3
-                                            }}
-                                        >
-                                            {item.label}
-                                        </Typography>
-                                        {instagramType === item.type && (
-                                            <CheckCircleIcon 
-                                                sx={{ 
-                                                    position: "absolute",
-                                                    top: 12,
-                                                    right: 12,
-                                                    fontSize: 24, 
-                                                    color: "#e91e63" 
-                                                }} 
-                                            />
                                         )}
                                     </Box>
-                                ))}
-                            </Box>
-                        )
-                    )}
-                    <Box
+                                    <Typography
+                                        sx={{
+                                            fontSize: "12px",
+                                            fontWeight: "600",
+                                            color: "#333",
+                                            whiteSpace: "pre-line",
+                                            lineHeight: 1.3
+                                        }}
+                                    >
+                                        {item.label}
+                                    </Typography>
+                                    {instagramType === item.type && (
+                                        <CheckCircleIcon 
+                                            sx={{ 
+                                                position: "absolute",
+                                                top: 12,
+                                                right: 12,
+                                                fontSize: 24, 
+                                                color: "#e91e63" 
+                                            }} 
+                                        />
+                                    )}
+                                </Box>
+                            ))}
+                        </Box>
+                    )
+                )}
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                        width: "100%",
+                        mt: 2
+                    }}
+                >
+                    <Button
+                        variant="contained"
                         sx={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            alignItems: "center",
-                            width: "100%",
-                            mt: 2
+                            backgroundColor: "#00BCD4",
+                            color: "white",
+                            borderRadius: "8px",
+                            padding: "8px 24px",
+                            textTransform: "none",
+                            fontWeight: "600",
+                            fontSize: "14px",
+                            "&:hover": { backgroundColor: "#00ACC1" }
+                        }}
+                        onClick={() => {
+                            if (showAccountsList && pages.length > 0) {
+                                window.location.href = "/socialMedia";
+                            } else if (showAccountsList && pages.length === 0) {
+                                // Handle empty state continue action
+                                onClose();
+                            } else {
+                                handleAuthRedirect("instagram");
+                            }
                         }}
                     >
-                        <Button
-                            variant="contained"
-                            sx={{
-                                backgroundColor: "#882AFF",
-                                color: "white",
-                                borderRadius: "8px",
-                                padding: "6px 16px",
-                                textTransform: "none",
-                                fontWeight: "600",
-                                fontSize: "14px",
-                                "&:hover": { backgroundColor: "#fff" }
-                            }}
-                            onClick={() => {
-                                if (showAccountsList && pages.length > 0) {
-                                    window.location.href = "/socialMedia";
-                                } else {
-                                    handleAuthRedirect("instagram");
-                                }
-                            }}
-                        >
-                            Continue
-                        </Button>
-                    </Box>
-                </>
-            )}
-        </Box>
-    );
-
+                        Continue
+                    </Button>
+                </Box>
+            </>
+        )}
+    </Box>
+);
     return (
         <>
             {socialMediaType === "Linkedin" ? LinkedInComponent : InstagramComponent}

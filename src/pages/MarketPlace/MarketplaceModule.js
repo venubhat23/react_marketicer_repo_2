@@ -1,83 +1,334 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from "react";
+
 import {
-  Box,
-  Typography,
-  Grid,
-  Paper,
+  Box, Typography, Button,
   TextField,
-  Button,
-  IconButton,
-  FormControl,
+  Avatar,
+  Chip,
   Select,
   MenuItem,
-  InputAdornment,
-} from '@mui/material';
-import {
-  ArrowBack as ArrowBackIcon,
-  Notifications as NotificationsIcon,
-  AccountCircle as AccountCircleIcon,
-  Category as CategoryIcon,
-  People as PeopleIcon,
-  AttachMoney as AttachMoneyIcon,
-  LocationOn as LocationOnIcon,
-  Language as LanguageIcon,
-  CloudUpload as CloudUploadIcon,
-} from '@mui/icons-material';
-import Sidebar from '../../components/Sidebar';
+  IconButton,
+  Card, FormControl,
+  Tab, Tabs, Checkbox,
+  Grid, Modal, Paper,
+  AppBar, Toolbar, Container, InputLabel, ListItemText,
+  CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack,ListItemIcon,
+  CircularProgress,
+} from "@mui/material";
+import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
+import CloseIcon from '@mui/icons-material/Close';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import SendIcon from '@mui/icons-material/Send';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PriceTagIcon from '@mui/icons-material/LocalOffer';
+import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
+import { toast } from "react-toastify";
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import Skeleton from "@mui/material/Skeleton";
+import OutlinedInput from '@mui/material/OutlinedInput';
+import Editor from "../../components/Editor";
+import Sidebar from "../../components/Sidebar";
 
 const MarketplaceModule = () => {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: '',
-    targetAudience: '',
-    budget: '',
-    location: '',
-    platform: '',
-    languages: '',
-  });
 
-  const handleInputChange = (field) => (event) => {
-    setFormData({
-      ...formData,
-      [field]: event.target.value,
-    });
+  const Categories = ['Electronics', 'Fashion', 'Home & Garden', 'Sports', 'Books', 'Automotive', 'Health & Beauty', 'Toys & Games']
+  const Genders = ['Male', 'Female', 'Unisex']
+  const Conditions = ['New', 'Like New', 'Good', 'Fair', 'Poor']
+  const Locations = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Ahmedabad']
+
+  const [postContent, setPostContent] = useState("");
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null);
+  const [uploadedFileName, setUploadedFileName] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [editorLoaded, setEditorLoaded] = useState(false);
+  
+  // Marketplace specific states
+  const [category, setCategory] = useState("");
+  const [gender, setGender] = useState("");
+  const [condition, setCondition] = useState("");
+  const [location, setLocation] = useState("");
+  const [price, setPrice] = useState("");
+  const [title, setTitle] = useState("");
+
+  useEffect(() => {
+    setEditorLoaded(true);
+  }, []);
+
+  const handleBoxClick = () => {
+    fileInputRef.current.click();
   };
 
-  const handleImageUpload = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        console.log('Image uploaded:', file.name);
-        // Handle image upload logic here
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const droppedFile = event.dataTransfer.files[0];
+    if (droppedFile) {
+      setFile(droppedFile);
+      setUploadedFileName(droppedFile.name);
+      handleFileUpload(droppedFile);
+    }
+  };
+
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(
+        "https://kitintellect.tech/storage/public/api/upload/aaFacebook",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.url) {
+        setUploadedImageUrl(data.url);
+        toast.success("File uploaded successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+        });
+      } else {
+        throw new Error("Upload failed");
       }
+    } catch (error) {
+      toast.error("File upload failed!", {
+        position: "top-right",
+        autoClose: 5000,
+      });
+      console.error("Error uploading file:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setUploadedFileName(selectedFile.name);
+      handleFileUpload(selectedFile);
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!title || !postContent || !category || !condition || !price || !location) {
+      alert("Please fill all required fields!");
+      return;
+    }
+    setPosting(true);
+    
+    const stripHtmlTags = (content) => content.replace(/<[^>]*>/g, '').trim();
+    const payloadData = {
+      title,
+      description: stripHtmlTags(postContent),
+      category,
+      gender,
+      condition,
+      location,
+      price: parseFloat(price),
+      image_url: uploadedImageUrl,
+      status: "published"
     };
-    input.click();
+    
+    console.log('Marketplace item data:', payloadData);
+
+    try {
+      // Replace with your marketplace API endpoint
+      const token = localStorage.getItem("token");
+      // await axios.post("http://localhost:3001/api/v1/marketplace", payloadData, {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //   }
+      // });
+      
+      alert("Item listed successfully!");
+      // Clear form
+      setTitle("");
+      setPostContent("");
+      setCategory("");
+      setGender("");
+      setCondition("");
+      setLocation("");
+      setPrice("");
+      setUploadedImageUrl("");
+      setUploadedFileName("");
+      setPosting(false);
+    } catch (error) {
+      console.error("Error listing item:", error);
+      alert("Failed to list item");
+      setPosting(false);
+    }
   };
 
-  const handlePublish = () => {
-    console.log('Publishing:', formData);
-    // Add your publish logic here
-  };
+  // Marketplace Preview Component
+  const MarketplacePreview = () => {
+    return (
+      <Card sx={{ borderRadius: 2, padding: '10px', maxWidth: 400 }}>
+        <CardContent sx={{ p: 0 }}>
+          
+          {/* Product Image */}
+          {uploadedImageUrl ? (
+            <Avatar 
+              src={uploadedImageUrl} 
+              alt="Product image" 
+              sx={{ 
+                width: '100%', 
+                height: 250, 
+                display: 'block', 
+                margin: 'auto',
+                borderRadius: 'inherit',
+                objectFit: 'cover'
+              }} 
+            />
+          ) : (
+            <Skeleton 
+              animation="wave" 
+              variant="rectangular" 
+              width="100%" 
+              height={250} 
+              sx={{ 
+                display: 'block', 
+                margin: 'auto', 
+                borderRadius: 'inherit' 
+              }} 
+            />
+          )}
 
-  const categories = ['Technology', 'Fashion', 'Food', 'Travel', 'Lifestyle', 'Beauty'];
-  const audiences = ['18-24', '25-34', '35-44', '45-54', '55+'];
-  const budgets = ['$100-500', '$500-1000', '$1000-5000', '$5000+'];
-  const locations = ['USA', 'Canada', 'UK', 'Australia', 'India', 'Global'];
-  const platforms = ['Instagram', 'YouTube', 'TikTok', 'Facebook', 'Twitter', 'LinkedIn'];
-  const languages = ['English', 'Spanish', 'French', 'German', 'Chinese', 'Hindi'];
+          {/* Product Details */}
+          <Box px={1} py={2}>
+            {/* Price */}
+            {price && (
+              <Typography variant="h6" color="#882AFF" fontWeight="bold" mb={1}>
+                ₹{price}
+              </Typography>
+            )}
+            
+            {/* Title */}
+            {title && (
+              <Typography variant="h6" fontWeight="bold" mb={1} sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {title}
+              </Typography>
+            )}
+
+            {/* Description */}
+            {postContent && (
+              <Typography variant="body2" color="text.secondary" mb={2} sx={{
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textAlign: 'justify'
+              }}>
+                <span dangerouslySetInnerHTML={{ __html: postContent }} />
+              </Typography>
+            )}
+
+            {/* Category & Condition */}
+            <Box display="flex" gap={1} mb={2} flexWrap="wrap">
+              {category && (
+                <Chip 
+                  label={category} 
+                  size="small" 
+                  sx={{ bgcolor: '#e3f2fd', color: '#1976d2' }}
+                />
+              )}
+              {condition && (
+                <Chip 
+                  label={condition} 
+                  size="small" 
+                  sx={{ bgcolor: '#f3e5f5', color: '#7b1fa2' }}
+                />
+              )}
+              {gender && (
+                <Chip 
+                  label={gender} 
+                  size="small" 
+                  sx={{ bgcolor: '#e8f5e8', color: '#2e7d32' }}
+                />
+              )}
+            </Box>
+
+            {/* Location */}
+            {location && (
+              <Box display="flex" alignItems="center" gap={0.5} mb={2}>
+                <LocationOnIcon fontSize="small" color="action" />
+                <Typography variant="body2" color="text.secondary">
+                  {location}
+                </Typography>
+              </Box>
+            )}
+
+            {/* Action Buttons */}
+            <Box display="flex" gap={1} mt={2}>
+              <Button 
+                variant="outlined" 
+                startIcon={<ChatBubbleOutlineIcon />}
+                size="small"
+                sx={{ 
+                  flex: 1,
+                  borderColor: '#882AFF',
+                  color: '#882AFF',
+                  '&:hover': {
+                    borderColor: '#6a1b9a',
+                    bgcolor: '#f3e5f5'
+                  }
+                }}
+              >
+                Message
+              </Button>
+              <Button 
+                variant="contained" 
+                startIcon={<ShoppingCartIcon />}
+                size="small"
+                sx={{ 
+                  flex: 1,
+                  bgcolor: '#882AFF',
+                  '&:hover': {
+                    bgcolor: '#6a1b9a'
+                  }
+                }}
+              >
+                Buy Now
+              </Button>
+            </Box>
+
+            {/* Metadata */}
+            <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
+              <Typography variant="caption" color="text.secondary">
+                Posted by You
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Just Now
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Grid container>
+    <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }}>
+      <Grid container sx={{overflow:'hidden !important'}}>
         <Grid size={{ md: 1 }} className="side_section">
-          <Sidebar />
+          <Sidebar/>
         </Grid>
-        <Grid size={{ md: 11 }}>
-          {/* Header */}
+        <Grid size={{ md: 11 }}> 
           <Paper
             elevation={0}
             sx={{
@@ -86,26 +337,24 @@ const MarketplaceModule = () => {
               backgroundColor: '#091a48',
               borderBottom: '1px solid',
               borderColor: 'divider',
-              borderRadius: 0,
+              borderRadius: 0
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <Typography variant="h6" sx={{ color: '#fff', display: 'flex', alignItems: 'center' }}>
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <Typography variant="h6" sx={{ color: '#fff' }}>
                 <IconButton
                   edge="start"
                   color="inherit"
                   aria-label="back"
                   sx={{ mr: 2, color: '#fff' }}
                 >
-                  <ArrowBackIcon />
+                  <ArrowLeftIcon />
                 </IconButton>
-                Marketplace Module
+                Marketplace - List Item
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <IconButton size="large" sx={{ color: '#fff' }}>
@@ -118,484 +367,253 @@ const MarketplaceModule = () => {
             </Box>
           </Paper>
 
-          {/* Main Content */}
-          <Box sx={{ 
-            flexGrow: 1, 
-            padding: { xs: '20px', md: '40px' }, 
-            backgroundColor: '#f8f9fa', 
-            minHeight: '100vh',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start'
-          }}>
-            <Paper
-              elevation={0}
-              sx={{
-                width: '100%',
-                maxWidth: '900px',
-                padding: { xs: '20px', md: '40px' },
-                borderRadius: '16px',
-                backgroundColor: '#fff',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-              }}
-            >
-              {/* Company Header */}
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 600,
-                  color: '#2c3e50',
-                  marginBottom: '40px',
-                  textAlign: 'left',
-                  fontSize: { xs: '1.5rem', md: '2rem' }
-                }}
-              >
-                Roar On Wheels Pvt. Ltd.
-              </Typography>
-
-              <Grid container spacing={3}>
-                {/* Title and Description Row */}
-                <Grid item xs={12} md={6}>
+          <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'20px'}}>
+            <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
+              
+              {/* Left Side - Form */}
+              <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%', overflowY: 'auto' }}>
+                
+                {/* Title Field */}
+                <Box mb={2}>
                   <TextField
                     fullWidth
-                    placeholder="Title"
-                    variant="outlined"
-                    value={formData.title}
-                    onChange={handleInputChange('title')}
-                    sx={{
+                    label="Item Title *"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    size="small"
+                    sx={{ 
                       '& .MuiOutlinedInput-root': {
-                        borderRadius: '30px',
-                        backgroundColor: '#fff',
-                        border: '2px solid #e8ecf0',
-                        height: '56px',
-                        fontSize: '14px',
-                        color: '#8B5CF6',
-                        '&:hover': {
-                          borderColor: '#8B5CF6',
-                        },
-                        '&.Mui-focused': {
-                          borderColor: '#8B5CF6',
-                          boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)',
-                        },
+                        '& fieldset': { borderColor: '#7F56D9' },
+                        '&:hover fieldset': { borderColor: '#7F56D9' },
+                        '&.Mui-focused fieldset': { borderColor: '#7F56D9' }
                       },
-                      '& .MuiInputBase-input': {
-                        padding: '16px 24px',
-                        color: '#8B5CF6',
-                        '&::placeholder': {
-                          color: '#8B5CF6',
-                          opacity: 0.8,
-                        },
-                      },
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        border: 'none',
-                      },
+                      '& .MuiInputLabel-root.Mui-focused': { color: '#7F56D9' }
                     }}
                   />
-                </Grid>
+                </Box>
 
-                <Grid item xs={12} md={6}>
+                {/* Price Field */}
+                <Box mb={2}>
                   <TextField
                     fullWidth
-                    placeholder="Enter a description..."
-                    variant="outlined"
-                    multiline
-                    rows={2}
-                    value={formData.description}
-                    onChange={handleInputChange('description')}
-                    sx={{
+                    label="Price (₹) *"
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    size="small"
+                    sx={{ 
                       '& .MuiOutlinedInput-root': {
-                        borderRadius: '20px',
-                        backgroundColor: '#fff',
-                        border: '2px solid #e8ecf0',
-                        minHeight: '56px',
-                        fontSize: '14px',
-                        color: '#8B5CF6',
-                        '&:hover': {
-                          borderColor: '#8B5CF6',
-                        },
-                        '&.Mui-focused': {
-                          borderColor: '#8B5CF6',
-                          boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)',
-                        },
+                        '& fieldset': { borderColor: '#7F56D9' },
+                        '&:hover fieldset': { borderColor: '#7F56D9' },
+                        '&.Mui-focused fieldset': { borderColor: '#7F56D9' }
                       },
-                      '& .MuiInputBase-input': {
-                        padding: '16px 24px',
-                        color: '#8B5CF6',
-                        '&::placeholder': {
-                          color: '#8B5CF6',
-                          opacity: 0.8,
-                        },
-                      },
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        border: 'none',
-                      },
+                      '& .MuiInputLabel-root.Mui-focused': { color: '#7F56D9' }
                     }}
                   />
+                </Box>
+
+                {/* Dropdowns */}
+                <Grid container spacing={2} mb={2}>
+                  <Grid item xs={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Category *</InputLabel>
+                      <Select
+                        label="Category *"
+                        size="small"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        sx={{ color:'#882AFF'}}
+                      >
+                        {Categories.map((cat) => (
+                          <MenuItem key={cat} value={cat} sx={{color:'#882AFF'}}>{cat}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  
+                  <Grid item xs={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Condition *</InputLabel>
+                      <Select
+                        label="Condition *"
+                        size="small"
+                        value={condition}
+                        onChange={(e) => setCondition(e.target.value)}
+                        sx={{ color:'#882AFF'}}
+                      >
+                        {Conditions.map((cond) => (
+                          <MenuItem key={cond} value={cond} sx={{color:'#882AFF'}}>{cond}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
                 </Grid>
 
-                {/* Upload Button Row */}
-                <Grid item xs={12} md={6}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<CloudUploadIcon />}
-                    onClick={handleImageUpload}
-                    fullWidth
-                    sx={{
-                      height: '56px',
-                      borderRadius: '30px',
-                      borderColor: '#8B5CF6',
-                      color: '#8B5CF6',
-                      backgroundColor: 'rgba(139, 92, 246, 0.05)',
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      textTransform: 'none',
-                      border: '2px solid #8B5CF6',
-                      '&:hover': {
-                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                        borderColor: '#7C3AED',
-                        transform: 'translateY(-1px)',
-                      },
-                    }}
-                  >
-                    Upload Image
-                  </Button>
+                <Grid container spacing={2} mb={2}>
+                  <Grid item xs={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Gender</InputLabel>
+                      <Select
+                        label="Gender"
+                        size="small"
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        sx={{ color:'#882AFF'}}
+                      >
+                        {Genders.map((g) => (
+                          <MenuItem key={g} value={g} sx={{color:'#882AFF'}}>{g}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  
+                  <Grid item xs={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Location *</InputLabel>
+                      <Select
+                        label="Location *"
+                        size="small"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        sx={{ color:'#882AFF'}}
+                      >
+                        {Locations.map((loc) => (
+                          <MenuItem key={loc} value={loc} sx={{color:'#882AFF'}}>{loc}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <Select
-                      value={formData.category}
-                      onChange={handleInputChange('category')}
-                      displayEmpty
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <CategoryIcon sx={{ color: '#8B5CF6', mr: 1, fontSize: '20px' }} />
-                        </InputAdornment>
-                      }
-                      sx={{
-                        height: '56px',
-                        borderRadius: '30px',
-                        backgroundColor: '#fff',
-                        border: '2px solid #e8ecf0',
-                        color: '#8B5CF6',
-                        fontSize: '14px',
-                        '& .MuiSelect-select': {
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '16px 24px',
-                          color: '#8B5CF6',
-                        },
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          border: 'none',
-                        },
-                        '&:hover': {
-                          borderColor: '#8B5CF6',
-                        },
-                        '&.Mui-focused': {
-                          borderColor: '#8B5CF6',
-                          boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)',
-                        },
-                      }}
-                    >
-                      <MenuItem value="" disabled>
-                        <em style={{ color: '#8B5CF6' }}>Category</em>
-                      </MenuItem>
-                      {categories.map((category) => (
-                        <MenuItem key={category} value={category}>
-                          {category}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+                {/* Description Editor */}
+                <Box mb={2}>
+                  <Typography variant="subtitle2" mb={1} color="#882AFF">
+                    Description *
+                  </Typography>
+                  <Editor value={postContent} onChange={setPostContent} />
+                </Box>
 
-                {/* Second Row of Dropdowns */}
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <Select
-                      value={formData.targetAudience}
-                      onChange={handleInputChange('targetAudience')}
-                      displayEmpty
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <PeopleIcon sx={{ color: '#8B5CF6', mr: 1, fontSize: '20px' }} />
-                        </InputAdornment>
-                      }
-                      sx={{
-                        height: '56px',
-                        borderRadius: '30px',
-                        backgroundColor: '#fff',
-                        border: '2px solid #e8ecf0',
-                        color: '#8B5CF6',
-                        fontSize: '14px',
-                        '& .MuiSelect-select': {
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '16px 24px',
-                          color: '#8B5CF6',
-                        },
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          border: 'none',
-                        },
-                        '&:hover': {
-                          borderColor: '#8B5CF6',
-                        },
-                        '&.Mui-focused': {
-                          borderColor: '#8B5CF6',
-                          boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)',
-                        },
-                      }}
-                    >
-                      <MenuItem value="" disabled>
-                        <em style={{ color: '#8B5CF6' }}>Target Audience</em>
-                      </MenuItem>
-                      {audiences.map((audience) => (
-                        <MenuItem key={audience} value={audience}>
-                          {audience}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+                <Typography variant="caption" display="block" mb={2}>
+                  275 characters left
+                </Typography>
 
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <Select
-                      value={formData.budget}
-                      onChange={handleInputChange('budget')}
-                      displayEmpty
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <AttachMoneyIcon sx={{ color: '#8B5CF6', mr: 1, fontSize: '20px' }} />
-                        </InputAdornment>
-                      }
-                      sx={{
-                        height: '56px',
-                        borderRadius: '30px',
-                        backgroundColor: '#fff',
-                        border: '2px solid #e8ecf0',
-                        color: '#8B5CF6',
-                        fontSize: '14px',
-                        '& .MuiSelect-select': {
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '16px 24px',
-                          color: '#8B5CF6',
-                        },
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          border: 'none',
-                        },
-                        '&:hover': {
-                          borderColor: '#8B5CF6',
-                        },
-                        '&.Mui-focused': {
-                          borderColor: '#8B5CF6',
-                          boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)',
-                        },
-                      }}
-                    >
-                      <MenuItem value="" disabled>
-                        <em style={{ color: '#8B5CF6' }}>Budget</em>
-                      </MenuItem>
-                      {budgets.map((budget) => (
-                        <MenuItem key={budget} value={budget}>
-                          {budget}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+                {/* Uploaded Images */}
+                <Box display="flex" gap={1} mb={2}>
+                  {uploadedImageUrl && (
+                    <Box position="relative">
+                      <Avatar
+                        variant="rounded"
+                        src={uploadedImageUrl}
+                        sx={{ width: 80, height: 80 }}
+                      />
+                      <IconButton
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          bgcolor: 'white',
+                        }}
+                        onClick={() => {
+                          setUploadedImageUrl("");
+                          setUploadedFileName("");
+                          setFile(null);
+                        }}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  )}
+                </Box>
 
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <Select
-                      value={formData.location}
-                      onChange={handleInputChange('location')}
-                      displayEmpty
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <LocationOnIcon sx={{ color: '#8B5CF6', mr: 1, fontSize: '20px' }} />
-                        </InputAdornment>
-                      }
-                      sx={{
-                        height: '56px',
-                        borderRadius: '30px',
-                        backgroundColor: '#fff',
-                        border: '2px solid #e8ecf0',
-                        color: '#8B5CF6',
-                        fontSize: '14px',
-                        '& .MuiSelect-select': {
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '16px 24px',
-                          color: '#8B5CF6',
-                        },
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          border: 'none',
-                        },
-                        '&:hover': {
-                          borderColor: '#8B5CF6',
-                        },
-                        '&.Mui-focused': {
-                          borderColor: '#8B5CF6',
-                          boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)',
-                        },
-                      }}
-                    >
-                      <MenuItem value="" disabled>
-                        <em style={{ color: '#8B5CF6' }}>Location</em>
-                      </MenuItem>
-                      {locations.map((location) => (
-                        <MenuItem key={location} value={location}>
-                          {location}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+                {/* Upload Media Box */}
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  flexDirection="column"
+                  sx={{
+                    padding: "16px",
+                    border: "1px solid #f0f0f0",
+                    borderRadius: "8px",
+                    backgroundColor: "#fff",
+                    textAlign: "center",
+                    cursor: "pointer",
+                    my: 2,
+                    margin: "10px",
+                    marginLeft: "0px",
+                    boxShadow: '0px 2px 1px -1px rgb(247 247 247 / 12%), 0px 1px 1px 0px rgb(247 247 247 / 12%), 0px 1px 3px 0px rgb(247 247 247 / 12%)'
+                  }}
+                  onClick={handleBoxClick}
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                >
+                  <Typography variant="body1" sx={{ color: "#000" }}>
+                    + Upload Media
+                  </Typography>
 
-                {/* Third Row of Dropdowns */}
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <Select
-                      value={formData.platform}
-                      onChange={handleInputChange('platform')}
-                      displayEmpty
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <Box
-                            sx={{
-                              width: 20,
-                              height: 20,
-                              borderRadius: '50%',
-                              backgroundColor: '#8B5CF6',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'white',
-                              fontSize: '10px',
-                              fontWeight: 'bold',
-                              mr: 1,
-                            }}
-                          >
-                            P
-                          </Box>
-                        </InputAdornment>
-                      }
-                      sx={{
-                        height: '56px',
-                        borderRadius: '30px',
-                        backgroundColor: '#fff',
-                        border: '2px solid #e8ecf0',
-                        color: '#8B5CF6',
-                        fontSize: '14px',
-                        '& .MuiSelect-select': {
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '16px 24px',
-                          color: '#8B5CF6',
-                        },
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          border: 'none',
-                        },
-                        '&:hover': {
-                          borderColor: '#8B5CF6',
-                        },
-                        '&.Mui-focused': {
-                          borderColor: '#8B5CF6',
-                          boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)',
-                        },
-                      }}
-                    >
-                      <MenuItem value="" disabled>
-                        <em style={{ color: '#8B5CF6' }}>Platform</em>
-                      </MenuItem>
-                      {platforms.map((platform) => (
-                        <MenuItem key={platform} value={platform}>
-                          {platform}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+                  {uploadedFileName && (
+                    <Typography variant="body2" sx={{
+                      color: "#444", 
+                      mt: 1, 
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis", 
+                      maxWidth: "400px",
+                    }}>
+                      Selected File: {uploadedFileName}
+                    </Typography>
+                  )}
 
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <Select
-                      value={formData.languages}
-                      onChange={handleInputChange('languages')}
-                      displayEmpty
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <LanguageIcon sx={{ color: '#8B5CF6', mr: 1, fontSize: '20px' }} />
-                        </InputAdornment>
-                      }
-                      sx={{
-                        height: '56px',
-                        borderRadius: '30px',
-                        backgroundColor: '#fff',
-                        border: '2px solid #e8ecf0',
-                        color: '#8B5CF6',
-                        fontSize: '14px',
-                        '& .MuiSelect-select': {
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '16px 24px',
-                          color: '#8B5CF6',
-                        },
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          border: 'none',
-                        },
-                        '&:hover': {
-                          borderColor: '#8B5CF6',
-                        },
-                        '&.Mui-focused': {
-                          borderColor: '#8B5CF6',
-                          boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)',
-                        },
-                      }}
-                    >
-                      <MenuItem value="" disabled>
-                        <em style={{ color: '#8B5CF6' }}>Languages</em>
-                      </MenuItem>
-                      {languages.map((language) => (
-                        <MenuItem key={language} value={language}>
-                          {language}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+                  {uploading && <Typography variant="body2">Uploading...</Typography>}
+                </Box>
+
+                {/* Hidden File Input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                  accept="image/*"
+                />
 
                 {/* Publish Button */}
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
-                    <Button
-                      variant="contained"
-                      onClick={handlePublish}
-                      sx={{
-                        width: '280px',
-                        height: '56px',
-                        borderRadius: '30px',
-                        backgroundColor: '#8B5CF6',
-                        fontSize: '16px',
-                        fontWeight: 600,
-                        textTransform: 'none',
-                        boxShadow: '0 8px 25px rgba(139, 92, 246, 0.35)',
-                        '&:hover': {
-                          backgroundColor: '#7C3AED',
-                          boxShadow: '0 10px 30px rgba(139, 92, 246, 0.45)',
-                          transform: 'translateY(-2px)',
-                        },
-                        transition: 'all 0.3s ease',
-                      }}
-                    >
-                      Publish
-                    </Button>
-                  </Box>
-                </Grid>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  onClick={handlePublish}
+                  disabled={posting || uploading}
+                  sx={{ 
+                    mt: 2, 
+                    bgcolor: '#7F56D9', 
+                    color: '#fff',
+                    '&:disabled': {
+                      bgcolor: '#9575cd',
+                      color: '#fff'
+                    }
+                  }}
+                >
+                  {posting ? (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <CircularProgress size={20} sx={{ color: '#fff' }} />
+                      Listing Item...
+                    </Box>
+                  ) : (
+                    'List Item'
+                  )}
+                </Button>
               </Grid>
-            </Paper>
+
+              {/* Right Side - Preview */}
+              <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height:'100%' }}>
+                <Typography variant="h6" mb={2} color="#882AFF">
+                  Marketplace Preview
+                </Typography>
+                <Box display="flex" justifyContent="center">
+                  <MarketplacePreview />
+                </Box>
+              </Grid>
+            </Grid>
           </Box>
         </Grid>
       </Grid>
