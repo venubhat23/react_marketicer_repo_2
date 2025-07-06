@@ -155,7 +155,7 @@ const InstagramAnalytics = () => {
                 fontWeight: 600,
                 fontSize: { xs: '1.25rem', md: '1.5rem' }
               }}>
-                Instagram Analytics
+                Analytics 2
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -175,7 +175,8 @@ const InstagramAnalytics = () => {
         <Box sx={{ 
           flexGrow: 1, 
           p: { xs: 2, md: 3 },
-          overflow: 'auto'
+          overflow: 'auto',
+          maxWidth: '100%'
         }}>
           {loading ? (
             <Box sx={{ 
@@ -263,7 +264,7 @@ const InstagramAnalytics = () => {
             <Box sx={{ width: '100%', maxWidth: '1400px', mx: 'auto' }}>
               {/* Account Selection */}
               <Card sx={{ 
-                p: 3, 
+                p: { xs: 2, md: 3 }, 
                 mb: 3, 
                 borderRadius: 3,
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -277,10 +278,10 @@ const InstagramAnalytics = () => {
                   flexWrap: 'wrap'
                 }}>
                   <InstagramIcon sx={{ fontSize: 30 }} />
-                  <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6" sx={{ flexGrow: 1, fontSize: { xs: '1rem', md: '1.25rem' } }}>
                     Select Instagram Account
                   </Typography>
-                  <FormControl sx={{ minWidth: 300 }}>
+                  <FormControl sx={{ minWidth: { xs: 250, md: 300 } }}>
                     <Select
                       value={selectedAccount}
                       onChange={handleAccountChange}
@@ -326,31 +327,31 @@ const InstagramAnalytics = () => {
                     }}>
                       <Box sx={{ 
                         background: 'linear-gradient(135deg, #E1306C 0%, #fd8856 100%)',
-                        p: 4,
+                        p: { xs: 3, md: 4 },
                         color: 'white',
                         textAlign: 'center'
                       }}>
                         <Avatar
                           src={selectedAccountData.profile?.profile_picture_url}
                           sx={{ 
-                            width: 100, 
-                            height: 100, 
+                            width: { xs: 80, md: 100 }, 
+                            height: { xs: 80, md: 100 }, 
                             margin: '0 auto 20px',
                             border: '4px solid rgba(255,255,255,0.2)'
                           }}
                         />
-                        <Typography variant="h5" gutterBottom fontWeight={600}>
+                        <Typography variant="h5" gutterBottom fontWeight={600} sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
                           @{selectedAccountData.username}
                         </Typography>
                         <Typography variant="body2" sx={{ opacity: 0.9 }}>
                           Intelligent Smart power
                         </Typography>
                       </Box>
-                      <CardContent sx={{ p: 4 }}>
+                      <CardContent sx={{ p: { xs: 3, md: 4 } }}>
                         <Grid container spacing={3}>
                           <Grid item xs={4}>
                             <Box sx={{ textAlign: 'center' }}>
-                              <Typography variant="h4" color="primary" fontWeight={600}>
+                              <Typography variant="h4" color="primary" fontWeight={600} sx={{ fontSize: { xs: '1.5rem', md: '2rem' } }}>
                                 {formatNumber(selectedAccountData.profile?.followers_count || 1)}
                               </Typography>
                               <Typography variant="body2" color="text.secondary">
@@ -360,7 +361,7 @@ const InstagramAnalytics = () => {
                           </Grid>
                           <Grid item xs={4}>
                             <Box sx={{ textAlign: 'center' }}>
-                              <Typography variant="h4" color="primary" fontWeight={600}>
+                              <Typography variant="h4" color="primary" fontWeight={600} sx={{ fontSize: { xs: '1.5rem', md: '2rem' } }}>
                                 {formatNumber(selectedAccountData.profile?.follows_count || 21)}
                               </Typography>
                               <Typography variant="body2" color="text.secondary">
@@ -370,7 +371,7 @@ const InstagramAnalytics = () => {
                           </Grid>
                           <Grid item xs={4}>
                             <Box sx={{ textAlign: 'center' }}>
-                              <Typography variant="h4" color="primary" fontWeight={600}>
+                              <Typography variant="h4" color="primary" fontWeight={600} sx={{ fontSize: { xs: '1.5rem', md: '2rem' } }}>
                                 {formatNumber(selectedAccountData.profile?.media_count || 1)}
                               </Typography>
                               <Typography variant="body2" color="text.secondary">
@@ -385,10 +386,10 @@ const InstagramAnalytics = () => {
 
                   {/* Analytics Cards */}
                   <Grid item xs={12} md={8}>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={2}>
                       <Grid item xs={6} lg={3}>
                         <Card sx={{ 
-                          height: '200px',
+                          height: { xs: '160px', md: '200px' },
                           borderRadius: 3, 
                           boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -398,18 +399,18 @@ const InstagramAnalytics = () => {
                         }}>
                           <CardContent sx={{ 
                             textAlign: 'center', 
-                            p: 3,
+                            p: { xs: 2, md: 3 },
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
                             height: '100%'
                           }}>
-                            <PhotoIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
-                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
+                            <PhotoIcon sx={{ fontSize: { xs: 36, md: 48 }, mb: 2, opacity: 0.9 }} />
+                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1, fontSize: { xs: '1.5rem', md: '2rem' } }}>
                               {selectedAccountData.analytics?.total_posts || 1}
                             </Typography>
-                            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                            <Typography variant="body1" sx={{ opacity: 0.9, fontSize: { xs: '0.875rem', md: '1rem' } }}>
                               Total Posts
                             </Typography>
                           </CardContent>
@@ -417,7 +418,7 @@ const InstagramAnalytics = () => {
                       </Grid>
                       <Grid item xs={6} lg={3}>
                         <Card sx={{ 
-                          height: '200px',
+                          height: { xs: '160px', md: '200px' },
                           borderRadius: 3, 
                           boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                           background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
@@ -427,18 +428,18 @@ const InstagramAnalytics = () => {
                         }}>
                           <CardContent sx={{ 
                             textAlign: 'center', 
-                            p: 3,
+                            p: { xs: 2, md: 3 },
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
                             height: '100%'
                           }}>
-                            <FavoriteIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
-                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
+                            <FavoriteIcon sx={{ fontSize: { xs: 36, md: 48 }, mb: 2, opacity: 0.9 }} />
+                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1, fontSize: { xs: '1.5rem', md: '2rem' } }}>
                               {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_likes || 0)}
                             </Typography>
-                            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                            <Typography variant="body1" sx={{ opacity: 0.9, fontSize: { xs: '0.875rem', md: '1rem' } }}>
                               Total Likes
                             </Typography>
                           </CardContent>
@@ -446,7 +447,7 @@ const InstagramAnalytics = () => {
                       </Grid>
                       <Grid item xs={6} lg={3}>
                         <Card sx={{ 
-                          height: '200px',
+                          height: { xs: '160px', md: '200px' },
                           borderRadius: 3, 
                           boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                           background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
@@ -456,18 +457,18 @@ const InstagramAnalytics = () => {
                         }}>
                           <CardContent sx={{ 
                             textAlign: 'center', 
-                            p: 3,
+                            p: { xs: 2, md: 3 },
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
                             height: '100%'
                           }}>
-                            <ChatBubbleIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
-                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
+                            <ChatBubbleIcon sx={{ fontSize: { xs: 36, md: 48 }, mb: 2, opacity: 0.9 }} />
+                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1, fontSize: { xs: '1.5rem', md: '2rem' } }}>
                               {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_comments || 0)}
                             </Typography>
-                            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                            <Typography variant="body1" sx={{ opacity: 0.9, fontSize: { xs: '0.875rem', md: '1rem' } }}>
                               Total Comments
                             </Typography>
                           </CardContent>
@@ -475,7 +476,7 @@ const InstagramAnalytics = () => {
                       </Grid>
                       <Grid item xs={6} lg={3}>
                         <Card sx={{ 
-                          height: '200px',
+                          height: { xs: '160px', md: '200px' },
                           borderRadius: 3, 
                           boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                           background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
@@ -485,18 +486,18 @@ const InstagramAnalytics = () => {
                         }}>
                           <CardContent sx={{ 
                             textAlign: 'center', 
-                            p: 3,
+                            p: { xs: 2, md: 3 },
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
                             height: '100%'
                           }}>
-                            <TrendingUpIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
-                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
+                            <TrendingUpIcon sx={{ fontSize: { xs: 36, md: 48 }, mb: 2, opacity: 0.9 }} />
+                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1, fontSize: { xs: '1.5rem', md: '2rem' } }}>
                               {selectedAccountData.summary?.engagement_rate || '0.0%'}
                             </Typography>
-                            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                            <Typography variant="body1" sx={{ opacity: 0.9, fontSize: { xs: '0.875rem', md: '1rem' } }}>
                               Engagement Rate
                             </Typography>
                           </CardContent>
@@ -515,17 +516,17 @@ const InstagramAnalytics = () => {
                       }}>
                         <Box sx={{ 
                           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          p: 4,
+                          p: { xs: 3, md: 4 },
                           color: 'white'
                         }}>
-                          <Typography variant="h5" fontWeight={600} sx={{ mb: 1 }}>
+                          <Typography variant="h5" fontWeight={600} sx={{ mb: 1, fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
                             Recent Posts ({selectedAccountData.analytics.recent_posts.length})
                           </Typography>
                           <Typography variant="body1" sx={{ opacity: 0.9 }}>
                             Your latest Instagram content performance
                           </Typography>
                         </Box>
-                        <CardContent sx={{ p: 4 }}>
+                        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
                           <Grid container spacing={3}>
                             {selectedAccountData.analytics.recent_posts.map((post, index) => (
                               <Grid item xs={12} sm={6} md={4} lg={3} key={post.id || index}>
