@@ -19,6 +19,7 @@ import Navbar  from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import CreatePost from './pages/CreatePost/CreatePost';
 import Analytics  from './pages/Profile/Analytics';
+import InstagramAnalytics from './pages/Profile/InstagramAnalytics';
 import SocialMedia from './pages/SocialMedia';
 import FullAnalytics from './pages/Profile/FullAnalytics';
 import ContractPage from './pages/Contract/ContractPage';
@@ -58,6 +59,11 @@ function App() {
           <Route path="/analytics" element={
             <ProtectedRoute>
               <Analytics />
+            </ProtectedRoute>
+          } />
+          <Route path="/instagram-analytics" element={
+            <ProtectedRoute>
+              <InstagramAnalytics />
             </ProtectedRoute>
           } />
           <Route path="/socialMedia" element={

@@ -21,7 +21,8 @@ import {
   AttachMoney as AttachMoneyIcon,
   Group as GroupIcon,
   Assessment as AssessmentIcon,
-  Close as CloseIcon,  
+  Close as CloseIcon,
+  Instagram as InstagramIcon,
 } from '@mui/icons-material';
 
 import {
@@ -116,9 +117,9 @@ const Sidebar = () => {
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding>
-            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Link to="/analytics">
+                  <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/analytics">
               <Box
                 sx={{
                   display: 'flex',
@@ -129,6 +130,24 @@ const Sidebar = () => {
               >
                 <EqualizerIcon fontSize="medium" />
                 <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Analytics</Typography>
+              </Box>
+            </Link>
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/instagram-analytics">
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  color: '#cbaef7',
+                }}
+              >
+                <InstagramIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Influencer Analytics</Typography>
               </Box>
             </Link>
           </ListItemButton>
