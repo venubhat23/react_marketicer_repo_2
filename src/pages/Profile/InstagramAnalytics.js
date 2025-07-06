@@ -111,14 +111,17 @@ const InstagramAnalytics = () => {
     <Box sx={{ 
       display: 'flex', 
       minHeight: '100vh', 
-      backgroundColor: '#f5f7fa',
-      width: '100%'
+      backgroundColor: '#f5f7fa'
     }}>
       {/* Sidebar */}
       <Box sx={{ 
-        width: { xs: '70px', md: '80px' }, 
+        width: { xs: '80px', md: '240px' }, 
         flexShrink: 0,
-        backgroundColor: '#091a48'
+        backgroundColor: '#091a48',
+        position: 'fixed',
+        height: '100vh',
+        zIndex: 1000,
+        overflowY: 'auto'
       }}>
         <Sidebar />
       </Box>
@@ -126,9 +129,10 @@ const InstagramAnalytics = () => {
       {/* Main Content */}
       <Box sx={{ 
         flexGrow: 1, 
+        marginLeft: { xs: '80px', md: '240px' },
         display: 'flex', 
         flexDirection: 'column',
-        overflow: 'hidden'
+        minHeight: '100vh'
       }}>
         {/* Header */}
         <Paper
@@ -143,20 +147,9 @@ const InstagramAnalytics = () => {
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
-            alignItems: 'center',
-            maxWidth: '1200px',
-            mx: 'auto',
-            width: '100%'
+            alignItems: 'center'
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="back"
-                sx={{ mr: 2, color: '#fff', display: { xs: 'inline-flex', md: 'none' } }}
-              >
-                <ArrowLeftIcon />
-              </IconButton>
               <Typography variant="h5" sx={{ 
                 color: '#fff', 
                 fontWeight: 600,
@@ -179,10 +172,9 @@ const InstagramAnalytics = () => {
         </Paper>
 
         {/* Content Container */}
-        <Container maxWidth="1200px" sx={{ 
+        <Box sx={{ 
           flexGrow: 1, 
-          py: { xs: 2, md: 3 },
-          px: { xs: 2, md: 3 },
+          p: { xs: 2, md: 3 },
           overflow: 'auto'
         }}>
           {loading ? (
@@ -268,7 +260,7 @@ const InstagramAnalytics = () => {
               </Button>
             </Card>
           ) : (
-            <Box sx={{ width: '100%' }}>
+            <Box sx={{ width: '100%', maxWidth: '1400px', mx: 'auto' }}>
               {/* Account Selection */}
               <Card sx={{ 
                 p: 3, 
@@ -323,325 +315,324 @@ const InstagramAnalytics = () => {
               </Card>
 
               {selectedAccountData && (
-                <Box sx={{ width: '100%' }}>
-                  {/* Profile Overview */}
-                  <Grid container spacing={3} sx={{ mb: 4 }}>
-                    {/* Profile Card */}
-                    <Grid item xs={12} lg={4}>
-                      <Card sx={{ 
-                        height: '100%', 
-                        borderRadius: 3, 
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                        overflow: 'hidden'
+                <Grid container spacing={3}>
+                  {/* Profile Card */}
+                  <Grid item xs={12} md={4}>
+                    <Card sx={{ 
+                      height: '100%', 
+                      borderRadius: 3, 
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                      overflow: 'hidden'
+                    }}>
+                      <Box sx={{ 
+                        background: 'linear-gradient(135deg, #E1306C 0%, #fd8856 100%)',
+                        p: 4,
+                        color: 'white',
+                        textAlign: 'center'
                       }}>
-                        <Box sx={{ 
-                          background: 'linear-gradient(135deg, #E1306C 0%, #fd8856 100%)',
-                          p: 3,
-                          color: 'white',
-                          textAlign: 'center'
-                        }}>
-                          <Avatar
-                            src={selectedAccountData.profile?.profile_picture_url}
-                            sx={{ 
-                              width: 80, 
-                              height: 80, 
-                              margin: '0 auto 16px',
-                              border: '4px solid rgba(255,255,255,0.2)'
-                            }}
-                          />
-                          <Typography variant="h6" gutterBottom fontWeight={600}>
-                            @{selectedAccountData.username}
-                          </Typography>
-                          <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                            Intelligent Smart power
-                          </Typography>
-                        </Box>
-                        <CardContent sx={{ p: 3 }}>
-                          <Grid container spacing={3}>
-                            <Grid item xs={4}>
-                              <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="h6" color="primary" fontWeight={600}>
-                                  {formatNumber(selectedAccountData.profile?.followers_count || 1)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Followers
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={4}>
-                              <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="h6" color="primary" fontWeight={600}>
-                                  {formatNumber(selectedAccountData.profile?.follows_count || 21)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Following
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={4}>
-                              <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="h6" color="primary" fontWeight={600}>
-                                  {formatNumber(selectedAccountData.profile?.media_count || 1)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Posts
-                                </Typography>
-                              </Box>
-                            </Grid>
+                        <Avatar
+                          src={selectedAccountData.profile?.profile_picture_url}
+                          sx={{ 
+                            width: 100, 
+                            height: 100, 
+                            margin: '0 auto 20px',
+                            border: '4px solid rgba(255,255,255,0.2)'
+                          }}
+                        />
+                        <Typography variant="h5" gutterBottom fontWeight={600}>
+                          @{selectedAccountData.username}
+                        </Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                          Intelligent Smart power
+                        </Typography>
+                      </Box>
+                      <CardContent sx={{ p: 4 }}>
+                        <Grid container spacing={3}>
+                          <Grid item xs={4}>
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="h4" color="primary" fontWeight={600}>
+                                {formatNumber(selectedAccountData.profile?.followers_count || 1)}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Followers
+                              </Typography>
+                            </Box>
                           </Grid>
-                        </CardContent>
-                      </Card>
-                    </Grid>
+                          <Grid item xs={4}>
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="h4" color="primary" fontWeight={600}>
+                                {formatNumber(selectedAccountData.profile?.follows_count || 21)}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Following
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="h4" color="primary" fontWeight={600}>
+                                {formatNumber(selectedAccountData.profile?.media_count || 1)}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Posts
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
 
-                    {/* Analytics Cards */}
-                    <Grid item xs={12} lg={8}>
-                      <Grid container spacing={2} sx={{ height: '100%' }}>
-                        <Grid item xs={6} md={3}>
-                          <Card sx={{ 
-                            height: '100%',
-                            borderRadius: 3, 
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            color: 'white',
-                            transition: 'transform 0.2s',
-                            '&:hover': { transform: 'translateY(-4px)' }
+                  {/* Analytics Cards */}
+                  <Grid item xs={12} md={8}>
+                    <Grid container spacing={3}>
+                      <Grid item xs={6} lg={3}>
+                        <Card sx={{ 
+                          height: '200px',
+                          borderRadius: 3, 
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          color: 'white',
+                          transition: 'transform 0.2s',
+                          '&:hover': { transform: 'translateY(-4px)' }
+                        }}>
+                          <CardContent sx={{ 
+                            textAlign: 'center', 
+                            p: 3,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '100%'
                           }}>
-                            <CardContent sx={{ 
-                              textAlign: 'center', 
-                              p: 3,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              height: '100%'
-                            }}>
-                              <PhotoIcon sx={{ fontSize: 40, mb: 2 }} />
-                              <Typography variant="h3" fontWeight={600}>
-                                {selectedAccountData.analytics?.total_posts || 1}
-                              </Typography>
-                              <Typography variant="body2" sx={{ opacity: 0.9, mt: 1 }}>
-                                Total Posts
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                        <Grid item xs={6} md={3}>
-                          <Card sx={{ 
-                            height: '100%',
-                            borderRadius: 3, 
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                            color: 'white',
-                            transition: 'transform 0.2s',
-                            '&:hover': { transform: 'translateY(-4px)' }
+                            <PhotoIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
+                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
+                              {selectedAccountData.analytics?.total_posts || 1}
+                            </Typography>
+                            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                              Total Posts
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                      <Grid item xs={6} lg={3}>
+                        <Card sx={{ 
+                          height: '200px',
+                          borderRadius: 3, 
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                          background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                          color: 'white',
+                          transition: 'transform 0.2s',
+                          '&:hover': { transform: 'translateY(-4px)' }
+                        }}>
+                          <CardContent sx={{ 
+                            textAlign: 'center', 
+                            p: 3,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '100%'
                           }}>
-                            <CardContent sx={{ 
-                              textAlign: 'center', 
-                              p: 3,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              height: '100%'
-                            }}>
-                              <FavoriteIcon sx={{ fontSize: 40, mb: 2 }} />
-                              <Typography variant="h3" fontWeight={600}>
-                                {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_likes || 0)}
-                              </Typography>
-                              <Typography variant="body2" sx={{ opacity: 0.9, mt: 1 }}>
-                                Total Likes
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                        <Grid item xs={6} md={3}>
-                          <Card sx={{ 
-                            height: '100%',
-                            borderRadius: 3, 
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                            color: 'white',
-                            transition: 'transform 0.2s',
-                            '&:hover': { transform: 'translateY(-4px)' }
+                            <FavoriteIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
+                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
+                              {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_likes || 0)}
+                            </Typography>
+                            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                              Total Likes
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                      <Grid item xs={6} lg={3}>
+                        <Card sx={{ 
+                          height: '200px',
+                          borderRadius: 3, 
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                          color: 'white',
+                          transition: 'transform 0.2s',
+                          '&:hover': { transform: 'translateY(-4px)' }
+                        }}>
+                          <CardContent sx={{ 
+                            textAlign: 'center', 
+                            p: 3,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '100%'
                           }}>
-                            <CardContent sx={{ 
-                              textAlign: 'center', 
-                              p: 3,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              height: '100%'
-                            }}>
-                              <ChatBubbleIcon sx={{ fontSize: 40, mb: 2 }} />
-                              <Typography variant="h3" fontWeight={600}>
-                                {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_comments || 0)}
-                              </Typography>
-                              <Typography variant="body2" sx={{ opacity: 0.9, mt: 1 }}>
-                                Total Comments
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                        <Grid item xs={6} md={3}>
-                          <Card sx={{ 
-                            height: '100%',
-                            borderRadius: 3, 
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                            background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                            color: 'white',
-                            transition: 'transform 0.2s',
-                            '&:hover': { transform: 'translateY(-4px)' }
+                            <ChatBubbleIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
+                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
+                              {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_comments || 0)}
+                            </Typography>
+                            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                              Total Comments
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                      <Grid item xs={6} lg={3}>
+                        <Card sx={{ 
+                          height: '200px',
+                          borderRadius: 3, 
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                          background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                          color: 'white',
+                          transition: 'transform 0.2s',
+                          '&:hover': { transform: 'translateY(-4px)' }
+                        }}>
+                          <CardContent sx={{ 
+                            textAlign: 'center', 
+                            p: 3,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '100%'
                           }}>
-                            <CardContent sx={{ 
-                              textAlign: 'center', 
-                              p: 3,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              height: '100%'
-                            }}>
-                              <TrendingUpIcon sx={{ fontSize: 40, mb: 2 }} />
-                              <Typography variant="h3" fontWeight={600}>
-                                {selectedAccountData.summary?.engagement_rate || '0.0%'}
-                              </Typography>
-                              <Typography variant="body2" sx={{ opacity: 0.9, mt: 1 }}>
-                                Engagement Rate
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
+                            <TrendingUpIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
+                            <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
+                              {selectedAccountData.summary?.engagement_rate || '0.0%'}
+                            </Typography>
+                            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                              Engagement Rate
+                            </Typography>
+                          </CardContent>
+                        </Card>
                       </Grid>
                     </Grid>
                   </Grid>
 
                   {/* Recent Posts */}
                   {selectedAccountData.analytics?.recent_posts && selectedAccountData.analytics.recent_posts.length > 0 && (
-                    <Card sx={{ 
-                      borderRadius: 3, 
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                      overflow: 'hidden'
-                    }}>
-                      <Box sx={{ 
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        p: 3,
-                        color: 'white'
+                    <Grid item xs={12} sx={{ mt: 3 }}>
+                      <Card sx={{ 
+                        borderRadius: 3, 
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                        overflow: 'hidden'
                       }}>
-                        <Typography variant="h6" fontWeight={600}>
-                          Recent Posts ({selectedAccountData.analytics.recent_posts.length})
-                        </Typography>
-                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                          Your latest Instagram content performance
-                        </Typography>
-                      </Box>
-                      <CardContent sx={{ p: 3 }}>
-                        <Grid container spacing={3}>
-                          {selectedAccountData.analytics.recent_posts.map((post, index) => (
-                            <Grid item xs={12} sm={6} md={4} lg={3} key={post.id || index}>
-                              <Card sx={{ 
-                                borderRadius: 3, 
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                                overflow: 'hidden',
-                                transition: 'transform 0.2s',
-                                '&:hover': { transform: 'translateY(-4px)' }
-                              }}>
-                                <Box sx={{ position: 'relative' }}>
-                                  <img
-                                    src={post.media_url}
-                                    alt={post.caption || 'Instagram post'}
-                                    style={{
-                                      width: '100%',
-                                      height: 250,
-                                      objectFit: 'cover'
-                                    }}
-                                    onError={(e) => {
-                                      e.target.src = 'https://via.placeholder.com/300x250?text=No+Image';
-                                    }}
-                                  />
-                                  <Chip
-                                    icon={getMediaTypeIcon(post.type)}
-                                    label={post.type}
-                                    size="small"
-                                    sx={{
-                                      position: 'absolute',
-                                      top: 8,
-                                      right: 8,
-                                      bgcolor: 'rgba(0,0,0,0.7)',
-                                      color: 'white',
-                                      borderRadius: 2
-                                    }}
-                                  />
-                                </Box>
-                                <CardContent sx={{ p: 2 }}>
-                                  <Tooltip title={post.caption || 'No caption'}>
-                                    <Typography 
-                                      variant="body2" 
-                                      sx={{ 
-                                        mb: 1,
-                                        display: '-webkit-box',
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: 'vertical',
-                                        overflow: 'hidden',
-                                        minHeight: '40px'
+                        <Box sx={{ 
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          p: 4,
+                          color: 'white'
+                        }}>
+                          <Typography variant="h5" fontWeight={600} sx={{ mb: 1 }}>
+                            Recent Posts ({selectedAccountData.analytics.recent_posts.length})
+                          </Typography>
+                          <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                            Your latest Instagram content performance
+                          </Typography>
+                        </Box>
+                        <CardContent sx={{ p: 4 }}>
+                          <Grid container spacing={3}>
+                            {selectedAccountData.analytics.recent_posts.map((post, index) => (
+                              <Grid item xs={12} sm={6} md={4} lg={3} key={post.id || index}>
+                                <Card sx={{ 
+                                  borderRadius: 3, 
+                                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                                  overflow: 'hidden',
+                                  transition: 'transform 0.2s',
+                                  '&:hover': { transform: 'translateY(-4px)' }
+                                }}>
+                                  <Box sx={{ position: 'relative' }}>
+                                    <img
+                                      src={post.media_url}
+                                      alt={post.caption || 'Instagram post'}
+                                      style={{
+                                        width: '100%',
+                                        height: 250,
+                                        objectFit: 'cover'
                                       }}
-                                    >
-                                      {post.caption || 'No caption'}
-                                    </Typography>
-                                  </Tooltip>
-                                  <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                    {new Date(post.timestamp).toLocaleDateString()}
-                                  </Typography>
-                                  <Box sx={{ 
-                                    display: 'flex', 
-                                    justifyContent: 'space-between', 
-                                    alignItems: 'center',
-                                    gap: 1
-                                  }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                      <FavoriteIcon fontSize="small" sx={{ color: '#E1306C' }} />
-                                      <Typography variant="caption" fontWeight={500}>
-                                        {formatNumber(post.likes || 0)}
-                                      </Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                      <ChatBubbleIcon fontSize="small" sx={{ color: '#1976d2' }} />
-                                      <Typography variant="caption" fontWeight={500}>
-                                        {formatNumber(post.comments || 0)}
-                                      </Typography>
-                                    </Box>
-                                  </Box>
-                                  {post.url && (
-                                    <Button
-                                      fullWidth
-                                      variant="outlined"
+                                      onError={(e) => {
+                                        e.target.src = 'https://via.placeholder.com/300x250?text=No+Image';
+                                      }}
+                                    />
+                                    <Chip
+                                      icon={getMediaTypeIcon(post.type)}
+                                      label={post.type}
                                       size="small"
-                                      startIcon={<InstagramIcon />}
-                                      href={post.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      sx={{ 
-                                        mt: 2,
-                                        borderRadius: 2,
-                                        textTransform: 'none'
+                                      sx={{
+                                        position: 'absolute',
+                                        top: 8,
+                                        right: 8,
+                                        bgcolor: 'rgba(0,0,0,0.7)',
+                                        color: 'white',
+                                        borderRadius: 2
                                       }}
-                                    >
-                                      View on Instagram
-                                    </Button>
-                                  )}
-                                </CardContent>
-                              </Card>
-                            </Grid>
-                          ))}
-                        </Grid>
-                      </CardContent>
-                    </Card>
+                                    />
+                                  </Box>
+                                  <CardContent sx={{ p: 3 }}>
+                                    <Tooltip title={post.caption || 'No caption'}>
+                                      <Typography 
+                                        variant="body2" 
+                                        sx={{ 
+                                          mb: 2,
+                                          display: '-webkit-box',
+                                          WebkitLineClamp: 2,
+                                          WebkitBoxOrient: 'vertical',
+                                          overflow: 'hidden',
+                                          minHeight: '40px'
+                                        }}
+                                      >
+                                        {post.caption || 'No caption'}
+                                      </Typography>
+                                    </Tooltip>
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                      {new Date(post.timestamp).toLocaleDateString()}
+                                    </Typography>
+                                    <Box sx={{ 
+                                      display: 'flex', 
+                                      justifyContent: 'space-between', 
+                                      alignItems: 'center',
+                                      gap: 1
+                                    }}>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <FavoriteIcon fontSize="small" sx={{ color: '#E1306C' }} />
+                                        <Typography variant="body2" fontWeight={500}>
+                                          {formatNumber(post.likes || 0)}
+                                        </Typography>
+                                      </Box>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <ChatBubbleIcon fontSize="small" sx={{ color: '#1976d2' }} />
+                                        <Typography variant="body2" fontWeight={500}>
+                                          {formatNumber(post.comments || 0)}
+                                        </Typography>
+                                      </Box>
+                                    </Box>
+                                    {post.url && (
+                                      <Button
+                                        fullWidth
+                                        variant="outlined"
+                                        size="small"
+                                        startIcon={<InstagramIcon />}
+                                        href={post.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        sx={{ 
+                                          mt: 2,
+                                          borderRadius: 2,
+                                          textTransform: 'none'
+                                        }}
+                                      >
+                                        View on Instagram
+                                      </Button>
+                                    )}
+                                  </CardContent>
+                                </Card>
+                              </Grid>
+                            ))}
+                          </Grid>
+                        </CardContent>
+                      </Card>
+                    </Grid>
                   )}
-                </Box>
+                </Grid>
               )}
             </Box>
           )}
-        </Container>
+        </Box>
       </Box>
     </Box>
   );
