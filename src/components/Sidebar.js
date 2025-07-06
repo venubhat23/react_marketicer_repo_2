@@ -55,12 +55,12 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { icon: <AddCircleOutlineIcon />, label: 'Create Posts', path: '/createPost' },
-    { icon: <EqualizerIcon />, label: 'Analytics', path: '/analytics' },
-    { icon: <InstagramIcon />, label: 'Influencer Analytics', path: '/instagram-analytics' },
-    { icon: <People />, label: 'Social Media', path: '/socialMedia' },
-    { icon: <DescriptionIcon />, label: 'Contracts', path: '/contracts' },
-    { icon: <StorefrontIcon />, label: 'Marketplace', path: '/marketplace' },
+    { icon: <AddCircleOutlineIcon fontSize="medium" />, label: 'Create Posts', path: '/createPost' },
+    { icon: <EqualizerIcon fontSize="medium" />, label: 'Analytics', path: '/analytics' },
+    { icon: <InstagramIcon fontSize="medium" />, label: 'Influencer Analytics', path: '/instagram-analytics' },
+    { icon: <People fontSize="medium" />, label: 'Social Media', path: '/socialMedia' },
+    { icon: <DescriptionIcon fontSize="medium" />, label: 'Contracts', path: '/contracts' },
+    { icon: <StorefrontIcon fontSize="medium" />, label: 'Marketplace', path: '/marketplace' },
   ];
 
   return (
@@ -122,9 +122,7 @@ const Sidebar = () => {
                 justifyContent: 'center',
                 minWidth: { xs: 'auto', md: 40 }
               }}>
-                {React.cloneElement(item.icon, { 
-                  fontSize: { xs: 'medium', md: 'large' } 
-                })}
+                {item.icon}
               </Box>
               <Typography 
                 variant="body2" 
@@ -183,7 +181,7 @@ const Sidebar = () => {
               justifyContent: 'center',
               minWidth: { xs: 'auto', md: 40 }
             }}>
-              <LogoutIcon fontSize={{ xs: 'medium', md: 'large' }} />
+              <LogoutIcon fontSize="medium" />
             </Box>
             <Typography 
               variant="body2" 
