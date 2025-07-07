@@ -123,7 +123,7 @@ const InstagramAnalytics = () => {
         display: 'flex', 
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: '#f8fafc'
+        backgroundColor: '#f1f5f9'
       }}>
         {/* Header */}
         <Paper
@@ -262,7 +262,7 @@ const InstagramAnalytics = () => {
                 p: { xs: 2, md: 3 }, 
                 mb: 4, 
                 borderRadius: 4,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                 color: 'white',
                 boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
               }}>
@@ -392,109 +392,105 @@ const InstagramAnalytics = () => {
                           </Typography>
                         </Box>
                         <CardContent sx={{ p: 3 }}>
-                          <Grid container spacing={2}>
-                            <Grid item xs={6} sm={4} md={3}>
-                              <Box sx={{ textAlign: 'center', p: 1 }}>
-                                <Typography variant="h5" color="primary" fontWeight={700} gutterBottom>
-                                  {formatNumber(selectedAccountData.profile?.followers_count || 0)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Followers Count
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={6} sm={4} md={3}>
-                              <Box sx={{ textAlign: 'center', p: 1 }}>
-                                <Typography variant="h5" color="primary" fontWeight={700} gutterBottom>
-                                  {formatNumber(selectedAccountData.profile?.follows_count || 0)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Follows Count
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={6} sm={4} md={3}>
-                              <Box sx={{ textAlign: 'center', p: 1 }}>
-                                <Typography variant="h5" color="primary" fontWeight={700} gutterBottom>
-                                  {formatNumber(selectedAccountData.profile?.media_count || 0)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Media Count
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={6} sm={4} md={3}>
-                              <Box sx={{ textAlign: 'center', p: 1 }}>
-                                <Typography variant="h5" sx={{ color: '#E1306C' }} fontWeight={700} gutterBottom>
-                                  {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_likes || 0)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Total Likes
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={6} sm={4} md={3}>
-                              <Box sx={{ textAlign: 'center', p: 1 }}>
-                                <Typography variant="h5" sx={{ color: '#1976d2' }} fontWeight={700} gutterBottom>
-                                  {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_comments || 0)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Total Comments
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={6} sm={4} md={3}>
-                              <Box sx={{ textAlign: 'center', p: 1 }}>
-                                <Typography variant="h5" sx={{ color: '#10b981' }} fontWeight={700} gutterBottom>
-                                  {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_engagement || 0)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Total Engagement
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={6} sm={4} md={3}>
-                              <Box sx={{ textAlign: 'center', p: 1 }}>
-                                <Typography variant="h5" sx={{ color: '#f59e0b' }} fontWeight={700} gutterBottom>
-                                  {formatNumber(selectedAccountData.analytics?.engagement_stats?.average_likes_per_post || 0)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Avg Likes per Post
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={6} sm={4} md={3}>
-                              <Box sx={{ textAlign: 'center', p: 1 }}>
-                                <Typography variant="h5" sx={{ color: '#8b5cf6' }} fontWeight={700} gutterBottom>
-                                  {formatNumber(selectedAccountData.analytics?.engagement_stats?.average_comments_per_post || 0)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Avg Comments per Post
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={6} sm={4} md={6}>
-                              <Box sx={{ textAlign: 'center', p: 1 }}>
-                                <Typography variant="h5" sx={{ color: '#ef4444' }} fontWeight={700} gutterBottom>
-                                  {formatNumber(selectedAccountData.analytics?.engagement_stats?.average_engagement_per_post || 0)}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Avg Engagement per Post
-                                </Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={6} sm={4} md={6}>
-                              <Box sx={{ textAlign: 'center', p: 1 }}>
-                                <Typography variant="h5" sx={{ color: '#06b6d4' }} fontWeight={700} gutterBottom>
-                                  {selectedAccountData.summary?.engagement_rate || '0.0%'}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Engagement Rate
-                                </Typography>
-                              </Box>
-                            </Grid>
-                          </Grid>
-                        </CardContent>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            gap: 2, 
+                            overflowX: 'auto',
+                            pb: 1,
+                            '&::-webkit-scrollbar': {
+                              height: 6,
+                            },
+                            '&::-webkit-scrollbar-track': {
+                              backgroundColor: '#f1f5f9',
+                              borderRadius: 3,
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                              backgroundColor: '#cbd5e1',
+                              borderRadius: 3,
+                            }
+                          }}>
+                             <Box sx={{ textAlign: 'center', minWidth: 120, p: 1 }}>
+                               <Typography variant="h5" color="primary" fontWeight={700} gutterBottom>
+                                 {formatNumber(selectedAccountData.profile?.followers_count || 0)}
+                               </Typography>
+                               <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                 Followers Count
+                               </Typography>
+                             </Box>
+                             <Box sx={{ textAlign: 'center', minWidth: 120, p: 1 }}>
+                               <Typography variant="h5" color="primary" fontWeight={700} gutterBottom>
+                                 {formatNumber(selectedAccountData.profile?.follows_count || 0)}
+                               </Typography>
+                               <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                 Follows Count
+                               </Typography>
+                             </Box>
+                             <Box sx={{ textAlign: 'center', minWidth: 120, p: 1 }}>
+                               <Typography variant="h5" color="primary" fontWeight={700} gutterBottom>
+                                 {formatNumber(selectedAccountData.profile?.media_count || 0)}
+                               </Typography>
+                               <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                 Media Count
+                               </Typography>
+                             </Box>
+                             <Box sx={{ textAlign: 'center', minWidth: 120, p: 1 }}>
+                               <Typography variant="h5" sx={{ color: '#E1306C' }} fontWeight={700} gutterBottom>
+                                 {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_likes || 0)}
+                               </Typography>
+                               <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                 Total Likes
+                               </Typography>
+                             </Box>
+                             <Box sx={{ textAlign: 'center', minWidth: 120, p: 1 }}>
+                               <Typography variant="h5" sx={{ color: '#1976d2' }} fontWeight={700} gutterBottom>
+                                 {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_comments || 0)}
+                               </Typography>
+                               <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                 Total Comments
+                               </Typography>
+                             </Box>
+                             <Box sx={{ textAlign: 'center', minWidth: 120, p: 1 }}>
+                               <Typography variant="h5" sx={{ color: '#10b981' }} fontWeight={700} gutterBottom>
+                                 {formatNumber(selectedAccountData.analytics?.engagement_stats?.total_engagement || 0)}
+                               </Typography>
+                               <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                 Total Engagement
+                               </Typography>
+                             </Box>
+                             <Box sx={{ textAlign: 'center', minWidth: 120, p: 1 }}>
+                               <Typography variant="h5" sx={{ color: '#f59e0b' }} fontWeight={700} gutterBottom>
+                                 {formatNumber(selectedAccountData.analytics?.engagement_stats?.average_likes_per_post || 0)}
+                               </Typography>
+                               <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                 Avg Likes per Post
+                               </Typography>
+                             </Box>
+                             <Box sx={{ textAlign: 'center', minWidth: 120, p: 1 }}>
+                               <Typography variant="h5" sx={{ color: '#8b5cf6' }} fontWeight={700} gutterBottom>
+                                 {formatNumber(selectedAccountData.analytics?.engagement_stats?.average_comments_per_post || 0)}
+                               </Typography>
+                               <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                 Avg Comments per Post
+                               </Typography>
+                             </Box>
+                             <Box sx={{ textAlign: 'center', minWidth: 120, p: 1 }}>
+                               <Typography variant="h5" sx={{ color: '#ef4444' }} fontWeight={700} gutterBottom>
+                                 {formatNumber(selectedAccountData.analytics?.engagement_stats?.average_engagement_per_post || 0)}
+                               </Typography>
+                               <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                 Avg Engagement per Post
+                               </Typography>
+                             </Box>
+                             <Box sx={{ textAlign: 'center', minWidth: 120, p: 1 }}>
+                               <Typography variant="h5" sx={{ color: '#06b6d4' }} fontWeight={700} gutterBottom>
+                                 {selectedAccountData.summary?.engagement_rate || '0.0%'}
+                               </Typography>
+                               <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                 Engagement Rate
+                               </Typography>
+                             </Box>
+                           </Box>
+                         </CardContent>
                       </Grid>
                     </Grid>
                   </Card>
@@ -508,7 +504,7 @@ const InstagramAnalytics = () => {
                       mb: 4
                     }}>
                       <Box sx={{ 
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                         p: 4,
                         color: 'white'
                       }}>
@@ -643,7 +639,7 @@ const InstagramAnalytics = () => {
                       overflow: 'hidden'
                     }}>
                       <Box sx={{ 
-                        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                         p: 4,
                         color: 'white'
                       }}>
