@@ -127,10 +127,6 @@ const InstagramAnalytics = () => {
       { value: formatNumber(data.profile?.media_count || 0), label: "Media Count" },
       { value: formatNumber(data.analytics?.engagement_stats?.total_likes || 0), label: "Total Likes" },
       { value: formatNumber(data.analytics?.engagement_stats?.total_comments || 0), label: "Total Comments" },
-      { value: formatNumber(data.analytics?.engagement_stats?.total_engagement || 0), label: "Total Engagement" },
-      { value: formatNumber(data.analytics?.engagement_stats?.average_likes_per_post || 0), label: "Avg Likes per Post" },
-      { value: formatNumber(data.analytics?.engagement_stats?.average_comments_per_post || 0), label: "Avg Comments per Post" },
-      { value: formatNumber(data.analytics?.engagement_stats?.average_engagement_per_post || 0), label: "Avg Engagement per Post" },
       { value: data.summary?.engagement_rate || '0.0%', label: "Engagement Rate" },
     ];
   };
@@ -436,19 +432,18 @@ const InstagramAnalytics = () => {
                  <Box sx={{ mt: '-20px', p: 1 }}>
                    <Grid container spacing={1}>
                      {getAnalyticsCards(selectedAccountData).map((card, index) => (
-                       <Grid key={index} item xs={6} sm={4} md={4} lg={2.4}>
+                       <Grid key={index} item xs={6} sm={4} md={4}>
                          <Card
                            sx={{
-                             width: '100%',
-                             maxWidth: 220,
+                             width: 220,
                              height: 86,
                              border: "1px solid #b6b6b6",
                              borderRadius: "10px",
                            }}
                          >
                            <CardContent sx={{ textAlign: "center", p: 1 }}>
-                             <Typography variant="h6" sx={{ fontSize: '1.1rem' }}>{card.value}</Typography>
-                             <Typography variant="body2" sx={{ mt: 1, fontSize: '0.8rem' }}>
+                             <Typography variant="h6">{card.value}</Typography>
+                             <Typography variant="body2" sx={{ mt: 2 }}>
                                {card.label}
                              </Typography>
                            </CardContent>
