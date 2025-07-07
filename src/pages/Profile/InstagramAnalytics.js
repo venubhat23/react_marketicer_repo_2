@@ -16,7 +16,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import PhotoIcon from '@mui/icons-material/Photo';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import Sidebar from '../../components/Sidebar';
+import Layout from '../../components/Layout';
 import {
   Notifications as NotificationsIcon,
   AccountCircle as AccountCircleIcon,
@@ -108,31 +108,12 @@ const InstagramAnalytics = () => {
   };
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      minHeight: '100vh', 
-      backgroundColor: '#f5f7fa'
-    }}>
-      {/* Sidebar */}
+    <Layout>
       <Box sx={{ 
-        width: { xs: '80px', md: '240px' }, 
-        flexShrink: 0,
-        backgroundColor: '#091a48',
-        position: 'fixed',
-        height: '100vh',
-        zIndex: 1000,
-        overflowY: 'auto'
-      }}>
-        <Sidebar />
-      </Box>
-
-      {/* Main Content */}
-      <Box sx={{ 
-        flexGrow: 1, 
-        marginLeft: { xs: '80px', md: '240px' },
         display: 'flex', 
         flexDirection: 'column',
-        minHeight: '100vh'
+        minHeight: '100vh',
+        backgroundColor: '#f5f7fa'
       }}>
         {/* Header */}
         <Paper
@@ -635,7 +616,7 @@ const InstagramAnalytics = () => {
           )}
         </Box>
       </Box>
-    </Box>
+    </Layout>
   );
 };
 

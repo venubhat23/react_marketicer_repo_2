@@ -19,7 +19,7 @@ import Engagement from '../Profile/Engagement';
 import Audience from '../Profile/Audience';
 import AudienceInsights from '../Profile/AudienceInsights';
 import BrandProfile from '../Profile/BrandProfile'
-import Sidebar from '../../components/Sidebar'
+import Layout from '../../components/Layout'
 import TabComponent from '../../components/TabComponent';
 import PaidPerformance from '../Profile/PaidPerformance';
 import ContentInsight from '../Profile/ContentInsight';
