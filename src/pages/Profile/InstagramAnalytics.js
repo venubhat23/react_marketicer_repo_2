@@ -143,67 +143,96 @@ const InstagramAnalytics = () => {
 
   const ProfileCard = ({ data }) => (
     <Card sx={{ 
-      borderRadius: 2, 
-      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+      borderRadius: 3, 
+      boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
       overflow: 'hidden',
-      height: 'fit-content'
+      height: 'fit-content',
+      border: '1px solid #f0f0f0'
     }}>
       <Box sx={{ 
         background: 'linear-gradient(135deg, #E1306C 0%, #fd8856 100%)',
-        p: 2,
+        p: 3,
         color: 'white',
-        textAlign: 'center'
+        textAlign: 'center',
+        position: 'relative'
       }}>
         <Avatar
           src={data.profile?.profile_picture_url}
           sx={{ 
-            width: 60, 
-            height: 60, 
-            margin: '0 auto 12px',
-            border: '2px solid rgba(255,255,255,0.2)'
+            width: 80, 
+            height: 80, 
+            margin: '0 auto 16px',
+            border: '3px solid rgba(255,255,255,0.3)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
           }}
         />
-        <Typography variant="h6" gutterBottom fontWeight={600} sx={{ fontSize: '1rem' }}>
+        <Typography variant="h6" gutterBottom fontWeight={600} sx={{ fontSize: '1.1rem' }}>
           {data.profile?.full_name || `@${data.username}`}
         </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.9, mb: 1.5, fontSize: '0.85rem' }}>
+        <Typography variant="body2" sx={{ opacity: 0.9, mb: 2, fontSize: '0.9rem' }}>
           @{data.username}
         </Typography>
       </Box>
-      <CardContent sx={{ p: 1.5 }}>
-        <Box sx={{ mb: 1.5, textAlign: 'center' }}>
-          <Typography variant="h4" color="primary" fontWeight={700} gutterBottom sx={{ fontSize: '1.5rem' }}>
+      <CardContent sx={{ p: 2.5 }}>
+        <Box sx={{ mb: 2.5, textAlign: 'center' }}>
+          <Typography variant="h3" color="primary" fontWeight={700} gutterBottom sx={{ fontSize: '2rem' }}>
             {formatNumber(data.profile?.followers_count || 0)}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
             Followers
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="caption" color="text.secondary">Engagement:</Typography>
-            <Typography variant="caption" fontWeight={600}>{data.summary?.engagement_rate || '0.0%'}</Typography>
+        
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            p: 1,
+            backgroundColor: '#f8f9fa',
+            borderRadius: 1
+          }}>
+            <Typography variant="body2" color="text.secondary" fontWeight={500}>Engagement Rate</Typography>
+            <Typography variant="body2" fontWeight={600} color="primary">{data.summary?.engagement_rate || '0.0%'}</Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="caption" color="text.secondary">Earned Media:</Typography>
-            <Typography variant="caption" fontWeight={600}>${formatNumber(data.earned_media || 0)}</Typography>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            p: 1,
+            backgroundColor: '#f8f9fa',
+            borderRadius: 1
+          }}>
+            <Typography variant="body2" color="text.secondary" fontWeight={500}>Earned Media</Typography>
+            <Typography variant="body2" fontWeight={600} color="success.main">${formatNumber(data.earned_media || 0)}</Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="caption" color="text.secondary">Avg Interactions:</Typography>
-            <Typography variant="caption" fontWeight={600}>{formatNumber(calculateAverageInteractions(data))}</Typography>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            p: 1,
+            backgroundColor: '#f8f9fa',
+            borderRadius: 1
+          }}>
+            <Typography variant="body2" color="text.secondary" fontWeight={500}>Avg Interactions</Typography>
+            <Typography variant="body2" fontWeight={600} color="info.main">{formatNumber(calculateAverageInteractions(data))}</Typography>
           </Box>
         </Box>
+        
         {data.profile?.bio && (
-          <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px solid #e0e0e0' }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', fontSize: '0.7rem' }}>
-              {data.profile.bio.length > 80 ? data.profile.bio.substring(0, 80) + '...' : data.profile.bio}
+          <Box sx={{ mt: 2.5, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', fontSize: '0.85rem', lineHeight: 1.4 }}>
+              {data.profile.bio.length > 100 ? data.profile.bio.substring(0, 100) + '...' : data.profile.bio}
             </Typography>
           </Box>
         )}
+        
         {data.profile?.location && (
-          <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <LocationOnIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+          <Box sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LocationOnIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
               {data.profile.location}
             </Typography>
           </Box>
@@ -429,22 +458,25 @@ const InstagramAnalytics = () => {
         </Box>
 
                           {/* Main content matching Analytics component layout */}
-         <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '15px' }}>
+         <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '20px' }}>
            {selectedAccountData && (
              <>
                                {/* Profile and Analytics in one line */}
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mt: '-20px' }}>
+                <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', mb: 3 }}>
                   {/* Profile section - left side */}
-                  <Box sx={{ width: '240px', flexShrink: 0 }}>
+                  <Box sx={{ width: '280px', flexShrink: 0 }}>
                     <ProfileCard data={selectedAccountData} />
                   </Box>
 
                   {/* Campaign Analytics section - right side */}
                   <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#1976d2' }}>
+                      Campaign Analytics
+                    </Typography>
                     <Box sx={{ 
                       display: 'grid', 
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                      gap: 1.5,
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+                      gap: 2,
                       width: '100%'
                     }}>
                       {getAnalyticsCards(selectedAccountData).map((card, index) => (
@@ -452,19 +484,48 @@ const InstagramAnalytics = () => {
                           key={index}
                           sx={{
                             width: '100%',
-                            height: 95,
-                            border: "1px solid #b6b6b6",
-                            borderRadius: "10px",
-                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            height: 110,
+                            border: "1px solid #e0e0e0",
+                            borderRadius: "12px",
+                            transition: 'all 0.3s ease',
+                            background: 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)',
                             '&:hover': {
-                              transform: 'translateY(-2px)',
-                              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 8px 25px rgba(0,0,0,0.12)',
+                              borderColor: '#1976d2'
                             }
                           }}
                         >
-                          <CardContent sx={{ textAlign: "center", p: 1.5, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 0.5 }}>{card.value}</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
+                          <CardContent sx={{ 
+                            textAlign: "center", 
+                            p: 2, 
+                            height: '100%', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}>
+                            <Typography 
+                              variant="h4" 
+                              sx={{ 
+                                fontSize: '1.5rem', 
+                                fontWeight: 700, 
+                                mb: 1,
+                                color: '#1976d2',
+                                letterSpacing: '-0.5px'
+                              }}
+                            >
+                              {card.value}
+                            </Typography>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                fontSize: '0.85rem', 
+                                color: 'text.secondary',
+                                fontWeight: 500,
+                                textAlign: 'center'
+                              }}
+                            >
                               {card.label}
                             </Typography>
                           </CardContent>
