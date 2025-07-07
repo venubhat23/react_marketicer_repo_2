@@ -121,13 +121,24 @@ const InstagramAnalytics = () => {
   // Create analytics cards array similar to Analytics component
   const getAnalyticsCards = (data) => {
     if (!data) return [];
+    const totalPosts = data.analytics?.total_posts || data.profile?.media_count || 1;
+    const totalLikes = data.analytics?.engagement_stats?.total_likes || 0;
+    const totalComments = data.analytics?.engagement_stats?.total_comments || 0;
+    const totalEngagement = totalLikes + totalComments;
+    
     return [
       { value: formatNumber(data.profile?.followers_count || 0), label: "Followers Count" },
       { value: formatNumber(data.profile?.follows_count || 0), label: "Follows Count" },
       { value: formatNumber(data.profile?.media_count || 0), label: "Media Count" },
-      { value: formatNumber(data.analytics?.engagement_stats?.total_likes || 0), label: "Total Likes" },
-      { value: formatNumber(data.analytics?.engagement_stats?.total_comments || 0), label: "Total Comments" },
+      { value: formatNumber(totalLikes), label: "Total Likes" },
+      { value: formatNumber(totalComments), label: "Total Comments" },
+      { value: formatNumber(totalEngagement), label: "Total Engagement" },
+      { value: formatNumber(Math.round(totalLikes / totalPosts)), label: "Avg Likes per Post" },
+      { value: formatNumber(Math.round(totalComments / totalPosts)), label: "Avg Comments per Post" },
+      { value: formatNumber(Math.round(totalEngagement / totalPosts)), label: "Avg Engagement per Post" },
       { value: data.summary?.engagement_rate || '0.0%', label: "Engagement Rate" },
+      { value: formatNumber(totalPosts), label: "Total Posts" },
+      { value: `${Math.round((data.profile?.followers_count || 0) / 1000 * 100) / 100}K`, label: "Reach Potential" },
     ];
   };
 
@@ -429,35 +440,35 @@ const InstagramAnalytics = () => {
                     <ProfileCard data={selectedAccountData} />
                   </Box>
 
-                  {/* Campaign Analytics section - right side */}
-                  <Box sx={{ flex: 1, p: 1 }}>
-                    <Box sx={{ 
-                      display: 'grid', 
-                      gridTemplateColumns: 'repeat(3, 1fr)', 
-                      gap: 1,
-                      width: '100%'
-                    }}>
-                      {getAnalyticsCards(selectedAccountData).map((card, index) => (
-                        <Card
-                          key={index}
-                          sx={{
-                            width: '100%',
-                            minWidth: 200,
-                            height: 86,
-                            border: "1px solid #b6b6b6",
-                            borderRadius: "10px",
-                          }}
-                        >
-                          <CardContent sx={{ textAlign: "center", p: 1 }}>
-                            <Typography variant="h6" sx={{ fontSize: '1rem' }}>{card.value}</Typography>
-                            <Typography variant="body2" sx={{ mt: 1, fontSize: '0.75rem' }}>
-                              {card.label}
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </Box>
-                  </Box>
+                                     {/* Campaign Analytics section - right side */}
+                   <Box sx={{ flex: 1, p: 1 }}>
+                     <Box sx={{ 
+                       display: 'grid', 
+                       gridTemplateColumns: 'repeat(4, 1fr)', 
+                       gap: 1,
+                       width: '100%'
+                     }}>
+                       {getAnalyticsCards(selectedAccountData).map((card, index) => (
+                         <Card
+                           key={index}
+                           sx={{
+                             width: '100%',
+                             minWidth: 160,
+                             height: 86,
+                             border: "1px solid #b6b6b6",
+                             borderRadius: "10px",
+                           }}
+                         >
+                           <CardContent sx={{ textAlign: "center", p: 1 }}>
+                             <Typography variant="h6" sx={{ fontSize: '0.9rem' }}>{card.value}</Typography>
+                             <Typography variant="body2" sx={{ mt: 1, fontSize: '0.7rem' }}>
+                               {card.label}
+                             </Typography>
+                           </CardContent>
+                         </Card>
+                       ))}
+                     </Box>
+                   </Box>
                 </Box>
 
                {/* Recent Posts Section */}
