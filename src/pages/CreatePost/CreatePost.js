@@ -27,7 +27,7 @@ import MessageCircle from "@mui/icons-material/Star"; // Placeholder for Message
 import Editor from "../../components/Editor";
 import TabComponent from "../../components/TabComponent";
 import InstagramPost from "../../components/InstagramPost"
-import Sidebar from "../../components/Sidebar";
+import Layout from "../../components/Layout";
 import axios from 'axios';
 import { useMutation } from "@tanstack/react-query";
 import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
@@ -620,11 +620,8 @@ const CreatePost = () => {
 
 
   return (
-
-  <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} >
-    <Grid container sx={{overflow:'hidden !important'}}>
-      <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
-      <Grid size={{ md: 11 }}> 
+    <Layout>
+      <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} > 
         <Paper
               elevation={0}
               sx={{
@@ -932,14 +929,8 @@ const CreatePost = () => {
           
       </Box>
           
-      </Grid>
-      
-          
-          
-        
-    </Grid>
-  </Box>
-
+      </Box>
+    </Layout>
   );
 };
 

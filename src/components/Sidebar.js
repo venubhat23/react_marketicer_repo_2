@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Avatar,
   Box,
@@ -9,6 +9,7 @@ import {
   Typography,
   ListItemButton,
   IconButton,
+  Tooltip,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -21,6 +22,9 @@ import {
   Assessment as AssessmentIcon,
   Close as CloseIcon,
   Instagram as InstagramIcon,
+  Menu as MenuIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 
 import {
@@ -38,8 +42,13 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import { Link, useNavigate } from "react-router-dom";
 import LanguageIcon from '@mui/icons-material/Language';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen: controlledIsOpen, onToggle }) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(true);
   const navigate = useNavigate();
+
+  // Use controlled state if provided, otherwise use internal state
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+  const handleToggle = onToggle || (() => setInternalIsOpen(!internalIsOpen));
 
   const handleLogout = () => {
     localStorage.clear();
@@ -48,152 +57,195 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { icon: <AddCircleOutlineIcon fontSize="medium" />, label: 'Create Posts', path: '/createPost' },
-    { icon: <EqualizerIcon fontSize="medium" />, label: 'Analytics', path: '/analytics' },
-    { icon: <InstagramIcon fontSize="medium" />, label: 'Analytics 2', path: '/instagram-analytics' },
-    { icon: <People fontSize="medium" />, label: 'Social Media', path: '/socialMedia' },
-    { icon: <DescriptionIcon fontSize="medium" />, label: 'Contracts', path: '/contracts' },
-    { icon: <StorefrontIcon fontSize="medium" />, label: 'Marketplace', path: '/marketplace' },
+    { icon: <AddCircleOutlineIcon />, label: 'Create Posts', path: '/createPost' },
+    { icon: <EqualizerIcon />, label: 'Analytics', path: '/analytics' },
+    { icon: <InstagramIcon />, label: 'Analytics 2', path: '/instagram-analytics' },
+    { icon: <People />, label: 'Social Media', path: '/socialMedia' },
+    { icon: <DescriptionIcon />, label: 'Contracts', path: '/contracts' },
+    { icon: <StorefrontIcon />, label: 'Marketplace', path: '/marketplace' },
   ];
+
+  // Save sidebar state to localStorage
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', isOpen.toString());
+  }, [isOpen]);
+
+  // Load sidebar state from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebarOpen');
+    if (savedState !== null && controlledIsOpen === undefined) {
+      setInternalIsOpen(savedState === 'true');
+    }
+  }, []);
+
+  const sidebarWidth = isOpen ? 240 : 80;
 
   return (
     <Box sx={{ 
       bgcolor: "#091a48", 
       flexDirection: "column", 
-      width: "100%", 
+      width: sidebarWidth,
       height: "100vh",
       display: 'flex',
-      position: 'relative'
+      position: 'fixed',
+      left: 0,
+      top: 0,
+      zIndex: 1200,
+      transition: 'width 0.3s ease-in-out',
+      overflow: 'hidden',
+      boxShadow: '2px 0 10px rgba(0,0,0,0.1)'
     }}>
-      {/* Logo */}
+      {/* Header with Logo and Toggle Button */}
       <Box sx={{ 
-        p: { xs: 1.5, md: 3 }, 
-        pt: { xs: 2, md: 4 }, 
-        pb: { xs: 1.5, md: 3 },
-        textAlign: 'center',
-        borderBottom: '1px solid rgba(255,255,255,0.1)'
+        p: 2, 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: isOpen ? 'space-between' : 'center',
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        minHeight: 64
       }}>
-        <img
-          src="https://c.animaapp.com/mayvvv0wua9Y41/img/marketincer-logo-1.svg"
-          alt="Marketincer logo"
-          width={29}
-          height={21}
-          style={{ display: 'block', margin: 'auto' }}
-        />
+        {isOpen && (
+          <img
+            src="https://c.animaapp.com/mayvvv0wua9Y41/img/marketincer-logo-1.svg"
+            alt="Marketincer logo"
+            width={29}
+            height={21}
+          />
+        )}
+        <IconButton
+          onClick={handleToggle}
+          sx={{
+            color: '#cbaef7',
+            '&:hover': {
+              backgroundColor: 'rgba(203, 174, 247, 0.1)',
+            }
+          }}
+        >
+          {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </IconButton>
       </Box>
 
       {/* Navigation Items */}
       <List sx={{ 
         flexGrow: 1, 
-        px: { xs: 0.5, md: 1.5 },
-        py: { xs: 1, md: 1.5 },
+        px: 1,
+        py: 1,
         overflow: 'auto'
       }}>
         {menuItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              component={Link}
-              to={item.path}
-              sx={{
-                display: 'flex',
-                flexDirection: { xs: 'column', md: 'row' },
-                alignItems: 'center',
-                justifyContent: { xs: 'center', md: 'flex-start' },
-                py: { xs: 1.2, md: 1.8 },
-                px: { xs: 0.8, md: 1.5 },
-                borderRadius: 1.5,
-                color: '#cbaef7',
-                gap: { xs: 0.3, md: 1.5 },
-                minHeight: { xs: 60, md: 50 },
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  backgroundColor: 'rgba(203, 174, 247, 0.1)',
-                  color: '#fff',
-                  transform: 'translateX(2px)'
-                }
-              }}
+            <Tooltip 
+              title={!isOpen ? item.label : ""} 
+              placement="right"
+              arrow
             >
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: { xs: 24, md: 32 },
-                height: { xs: 24, md: 32 }
-              }}>
-                {item.icon}
-              </Box>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  fontSize: { xs: '10px', md: '13px' },
-                  fontWeight: 500,
-                  whiteSpace: 'nowrap',
-                  textAlign: { xs: 'center', md: 'left' },
-                  lineHeight: 1.2,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  maxWidth: { xs: '100%', md: '150px' }
+              <ListItemButton
+                component={Link}
+                to={item.path}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: isOpen ? 'flex-start' : 'center',
+                  py: 1.5,
+                  px: isOpen ? 2 : 1,
+                  borderRadius: 1.5,
+                  color: '#cbaef7',
+                  gap: isOpen ? 2 : 0,
+                  minHeight: 48,
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    backgroundColor: 'rgba(203, 174, 247, 0.1)',
+                    color: '#fff',
+                    transform: 'translateX(2px)'
+                  }
                 }}
               >
-                {item.label}
-              </Typography>
-            </ListItemButton>
+                <ListItemIcon sx={{ 
+                  minWidth: 'auto',
+                  color: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {React.cloneElement(item.icon, { fontSize: 'medium' })}
+                </ListItemIcon>
+                {isOpen && (
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
+                  >
+                    {item.label}
+                  </Typography>
+                )}
+              </ListItemButton>
+            </Tooltip>
           </ListItem>
         ))}
       </List>
 
       {/* Footer */}
       <Box sx={{ 
-        px: { xs: 0.5, md: 1.5 }, 
-        pb: { xs: 1.5, md: 2.5 },
+        px: 1, 
+        pb: 2,
         borderTop: '1px solid rgba(255,255,255,0.1)',
-        pt: { xs: 1, md: 1.5 }
+        pt: 1
       }}>
         {/* Logout Button */}
         <ListItem disablePadding>
-          <ListItemButton
-            onClick={handleLogout}
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
-              alignItems: 'center',
-              justifyContent: { xs: 'center', md: 'flex-start' },
-              py: { xs: 1.2, md: 1.8 },
-              px: { xs: 0.8, md: 1.5 },
-              borderRadius: 1.5,
-              color: '#cbaef7',
-              gap: { xs: 0.3, md: 1.5 },
-              minHeight: { xs: 60, md: 50 },
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                backgroundColor: 'rgba(244, 67, 54, 0.1)',
-                color: '#f44336',
-                transform: 'translateX(2px)'
-              }
-            }}
+          <Tooltip 
+            title={!isOpen ? "Logout" : ""} 
+            placement="right"
+            arrow
           >
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: { xs: 24, md: 32 },
-              height: { xs: 24, md: 32 }
-            }}>
-              <LogoutIcon fontSize="medium" />
-            </Box>
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                fontSize: { xs: '10px', md: '13px' },
-                fontWeight: 500,
-                whiteSpace: 'nowrap',
-                textAlign: { xs: 'center', md: 'left' },
-                lineHeight: 1.2
+            <ListItemButton
+              onClick={handleLogout}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: isOpen ? 'flex-start' : 'center',
+                py: 1.5,
+                px: isOpen ? 2 : 1,
+                borderRadius: 1.5,
+                color: '#cbaef7',
+                gap: isOpen ? 2 : 0,
+                minHeight: 48,
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                  color: '#f44336',
+                  transform: 'translateX(2px)'
+                }
               }}
             >
-              Logout
-            </Typography>
-          </ListItemButton>
+              <ListItemIcon sx={{ 
+                minWidth: 'auto',
+                color: 'inherit',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <LogoutIcon fontSize="medium" />
+              </ListItemIcon>
+              {isOpen && (
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Logout
+                </Typography>
+              )}
+            </ListItemButton>
+          </Tooltip>
         </ListItem>
       </Box>
     </Box>

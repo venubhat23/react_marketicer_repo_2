@@ -33,7 +33,7 @@ import {
 import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
 import SocialConnect from './SocialConnect';
 import SocialDisConnect from './SocialDisConnect';
-import Sidebar from '../components/Sidebar';
+import Layout from '../components/Layout';
 import Navbar from '../components/Navbar';
 import axios from "axios";
 
@@ -192,11 +192,8 @@ const SocialMedia =()=>{
   }, []);
 
   return (
-
-    <><Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100vh' }}>
-      <Grid container>
-        <Grid size={{ md: 1 }} className="side_section"> <Sidebar /></Grid>
-        <Grid size={{ md: 11 }}>
+    <Layout>
+      <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100vh' }}>
           <Paper
             elevation={0}
             sx={{
@@ -586,37 +583,8 @@ const SocialMedia =()=>{
             </Stack>
           </Paper>
         </Box>
-        </Grid>
-      </Grid>
-    </Box>
-    
-    
-    <Box sx={{ flexGrow: 1 }}>
-        
-        {/* Header */}
-        {/* <AppBar
-      position="static"
-      sx={{ bgcolor: "#091a48", boxShadow: "none" }}
-    >
-      <Toolbar>
-        <IconButton
-          edge="start"
-          color="inherit"
-          aria-label="back"
-          sx={{ mr: 2 }}
-        >
-          <ArrowLeftIcon />
-        </IconButton>
-        <Typography variant="h5" component="div" fontWeight={500}>
-          Social Media Accounts
-        </Typography>
-      </Toolbar>
-    </AppBar> */}
-
-        {/* Content */}
-        
-
-      </Box></>
+      </Box>
+    </Layout>
   )
 }
 
