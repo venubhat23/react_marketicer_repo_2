@@ -42,7 +42,7 @@ import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 
-import Sidebar from '../components/Sidebar'
+import Layout from '../components/Layout'
 
 
 // Create theme
@@ -92,10 +92,8 @@ const Dashboard = () => {
 
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100%' }} >
-    <Grid container>
-      <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
-      <Grid size={{ md: 11 }}> 
+    <Layout>
+      <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100%' }} > 
         <Paper
               elevation={0}
               sx={{
@@ -236,9 +234,8 @@ const Dashboard = () => {
 
                 </Grid>
               </Box>
-          </Grid>
-          </Grid>
           </Box>
+      </Layout>
           
   );
 };

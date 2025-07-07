@@ -32,7 +32,7 @@ import {
   Edit as EditIcon,
 } from '@mui/icons-material';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
-import Sidebar from "../../components/Sidebar";
+import Layout from "../../components/Layout";
 import { useNavigate } from "react-router-dom";
 import AIContractGenerator from './AIContractGenerator';
 
@@ -512,22 +512,18 @@ const ContractPage = () => {
   }
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: '#f8f9fa', minHeight: '100vh' }}>
-      <Grid container>
-        <Grid size={{ md: 1 }} className="side_section">
-          <Sidebar />
-        </Grid>
-        <Grid size={{ md: 11 }}>
-          {/* Header with updated background color */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              backgroundColor: '#091a48', // Updated header background color
-              borderRadius: 0,
-              color: 'white'
-            }}
-          >
+    <Layout>
+      <Box sx={{ flexGrow: 1, bgcolor: '#f8f9fa', minHeight: '100vh' }}>
+        {/* Header with updated background color */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            backgroundColor: '#091a48', // Updated header background color
+            borderRadius: 0,
+            color: 'white'
+          }}
+        >
             <Box sx={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -761,10 +757,9 @@ const ContractPage = () => {
               </Box>
             )}
           </Box>
-        </Grid>
-      </Grid>
-    </Box>
-  );
-};
+        </Box>
+      </Layout>
+    );
+  };
 
 export default ContractPage;
