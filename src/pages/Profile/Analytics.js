@@ -277,10 +277,8 @@ if (showNoAnalyticsModal) {
   );
 }
   return (
-    <Box sx={{ flexGrow: 1 }} >
-      <Grid container>
-        <Grid size={{ md: 1 }} className="side_section"> <Sidebar /></Grid>
-        <Grid size={{ md: 11 }}>
+    <Layout>
+      <Box sx={{ flexGrow: 1 }} >
           <Paper
             elevation={0}
             sx={{
@@ -492,9 +490,8 @@ if (showNoAnalyticsModal) {
 
             </Grid>
           </Box>
-        </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </Layout>
   )
 }
 
