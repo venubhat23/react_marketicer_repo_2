@@ -431,32 +431,33 @@ const InstagramAnalytics = () => {
                 <ProfileCard data={selectedAccountData} />
               </Grid>
 
-              {/* Campaign Analytics section - right side (8 columns) */}
-              <Grid item xs={12} sm={8} md={8}>
-                <Box>
-                  <Grid container spacing={1}>
-                    {getAnalyticsCards(selectedAccountData).map((card, index) => (
-                      <Grid key={index} item xs={12} sm={6} md={4}>
-                        <Card
-                          sx={{
-                            width: 220,
-                            height: 86,
-                            border: "1px solid #b6b6b6",
-                            borderRadius: "10px",
-                          }}
-                        >
-                          <CardContent sx={{ textAlign: "center", p: 1 }}>
-                            <Typography variant="h6">{card.value}</Typography>
-                            <Typography variant="body2" sx={{ mt: 2 }}>
-                              {card.label}
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              </Grid>
+                             {/* Campaign Analytics section - right side (8 columns) */}
+               <Grid item xs={12} sm={8} md={8}>
+                 <Box sx={{ mt: '-20px', p: 1 }}>
+                   <Grid container spacing={1}>
+                     {getAnalyticsCards(selectedAccountData).map((card, index) => (
+                       <Grid key={index} item xs={6} sm={4} md={4} lg={2.4}>
+                         <Card
+                           sx={{
+                             width: '100%',
+                             maxWidth: 220,
+                             height: 86,
+                             border: "1px solid #b6b6b6",
+                             borderRadius: "10px",
+                           }}
+                         >
+                           <CardContent sx={{ textAlign: "center", p: 1 }}>
+                             <Typography variant="h6" sx={{ fontSize: '1.1rem' }}>{card.value}</Typography>
+                             <Typography variant="body2" sx={{ mt: 1, fontSize: '0.8rem' }}>
+                               {card.label}
+                             </Typography>
+                           </CardContent>
+                         </Card>
+                       </Grid>
+                     ))}
+                   </Grid>
+                 </Box>
+               </Grid>
 
               {/* Recent Posts Section */}
               {selectedAccountData.analytics?.recent_posts && selectedAccountData.analytics.recent_posts.length > 0 && (
