@@ -175,7 +175,7 @@ const InstagramAnalytics = () => {
       </Box>
       <CardContent sx={{ p: 2.5 }}>
         <Box sx={{ mb: 2.5, textAlign: 'center' }}>
-          <Typography variant="h3" color="primary" fontWeight={700} gutterBottom sx={{ fontSize: '2rem' }}>
+          <Typography variant="h3" fontWeight={700} gutterBottom sx={{ fontSize: '2rem', color: '#882AFF' }}>
             {formatNumber(data.profile?.followers_count || 0)}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
@@ -193,7 +193,7 @@ const InstagramAnalytics = () => {
             borderRadius: 1
           }}>
             <Typography variant="body2" color="text.secondary" fontWeight={500}>Engagement Rate</Typography>
-            <Typography variant="body2" fontWeight={600} color="primary">{data.summary?.engagement_rate || '0.0%'}</Typography>
+            <Typography variant="body2" fontWeight={600} sx={{ color: '#882AFF' }}>{data.summary?.engagement_rate || '0.0%'}</Typography>
           </Box>
           
           <Box sx={{ 
@@ -205,7 +205,7 @@ const InstagramAnalytics = () => {
             borderRadius: 1
           }}>
             <Typography variant="body2" color="text.secondary" fontWeight={500}>Earned Media</Typography>
-            <Typography variant="body2" fontWeight={600} color="success.main">${formatNumber(data.earned_media || 0)}</Typography>
+            <Typography variant="body2" fontWeight={600} sx={{ color: '#882AFF' }}>${formatNumber(data.earned_media || 0)}</Typography>
           </Box>
           
           <Box sx={{ 
@@ -217,7 +217,7 @@ const InstagramAnalytics = () => {
             borderRadius: 1
           }}>
             <Typography variant="body2" color="text.secondary" fontWeight={500}>Avg Interactions</Typography>
-            <Typography variant="body2" fontWeight={600} color="info.main">{formatNumber(calculateAverageInteractions(data))}</Typography>
+            <Typography variant="body2" fontWeight={600} sx={{ color: '#882AFF' }}>{formatNumber(calculateAverageInteractions(data))}</Typography>
           </Box>
         </Box>
         
@@ -470,6 +470,9 @@ const InstagramAnalytics = () => {
 
                   {/* Campaign Analytics section - right side */}
                   <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#882AFF' }}>
+                      Campaign Analytics
+                    </Typography>
                     <Box sx={{ 
                       display: 'grid', 
                       gridTemplateColumns: 'repeat(4, 1fr)', 
@@ -481,21 +484,21 @@ const InstagramAnalytics = () => {
                           key={index}
                           sx={{
                             width: '100%',
-                            height: 110,
-                            border: "1px solid #e0e0e0",
-                            borderRadius: "12px",
+                            height: 86,
+                            border: "1px solid #b6b6b6",
+                            borderRadius: "10px",
                             transition: 'all 0.3s ease',
-                            background: 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)',
+                            background: '#fff',
                             '&:hover': {
-                              transform: 'translateY(-4px)',
-                              boxShadow: '0 8px 25px rgba(0,0,0,0.12)',
-                              borderColor: '#1976d2'
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 4px 15px rgba(136,42,255,0.2)',
+                              borderColor: '#882AFF'
                             }
                           }}
                         >
                           <CardContent sx={{ 
                             textAlign: "center", 
-                            p: 1.5, 
+                            p: 1, 
                             height: '100%', 
                             display: 'flex', 
                             flexDirection: 'column', 
@@ -503,13 +506,12 @@ const InstagramAnalytics = () => {
                             alignItems: 'center'
                           }}>
                             <Typography 
-                              variant="h4" 
+                              variant="h6" 
                               sx={{ 
-                                fontSize: '1.4rem', 
-                                fontWeight: 700, 
+                                fontSize: '1rem', 
+                                fontWeight: 600, 
                                 mb: 0.5,
-                                color: '#1976d2',
-                                letterSpacing: '-0.5px'
+                                color: '#882AFF'
                               }}
                             >
                               {card.value}
@@ -519,7 +521,7 @@ const InstagramAnalytics = () => {
                               sx={{ 
                                 fontSize: '0.75rem', 
                                 color: 'text.secondary',
-                                fontWeight: 500,
+                                fontWeight: 400,
                                 textAlign: 'center',
                                 lineHeight: 1.2
                               }}
