@@ -472,8 +472,8 @@ const InstagramAnalytics = () => {
                   <Box sx={{ flex: 1 }}>
                     <Box sx={{ 
                       display: 'grid', 
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
-                      gap: 2,
+                      gridTemplateColumns: 'repeat(4, 1fr)', 
+                      gap: 1.5,
                       width: '100%'
                     }}>
                       {getAnalyticsCards(selectedAccountData).map((card, index) => (
@@ -495,7 +495,7 @@ const InstagramAnalytics = () => {
                         >
                           <CardContent sx={{ 
                             textAlign: "center", 
-                            p: 2, 
+                            p: 1.5, 
                             height: '100%', 
                             display: 'flex', 
                             flexDirection: 'column', 
@@ -505,9 +505,9 @@ const InstagramAnalytics = () => {
                             <Typography 
                               variant="h4" 
                               sx={{ 
-                                fontSize: '1.5rem', 
+                                fontSize: '1.4rem', 
                                 fontWeight: 700, 
-                                mb: 1,
+                                mb: 0.5,
                                 color: '#1976d2',
                                 letterSpacing: '-0.5px'
                               }}
@@ -517,10 +517,11 @@ const InstagramAnalytics = () => {
                             <Typography 
                               variant="body2" 
                               sx={{ 
-                                fontSize: '0.85rem', 
+                                fontSize: '0.75rem', 
                                 color: 'text.secondary',
                                 fontWeight: 500,
-                                textAlign: 'center'
+                                textAlign: 'center',
+                                lineHeight: 1.2
                               }}
                             >
                               {card.label}
