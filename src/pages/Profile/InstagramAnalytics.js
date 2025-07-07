@@ -422,42 +422,43 @@ const InstagramAnalytics = () => {
          <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '15px' }}>
            {selectedAccountData && (
              <>
-               {/* Profile and Analytics in one line */}
-               <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mt: '-20px' }}>
-                 {/* Profile section - left side */}
-                 <Box sx={{ width: '350px', p: 1 }}>
-                   <ProfileCard data={selectedAccountData} />
-                 </Box>
+                               {/* Profile and Analytics in one line */}
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', mt: '-20px' }}>
+                  {/* Profile section - left side */}
+                  <Box sx={{ width: '300px', p: 1 }}>
+                    <ProfileCard data={selectedAccountData} />
+                  </Box>
 
-                 {/* Campaign Analytics section - right side */}
-                 <Box sx={{ flex: 1, p: 1 }}>
-                   <Box sx={{ 
-                     display: 'grid', 
-                     gridTemplateColumns: 'repeat(3, 220px)', 
-                     gap: 1,
-                     justifyContent: 'start'
-                   }}>
-                     {getAnalyticsCards(selectedAccountData).map((card, index) => (
-                       <Card
-                         key={index}
-                         sx={{
-                           width: 220,
-                           height: 86,
-                           border: "1px solid #b6b6b6",
-                           borderRadius: "10px",
-                         }}
-                       >
-                         <CardContent sx={{ textAlign: "center", p: 1 }}>
-                           <Typography variant="h6">{card.value}</Typography>
-                           <Typography variant="body2" sx={{ mt: 2 }}>
-                             {card.label}
-                           </Typography>
-                         </CardContent>
-                       </Card>
-                     ))}
-                   </Box>
-                 </Box>
-               </Box>
+                  {/* Campaign Analytics section - right side */}
+                  <Box sx={{ flex: 1, p: 1 }}>
+                    <Box sx={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(3, 1fr)', 
+                      gap: 1,
+                      width: '100%'
+                    }}>
+                      {getAnalyticsCards(selectedAccountData).map((card, index) => (
+                        <Card
+                          key={index}
+                          sx={{
+                            width: '100%',
+                            minWidth: 200,
+                            height: 86,
+                            border: "1px solid #b6b6b6",
+                            borderRadius: "10px",
+                          }}
+                        >
+                          <CardContent sx={{ textAlign: "center", p: 1 }}>
+                            <Typography variant="h6" sx={{ fontSize: '1rem' }}>{card.value}</Typography>
+                            <Typography variant="body2" sx={{ mt: 1, fontSize: '0.75rem' }}>
+                              {card.label}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
 
                {/* Recent Posts Section */}
                {selectedAccountData.analytics?.recent_posts && selectedAccountData.analytics.recent_posts.length > 0 && (
