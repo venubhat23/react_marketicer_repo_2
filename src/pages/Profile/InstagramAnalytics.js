@@ -18,6 +18,8 @@ import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import InteractiveIcon from '@mui/icons-material/TouchApp';
 import Layout from '../../components/Layout';
 import {
@@ -121,13 +123,25 @@ const InstagramAnalytics = () => {
   // Create analytics cards array similar to Analytics component
   const getAnalyticsCards = (data) => {
     if (!data) return [];
+    
+    const totalPosts = data.profile?.media_count || 0;
+    const totalLikes = data.analytics?.engagement_stats?.total_likes || 0;
+    const totalComments = data.analytics?.engagement_stats?.total_comments || 0;
+    const followers = data.profile?.followers_count || 0;
+    
     return [
-      { value: formatNumber(data.profile?.followers_count || 0), label: "Followers Count" },
+      { value: formatNumber(followers), label: "Followers Count" },
       { value: formatNumber(data.profile?.follows_count || 0), label: "Follows Count" },
-      { value: formatNumber(data.profile?.media_count || 0), label: "Media Count" },
-      { value: formatNumber(data.analytics?.engagement_stats?.total_likes || 0), label: "Total Likes" },
-      { value: formatNumber(data.analytics?.engagement_stats?.total_comments || 0), label: "Total Comments" },
+      { value: formatNumber(totalPosts), label: "Media Count" },
+      { value: formatNumber(totalLikes), label: "Total Likes" },
+      { value: formatNumber(totalComments), label: "Total Comments" },
+      { value: formatNumber(totalLikes + totalComments), label: "Total Engagement" },
+      { value: formatNumber(totalPosts > 0 ? Math.round(totalLikes / totalPosts) : 0), label: "Avg Likes per Post" },
+      { value: formatNumber(totalPosts > 0 ? Math.round(totalComments / totalPosts) : 0), label: "Avg Comments per Post" },
+      { value: formatNumber(totalPosts > 0 ? Math.round((totalLikes + totalComments) / totalPosts) : 0), label: "Avg Engagement per Post" },
       { value: data.summary?.engagement_rate || '0.0%', label: "Engagement Rate" },
+      { value: formatNumber(totalPosts), label: "Total Posts" },
+      { value: formatNumber(Math.round(followers * 0.1)), label: "Reach Potential" },
     ];
   };
 
@@ -433,7 +447,7 @@ const InstagramAnalytics = () => {
                   <Box sx={{ flex: 1, p: 1 }}>
                     <Box sx={{ 
                       display: 'grid', 
-                      gridTemplateColumns: 'repeat(3, 1fr)', 
+                      gridTemplateColumns: 'repeat(4, 1fr)', 
                       gap: 1,
                       width: '100%'
                     }}>
@@ -442,7 +456,7 @@ const InstagramAnalytics = () => {
                           key={index}
                           sx={{
                             width: '100%',
-                            minWidth: 200,
+                            minWidth: 160,
                             height: 86,
                             border: "1px solid #b6b6b6",
                             borderRadius: "10px",
