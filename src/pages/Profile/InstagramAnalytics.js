@@ -470,9 +470,6 @@ const InstagramAnalytics = () => {
 
                   {/* Campaign Analytics section - right side */}
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#1976d2' }}>
-                      Campaign Analytics
-                    </Typography>
                     <Box sx={{ 
                       display: 'grid', 
                       gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
