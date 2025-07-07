@@ -22,10 +22,6 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import InteractiveIcon from '@mui/icons-material/TouchApp';
 import Layout from '../../components/Layout';
-import {
-  Notifications as NotificationsIcon,
-  AccountCircle as AccountCircleIcon,
-} from '@mui/icons-material';
 import axios from 'axios';
 
 const InstagramAnalytics = () => {
