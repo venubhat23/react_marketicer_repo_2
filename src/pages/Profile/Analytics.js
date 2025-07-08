@@ -9,7 +9,9 @@ import {
   TextField, MenuItem,
   InputAdornment, ListItemText,
   Card, AppBar, Toolbar, Paper, InputLabel,
-  CardContent, IconButton, OutlinedInput, CircularProgress
+  CardContent, IconButton, OutlinedInput, CircularProgress,
+  Modal,
+  Button
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import AnalyticsProfile from '../Profile/AnalyticsProfile'
@@ -67,6 +69,7 @@ const Analytics = () => {
   const [location, setLocation] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showNoAnalyticsModal, setShowNoAnalyticsModal] = useState(false);
 
 
 useEffect(() => {
@@ -79,9 +82,9 @@ useEffect(() => {
     })
       .then((response) => {
         const profileRes = response?.data?.data || []
-        // If no data found, continue with empty data but don't show modal
+        // Show modal if backend returns nil or empty array
         if (!profileRes || profileRes.length === 0) {
-          setProfileData([]);
+          setShowNoAnalyticsModal(true);
           setLoading(false);
           return;
         }
@@ -126,8 +129,7 @@ useEffect(() => {
       })
       .catch((error) => {
         console.error('Error fetching analytics:', error);
-        // Continue with empty data instead of showing modal
-        setProfileData([]);
+        setShowNoAnalyticsModal(true);
         setLoading(false);
       });
   }, []);
@@ -217,7 +219,7 @@ useEffect(() => {
 
   const selectedData = profileData.filter(item => item.name === platformOption);
 
-  // Show loading state
+    // Show loading state
   if (loading) {
     return (
       <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -226,7 +228,55 @@ useEffect(() => {
     );
   }
 
-
+// Show "No Analytics Found" modal
+if (showNoAnalyticsModal) {
+  return (
+    <Modal
+      open={showNoAnalyticsModal}
+      onClose={() => setShowNoAnalyticsModal(false)}
+      aria-labelledby="no-analytics-modal-title"
+      aria-describedby="no-analytics-modal-description"
+    >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: 'background.paper',
+          border: '2px solid #1976d2',
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2,
+          textAlign: 'center'
+        }}
+      >
+        <Typography id="no-analytics-modal-title" variant="h6" component="h2" color="error">
+          No Analytics Found
+        </Typography>
+        <Typography id="no-analytics-modal-description" sx={{ mt: 2 }}>
+          We couldn't find any analytics data to display. Please try again later or check your data source.
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{
+            mt: 3,
+            backgroundColor: "#fff",
+            color: "#1976d2",
+            border: "1px solid #1976d2",
+            '&:hover': {
+              backgroundColor: "#f5f5f5"
+            }
+          }}
+          onClick={() => window.location.href = "https://app.marketincer.com/createPost"}
+        >
+          Close
+        </Button>
+      </Box>
+    </Modal>
+  );
+}
   return (
     <Layout>
       <Box sx={{ flexGrow: 1 }} >
@@ -332,7 +382,7 @@ useEffect(() => {
               >
                 {profileData.length === 0 ? (
                   <MenuItem value="" disabled>
-                    <em>Loading analytics profiles...</em>
+                    <em>No profiles available</em>
                   </MenuItem>
                 ) : (
                   profileData.map((item, index) => (
