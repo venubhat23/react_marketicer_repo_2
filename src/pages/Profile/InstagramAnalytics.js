@@ -502,13 +502,13 @@ const InstagramAnalytics = () => {
         <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '20px', backgroundColor: '#f8f9ff' }}>
           <Grid container spacing={3}>
             {/* Profile Section - matching Analytics exact Grid structure */}
-            <Grid size={{ xs: 12, sm: 12, md: 4 }} spacing={1} sx={{ mt: '-20px', p: 1 }}>
+            <Grid item xs={12} sm={12} md={4} sx={{ mt: '-20px' }}>
               {selectedAccountData ? (
                 <ProfileCard data={selectedAccountData} />
               ) : (
                 <Card sx={{ 
                   width: '100%', 
-                  height: '400px', 
+                  height: '500px', 
                   backgroundColor: '#fff', 
                   borderRadius: '20px', 
                   padding: '32px', 
@@ -545,11 +545,11 @@ const InstagramAnalytics = () => {
             </Grid>
 
             {/* Analytics Cards Section - matching Analytics exact Grid structure */}
-            {selectedAccountData && (
-              <Grid size={{ xs: 12, sm: 12, md: 8 }} spacing={1}>
+            <Grid item xs={12} sm={12} md={8}>
+              {selectedAccountData ? (
                 <Box>
                   <Typography variant="h6" sx={{ mb: 3, color: '#333', fontWeight: 'bold' }}>
-                    Analytics Overview
+                    Campaign Analytics
                   </Typography>
                   <Grid container spacing={2}>
                     {getAnalyticsCards(selectedAccountData).slice(0, 12).map((card, index) => (
@@ -606,13 +606,46 @@ const InstagramAnalytics = () => {
                     ))}
                   </Grid>
                 </Box>
-              </Grid>
-            )}
+              ) : (
+                <Card sx={{ 
+                  width: '100%', 
+                  height: '500px', 
+                  backgroundColor: '#fff', 
+                  borderRadius: '20px', 
+                  padding: '32px', 
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)', 
+                  border: '1px solid #e0e0e0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
+                    <Box sx={{ 
+                      width: 80, 
+                      height: 80, 
+                      borderRadius: '50%', 
+                      backgroundColor: '#667eea', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      mb: 3
+                    }}>
+                      <TrendingUpIcon sx={{ fontSize: 40, color: '#fff' }} />
+                    </Box>
+                    <Typography variant="h6" color="textSecondary" sx={{ mb: 1 }}>
+                      Select Account for Analytics
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', opacity: 0.7 }}>
+                      Choose an Instagram account to view campaign analytics
+                    </Typography>
+                  </Box>
+                </Card>
+              )}
+            </Grid>
 
-            {/* Recent Posts Section - Enhanced with beautiful styling */}
-            <Grid size={{ xs: 12, sm: 12, md: 12 }} spacing={2}>
+            {/* Recent Posts Section - Full width second row */}
+            <Grid item xs={12}>
               <Card sx={{ 
-                mt: 3, 
                 borderRadius: '20px', 
                 border: '1px solid #e8eaf6',
                 background: 'linear-gradient(135deg, #fff 0%, #f8f9ff 100%)',
