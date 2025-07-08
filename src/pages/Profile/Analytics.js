@@ -71,6 +71,7 @@ const Analytics = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showNoAnalyticsModal, setShowNoAnalyticsModal] = useState(false);
 
+
 useEffect(() => {
     setLoading(true);
     const token = localStorage.getItem("token");
@@ -218,7 +219,7 @@ useEffect(() => {
 
   const selectedData = profileData.filter(item => item.name === platformOption);
 
-  // Show loading state
+    // Show loading state
   if (loading) {
     return (
       <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>

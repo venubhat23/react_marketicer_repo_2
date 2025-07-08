@@ -30,7 +30,7 @@ const InstagramAnalytics = () => {
   const [selectedAccountData, setSelectedAccountData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showNoAnalyticsModal, setShowNoAnalyticsModal] = useState(false);
+
 
   useEffect(() => {
     fetchInstagramAnalytics();
@@ -45,7 +45,7 @@ const InstagramAnalytics = () => {
       
       if (!token) {
         setError('No authentication token found');
-        setShowNoAnalyticsModal(true);
+        setInstagramData([]);
         setLoading(false);
         return;
       }
@@ -65,13 +65,15 @@ const InstagramAnalytics = () => {
         setSelectedAccount(firstAccount.username);
         setSelectedAccountData(firstAccount);
       } else {
+        // If no data found, continue with empty data but don't show modal
         setError('No Instagram data found');
-        setShowNoAnalyticsModal(true);
+        setInstagramData([]);
       }
     } catch (error) {
       console.error('Error fetching Instagram analytics:', error);
       setError(`API Error: ${error.response?.data?.message || error.message}`);
-      setShowNoAnalyticsModal(true);
+      // Continue with empty data instead of showing modal
+      setInstagramData([]);
     } finally {
       setLoading(false);
     }
@@ -260,57 +262,7 @@ const InstagramAnalytics = () => {
     );
   }
 
-  // Show "No Analytics Found" modal - matching Analytics component
-  if (showNoAnalyticsModal) {
-    return (
-      <Layout>
-        <Modal
-          open={showNoAnalyticsModal}
-          onClose={() => setShowNoAnalyticsModal(false)}
-          aria-labelledby="no-analytics-modal-title"
-          aria-describedby="no-analytics-modal-description"
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 400,
-              bgcolor: 'background.paper',
-              border: '2px solid #1976d2',
-              boxShadow: 24,
-              p: 4,
-              borderRadius: 2,
-              textAlign: 'center'
-            }}
-          >
-            <Typography id="no-analytics-modal-title" variant="h6" component="h2" color="error">
-              No Instagram Analytics Found
-            </Typography>
-            <Typography id="no-analytics-modal-description" sx={{ mt: 2 }}>
-              We couldn't find any Instagram analytics data to display. Please connect your Instagram account or try again later.
-            </Typography>
-            <Button
-              variant="contained"
-              sx={{
-                mt: 3,
-                backgroundColor: "#fff",
-                color: "#1976d2",
-                border: "1px solid #1976d2",
-                '&:hover': {
-                  backgroundColor: "#f5f5f5"
-                }
-              }}
-              onClick={() => window.location.href = "/socialMedia"}
-            >
-              Connect Instagram
-            </Button>
-          </Box>
-        </Modal>
-      </Layout>
-    );
-  }
+
 
   return (
     <Layout>
@@ -401,7 +353,7 @@ const InstagramAnalytics = () => {
             >
               {instagramData.length === 0 ? (
                 <MenuItem value="" disabled>
-                  <em>No Instagram accounts available</em>
+                  <em>Loading Instagram accounts...</em>
                 </MenuItem>
               ) : (
                 instagramData.map((account, index) => (
@@ -443,8 +395,13 @@ const InstagramAnalytics = () => {
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
                     <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
                     <Typography variant="body1" color="textSecondary">
-                      No Instagram account selected
+                      {instagramData.length === 0 ? 'Loading Instagram analytics data...' : 'No Instagram account selected'}
                     </Typography>
+                    {instagramData.length === 0 && (
+                      <Typography variant="body2" color="textSecondary" sx={{ mt: 1, textAlign: 'center' }}>
+                        All available Instagram analytics records will be displayed here.
+                      </Typography>
+                    )}
                   </Box>
                 </Card>
               )}
@@ -548,8 +505,17 @@ const InstagramAnalytics = () => {
                     <Box sx={{ textAlign: 'center', py: 4 }}>
                       <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
                       <Typography variant="body1" color="textSecondary">
-                        {selectedAccountData ? 'No recent posts found for this account' : 'Please select an Instagram account'}
+                        {instagramData.length === 0 
+                          ? 'Loading Instagram posts...' 
+                          : selectedAccountData 
+                            ? 'No recent posts found for this account' 
+                            : 'Please select an Instagram account'}
                       </Typography>
+                      {instagramData.length === 0 && (
+                        <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                          All available posts will be shown here once data is loaded.
+                        </Typography>
+                      )}
                     </Box>
                   )}
                 </CardContent>
