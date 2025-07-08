@@ -9,6 +9,7 @@ import {
   Typography,
   ListItemButton,
   IconButton,
+  Tooltip,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -20,6 +21,8 @@ import {
   Group as GroupIcon,
   Assessment as AssessmentIcon,
   Close as CloseIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 
 import {
@@ -42,7 +45,7 @@ const footerItems = [
   { icon: <SettingsIcon />, active: true },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen = true, onToggle }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -51,8 +54,149 @@ const Sidebar = () => {
     navigate("/login");        // Redirect to login page
   };
 
+  const menuItems = [
+    { 
+      icon: <AddCircleOutlineIcon fontSize="medium" />, 
+      text: 'Create Posts', 
+      path: '/createPost', 
+      visible: true 
+    },
+    { 
+      icon: <AppsIcon fontSize="medium" />, 
+      text: 'Dashboard', 
+      path: '/dashboard', 
+      visible: false 
+    },
+    { 
+      icon: <LanguageIcon fontSize="medium" />, 
+      text: 'Discover', 
+      path: '/discover', 
+      visible: false 
+    },
+    { 
+      icon: <EqualizerIcon fontSize="medium" />, 
+      text: 'Analytics', 
+      path: '/analytics', 
+      visible: true 
+    },
+    { 
+      icon: <TrendingUpIcon fontSize="medium" />, 
+      text: 'Analytics 2', 
+      path: '/instagram-analytics', 
+      visible: true 
+    },
+    { 
+      icon: <People fontSize="medium" />, 
+      text: 'Social Media', 
+      path: '/socialMedia', 
+      visible: true 
+    },
+    { 
+      icon: <DescriptionIcon fontSize="medium" />, 
+      text: 'Contracts', 
+      path: '/contracts', 
+      visible: true 
+    },
+    { 
+      icon: <StorefrontIcon fontSize="medium" />, 
+      text: 'Marketplace', 
+      path: '/marketplace', 
+      visible: true 
+    },
+  ];
+
+  const renderMenuItem = (item) => {
+    if (!item.visible) return null;
+
+    const content = (
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: isOpen ? 'column' : 'column', 
+        alignItems: 'center', 
+        color: '#cbaef7',
+        width: '100%',
+        py: isOpen ? 1 : 1.5,
+      }}>
+        {item.icon}
+        {isOpen && (
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              fontSize: '12px', 
+              whiteSpace: 'nowrap',
+              mt: 0.5,
+              opacity: 1,
+              transition: 'opacity 0.3s ease-in-out'
+            }}
+          >
+            {item.text}
+          </Typography>
+        )}
+      </Box>
+    );
+
+    return (
+      <ListItem key={item.path} disablePadding>
+        <Tooltip title={!isOpen ? item.text : ''} placement="right">
+          <ListItemButton sx={{ 
+            display: 'flex', 
+            justifyContent: 'center',
+            minHeight: isOpen ? 'auto' : 56,
+            '&:hover': {
+              bgcolor: 'rgba(203, 174, 247, 0.1)',
+              transform: 'translateX(2px)',
+            },
+            transition: 'all 0.2s ease-in-out'
+          }}>
+            <Link to={item.path} style={{ textDecoration: 'none', width: '100%', display: 'flex', justifyContent: 'center' }}>
+              {content}
+            </Link>
+          </ListItemButton>
+        </Tooltip>
+      </ListItem>
+    );
+  };
+
   return(
-    <Box sx={{ bgcolor: "#091a48", flexDirection: "column", width:"100%", height: "100vh" }}>
+    <Box sx={{ 
+      bgcolor: "#091a48", 
+      flexDirection: "column", 
+      width: "100%", 
+      height: "100vh",
+      position: 'relative'
+    }}>
+      {/* Toggle Button */}
+      <Box sx={{ 
+        position: 'absolute', 
+        top: 16, 
+        right: -12, 
+        zIndex: 1300,
+        bgcolor: '#091a48',
+        borderRadius: '50%',
+        border: '2px solid #fff',
+        width: 24,
+        height: 24,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <IconButton
+          onClick={onToggle}
+          size="small"
+          sx={{
+            color: '#fff',
+            padding: 0,
+            width: '100%',
+            height: '100%',
+            '&:hover': {
+              bgcolor: 'rgba(255,255,255,0.1)',
+            },
+          }}
+        >
+          {isOpen ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
+        </IconButton>
+      </Box>
+
       {/* Logo */}
       <Box sx={{ p: 2, pt: 4, pb: 2 }}>
         <img
@@ -65,136 +209,54 @@ const Sidebar = () => {
       </Box>
 
       {/* Navigation Icons */}
-      <List className="sidebar-list">
-
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Link to="/createPost">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <AddCircleOutlineIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Create Posts</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
-
-          <ListItem disablePadding >
-            <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
-              <Link to="/dashboard">
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  color: '#cbaef7',
-                }}
-              >
-                <AppsIcon fontSize="medium" />
-                <Typography variant="body2" sx={{fontSize:'12px', whiteSpace:'nowrap'}}>Dashboard</Typography>
-              </Box>
-              </Link>
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding >
-            <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
-              <Link to="/discover">
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  color: '#cbaef7',
-                }}
-              >
-                <LanguageIcon fontSize="medium" />
-                <Typography variant="body2" sx={{fontSize:'12px', whiteSpace:'nowrap'}}>Discover</Typography>
-              </Box>
-              </Link>
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding>
-            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Link to="/analytics">
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  color: '#cbaef7',
-                }}
-              >
-                <EqualizerIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Analytics</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Link to="/instagram-analytics">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <TrendingUpIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Analytics 2</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Link to="/socialMedia">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <People fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Social Media</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
-
-        {/* NEW CONTRACT NAVIGATION ITEM */}
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Link to="/contracts">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <DescriptionIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Contracts</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
-        
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Link to="/marketplace">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <StorefrontIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Marketplace</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
-
+      <List className="sidebar-list" sx={{ flex: 1, pt: 2 }}>
+        {menuItems.map(renderMenuItem)}
       </List>
 
       {/* Footer */}
       <Box sx={{ mt: "auto", px: 1, pb: 2 }}>
         <List>
-          {/* Existing footer items if needed */}
-          {footerItems.map((item, index) => (
-            <ListItem key={index} disablePadding sx={{ mb: 0.5, p: 0 }} />
-          ))}
-
           {/* Logout item */}
           <ListItem disablePadding>
-            <ListItemButton onClick={handleLogout} sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <LogoutIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Logout</Typography>
-              </Box>
-            </ListItemButton>
+            <Tooltip title={!isOpen ? 'Logout' : ''} placement="right">
+              <ListItemButton 
+                onClick={handleLogout} 
+                sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'center',
+                  minHeight: isOpen ? 'auto' : 56,
+                  '&:hover': {
+                    bgcolor: 'rgba(203, 174, 247, 0.1)',
+                    transform: 'translateX(2px)',
+                  },
+                  transition: 'all 0.2s ease-in-out'
+                }}
+              >
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  color: '#cbaef7',
+                  py: isOpen ? 1 : 1.5,
+                }}>
+                  <LogoutIcon fontSize="medium" />
+                  {isOpen && (
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        fontSize: '12px', 
+                        whiteSpace: 'nowrap',
+                        mt: 0.5,
+                        opacity: 1,
+                        transition: 'opacity 0.3s ease-in-out'
+                      }}
+                    >
+                      Logout
+                    </Typography>
+                  )}
+                </Box>
+              </ListItemButton>
+            </Tooltip>
           </ListItem>
         </List>
 
