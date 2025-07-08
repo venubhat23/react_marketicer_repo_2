@@ -433,17 +433,26 @@ const InstagramAnalytics = () => {
 
         {/* Main content matching Analytics component layout exactly */}
         <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '15px' }}>
-          {selectedAccountData && (
-            <Grid container spacing={2}>
-              {/* Profile Section - matching Analytics layout */}
-              <Grid item xs={12} sm={4} md={4}>
-                <Box sx={{ mt: '-20px', p: 1 }}>
-                  <ProfileCard data={selectedAccountData} />
-                </Box>
-              </Grid>
+          <Grid container spacing={2}>
+            {/* Profile Section - matching Analytics exact Grid structure */}
+            <Grid size={{ xs: 2, sm: 4, md: 4 }} spacing={1} sx={{ mt: '-20px', p: 1 }}>
+              {selectedAccountData ? (
+                <ProfileCard data={selectedAccountData} />
+              ) : (
+                <Card sx={{ width: '100%', height: 'auto', backgroundColor: '#fff', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', border: '1px solid #e0e0e0' }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
+                    <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
+                    <Typography variant="body1" color="textSecondary">
+                      No Instagram account selected
+                    </Typography>
+                  </Box>
+                </Card>
+              )}
+            </Grid>
 
-              {/* Analytics Cards Section - matching Analytics layout */}
-              <Grid item xs={12} sm={8} md={8}>
+            {/* Analytics Cards Section - matching Analytics exact Grid structure */}
+            {selectedAccountData && (
+              <Grid size={{ xs: 4, sm: 4, md: 8 }} spacing={1}>
                 <Box>
                   <Grid container spacing={1}>
                     {getAnalyticsCards(selectedAccountData).slice(0, 12).map((card, index) => (
@@ -468,85 +477,85 @@ const InstagramAnalytics = () => {
                   </Grid>
                 </Box>
               </Grid>
+            )}
 
-              {/* Recent Posts Section - matching Analytics BrandProfile layout */}
-              <Grid item xs={12} md={12}>
-                <Card sx={{ mt: 2, borderRadius: '12px', border: '1px solid #e0e0e0' }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                      Recent Instagram Posts
-                    </Typography>
-                    {selectedAccountData.media && selectedAccountData.media.length > 0 ? (
-                      <Grid container spacing={2}>
-                        {selectedAccountData.media.slice(0, 6).map((post, index) => (
-                          <Grid key={index} item xs={12} sm={6} md={4}>
-                            <Card sx={{ 
-                              borderRadius: '8px', 
-                              overflow: 'hidden',
-                              height: '300px',
-                              display: 'flex',
-                              flexDirection: 'column'
+            {/* Recent Posts Section - matching Analytics exact Grid structure */}
+            <Grid size={{ xs: 2, sm: 6, md: 12 }} spacing={2}>
+              <Card sx={{ mt: 2, borderRadius: '12px', border: '1px solid #e0e0e0' }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                    Recent Instagram Posts
+                  </Typography>
+                  {selectedAccountData && selectedAccountData.media && selectedAccountData.media.length > 0 ? (
+                    <Grid container spacing={2}>
+                      {selectedAccountData.media.slice(0, 6).map((post, index) => (
+                        <Grid key={index} item xs={12} sm={6} md={4}>
+                          <Card sx={{ 
+                            borderRadius: '8px', 
+                            overflow: 'hidden',
+                            height: '300px',
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}>
+                            <Box sx={{ 
+                              height: '200px', 
+                              backgroundImage: `url(${post.media_url})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              position: 'relative'
                             }}>
                               <Box sx={{ 
-                                height: '200px', 
-                                backgroundImage: `url(${post.media_url})`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                position: 'relative'
+                                position: 'absolute', 
+                                top: 8, 
+                                right: 8,
+                                bgcolor: 'rgba(0,0,0,0.6)',
+                                borderRadius: '4px',
+                                p: 0.5
                               }}>
-                                <Box sx={{ 
-                                  position: 'absolute', 
-                                  top: 8, 
-                                  right: 8,
-                                  bgcolor: 'rgba(0,0,0,0.6)',
-                                  borderRadius: '4px',
-                                  p: 0.5
-                                }}>
-                                  {getMediaTypeIcon(post.media_type)}
+                                {getMediaTypeIcon(post.media_type)}
+                              </Box>
+                            </Box>
+                            <CardContent sx={{ flexGrow: 1, p: 2 }}>
+                              <Typography variant="body2" sx={{ 
+                                overflow: 'hidden', 
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                mb: 1
+                              }}>
+                                {post.caption ? post.caption.substring(0, 80) + '...' : 'No caption'}
+                              </Typography>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <FavoriteIcon sx={{ fontSize: 16, color: '#e91e63' }} />
+                                  <Typography variant="body2">{formatNumber(post.like_count || 0)}</Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <ChatBubbleIcon sx={{ fontSize: 16, color: '#2196f3' }} />
+                                  <Typography variant="body2">{formatNumber(post.comments_count || 0)}</Typography>
                                 </Box>
                               </Box>
-                              <CardContent sx={{ flexGrow: 1, p: 2 }}>
-                                <Typography variant="body2" sx={{ 
-                                  overflow: 'hidden', 
-                                  textOverflow: 'ellipsis',
-                                  display: '-webkit-box',
-                                  WebkitLineClamp: 2,
-                                  WebkitBoxOrient: 'vertical',
-                                  mb: 1
-                                }}>
-                                  {post.caption ? post.caption.substring(0, 80) + '...' : 'No caption'}
-                                </Typography>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <FavoriteIcon sx={{ fontSize: 16, color: '#e91e63' }} />
-                                    <Typography variant="body2">{formatNumber(post.like_count || 0)}</Typography>
-                                  </Box>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <ChatBubbleIcon sx={{ fontSize: 16, color: '#2196f3' }} />
-                                    <Typography variant="body2">{formatNumber(post.comments_count || 0)}</Typography>
-                                  </Box>
-                                </Box>
-                                <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
-                                  {formatDate(post.timestamp)}
-                                </Typography>
-                              </CardContent>
-                            </Card>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    ) : (
-                      <Box sx={{ textAlign: 'center', py: 4 }}>
-                        <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
-                        <Typography variant="body1" color="textSecondary">
-                          No recent posts found for this account
-                        </Typography>
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
+                              <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
+                                {formatDate(post.timestamp)}
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  ) : (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
+                      <Typography variant="body1" color="textSecondary">
+                        {selectedAccountData ? 'No recent posts found for this account' : 'Please select an Instagram account'}
+                      </Typography>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
             </Grid>
-          )}
+          </Grid>
         </Box>
       </Box>
     </Layout>
