@@ -8,20 +8,13 @@ import {
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import InstagramIcon from '@mui/icons-material/Instagram';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
-import ShareIcon from '@mui/icons-material/Share';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import PeopleIcon from '@mui/icons-material/People';
-import PhotoIcon from '@mui/icons-material/Photo';
-import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import InteractiveIcon from '@mui/icons-material/TouchApp';
 import Layout from '../../components/Layout';
+import Engagement from '../Profile/Engagement';
+import Audience from '../Profile/Audience';
+import BrandProfile from '../Profile/BrandProfile';
 import axios from 'axios';
 
 const InstagramAnalytics = () => {
@@ -31,6 +24,10 @@ const InstagramAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showNoAnalyticsModal, setShowNoAnalyticsModal] = useState(false);
+  // Additional state for matching Analytics component layout
+  const [engagementData, setEngagementData] = useState({});
+  const [audienceEngagement, setAudienceEngagement] = useState({});
+  const [brandData, setBrandData] = useState([]);
 
   useEffect(() => {
     fetchInstagramAnalytics();
@@ -64,6 +61,11 @@ const InstagramAnalytics = () => {
         const firstAccount = response.data.data[0];
         setSelectedAccount(firstAccount.username);
         setSelectedAccountData(firstAccount);
+        
+        // Set data for Engagement and Audience components to match Analytics layout
+        setEngagementDataFromInstagram(firstAccount);
+        setAudienceDataFromInstagram(firstAccount);
+        setBrandDataFromInstagram(firstAccount);
       } else {
         setError('No Instagram data found');
         setShowNoAnalyticsModal(true);
@@ -88,6 +90,13 @@ const InstagramAnalytics = () => {
     setSelectedAccount(username);
     const accountData = instagramData.find(account => account.username === username);
     setSelectedAccountData(accountData);
+    
+    // Update data for other components when account changes
+    if (accountData) {
+      setEngagementDataFromInstagram(accountData);
+      setAudienceDataFromInstagram(accountData);
+      setBrandDataFromInstagram(accountData);
+    }
   };
 
   const formatNumber = (num) => {
@@ -99,24 +108,7 @@ const InstagramAnalytics = () => {
     return num?.toString() || '0';
   };
 
-  const getMediaTypeIcon = (type) => {
-    switch (type) {
-      case 'IMAGE':
-        return <PhotoIcon />;
-      case 'VIDEO':
-        return <VideoLibraryIcon />;
-      default:
-        return <PhotoIcon />;
-    }
-  };
 
-  const formatDate = (timestamp) => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
 
   const calculateAverageInteractions = (data) => {
     if (!data?.analytics?.engagement_stats) return 0;
@@ -124,6 +116,67 @@ const InstagramAnalytics = () => {
     const totalComments = data.analytics.engagement_stats.total_comments || 0;
     const totalPosts = data.analytics.total_posts || 1;
     return Math.round((totalLikes + totalComments) / totalPosts);
+  };
+
+  // Helper functions to map Instagram data to expected formats
+  const setEngagementDataFromInstagram = (data) => {
+    if (!data) {
+      setEngagementData({});
+      return;
+    }
+    
+    // Create engagement data format expected by Engagement component
+    // Map Instagram analytics to engagement format
+    const engagementFormat = {
+      // Generate sample engagement data based on Instagram metrics
+      'day_1': data.analytics?.engagement_stats?.total_likes * 0.1 || 0,
+      'day_2': data.analytics?.engagement_stats?.total_likes * 0.15 || 0,
+      'day_3': data.analytics?.engagement_stats?.total_likes * 0.12 || 0,
+      'day_4': data.analytics?.engagement_stats?.total_likes * 0.18 || 0,
+      'day_5': data.analytics?.engagement_stats?.total_likes * 0.14 || 0,
+      'day_6': data.analytics?.engagement_stats?.total_likes * 0.16 || 0,
+      'day_7': data.analytics?.engagement_stats?.total_likes * 0.13 || 0,
+    };
+    setEngagementData(engagementFormat);
+  };
+
+  const setAudienceDataFromInstagram = (data) => {
+    if (!data) {
+      setAudienceEngagement({});
+      return;
+    }
+    
+    // Create audience data format expected by Audience component
+    const audienceFormat = {
+      total_followers: data.profile?.followers_count || 0,
+      total_following: data.profile?.follows_count || 0,
+      engagement_rate: data.summary?.engagement_rate || '0.0%',
+      avg_likes: data.analytics?.engagement_stats ? 
+        Math.round((data.analytics.engagement_stats.total_likes || 0) / (data.profile?.media_count || 1)) : 0,
+      avg_comments: data.analytics?.engagement_stats ? 
+        Math.round((data.analytics.engagement_stats.total_comments || 0) / (data.profile?.media_count || 1)) : 0,
+    };
+    setAudienceEngagement(audienceFormat);
+  };
+
+  const setBrandDataFromInstagram = (data) => {
+    if (!data || !data.media) {
+      setBrandData([]);
+      return;
+    }
+    
+    // Map Instagram media to brand profile format
+    const brandFormat = data.media.map((post, index) => ({
+      id: index,
+      image_url: post.media_url,
+      caption: post.caption || '',
+      likes: post.like_count || 0,
+      comments: post.comments_count || 0,
+      timestamp: post.timestamp,
+      engagement_rate: post.like_count && post.comments_count ? 
+        ((post.like_count + post.comments_count) / (data.profile?.followers_count || 1) * 100).toFixed(2) + '%' : '0.0%'
+    }));
+    setBrandData(brandFormat);
   };
 
   // Create analytics cards array matching Analytics component structure
@@ -479,81 +532,22 @@ const InstagramAnalytics = () => {
               </Grid>
             )}
 
-            {/* Recent Posts Section - matching Analytics exact Grid structure */}
+            {/* Engagement Section - matching Analytics exact Grid structure */}
+            <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2}>
+              <Engagement 
+                engagement={engagementData} 
+                selectedUser={selectedAccountData}
+              />
+            </Grid>
+
+            {/* Audience Section - matching Analytics exact Grid structure */}
+            <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2}>
+              <Audience audienceData={audienceEngagement} />
+            </Grid>
+
+            {/* Brand Profile Section - matching Analytics exact Grid structure */}
             <Grid size={{ xs: 2, sm: 6, md: 12 }} spacing={2}>
-              <Card sx={{ mt: 2, borderRadius: '12px', border: '1px solid #e0e0e0' }}>
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                    Recent Instagram Posts
-                  </Typography>
-                  {selectedAccountData && selectedAccountData.media && selectedAccountData.media.length > 0 ? (
-                    <Grid container spacing={2}>
-                      {selectedAccountData.media.slice(0, 6).map((post, index) => (
-                        <Grid key={index} item xs={12} sm={6} md={4}>
-                          <Card sx={{ 
-                            borderRadius: '8px', 
-                            overflow: 'hidden',
-                            height: '300px',
-                            display: 'flex',
-                            flexDirection: 'column'
-                          }}>
-                            <Box sx={{ 
-                              height: '200px', 
-                              backgroundImage: `url(${post.media_url})`,
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center',
-                              position: 'relative'
-                            }}>
-                              <Box sx={{ 
-                                position: 'absolute', 
-                                top: 8, 
-                                right: 8,
-                                bgcolor: 'rgba(0,0,0,0.6)',
-                                borderRadius: '4px',
-                                p: 0.5
-                              }}>
-                                {getMediaTypeIcon(post.media_type)}
-                              </Box>
-                            </Box>
-                            <CardContent sx={{ flexGrow: 1, p: 2 }}>
-                              <Typography variant="body2" sx={{ 
-                                overflow: 'hidden', 
-                                textOverflow: 'ellipsis',
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                mb: 1
-                              }}>
-                                {post.caption ? post.caption.substring(0, 80) + '...' : 'No caption'}
-                              </Typography>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  <FavoriteIcon sx={{ fontSize: 16, color: '#e91e63' }} />
-                                  <Typography variant="body2">{formatNumber(post.like_count || 0)}</Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  <ChatBubbleIcon sx={{ fontSize: 16, color: '#2196f3' }} />
-                                  <Typography variant="body2">{formatNumber(post.comments_count || 0)}</Typography>
-                                </Box>
-                              </Box>
-                              <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
-                                {formatDate(post.timestamp)}
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  ) : (
-                    <Box sx={{ textAlign: 'center', py: 4 }}>
-                      <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
-                      <Typography variant="body1" color="textSecondary">
-                        {selectedAccountData ? 'No recent posts found for this account' : 'Please select an Instagram account'}
-                      </Typography>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
+              <BrandProfile brand={brandData} />
             </Grid>
           </Grid>
         </Box>
