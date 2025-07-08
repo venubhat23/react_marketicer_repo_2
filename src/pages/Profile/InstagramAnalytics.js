@@ -3,8 +3,8 @@ import {
   Box, Typography, FormControl, Avatar,
   Grid, Select, MenuItem, Card, CardContent, 
   Paper, IconButton, CircularProgress, Button,
-  Chip, Container, Stack, Modal,
-  Badge, Tooltip
+  Chip, Container, Stack, Modal, Tooltip,
+  LinearProgress, Divider
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -21,6 +21,12 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import InteractiveIcon from '@mui/icons-material/TouchApp';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import MouseIcon from '@mui/icons-material/Mouse';
+import PersonIcon from '@mui/icons-material/Person';
+import GroupsIcon from '@mui/icons-material/Groups';
+import ImageIcon from '@mui/icons-material/Image';
 import Layout from '../../components/Layout';
 import axios from 'axios';
 
@@ -30,7 +36,6 @@ const InstagramAnalytics = () => {
   const [selectedAccountData, setSelectedAccountData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
 
   useEffect(() => {
     fetchInstagramAnalytics();
@@ -65,14 +70,12 @@ const InstagramAnalytics = () => {
         setSelectedAccount(firstAccount.username);
         setSelectedAccountData(firstAccount);
       } else {
-        // If no data found, continue with empty data but don't show modal
         setError('No Instagram data found');
         setInstagramData([]);
       }
     } catch (error) {
       console.error('Error fetching Instagram analytics:', error);
       setError(`API Error: ${error.response?.data?.message || error.message}`);
-      // Continue with empty data instead of showing modal
       setInstagramData([]);
     } finally {
       setLoading(false);
@@ -82,7 +85,6 @@ const InstagramAnalytics = () => {
   const handleAccountChange = (e) => {
     const username = e.target.value;
     
-    // Don't proceed if empty value is selected
     if (!username) {
       return;
     }
@@ -104,11 +106,11 @@ const InstagramAnalytics = () => {
   const getMediaTypeIcon = (type) => {
     switch (type) {
       case 'IMAGE':
-        return <PhotoIcon />;
+        return <PhotoIcon sx={{ color: '#fff', fontSize: 16 }} />;
       case 'VIDEO':
-        return <VideoLibraryIcon />;
+        return <VideoLibraryIcon sx={{ color: '#fff', fontSize: 16 }} />;
       default:
-        return <PhotoIcon />;
+        return <PhotoIcon sx={{ color: '#fff', fontSize: 16 }} />;
     }
   };
 
@@ -128,50 +130,122 @@ const InstagramAnalytics = () => {
     return Math.round((totalLikes + totalComments) / totalPosts);
   };
 
-  // Create analytics cards array matching Analytics component structure
+  // Enhanced analytics cards with beautiful icons and styling
   const getAnalyticsCards = (data) => {
     if (!data) return [];
     
-    const totalPosts = data.profile?.media_count || 0;
     const totalLikes = data.analytics?.engagement_stats?.total_likes || 0;
     const totalComments = data.analytics?.engagement_stats?.total_comments || 0;
+    const totalPosts = data.analytics?.total_posts || 0;
     const followers = data.profile?.followers_count || 0;
     const following = data.profile?.follows_count || 0;
-    const avgLikes = totalPosts > 0 ? Math.round(totalLikes / totalPosts) : 0;
-    const avgComments = totalPosts > 0 ? Math.round(totalComments / totalPosts) : 0;
-    const avgEngagement = totalPosts > 0 ? Math.round((totalLikes + totalComments) / totalPosts) : 0;
-    const reachPotential = Math.round(followers * 0.15); // Estimated reach potential
+    const mediaCount = data.profile?.media_count || 0;
+    const engagementRate = data.summary?.engagement_rate || '0.0%';
     
     return [
-      { value: formatNumber(totalLikes), label: "Total Likes" },
-      { value: formatNumber(totalComments), label: "Total Comments" },
-      { value: data.summary?.engagement_rate || '0.0%', label: "Total Engagement" },
-      { value: formatNumber(followers), label: "Total Reach" },
-      { value: formatNumber(Math.round(totalLikes * 0.5)), label: "Total Shares" },
-      { value: formatNumber(Math.round(totalPosts * 15)), label: "Total Saves" },
-      { value: formatNumber(Math.round(totalPosts * 25)), label: "Total Clicks" },
-      { value: formatNumber(Math.round(followers * 0.08)), label: "Profile Visits" },
-      { value: formatNumber(followers), label: "Followers Count" },
-      { value: formatNumber(following), label: "Following Count" },
-      { value: formatNumber(totalPosts), label: "Media Count" },
-      { value: formatNumber(reachPotential), label: "Reach Potential" },
+      { 
+        value: formatNumber(totalLikes), 
+        label: "Total Likes", 
+        icon: <FavoriteIcon sx={{ color: '#e91e63', fontSize: 20 }} />,
+        color: '#e91e63',
+        bgColor: '#fce4ec'
+      },
+      { 
+        value: formatNumber(totalComments), 
+        label: "Total Comments", 
+        icon: <ChatBubbleIcon sx={{ color: '#2196f3', fontSize: 20 }} />,
+        color: '#2196f3',
+        bgColor: '#e3f2fd'
+      },
+      { 
+        value: engagementRate, 
+        label: "Engagement Rate", 
+        icon: <TrendingUpIcon sx={{ color: '#4caf50', fontSize: 20 }} />,
+        color: '#4caf50',
+        bgColor: '#e8f5e8'
+      },
+      { 
+        value: formatNumber(followers), 
+        label: "Followers", 
+        icon: <PeopleIcon sx={{ color: '#ff9800', fontSize: 20 }} />,
+        color: '#ff9800',
+        bgColor: '#fff3e0'
+      },
+      { 
+        value: formatNumber(Math.round(totalLikes * 0.5)), 
+        label: "Estimated Shares", 
+        icon: <ShareIcon sx={{ color: '#9c27b0', fontSize: 20 }} />,
+        color: '#9c27b0',
+        bgColor: '#f3e5f5'
+      },
+      { 
+        value: formatNumber(Math.round(totalPosts * 15)), 
+        label: "Estimated Saves", 
+        icon: <BookmarkIcon sx={{ color: '#795548', fontSize: 20 }} />,
+        color: '#795548',
+        bgColor: '#efebe9'
+      },
+      { 
+        value: formatNumber(Math.round(totalPosts * 25)), 
+        label: "Estimated Clicks", 
+        icon: <MouseIcon sx={{ color: '#607d8b', fontSize: 20 }} />,
+        color: '#607d8b',
+        bgColor: '#eceff1'
+      },
+      { 
+        value: formatNumber(Math.round(followers * 0.08)), 
+        label: "Profile Visits", 
+        icon: <VisibilityIcon sx={{ color: '#00bcd4', fontSize: 20 }} />,
+        color: '#00bcd4',
+        bgColor: '#e0f2f1'
+      },
+      { 
+        value: formatNumber(following), 
+        label: "Following", 
+        icon: <PersonIcon sx={{ color: '#3f51b5', fontSize: 20 }} />,
+        color: '#3f51b5',
+        bgColor: '#e8eaf6'
+      },
+      { 
+        value: formatNumber(mediaCount), 
+        label: "Media Count", 
+        icon: <ImageIcon sx={{ color: '#ff5722', fontSize: 20 }} />,
+        color: '#ff5722',
+        bgColor: '#fbe9e7'
+      },
+      { 
+        value: formatNumber(Math.round(followers * 0.15)), 
+        label: "Reach Potential", 
+        icon: <GroupsIcon sx={{ color: '#8bc34a', fontSize: 20 }} />,
+        color: '#8bc34a',
+        bgColor: '#f1f8e9'
+      },
+      { 
+        value: formatNumber(calculateAverageInteractions(data)), 
+        label: "Avg. Interactions", 
+        icon: <InteractiveIcon sx={{ color: '#673ab7', fontSize: 20 }} />,
+        color: '#673ab7',
+        bgColor: '#ede7f6'
+      },
     ];
   };
 
-  // Profile card component matching Analytics design
+  // Enhanced Profile card with beautiful styling
   const ProfileCard = ({ data }) => {
     const influencerData = {
-      name: data.profile?.full_name || `@${data.username}`,
+      name: data.page_name || `@${data.username}`,
       profileImage: data.profile?.profile_picture_url || "https://c.animaapp.com/mavezxjciUNcPR/img/ellipse-121-1.png",
       followers: formatNumber(data.profile?.followers_count || 0),
       following: formatNumber(data.profile?.follows_count || 0),
-      bio: data.profile?.bio ? (data.profile.bio.length > 100 ? data.profile.bio.substring(0, 100) + '...' : data.profile.bio) : "Instagram Analytics Profile",
+      bio: data.profile?.biography ? (data.profile.biography.length > 100 ? data.profile.biography.substring(0, 100) + '...' : data.profile.biography) : "Instagram Analytics Profile",
       category: "Instagram Creator",
-      location: data.profile?.location || "Instagram",
+      location: "Instagram",
+      mediaCount: formatNumber(data.profile?.media_count || 0),
+      engagementRate: data.summary?.engagement_rate || '0.0%',
       metrics: [
         { label: "Engagement Rate:", value: data.summary?.engagement_rate || '0.0%' },
-        { label: "Earned Media:", value: formatNumber(data.earned_media || 0) },
-        { label: "Average Interactions:", value: formatNumber(calculateAverageInteractions(data)) },
+        { label: "Most Used Media:", value: data.summary?.most_used_media_type || 'IMAGE' },
+        { label: "Posting Frequency:", value: data.summary?.posting_frequency || 'N/A' },
       ],
     };
 
@@ -180,64 +254,79 @@ const InstagramAnalytics = () => {
         sx={{
           width: '100%',
           height: 'auto',
-          backgroundColor: '#fff',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          border: '1px solid #e0e0e0',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          borderRadius: '20px',
+          padding: '24px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          color: 'white',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Box sx={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }} />
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1 }}>
           <Avatar
             src={influencerData.profileImage}
             sx={{
-              width: 100,
-              height: 100,
+              width: 120,
+              height: 120,
               mb: 2,
-              border: '3px solid #e0e0e0',
+              border: '4px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
             }}
           />
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center' }}>
             {influencerData.name}
           </Typography>
-          <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', mb: 2 }}>
+          <Typography variant="body2" sx={{ opacity: 0.9, textAlign: 'center', mb: 3 }}>
             @{data.username}
           </Typography>
           
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%', mb: 3 }}>
             <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 0.5 }}>
                 {influencerData.followers}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#666' }}>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
                 Followers
               </Typography>
             </Box>
             <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 0.5 }}>
                 {influencerData.following}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#666' }}>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
                 Following
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                {influencerData.mediaCount}
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Posts
               </Typography>
             </Box>
           </Box>
           
-          <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', mb: 2 }}>
-            {influencerData.bio}
-          </Typography>
+          <Card sx={{ width: '100%', backgroundColor: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', borderRadius: '12px', p: 2, mb: 3 }}>
+            <Typography variant="body2" sx={{ textAlign: 'center', lineHeight: 1.6 }}>
+              {influencerData.bio}
+            </Typography>
+          </Card>
           
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <LocationOnIcon sx={{ fontSize: 16, color: '#666' }} />
-            <Typography variant="body2" sx={{ color: '#666' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+            <InstagramIcon sx={{ fontSize: 20, opacity: 0.8 }} />
+            <Typography variant="body2" sx={{ opacity: 0.8 }}>
               {influencerData.location}
             </Typography>
           </Box>
           
-          <Box sx={{ width: '100%', pt: 2, borderTop: '1px solid #e0e0e0' }}>
+          <Box sx={{ width: '100%', pt: 2, borderTop: '1px solid rgba(255, 255, 255, 0.2)' }}>
             {influencerData.metrics.map((metric, index) => (
-              <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2" sx={{ color: '#666' }}>
+              <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                <Typography variant="body2" sx={{ opacity: 0.8 }}>
                   {metric.label}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
@@ -256,13 +345,19 @@ const InstagramAnalytics = () => {
     return (
       <Layout>
         <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <CircularProgress />
+          <Box sx={{ textAlign: 'center' }}>
+            <CircularProgress size={60} sx={{ mb: 2, color: '#667eea' }} />
+            <Typography variant="h6" sx={{ color: '#667eea', mb: 1 }}>
+              Loading Instagram Analytics...
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Please wait while we fetch your data
+            </Typography>
+          </Box>
         </Box>
       </Layout>
     );
   }
-
-
 
   return (
     <Layout>
@@ -295,7 +390,7 @@ const InstagramAnalytics = () => {
               >
                 <ArrowLeftIcon />
               </IconButton>
-              Analytics 2
+              Instagram Analytics
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <IconButton size="large" sx={{ color: '#fff' }}>
@@ -308,15 +403,16 @@ const InstagramAnalytics = () => {
           </Box>
         </Paper>
 
-        {/* Blue filter section matching Analytics component exactly */}
+        {/* Enhanced filter section with gradient */}
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'row',
             gap: 2,
             alignItems: 'center', 
-            bgcolor: '#B1C6FF', 
-            padding: '10px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            padding: '16px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
           }}
         >
           <FormControl fullWidth>
@@ -325,26 +421,37 @@ const InstagramAnalytics = () => {
               onChange={handleAccountChange}
               displayEmpty
               sx={{
-                width: '300px', 
-                bgcolor: '#fff', 
+                width: '350px', 
+                bgcolor: 'rgba(255, 255, 255, 0.95)', 
                 borderRadius: '50px', 
-                height: '40px',
+                height: '48px',
                 mt: '6px',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                '& .MuiSelect-select': {
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }
               }}
               MenuProps={{
                 PaperProps: {
                   sx: {
-                    maxHeight: 300,
+                    maxHeight: 350,
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
                     '& .MuiMenuItem-root': {
+                      py: 1.5,
+                      px: 2,
                       '&.Mui-selected': {
-                        backgroundColor: '#1976d2 !important',
+                        backgroundColor: '#667eea !important',
                         color: 'white !important',
                         '&:hover': {
-                          backgroundColor: '#1565c0 !important',
+                          backgroundColor: '#5a6fd8 !important',
                         },
                       },
                       '&:hover': {
-                        backgroundColor: '#f5f5f5',
+                        backgroundColor: '#f8f9ff',
                       },
                     },
                   },
@@ -361,20 +468,28 @@ const InstagramAnalytics = () => {
                     key={`${account.username}-${index}`}
                     value={account.username}
                     sx={{
-                      backgroundColor: selectedAccount === account.username ? '#1976d2 !important' : 'transparent',
+                      backgroundColor: selectedAccount === account.username ? '#667eea !important' : 'transparent',
                       color: selectedAccount === account.username ? 'white !important' : 'inherit',
                       '&:hover': {
-                        backgroundColor: selectedAccount === account.username ? '#1565c0 !important' : '#f5f5f5 !important',
+                        backgroundColor: selectedAccount === account.username ? '#5a6fd8 !important' : '#f8f9ff !important',
                       },
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Avatar 
                         src={account.profile?.profile_picture_url}
-                        sx={{ width: 24, height: 24 }}
+                        sx={{ width: 32, height: 32, border: '2px solid #e0e0e0' }}
                       />
-                      <Typography>@{account.username}</Typography>
-                      {account.profile?.full_name && ` (${account.profile.full_name})`}
+                      <Box>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                          @{account.username}
+                        </Typography>
+                        {account.page_name && (
+                          <Typography variant="body2" sx={{ opacity: 0.8, fontSize: '0.75rem' }}>
+                            {account.page_name}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
                   </MenuItem>
                 ))
@@ -384,24 +499,46 @@ const InstagramAnalytics = () => {
         </Box>
 
         {/* Main content matching Analytics component layout exactly */}
-        <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '15px' }}>
-          <Grid container spacing={2}>
+        <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '20px', backgroundColor: '#f8f9ff' }}>
+          <Grid container spacing={3}>
             {/* Profile Section - matching Analytics exact Grid structure */}
-            <Grid size={{ xs: 2, sm: 4, md: 4 }} spacing={1} sx={{ mt: '-20px', p: 1 }}>
+            <Grid size={{ xs: 12, sm: 12, md: 4 }} spacing={1} sx={{ mt: '-20px', p: 1 }}>
               {selectedAccountData ? (
                 <ProfileCard data={selectedAccountData} />
               ) : (
-                <Card sx={{ width: '100%', height: 'auto', backgroundColor: '#fff', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', border: '1px solid #e0e0e0' }}>
+                <Card sx={{ 
+                  width: '100%', 
+                  height: '400px', 
+                  backgroundColor: '#fff', 
+                  borderRadius: '20px', 
+                  padding: '32px', 
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)', 
+                  border: '1px solid #e0e0e0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
-                    <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
-                    <Typography variant="body1" color="textSecondary">
-                      {instagramData.length === 0 ? 'Loading Instagram analytics data...' : 'No Instagram account selected'}
+                    <Box sx={{ 
+                      width: 80, 
+                      height: 80, 
+                      borderRadius: '50%', 
+                      backgroundColor: '#667eea', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      mb: 3
+                    }}>
+                      <InstagramIcon sx={{ fontSize: 40, color: '#fff' }} />
+                    </Box>
+                    <Typography variant="h6" color="textSecondary" sx={{ mb: 1 }}>
+                      {instagramData.length === 0 ? 'Loading Instagram Data...' : 'No Account Selected'}
                     </Typography>
-                    {instagramData.length === 0 && (
-                      <Typography variant="body2" color="textSecondary" sx={{ mt: 1, textAlign: 'center' }}>
-                        All available Instagram analytics records will be displayed here.
-                      </Typography>
-                    )}
+                    <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', opacity: 0.7 }}>
+                      {instagramData.length === 0 
+                        ? 'Please wait while we fetch your analytics data' 
+                        : 'Please select an Instagram account to view analytics'}
+                    </Typography>
                   </Box>
                 </Card>
               )}
@@ -409,22 +546,58 @@ const InstagramAnalytics = () => {
 
             {/* Analytics Cards Section - matching Analytics exact Grid structure */}
             {selectedAccountData && (
-              <Grid size={{ xs: 4, sm: 4, md: 8 }} spacing={1}>
+              <Grid size={{ xs: 12, sm: 12, md: 8 }} spacing={1}>
                 <Box>
-                  <Grid container spacing={1}>
+                  <Typography variant="h6" sx={{ mb: 3, color: '#333', fontWeight: 'bold' }}>
+                    Analytics Overview
+                  </Typography>
+                  <Grid container spacing={2}>
                     {getAnalyticsCards(selectedAccountData).slice(0, 12).map((card, index) => (
                       <Grid key={index} item xs={12} sm={6} md={4}>
                         <Card
                           sx={{
-                            width: 220,
-                            height: 86,
-                            border: "1px solid #b6b6b6",
-                            borderRadius: "10px",
+                            width: '100%',
+                            height: '120px',
+                            background: 'linear-gradient(135deg, #fff 0%, #f8f9ff 100%)',
+                            borderRadius: "16px",
+                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                            border: '1px solid #e8eaf6',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+                            },
+                            position: 'relative',
+                            overflow: 'hidden'
                           }}
                         >
-                          <CardContent sx={{ textAlign: "center", p: 1 }}>
-                            <Typography variant="h6">{card.value}</Typography>
-                            <Typography variant="body2" sx={{ mt: 2 }}>
+                          <Box sx={{ 
+                            position: 'absolute', 
+                            top: -10, 
+                            right: -10, 
+                            width: 40, 
+                            height: 40, 
+                            backgroundColor: card.bgColor,
+                            borderRadius: '50%',
+                            opacity: 0.6
+                          }} />
+                          <CardContent sx={{ 
+                            textAlign: "center", 
+                            p: 2, 
+                            height: '100%', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            justifyContent: 'center',
+                            position: 'relative',
+                            zIndex: 1
+                          }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+                              {card.icon}
+                            </Box>
+                            <Typography variant="h5" sx={{ fontWeight: 'bold', color: card.color, mb: 1 }}>
+                              {card.value}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem' }}>
                               {card.label}
                             </Typography>
                           </CardContent>
@@ -436,26 +609,43 @@ const InstagramAnalytics = () => {
               </Grid>
             )}
 
-            {/* Recent Posts Section - matching Analytics exact Grid structure */}
-            <Grid size={{ xs: 2, sm: 6, md: 12 }} spacing={2}>
-              <Card sx={{ mt: 2, borderRadius: '12px', border: '1px solid #e0e0e0' }}>
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                    Recent Instagram Posts
-                  </Typography>
-                  {selectedAccountData && selectedAccountData.media && selectedAccountData.media.length > 0 ? (
-                    <Grid container spacing={2}>
-                      {selectedAccountData.media.slice(0, 6).map((post, index) => (
+            {/* Recent Posts Section - Enhanced with beautiful styling */}
+            <Grid size={{ xs: 12, sm: 12, md: 12 }} spacing={2}>
+              <Card sx={{ 
+                mt: 3, 
+                borderRadius: '20px', 
+                border: '1px solid #e8eaf6',
+                background: 'linear-gradient(135deg, #fff 0%, #f8f9ff 100%)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)'
+              }}>
+                <CardContent sx={{ p: 4 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                    <InstagramIcon sx={{ fontSize: 28, color: '#667eea', mr: 2 }} />
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333' }}>
+                      Recent Instagram Posts
+                    </Typography>
+                  </Box>
+                  
+                  {selectedAccountData && selectedAccountData.analytics?.recent_posts && selectedAccountData.analytics.recent_posts.length > 0 ? (
+                    <Grid container spacing={3}>
+                      {selectedAccountData.analytics.recent_posts.slice(0, 6).map((post, index) => (
                         <Grid key={index} item xs={12} sm={6} md={4}>
                           <Card sx={{ 
-                            borderRadius: '8px', 
+                            borderRadius: '16px', 
                             overflow: 'hidden',
-                            height: '300px',
+                            height: '380px',
                             display: 'flex',
-                            flexDirection: 'column'
+                            flexDirection: 'column',
+                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                            border: '1px solid #e0e0e0',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+                            }
                           }}>
                             <Box sx={{ 
-                              height: '200px', 
+                              height: '240px', 
                               backgroundImage: `url(${post.media_url})`,
                               backgroundSize: 'cover',
                               backgroundPosition: 'center',
@@ -463,59 +653,110 @@ const InstagramAnalytics = () => {
                             }}>
                               <Box sx={{ 
                                 position: 'absolute', 
-                                top: 8, 
-                                right: 8,
-                                bgcolor: 'rgba(0,0,0,0.6)',
-                                borderRadius: '4px',
-                                p: 0.5
+                                top: 12, 
+                                right: 12,
+                                background: 'linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 100%)',
+                                borderRadius: '8px',
+                                p: 1,
+                                backdropFilter: 'blur(4px)'
                               }}>
-                                {getMediaTypeIcon(post.media_type)}
+                                {getMediaTypeIcon(post.type)}
+                              </Box>
+                              <Box sx={{ 
+                                position: 'absolute', 
+                                bottom: 12, 
+                                left: 12,
+                                background: 'linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 100%)',
+                                borderRadius: '8px',
+                                p: 1,
+                                backdropFilter: 'blur(4px)'
+                              }}>
+                                <Typography variant="caption" sx={{ color: '#fff', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <CalendarTodayIcon sx={{ fontSize: 12 }} />
+                                  {formatDate(post.timestamp)}
+                                </Typography>
                               </Box>
                             </Box>
-                            <CardContent sx={{ flexGrow: 1, p: 2 }}>
+                            <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
                               <Typography variant="body2" sx={{ 
                                 overflow: 'hidden', 
                                 textOverflow: 'ellipsis',
                                 display: '-webkit-box',
                                 WebkitLineClamp: 2,
                                 WebkitBoxOrient: 'vertical',
-                                mb: 1
+                                mb: 2,
+                                lineHeight: 1.4,
+                                fontWeight: 500
                               }}>
-                                {post.caption ? post.caption.substring(0, 80) + '...' : 'No caption'}
+                                {post.caption ? post.caption.substring(0, 100) + '...' : 'No caption available'}
                               </Typography>
+                              <Divider sx={{ my: 1.5 }} />
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  <FavoriteIcon sx={{ fontSize: 16, color: '#e91e63' }} />
-                                  <Typography variant="body2">{formatNumber(post.like_count || 0)}</Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  <ChatBubbleIcon sx={{ fontSize: 16, color: '#2196f3' }} />
-                                  <Typography variant="body2">{formatNumber(post.comments_count || 0)}</Typography>
-                                </Box>
+                                <Tooltip title="Likes" placement="top">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <FavoriteIcon sx={{ fontSize: 18, color: '#e91e63' }} />
+                                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                      {formatNumber(post.likes || 0)}
+                                    </Typography>
+                                  </Box>
+                                </Tooltip>
+                                <Tooltip title="Comments" placement="top">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <ChatBubbleIcon sx={{ fontSize: 18, color: '#2196f3' }} />
+                                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                      {formatNumber(post.comments || 0)}
+                                    </Typography>
+                                  </Box>
+                                </Tooltip>
+                                <Tooltip title="Engagement" placement="top">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <TrendingUpIcon sx={{ fontSize: 18, color: '#4caf50' }} />
+                                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                      {formatNumber(post.engagement || 0)}
+                                    </Typography>
+                                  </Box>
+                                </Tooltip>
                               </Box>
-                              <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
-                                {formatDate(post.timestamp)}
-                              </Typography>
                             </CardContent>
                           </Card>
                         </Grid>
                       ))}
                     </Grid>
                   ) : (
-                    <Box sx={{ textAlign: 'center', py: 4 }}>
-                      <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
-                      <Typography variant="body1" color="textSecondary">
+                    <Box sx={{ 
+                      textAlign: 'center', 
+                      py: 8,
+                      background: 'linear-gradient(135deg, #f8f9ff 0%, #e8eaf6 100%)',
+                      borderRadius: '16px',
+                      border: '2px dashed #c5cae9'
+                    }}>
+                      <Box sx={{ 
+                        width: 100, 
+                        height: 100, 
+                        borderRadius: '50%', 
+                        backgroundColor: '#667eea', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        margin: '0 auto',
+                        mb: 3
+                      }}>
+                        <InstagramIcon sx={{ fontSize: 48, color: '#fff' }} />
+                      </Box>
+                      <Typography variant="h6" color="textSecondary" sx={{ mb: 1 }}>
                         {instagramData.length === 0 
-                          ? 'Loading Instagram posts...' 
+                          ? 'Loading Instagram Posts...' 
                           : selectedAccountData 
-                            ? 'No recent posts found for this account' 
-                            : 'Please select an Instagram account'}
+                            ? 'No Recent Posts Found' 
+                            : 'Select an Account to View Posts'}
                       </Typography>
-                      {instagramData.length === 0 && (
-                        <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                          All available posts will be shown here once data is loaded.
-                        </Typography>
-                      )}
+                      <Typography variant="body2" color="textSecondary" sx={{ opacity: 0.7 }}>
+                        {instagramData.length === 0 
+                          ? 'Please wait while we fetch your recent posts' 
+                          : selectedAccountData 
+                            ? 'This account doesn\'t have any recent posts to display' 
+                            : 'Choose an Instagram account from the dropdown above'}
+                      </Typography>
                     </Box>
                   )}
                 </CardContent>
