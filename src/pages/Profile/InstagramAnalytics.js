@@ -3,8 +3,8 @@ import {
   Box, Typography, FormControl, Avatar,
   Grid, Select, MenuItem, Card, CardContent, 
   Paper, IconButton, CircularProgress, Button,
-  Chip, Container, Stack, Modal,
-  Badge, Tooltip
+  Chip, Container, Stack, Modal, Tooltip,
+  LinearProgress, Divider
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -21,6 +21,12 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import InteractiveIcon from '@mui/icons-material/TouchApp';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import MouseIcon from '@mui/icons-material/Mouse';
+import PersonIcon from '@mui/icons-material/Person';
+import GroupsIcon from '@mui/icons-material/Groups';
+import ImageIcon from '@mui/icons-material/Image';
 import Layout from '../../components/Layout';
 import axios from 'axios';
 
@@ -30,7 +36,6 @@ const InstagramAnalytics = () => {
   const [selectedAccountData, setSelectedAccountData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
 
   useEffect(() => {
     fetchInstagramAnalytics();
@@ -65,14 +70,12 @@ const InstagramAnalytics = () => {
         setSelectedAccount(firstAccount.username);
         setSelectedAccountData(firstAccount);
       } else {
-        // If no data found, continue with empty data but don't show modal
         setError('No Instagram data found');
         setInstagramData([]);
       }
     } catch (error) {
       console.error('Error fetching Instagram analytics:', error);
       setError(`API Error: ${error.response?.data?.message || error.message}`);
-      // Continue with empty data instead of showing modal
       setInstagramData([]);
     } finally {
       setLoading(false);
@@ -82,7 +85,6 @@ const InstagramAnalytics = () => {
   const handleAccountChange = (e) => {
     const username = e.target.value;
     
-    // Don't proceed if empty value is selected
     if (!username) {
       return;
     }
@@ -128,126 +130,172 @@ const InstagramAnalytics = () => {
     return Math.round((totalLikes + totalComments) / totalPosts);
   };
 
-  // Create analytics cards array matching Analytics component structure
+  // Create analytics cards matching Analytics component structure exactly
   const getAnalyticsCards = (data) => {
     if (!data) return [];
     
-    const totalPosts = data.profile?.media_count || 0;
     const totalLikes = data.analytics?.engagement_stats?.total_likes || 0;
     const totalComments = data.analytics?.engagement_stats?.total_comments || 0;
+    const totalPosts = data.analytics?.total_posts || 0;
     const followers = data.profile?.followers_count || 0;
     const following = data.profile?.follows_count || 0;
-    const avgLikes = totalPosts > 0 ? Math.round(totalLikes / totalPosts) : 0;
-    const avgComments = totalPosts > 0 ? Math.round(totalComments / totalPosts) : 0;
-    const avgEngagement = totalPosts > 0 ? Math.round((totalLikes + totalComments) / totalPosts) : 0;
-    const reachPotential = Math.round(followers * 0.15); // Estimated reach potential
+    const mediaCount = data.profile?.media_count || 0;
+    const engagementRate = data.summary?.engagement_rate || '0.0%';
     
     return [
       { value: formatNumber(totalLikes), label: "Total Likes" },
       { value: formatNumber(totalComments), label: "Total Comments" },
-      { value: data.summary?.engagement_rate || '0.0%', label: "Total Engagement" },
+      { value: engagementRate, label: "Total Engagement" },
       { value: formatNumber(followers), label: "Total Reach" },
       { value: formatNumber(Math.round(totalLikes * 0.5)), label: "Total Shares" },
       { value: formatNumber(Math.round(totalPosts * 15)), label: "Total Saves" },
       { value: formatNumber(Math.round(totalPosts * 25)), label: "Total Clicks" },
       { value: formatNumber(Math.round(followers * 0.08)), label: "Profile Visits" },
-      { value: formatNumber(followers), label: "Followers Count" },
-      { value: formatNumber(following), label: "Following Count" },
-      { value: formatNumber(totalPosts), label: "Media Count" },
-      { value: formatNumber(reachPotential), label: "Reach Potential" },
     ];
   };
 
-  // Profile card component matching Analytics design
+  // Profile card component matching AnalyticsProfile but smaller
   const ProfileCard = ({ data }) => {
-    const influencerData = {
-      name: data.profile?.full_name || `@${data.username}`,
-      profileImage: data.profile?.profile_picture_url || "https://c.animaapp.com/mavezxjciUNcPR/img/ellipse-121-1.png",
-      followers: formatNumber(data.profile?.followers_count || 0),
-      following: formatNumber(data.profile?.follows_count || 0),
-      bio: data.profile?.bio ? (data.profile.bio.length > 100 ? data.profile.bio.substring(0, 100) + '...' : data.profile.bio) : "Instagram Analytics Profile",
-      category: "Instagram Creator",
-      location: data.profile?.location || "Instagram",
-      metrics: [
-        { label: "Engagement Rate:", value: data.summary?.engagement_rate || '0.0%' },
-        { label: "Earned Media:", value: formatNumber(data.earned_media || 0) },
-        { label: "Average Interactions:", value: formatNumber(calculateAverageInteractions(data)) },
-      ],
-    };
-
     return (
-      <Card
-        sx={{
-          width: '100%',
-          height: 'auto',
-          backgroundColor: '#fff',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          border: '1px solid #e0e0e0',
-        }}
-      >
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Avatar
-            src={influencerData.profileImage}
-            sx={{
-              width: 100,
-              height: 100,
-              mb: 2,
-              border: '3px solid #e0e0e0',
-            }}
-          />
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center' }}>
-            {influencerData.name}
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', mb: 2 }}>
-            @{data.username}
-          </Typography>
-          
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', mb: 2 }}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                {influencerData.followers}
+      <Box sx={{ my: 2 }}>
+        <Card
+          sx={{
+            width: "100%",
+            borderRadius: 2,
+            border: "1px solid #e2e2e2",
+            boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
+          }}
+        >
+          <CardContent sx={{ position: "relative", p: 2 }}>
+            {/* Profile Image */}
+            <Avatar
+              src={data.profile?.profile_picture_url || "https://c.animaapp.com/mavezxjciUNcPR/img/ellipse-121-1.png"}
+              alt={`${data.username}'s profile`}
+              sx={{
+                width: 60,
+                height: 60,
+                position: "absolute",
+                top: 11,
+                left: 22,
+              }}
+            />
+
+            {/* Profile Info */}
+            <Box sx={{ ml: 10, mt: 1, textAlign: "center" }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 500,
+                  fontSize: "18px",
+                  lineHeight: "20px",
+                }}
+              >
+                {data.page_name || data.username}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#666' }}>
-                Followers
-              </Typography>
-            </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                {influencerData.following}
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#666' }}>
-                Following
-              </Typography>
-            </Box>
-          </Box>
-          
-          <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', mb: 2 }}>
-            {influencerData.bio}
-          </Typography>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <LocationOnIcon sx={{ fontSize: 16, color: '#666' }} />
-            <Typography variant="body2" sx={{ color: '#666' }}>
-              {influencerData.location}
-            </Typography>
-          </Box>
-          
-          <Box sx={{ width: '100%', pt: 2, borderTop: '1px solid #e0e0e0' }}>
-            {influencerData.metrics.map((metric, index) => (
-              <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2" sx={{ color: '#666' }}>
-                  {metric.label}
+
+              <Box sx={{ mt: 1 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    color: "#8b8b8b",
+                    fontSize: "14px",
+                    lineHeight: "14px",
+                    display: "inline",
+                  }}
+                >
+                  {formatNumber(data.profile?.followers_count || 0)}{" "}
                 </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                  {metric.value}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    color: "#8b8b8b",
+                    fontSize: "12px",
+                    lineHeight: "14px",
+                    display: "inline",
+                  }}
+                >
+                  Followers
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    color: "#8b8b8b",
+                    fontSize: "14px",
+                    lineHeight: "14px",
+                    display: "inline",
+                    mx: 1,
+                  }}
+                >
+                  {formatNumber(data.profile?.follows_count || 0)}{" "}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    color: "#8b8b8b",
+                    fontSize: "12px",
+                    lineHeight: "14px",
+                    display: "inline",
+                  }}
+                >
+                  Following
                 </Typography>
               </Box>
-            ))}
-          </Box>
-        </Box>
-      </Card>
+
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 500,
+                  color: "#666666",
+                  fontSize: "12px",
+                  lineHeight: "14px",
+                  mt: 1,
+                }}
+              >
+                {data.profile?.biography ? 
+                  (data.profile.biography.length > 60 ? 
+                    data.profile.biography.substring(0, 60) + '...' : 
+                    data.profile.biography) : 
+                  "Instagram Profile"}
+              </Typography>
+            </Box>
+
+            {/* Divider */}
+            <Divider sx={{ my: 1.5, mt: 2 }} />
+
+            {/* Metrics */}
+            <Grid container direction="column" spacing={1} sx={{ pl: 2, textAlign: 'justify' }}>
+              <Grid item>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: 400,
+                    color: "#333333",
+                    fontSize: "12px",
+                    lineHeight: "16px",
+                  }}
+                >
+                  <Box
+                    component="div"
+                    className="profilecontent"
+                    sx={{ display: "inline-block", width: "100%" }}
+                  >
+                    <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                      <li>Engagement: {data.summary?.engagement_rate || '0.0%'}</li>
+                      <li>Media: {data.summary?.most_used_media_type || 'IMAGE'}</li>
+                      <li>Posts: {data.analytics?.total_posts || 0}</li>
+                      <li>Frequency: {data.summary?.posting_frequency || 'N/A'}</li>
+                    </ul>
+                  </Box>
+                </Typography>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      </Box>
     );
   };
 
@@ -261,8 +309,6 @@ const InstagramAnalytics = () => {
       </Layout>
     );
   }
-
-
 
   return (
     <Layout>
@@ -295,7 +341,7 @@ const InstagramAnalytics = () => {
               >
                 <ArrowLeftIcon />
               </IconButton>
-              Analytics 2
+              Instagram Analytics
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <IconButton size="large" sx={{ color: '#fff' }}>
@@ -368,14 +414,8 @@ const InstagramAnalytics = () => {
                       },
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Avatar 
-                        src={account.profile?.profile_picture_url}
-                        sx={{ width: 24, height: 24 }}
-                      />
-                      <Typography>@{account.username}</Typography>
-                      {account.profile?.full_name && ` (${account.profile.full_name})`}
-                    </Box>
+                    {account.username}
+                    {account.page_name && ` (${account.page_name})`}
                   </MenuItem>
                 ))
               )}
@@ -387,44 +427,51 @@ const InstagramAnalytics = () => {
         <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '15px' }}>
           <Grid container spacing={2}>
             {/* Profile Section - matching Analytics exact Grid structure */}
-            <Grid size={{ xs: 2, sm: 4, md: 4 }} spacing={1} sx={{ mt: '-20px', p: 1 }}>
+            <Grid item xs={12} sm={3} md={3} sx={{ mt: '-20px', p: 1 }}>
               {selectedAccountData ? (
                 <ProfileCard data={selectedAccountData} />
               ) : (
-                <Card sx={{ width: '100%', height: 'auto', backgroundColor: '#fff', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', border: '1px solid #e0e0e0' }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
-                    <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
-                    <Typography variant="body1" color="textSecondary">
-                      {instagramData.length === 0 ? 'Loading Instagram analytics data...' : 'No Instagram account selected'}
-                    </Typography>
-                    {instagramData.length === 0 && (
-                      <Typography variant="body2" color="textSecondary" sx={{ mt: 1, textAlign: 'center' }}>
-                        All available Instagram analytics records will be displayed here.
+                <Box sx={{ my: 2 }}>
+                  <Card
+                    sx={{
+                      width: "100%",
+                      borderRadius: 2,
+                      border: "1px solid #e2e2e2",
+                      boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
+                    }}
+                  >
+                    <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                      <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
+                      <Typography variant="body1" color="textSecondary">
+                        {instagramData.length === 0 ? 'Loading Instagram analytics data...' : 'No Instagram account selected'}
                       </Typography>
-                    )}
-                  </Box>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Box>
               )}
             </Grid>
 
             {/* Analytics Cards Section - matching Analytics exact Grid structure */}
             {selectedAccountData && (
-              <Grid size={{ xs: 4, sm: 4, md: 8 }} spacing={1}>
+              <Grid item xs={12} sm={9} md={9}>
                 <Box>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 'bold', fontSize: '18px' }}>
+                    Campaign Analytics
+                  </Typography>
                   <Grid container spacing={1}>
-                    {getAnalyticsCards(selectedAccountData).slice(0, 12).map((card, index) => (
-                      <Grid key={index} item xs={12} sm={6} md={4}>
+                    {getAnalyticsCards(selectedAccountData).slice(0, 8).map((card, index) => (
+                      <Grid key={index} item xs={12} sm={6} md={3}>
                         <Card
                           sx={{
-                            width: 220,
+                            width: '100%',
                             height: 86,
                             border: "1px solid #b6b6b6",
                             borderRadius: "10px",
                           }}
                         >
                           <CardContent sx={{ textAlign: "center", p: 1 }}>
-                            <Typography variant="h6">{card.value}</Typography>
-                            <Typography variant="body2" sx={{ mt: 2 }}>
+                            <Typography variant="h6" sx={{ fontSize: '16px' }}>{card.value}</Typography>
+                            <Typography variant="body2" sx={{ mt: 1, fontSize: '11px' }}>
                               {card.label}
                             </Typography>
                           </CardContent>
@@ -437,15 +484,15 @@ const InstagramAnalytics = () => {
             )}
 
             {/* Recent Posts Section - matching Analytics exact Grid structure */}
-            <Grid size={{ xs: 2, sm: 6, md: 12 }} spacing={2}>
+            <Grid item xs={12} sm={12} md={12}>
               <Card sx={{ mt: 2, borderRadius: '12px', border: '1px solid #e0e0e0' }}>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
                     Recent Instagram Posts
                   </Typography>
-                  {selectedAccountData && selectedAccountData.media && selectedAccountData.media.length > 0 ? (
+                  {selectedAccountData && selectedAccountData.analytics?.recent_posts && selectedAccountData.analytics.recent_posts.length > 0 ? (
                     <Grid container spacing={2}>
-                      {selectedAccountData.media.slice(0, 6).map((post, index) => (
+                      {selectedAccountData.analytics.recent_posts.slice(0, 6).map((post, index) => (
                         <Grid key={index} item xs={12} sm={6} md={4}>
                           <Card sx={{ 
                             borderRadius: '8px', 
@@ -469,7 +516,7 @@ const InstagramAnalytics = () => {
                                 borderRadius: '4px',
                                 p: 0.5
                               }}>
-                                {getMediaTypeIcon(post.media_type)}
+                                {getMediaTypeIcon(post.type)}
                               </Box>
                             </Box>
                             <CardContent sx={{ flexGrow: 1, p: 2 }}>
@@ -486,11 +533,11 @@ const InstagramAnalytics = () => {
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                   <FavoriteIcon sx={{ fontSize: 16, color: '#e91e63' }} />
-                                  <Typography variant="body2">{formatNumber(post.like_count || 0)}</Typography>
+                                  <Typography variant="body2">{formatNumber(post.likes || 0)}</Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                   <ChatBubbleIcon sx={{ fontSize: 16, color: '#2196f3' }} />
-                                  <Typography variant="body2">{formatNumber(post.comments_count || 0)}</Typography>
+                                  <Typography variant="body2">{formatNumber(post.comments || 0)}</Typography>
                                 </Box>
                               </Box>
                               <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
@@ -511,11 +558,6 @@ const InstagramAnalytics = () => {
                             ? 'No recent posts found for this account' 
                             : 'Please select an Instagram account'}
                       </Typography>
-                      {instagramData.length === 0 && (
-                        <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                          All available posts will be shown here once data is loaded.
-                        </Typography>
-                      )}
                     </Box>
                   )}
                 </CardContent>
