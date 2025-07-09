@@ -2,31 +2,15 @@ import React, { useEffect, useState } from 'react';
 import {
   Box, Typography, FormControl, Avatar,
   Grid, Select, MenuItem, Card, CardContent, 
-  Paper, IconButton, CircularProgress, Button,
-  Chip, Container, Stack, Modal, Tooltip,
-  LinearProgress, Divider
+  Paper, IconButton, CircularProgress,
+  Divider, Container, Stack
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
-import ShareIcon from '@mui/icons-material/Share';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import PeopleIcon from '@mui/icons-material/People';
-import PhotoIcon from '@mui/icons-material/Photo';
-import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import InteractiveIcon from '@mui/icons-material/TouchApp';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import MouseIcon from '@mui/icons-material/Mouse';
-import PersonIcon from '@mui/icons-material/Person';
-import GroupsIcon from '@mui/icons-material/Groups';
-import ImageIcon from '@mui/icons-material/Image';
 import Layout from '../../components/Layout';
 import axios from 'axios';
 
@@ -103,31 +87,12 @@ const InstagramAnalytics = () => {
     return num?.toString() || '0';
   };
 
-  const getMediaTypeIcon = (type) => {
-    switch (type) {
-      case 'IMAGE':
-        return <PhotoIcon />;
-      case 'VIDEO':
-        return <VideoLibraryIcon />;
-      default:
-        return <PhotoIcon />;
-    }
-  };
-
   const formatDate = (timestamp) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
-  };
-
-  const calculateAverageInteractions = (data) => {
-    if (!data?.analytics?.engagement_stats) return 0;
-    const totalLikes = data.analytics.engagement_stats.total_likes || 0;
-    const totalComments = data.analytics.engagement_stats.total_comments || 0;
-    const totalPosts = data.analytics.total_posts || 1;
-    return Math.round((totalLikes + totalComments) / totalPosts);
   };
 
   // Create analytics cards matching Analytics component structure exactly
@@ -154,7 +119,7 @@ const InstagramAnalytics = () => {
     ];
   };
 
-  // Profile card component matching AnalyticsProfile but smaller
+  // Profile card component matching Analytics component exactly
   const ProfileCard = ({ data }) => {
     return (
       <Box sx={{ my: 2 }}>
@@ -427,7 +392,7 @@ const InstagramAnalytics = () => {
         <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '15px' }}>
           <Grid container spacing={2}>
             {/* Profile Section - matching Analytics exact Grid structure */}
-            <Grid item xs={12} sm={3} md={3} sx={{ mt: '-20px', p: 1 }}>
+            <Grid item xs={12} sm={3} md={4} sx={{ mt: '-20px', p: 1 }}>
               {selectedAccountData ? (
                 <ProfileCard data={selectedAccountData} />
               ) : (
@@ -453,25 +418,25 @@ const InstagramAnalytics = () => {
 
             {/* Analytics Cards Section - matching Analytics exact Grid structure */}
             {selectedAccountData && (
-              <Grid item xs={12} sm={9} md={9}>
+              <Grid item xs={12} sm={9} md={8}>
                 <Box>
                   <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 'bold', fontSize: '18px' }}>
                     Campaign Analytics
                   </Typography>
                   <Grid container spacing={1}>
                     {getAnalyticsCards(selectedAccountData).slice(0, 8).map((card, index) => (
-                      <Grid key={index} item xs={12} sm={6} md={3}>
+                      <Grid key={index} item xs={12} sm={6} md={4}>
                         <Card
                           sx={{
-                            width: '100%',
+                            width: 220,
                             height: 86,
                             border: "1px solid #b6b6b6",
                             borderRadius: "10px",
                           }}
                         >
                           <CardContent sx={{ textAlign: "center", p: 1 }}>
-                            <Typography variant="h6" sx={{ fontSize: '16px' }}>{card.value}</Typography>
-                            <Typography variant="body2" sx={{ mt: 1, fontSize: '11px' }}>
+                            <Typography variant="h6">{card.value}</Typography>
+                            <Typography variant="body2" sx={{ mt: 2 }}>
                               {card.label}
                             </Typography>
                           </CardContent>
@@ -482,8 +447,6 @@ const InstagramAnalytics = () => {
                 </Box>
               </Grid>
             )}
-
-
           </Grid>
         </Box>
       </Box>
