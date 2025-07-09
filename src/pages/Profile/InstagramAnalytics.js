@@ -388,11 +388,11 @@ const InstagramAnalytics = () => {
           </FormControl>
         </Box>
 
-        {/* Main content matching Analytics component layout exactly */}
+        {/* Main content matching figma design exactly */}
         <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '15px' }}>
-          <Grid container spacing={2}>
-            {/* Profile Section - Left side */}
-            <Grid item xs={12} md={4} sx={{ mt: '-20px', p: 1 }}>
+          <Grid container spacing={3}>
+            {/* Profile Section - Left side (narrower) */}
+            <Grid item xs={12} md={3} sx={{ mt: '-20px', p: 1 }}>
               {selectedAccountData ? (
                 <ProfileCard data={selectedAccountData} />
               ) : (
@@ -416,8 +416,8 @@ const InstagramAnalytics = () => {
               )}
             </Grid>
 
-            {/* Campaign Analytics Section - Right side */}
-            <Grid item xs={12} md={8}>
+            {/* Campaign Analytics Section - Right side (wider) */}
+            <Grid item xs={12} md={9}>
               <Typography
                 variant="h6"
                 sx={{
@@ -433,12 +433,16 @@ const InstagramAnalytics = () => {
               {selectedAccountData ? (
                 <Grid container spacing={2}>
                   {getAnalyticsCards(selectedAccountData).slice(0, 8).map((card, index) => (
-                    <Grid key={index} item xs={12} sm={6} md={6} lg={3}>
+                    <Grid key={index} item xs={6} sm={3} md={3} lg={3}>
                       <Card
                         sx={{
                           borderRadius: 2,
                           border: "1px solid #e0e0e0",
                           background: '#ffffff',
+                          height: '100px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           transition: 'all 0.2s ease',
                           '&:hover': {
                             transform: 'translateY(-1px)',
@@ -446,14 +450,14 @@ const InstagramAnalytics = () => {
                           }
                         }}
                       >
-                        <CardContent sx={{ textAlign: "center", p: 3 }}>
+                        <CardContent sx={{ textAlign: "center", p: 2 }}>
                           <Typography
-                            variant="h4"
+                            variant="h5"
                             sx={{
                               fontWeight: 700,
                               color: '#1a1a1a',
                               mb: 1,
-                              fontSize: '24px'
+                              fontSize: '20px'
                             }}
                           >
                             {card.value}
@@ -462,7 +466,7 @@ const InstagramAnalytics = () => {
                             variant="body2"
                             sx={{
                               color: '#666',
-                              fontSize: '14px',
+                              fontSize: '12px',
                               fontWeight: 500
                             }}
                           >
