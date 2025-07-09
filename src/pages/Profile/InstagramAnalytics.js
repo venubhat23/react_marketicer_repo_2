@@ -9,7 +9,10 @@ import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
+import ChatBubbleOutline from "@mui/icons-material/ChatBubbleOutline";
 import ShareIcon from '@mui/icons-material/Share';
+import Send from "@mui/icons-material/Send";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -249,179 +252,144 @@ const InstagramAnalytics = () => {
     );
   };
 
-  // Recent Posts component matching Figma design
-  const RecentPostCard = ({ post, accountData }) => {
+  // Recent Posts component matching BrandProfile design
+  const RecentPostCard = ({ post, accountData, index }) => {
     const formatDate = (timestamp) => {
       const date = new Date(timestamp);
-      const now = new Date();
-      const diffInHours = (now - date) / (1000 * 60 * 60);
-      
-      if (diffInHours < 24) {
-        return `${Math.floor(diffInHours)}h`;
-      } else if (diffInHours < 24 * 7) {
-        return `${Math.floor(diffInHours / 24)}d`;
-      } else {
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      }
+      return date.toLocaleDateString('en-US', { 
+        day: 'numeric', 
+        month: 'short' 
+      });
     };
 
     return (
       <Card
         sx={{
-          borderRadius: 3,
-          border: "1px solid #e0e0e0",
-          boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.08)",
-          background: '#ffffff',
-          overflow: 'hidden',
-          transition: 'all 0.2s ease',
-          '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.12)'
-          }
+          p: 2,
+          borderRadius: "10px",
+          border: "1px solid #d6d6d6",
+          boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.25)",
+          bgcolor: "#fffdfd",
+          width: '100%',
         }}
       >
-        {/* Post Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', p: 2.5, pb: 1.5 }}>
-          <Avatar
-            src={accountData?.profile?.profile_picture_url || "https://c.animaapp.com/mavezxjciUNcPR/img/ellipse-121-1.png"}
-            alt={`${accountData?.username}'s profile`}
-            sx={{
-              width: 40,
-              height: 40,
-              mr: 1.5,
-              border: '1px solid #e0e0e0'
-            }}
-          />
-          <Box sx={{ flex: 1 }}>
-            <Typography
-              variant="body1"
-              sx={{
-                fontWeight: 600,
-                fontSize: "15px",
-                color: '#1a1a1a',
-                mb: 0.5
-              }}
-            >
-              {accountData?.page_name || accountData?.username || 'aksharshetty01012025'}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: '#666',
-                fontSize: "13px"
-              }}
-            >
-              @{accountData?.username || 'aksharshetty01012025'} • {formatDate(post?.timestamp || Date.now())}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: '#666',
-                fontSize: "13px",
-                mr: 1
-              }}
-            >
-              13March
-            </Typography>
-            <Button
-              variant="text"
-              sx={{
-                color: '#7c4dff',
-                textTransform: 'none',
-                fontWeight: 500,
-                fontSize: '13px',
-                minWidth: 'auto',
-                p: 0.5,
-                mr: 1
-              }}
-            >
-              View full Analytics →
-            </Button>
-            <IconButton size="small" sx={{ color: '#666' }}>
-              <MoreHorizIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        </Box>
+        <CardContent sx={{ p: 0 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={2} md={2}>
+              <Box
+                component="img"
+                src={post?.media_url || `https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80`}
+                alt="Post thumbnail"
+                sx={{
+                  width: 75,
+                  height: 75,
+                  objectFit: "cover",
+                  borderRadius: "4px",
+                }}
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/75x75?text=No+Image";
+                }}
+              />
+            </Grid>
 
-        {/* Post Content */}
-        <Box sx={{ px: 2.5, pb: 1.5 }}>
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#1a1a1a',
-              fontSize: "14px",
-              lineHeight: 1.5,
-              mb: 2
-            }}
-          >
-            {post?.caption || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'}
-          </Typography>
-        </Box>
+            <Grid item xs={5} md={7}>
+              <Box sx={{ mb: 1 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+                >
+                  <span>Instagram</span>
+                  <Typography component="span" color="text.secondary">
+                    @{accountData?.username || 'anybrand'}
+                  </Typography>
+                  <Typography component="span" color="text.secondary">
+                    {formatDate(post?.timestamp || Date.now())}
+                  </Typography>
+                </Typography>
 
-        {/* Post Media */}
-        <Box
-          sx={{
-            width: '100%',
-            height: 300,
-            overflow: 'hidden',
-            backgroundColor: '#f5f5f5',
-            mb: 2
-          }}
-        >
-          <img
-            src={post?.media_url || 'https://picsum.photos/800/300?random=1'}
-            alt="Post content"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
-          />
-        </Box>
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="body2" fontWeight="medium">
+                    {accountData?.page_name || accountData?.username || 'Influencer'}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary"
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      mt: 0.5
+                    }}
+                  >
+                    {post?.caption || "Lorem ipsum dolor sit..."}
+                  </Typography>
+                </Box>
+              </Box>
 
-        {/* Engagement Stats Row */}
-        <Box sx={{ px: 2.5, pb: 1.5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <FavoriteIcon sx={{ fontSize: 18, color: '#666' }} />
-              <Typography variant="body2" sx={{ color: '#666', fontSize: '14px', fontWeight: 500 }}>
-                {formatNumber(post?.like_count || 378000)}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ChatBubbleIcon sx={{ fontSize: 18, color: '#666' }} />
-              <Typography variant="body2" sx={{ color: '#666', fontSize: '14px', fontWeight: 500 }}>
-                {formatNumber(post?.comments_count || 248)}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ShareIcon sx={{ fontSize: 18, color: '#666' }} />
-              <Typography variant="body2" sx={{ color: '#666', fontSize: '14px', fontWeight: 500 }}>
-                {formatNumber(Math.floor((post?.like_count || 378000) * 0.1))}
-              </Typography>
-            </Box>
-          </Box>
+              <Stack direction="row" spacing={3} sx={{ mt: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <FavoriteIcon fontSize="small" sx={{ color: "#e91e63" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 1, fontWeight: 300 }}
+                  >
+                    {formatNumber(post?.like_count || 378000)}
+                  </Typography>
+                </Box>
 
-          {/* Action Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 1, borderTop: '1px solid #f0f0f0' }}>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <IconButton size="small" sx={{ color: '#666', padding: 1 }}>
-                <FavoriteIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small" sx={{ color: '#666', padding: 1 }}>
-                <ChatBubbleIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small" sx={{ color: '#666', padding: 1 }}>
-                <ShareIcon fontSize="small" />
-              </IconButton>
-            </Box>
-            <IconButton size="small" sx={{ color: '#666', padding: 1 }}>
-              <BookmarkIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        </Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <ChatBubbleOutline fontSize="small" sx={{ color: "#2196f3" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 1, fontWeight: 300 }}
+                  >
+                    {formatNumber(post?.comments_count || 248)}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Send fontSize="small" sx={{ color: "#4caf50" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 1, fontWeight: 300 }}
+                  >
+                    {formatNumber(Math.floor((post?.like_count || 378000) * 0.1))}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <VisibilityIcon fontSize="small" sx={{ color: "#ff9800" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 1, fontWeight: 300 }}
+                  >
+                    {formatNumber(post?.views || 122000)}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Grid>
+
+            <Grid item xs={3} md={3}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', height: '100%' }}>
+                <Button
+                  variant="text"
+                  sx={{
+                    color: '#7c4dff',
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    fontSize: '13px',
+                    minWidth: 'auto',
+                    p: 0.5
+                  }}
+                >
+                  View full Analytics →
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </CardContent>
       </Card>
     );
   };
@@ -717,12 +685,12 @@ const InstagramAnalytics = () => {
                     </Typography>
                   </Box>
 
-                  {/* Posts List - Full Width Instagram Style */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  {/* Posts List - BrandProfile Style */}
+                  <Stack spacing={2}>
                     {getRecentPosts(selectedAccountData).map((post, index) => (
-                      <RecentPostCard key={post.id || index} post={post} accountData={selectedAccountData} />
+                      <RecentPostCard key={post.id || index} post={post} accountData={selectedAccountData} index={index} />
                     ))}
-                  </Box>
+                  </Stack>
                 </Box>
               </Box>
             ) : (
