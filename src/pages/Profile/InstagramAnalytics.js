@@ -121,128 +121,135 @@ const InstagramAnalytics = () => {
     ];
   };
 
-  // Recent Posts Component
-  const RecentPostCard = ({ post, username, profilePicture }) => {
-    const likes = post.like_count || Math.floor(Math.random() * 500) + 100;
-    const comments = post.comments_count || Math.floor(Math.random() * 50) + 10;
-    const shares = Math.floor(likes * 0.1);
-    const clicks = Math.floor(likes * 0.3);
-    
+  // Brand Tagged Post Card - Full Width Design
+  const BrandTaggedPostCard = ({ post, username, profilePicture }) => {
     return (
       <Card
         sx={{
           borderRadius: 2,
-          border: "1px solid #e0e0e0",
-          boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
-          background: '#ffffff',
-          mb: 2,
+          border: "1px solid #d6d6d6",
+          boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.25)",
+          background: '#fffdfd',
           transition: 'all 0.2s ease',
           '&:hover': {
             transform: 'translateY(-1px)',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+            boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
           }
         }}
       >
-        <CardContent sx={{ p: 2.5 }}>
-          {/* Header with avatar, name, date and View Analytics */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Avatar
-                src={profilePicture || "https://c.animaapp.com/mavezxjciUNcPR/img/ellipse-121-1.png"}
-                alt={username}
-                sx={{ width: 32, height: 32, mr: 1.5 }}
+        <CardContent sx={{ p: 2 }}>
+          <Grid container spacing={2}>
+            {/* Thumbnail */}
+            <Grid item xs={12} sm={2} md={1}>
+              <Box
+                component="img"
+                src={post.thumbnail_url || "https://via.placeholder.com/75x75?text=No+Image"}
+                alt="Post thumbnail"
+                sx={{
+                  width: 75,
+                  height: 75,
+                  objectFit: "cover",
+                  borderRadius: "4px",
+                }}
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/75x75?text=No+Image";
+                }}
               />
-              <Box>
+            </Grid>
+
+            {/* Content */}
+            <Grid item xs={12} sm={10} md={11}>
+              <Box sx={{ mb: 1 }}>
                 <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: "14px",
-                    color: '#1a1a1a',
-                    lineHeight: 1.2
+                  variant="body1"
+                  sx={{ 
+                    display: "flex", 
+                    justifyContent: "space-between", 
+                    alignItems: "center",
+                    mb: 1,
+                    flexWrap: "wrap",
+                    gap: 1
                   }}
                 >
-                  Influencer
+                  <Box component="span" sx={{ fontWeight: 500 }}>
+                    {post.platform}
+                  </Box>
+                  <Typography component="span" color="text.secondary">
+                    {post.brand}
+                  </Typography>
+                  <Typography component="span" color="text.secondary">
+                    {new Date(post.date).toLocaleDateString('en-US', { 
+                      day: 'numeric', 
+                      month: 'short' 
+                    })}
+                  </Typography>
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#888',
-                    fontSize: "12px",
-                    lineHeight: 1.2
-                  }}
-                >
-                  @{username}
-                </Typography>
+
+                <Box sx={{ mb: 1 }}>
+                  <Typography variant="body2" fontWeight="medium">
+                    {post.brand}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary"
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      mt: 0.5
+                    }}
+                  >
+                    {post.content || "No content available"}
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#888',
-                  fontSize: "12px"
-                }}
-              >
-                13March
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#6366f1',
-                  fontSize: "12px",
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&:hover': { textDecoration: 'underline' }
-                }}
-              >
-                View full Analytics →
-              </Typography>
-            </Box>
-          </Box>
 
-          {/* Post content */}
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#666',
-              fontSize: "13px",
-              mb: 2,
-              lineHeight: 1.4
-            }}
-          >
-            Lorem ipsum dolor sit...
-          </Typography>
+              {/* Engagement metrics */}
+              <Box sx={{ display: "flex", gap: 3, alignItems: "center", flexWrap: "wrap" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <FavoriteIcon sx={{ fontSize: 16, color: "#e91e63" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 300, color: '#666' }}
+                  >
+                    {formatNumber(post.likes || 0)}
+                  </Typography>
+                </Box>
 
-          {/* Engagement metrics in horizontal layout */}
-          <Box sx={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <FavoriteIcon sx={{ fontSize: 16, color: '#888' }} />
-              <Typography variant="body2" sx={{ color: '#888', fontSize: '13px' }}>
-                {formatNumber(likes)}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ChatBubbleIcon sx={{ fontSize: 16, color: '#888' }} />
-              <Typography variant="body2" sx={{ color: '#888', fontSize: '13px' }}>
-                {formatNumber(comments)}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ShareIcon sx={{ fontSize: 16, color: '#888' }} />
-              <Typography variant="body2" sx={{ color: '#888', fontSize: '13px' }}>
-                {formatNumber(shares)}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <LinkIcon sx={{ fontSize: 16, color: '#888' }} />
-              <Typography variant="body2" sx={{ color: '#888', fontSize: '13px' }}>
-                {formatNumber(clicks)}
-              </Typography>
-            </Box>
-          </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <ChatBubbleIcon sx={{ fontSize: 16, color: "#2196f3" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 300, color: '#666' }}
+                  >
+                    {formatNumber(post.comments || 0)}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <ShareIcon sx={{ fontSize: 16, color: "#4caf50" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 300, color: '#666' }}
+                  >
+                    {formatNumber(post.shares || 0)}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <LinkIcon sx={{ fontSize: 16, color: "#ff9800" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 300, color: '#666' }}
+                  >
+                    {formatNumber(post.views || 0)}
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
     );
@@ -473,52 +480,168 @@ const InstagramAnalytics = () => {
           </FormControl>
         </Box>
 
-        {/* Main content - exact Figma layout */}
+        {/* Main content - Updated Full Width Layout */}
         <Box sx={{ 
-          display: 'flex', 
-          gap: 3, 
           p: 3, 
           backgroundColor: '#f8f9fa',
           minHeight: 'calc(100vh - 120px)'
         }}>
-          {/* Left Profile Section */}
-          <Box sx={{ flex: '0 0 400px' }}>
-            {selectedAccountData ? (
-              <Box>
-                <ProfileCard data={selectedAccountData} />
-                
-                {/* Recent Posts Section */}
-                <Box sx={{ mt: 3 }}>
+          {selectedAccountData ? (
+            <Box>
+              {/* Top section with Profile and Analytics */}
+              <Box sx={{ 
+                display: 'flex', 
+                gap: 3, 
+                mb: 3
+              }}>
+                {/* Left Profile Section */}
+                <Box sx={{ flex: '0 0 400px' }}>
+                  <ProfileCard data={selectedAccountData} />
+                </Box>
+
+                {/* Right Analytics Section */}
+                <Box sx={{ flex: 1 }}>
                   <Typography
                     variant="h6"
                     sx={{
                       mb: 2,
                       color: '#1a1a1a',
                       fontWeight: 600,
-                      fontSize: '16px'
+                      fontSize: '20px'
                     }}
                   >
-                    Recent Posts
+                    Campaign Analytics
                   </Typography>
                   
-                  {/* Mock recent posts data - you can replace with actual data */}
-                  {selectedAccountData.posts?.slice(0, 3).map((post, index) => (
-                    <RecentPostCard 
-                      key={index}
-                      post={post}
-                      username={selectedAccountData.username}
-                      profilePicture={selectedAccountData.profile?.profile_picture_url}
-                    />
-                  )) || 
-                  // Fallback mock data if no posts available
-                  [1, 2].map((_, index) => (
-                    <RecentPostCard 
+                  {/* First row - 4 cards */}
+                  <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                    {getAnalyticsCards(selectedAccountData).slice(0, 4).map((card, index) => (
+                      <Box key={index} sx={{ flex: 1 }}>
+                        <Card
+                          sx={{
+                            borderRadius: 2,
+                            border: "1px solid #e0e0e0",
+                            background: '#ffffff',
+                            boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
+                            transition: 'all 0.2s ease',
+                            height: '100px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            '&:hover': {
+                              transform: 'translateY(-1px)',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                            }
+                          }}
+                        >
+                          <CardContent sx={{ textAlign: "center", p: 2 }}>
+                            <Typography
+                              variant="h5"
+                              sx={{
+                                fontWeight: 600,
+                                color: '#1a1a1a',
+                                mb: 0.5,
+                                fontSize: '22px'
+                              }}
+                            >
+                              {card.value}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: '#666',
+                                fontSize: '12px',
+                                fontWeight: 400
+                              }}
+                            >
+                              {card.label}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Box>
+                    ))}
+                  </Box>
+
+                  {/* Second row - 4 cards */}
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    {getAnalyticsCards(selectedAccountData).slice(4, 8).map((card, index) => (
+                      <Box key={index + 4} sx={{ flex: 1 }}>
+                        <Card
+                          sx={{
+                            borderRadius: 2,
+                            border: "1px solid #e0e0e0",
+                            background: '#ffffff',
+                            boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
+                            transition: 'all 0.2s ease',
+                            height: '100px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            '&:hover': {
+                              transform: 'translateY(-1px)',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                            }
+                          }}
+                        >
+                          <CardContent sx={{ textAlign: "center", p: 2 }}>
+                            <Typography
+                              variant="h5"
+                              sx={{
+                                fontWeight: 600,
+                                color: '#1a1a1a',
+                                mb: 0.5,
+                                fontSize: '22px'
+                              }}
+                            >
+                              {card.value}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: '#666',
+                                fontSize: '12px',
+                                fontWeight: 400
+                              }}
+                            >
+                              {card.label}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* All brand tagged posts section - Full Width */}
+              <Box sx={{ mb: 4 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 2,
+                    color: '#1a1a1a',
+                    fontWeight: 600,
+                    fontSize: '18px'
+                  }}
+                >
+                  All Brand Tagged Posts
+                </Typography>
+                
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {/* Mock brand tagged posts data */}
+                  {[1, 2, 3].map((_, index) => (
+                    <BrandTaggedPostCard 
                       key={index}
                       post={{
-                        caption: 'Lorem ipsum dolor sit...',
-                        like_count: 378000 + Math.floor(Math.random() * 1000),
-                        comments_count: 248 + Math.floor(Math.random() * 100),
-                        timestamp: Date.now() - (index * 86400000)
+                        thumbnail_url: `https://picsum.photos/75/75?random=${index}`,
+                        platform: 'Instagram',
+                        brand: 'Fashion Brand',
+                        date: new Date(Date.now() - (index * 86400000)).toISOString(),
+                        content: 'Amazing collaboration with this brand! Check out their latest collection...',
+                        likes: 1200 + Math.floor(Math.random() * 500),
+                        comments: 45 + Math.floor(Math.random() * 30),
+                        shares: 23 + Math.floor(Math.random() * 20),
+                        views: 8500 + Math.floor(Math.random() * 1000)
                       }}
                       username={selectedAccountData.username}
                       profilePicture={selectedAccountData.profile?.profile_picture_url}
@@ -526,152 +649,82 @@ const InstagramAnalytics = () => {
                   ))}
                 </Box>
               </Box>
-            ) : (
-              <Card
-                sx={{
-                  borderRadius: 2,
-                  border: "1px solid #e0e0e0",
-                  boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
-                  background: '#ffffff',
-                  maxWidth: '400px'
-                }}
-              >
-                <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                  <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
-                  <Typography variant="body1" color="textSecondary">
-                    {instagramData.length === 0 ? 'Loading Instagram analytics data...' : 'No Instagram account selected'}
-                  </Typography>
-                </CardContent>
-              </Card>
-            )}
-          </Box>
 
-          {/* Right Analytics Section */}
-          <Box sx={{ flex: 1 }}>
-            <Typography
-              variant="h6"
+              {/* Recent Posts Section - Full Width */}
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 2,
+                    color: '#1a1a1a',
+                    fontWeight: 600,
+                    fontSize: '18px'
+                  }}
+                >
+                  Recent Posts
+                </Typography>
+                
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {/* Mock recent posts data */}
+                  {selectedAccountData.posts?.slice(0, 4).map((post, index) => (
+                    <BrandTaggedPostCard 
+                      key={index}
+                      post={{
+                        thumbnail_url: `https://picsum.photos/75/75?random=${index + 10}`,
+                        platform: 'Instagram',
+                        brand: selectedAccountData.username,
+                        date: new Date(Date.now() - (index * 86400000)).toISOString(),
+                        content: post.caption || 'Lorem ipsum dolor sit amet consectetur adipisicing elit...',
+                        likes: post.like_count || 378000 + Math.floor(Math.random() * 1000),
+                        comments: post.comments_count || 248 + Math.floor(Math.random() * 100),
+                        shares: Math.floor((post.like_count || 378000) * 0.1),
+                        views: Math.floor((post.like_count || 378000) * 2.5)
+                      }}
+                      username={selectedAccountData.username}
+                      profilePicture={selectedAccountData.profile?.profile_picture_url}
+                    />
+                  )) || 
+                  // Fallback mock data if no posts available
+                  [1, 2, 3, 4].map((_, index) => (
+                    <BrandTaggedPostCard 
+                      key={index}
+                      post={{
+                        thumbnail_url: `https://picsum.photos/75/75?random=${index + 20}`,
+                        platform: 'Instagram',
+                        brand: selectedAccountData.username,
+                        date: new Date(Date.now() - (index * 86400000)).toISOString(),
+                        content: 'Lorem ipsum dolor sit amet consectetur adipisicing elit...',
+                        likes: 378000 + Math.floor(Math.random() * 1000),
+                        comments: 248 + Math.floor(Math.random() * 100),
+                        shares: 189 + Math.floor(Math.random() * 50),
+                        views: 945000 + Math.floor(Math.random() * 10000)
+                      }}
+                      username={selectedAccountData.username}
+                      profilePicture={selectedAccountData.profile?.profile_picture_url}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+          ) : (
+            <Card
               sx={{
-                mb: 2,
-                color: '#1a1a1a',
-                fontWeight: 600,
-                fontSize: '20px'
+                borderRadius: 2,
+                border: "1px solid #e0e0e0",
+                boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
+                background: '#ffffff',
+                maxWidth: '400px',
+                mx: 'auto'
               }}
             >
-              Campaign Analytics
-            </Typography>
-            
-            {selectedAccountData ? (
-              <Box>
-                {/* First row - 4 cards */}
-                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                  {getAnalyticsCards(selectedAccountData).slice(0, 4).map((card, index) => (
-                    <Box key={index} sx={{ flex: 1 }}>
-                      <Card
-                        sx={{
-                          borderRadius: 2,
-                          border: "1px solid #e0e0e0",
-                          background: '#ffffff',
-                          boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
-                          transition: 'all 0.2s ease',
-                          height: '100px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          '&:hover': {
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
-                          }
-                        }}
-                      >
-                        <CardContent sx={{ textAlign: "center", p: 2 }}>
-                          <Typography
-                            variant="h5"
-                            sx={{
-                              fontWeight: 600,
-                              color: '#1a1a1a',
-                              mb: 0.5,
-                              fontSize: '22px'
-                            }}
-                          >
-                            {card.value}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: '#666',
-                              fontSize: '12px',
-                              fontWeight: 400
-                            }}
-                          >
-                            {card.label}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Box>
-                  ))}
-                </Box>
-
-                {/* Second row - 4 cards */}
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  {getAnalyticsCards(selectedAccountData).slice(4, 8).map((card, index) => (
-                    <Box key={index + 4} sx={{ flex: 1 }}>
-                      <Card
-                        sx={{
-                          borderRadius: 2,
-                          border: "1px solid #e0e0e0",
-                          background: '#ffffff',
-                          boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
-                          transition: 'all 0.2s ease',
-                          height: '100px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          '&:hover': {
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
-                          }
-                        }}
-                      >
-                        <CardContent sx={{ textAlign: "center", p: 2 }}>
-                          <Typography
-                            variant="h5"
-                            sx={{
-                              fontWeight: 600,
-                              color: '#1a1a1a',
-                              mb: 0.5,
-                              fontSize: '22px'
-                            }}
-                          >
-                            {card.value}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: '#666',
-                              fontSize: '12px',
-                              fontWeight: 400
-                            }}
-                          >
-                            {card.label}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
-            ) : (
-              <Box sx={{ textAlign: 'center', py: 6 }}>
-                <InstagramIcon sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
-                <Typography variant="h6" color="textSecondary" sx={{ mb: 1 }}>
-                  No Data Available
+              <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
+                <Typography variant="body1" color="textSecondary">
+                  {instagramData.length === 0 ? 'Loading Instagram analytics data...' : 'No Instagram account selected'}
                 </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Please select an Instagram account to view analytics
-                </Typography>
-              </Box>
-            )}
-          </Box>
+              </CardContent>
+            </Card>
+          )}
         </Box>
       </Box>
     </Layout>
