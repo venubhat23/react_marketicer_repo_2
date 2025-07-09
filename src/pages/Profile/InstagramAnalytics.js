@@ -268,135 +268,160 @@ const InstagramAnalytics = () => {
     return (
       <Card
         sx={{
-          borderRadius: 2,
+          borderRadius: 3,
           border: "1px solid #e0e0e0",
-          boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
+          boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.08)",
           background: '#ffffff',
-          mb: 2,
+          overflow: 'hidden',
           transition: 'all 0.2s ease',
           '&:hover': {
-            transform: 'translateY(-1px)',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.12)'
           }
         }}
       >
-        <CardContent sx={{ p: 2 }}>
-          {/* Post Header */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Avatar
-              src={accountData?.profile?.profile_picture_url || "https://c.animaapp.com/mavezxjciUNcPR/img/ellipse-121-1.png"}
-              alt={`${accountData?.username}'s profile`}
+        {/* Post Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', p: 2.5, pb: 1.5 }}>
+          <Avatar
+            src={accountData?.profile?.profile_picture_url || "https://c.animaapp.com/mavezxjciUNcPR/img/ellipse-121-1.png"}
+            alt={`${accountData?.username}'s profile`}
+            sx={{
+              width: 40,
+              height: 40,
+              mr: 1.5,
+              border: '1px solid #e0e0e0'
+            }}
+          />
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant="body1"
               sx={{
-                width: 32,
-                height: 32,
-                mr: 1.5,
-                border: '1px solid #e0e0e0'
+                fontWeight: 600,
+                fontSize: "15px",
+                color: '#1a1a1a',
+                mb: 0.5
               }}
-            />
-            <Box sx={{ flex: 1 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "14px",
-                  color: '#1a1a1a',
-                  mb: 0.5
-                }}
-              >
-                {accountData?.page_name || accountData?.username || 'Influencer'}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#666',
-                  fontSize: "12px"
-                }}
-              >
-                @{accountData?.username || 'name'} • {formatDate(post?.timestamp || Date.now())}
-              </Typography>
-            </Box>
+            >
+              {accountData?.page_name || accountData?.username || 'aksharshetty01012025'}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#666',
+                fontSize: "13px"
+              }}
+            >
+              @{accountData?.username || 'aksharshetty01012025'} • {formatDate(post?.timestamp || Date.now())}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#666',
+                fontSize: "13px",
+                mr: 1
+              }}
+            >
+              13March
+            </Typography>
+            <Button
+              variant="text"
+              sx={{
+                color: '#7c4dff',
+                textTransform: 'none',
+                fontWeight: 500,
+                fontSize: '13px',
+                minWidth: 'auto',
+                p: 0.5,
+                mr: 1
+              }}
+            >
+              View full Analytics →
+            </Button>
             <IconButton size="small" sx={{ color: '#666' }}>
               <MoreHorizIcon fontSize="small" />
             </IconButton>
           </Box>
+        </Box>
 
-          {/* Post Content */}
+        {/* Post Content */}
+        <Box sx={{ px: 2.5, pb: 1.5 }}>
           <Typography
             variant="body2"
             sx={{
               color: '#1a1a1a',
               fontSize: "14px",
-              mb: 2,
-              lineHeight: 1.4
+              lineHeight: 1.5,
+              mb: 2
             }}
           >
-            {post?.caption || 'Lorem ipsum dolor sit...'}
+            {post?.caption || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'}
           </Typography>
+        </Box>
 
-          {/* Post Media */}
-          {post?.media_url && (
-            <Box
-              sx={{
-                width: '100%',
-                height: 200,
-                borderRadius: 1,
-                overflow: 'hidden',
-                mb: 2,
-                backgroundColor: '#f5f5f5'
-              }}
-            >
-              <img
-                src={post.media_url}
-                alt="Post content"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            </Box>
-          )}
+        {/* Post Media */}
+        <Box
+          sx={{
+            width: '100%',
+            height: 300,
+            overflow: 'hidden',
+            backgroundColor: '#f5f5f5',
+            mb: 2
+          }}
+        >
+          <img
+            src={post?.media_url || 'https://picsum.photos/800/300?random=1'}
+            alt="Post content"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        </Box>
 
-          {/* Engagement Stats */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 1 }}>
+        {/* Engagement Stats Row */}
+        <Box sx={{ px: 2.5, pb: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <FavoriteIcon sx={{ fontSize: 16, color: '#666' }} />
-              <Typography variant="body2" sx={{ color: '#666', fontSize: '13px' }}>
-                {formatNumber(post?.like_count || Math.floor(Math.random() * 1000) + 100)}
+              <FavoriteIcon sx={{ fontSize: 18, color: '#666' }} />
+              <Typography variant="body2" sx={{ color: '#666', fontSize: '14px', fontWeight: 500 }}>
+                {formatNumber(post?.like_count || 378000)}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ChatBubbleIcon sx={{ fontSize: 16, color: '#666' }} />
-              <Typography variant="body2" sx={{ color: '#666', fontSize: '13px' }}>
-                {formatNumber(post?.comments_count || Math.floor(Math.random() * 100) + 10)}
+              <ChatBubbleIcon sx={{ fontSize: 18, color: '#666' }} />
+              <Typography variant="body2" sx={{ color: '#666', fontSize: '14px', fontWeight: 500 }}>
+                {formatNumber(post?.comments_count || 248)}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ShareIcon sx={{ fontSize: 16, color: '#666' }} />
-              <Typography variant="body2" sx={{ color: '#666', fontSize: '13px' }}>
-                {formatNumber(Math.floor((post?.like_count || 100) * 0.1))}
+              <ShareIcon sx={{ fontSize: 18, color: '#666' }} />
+              <Typography variant="body2" sx={{ color: '#666', fontSize: '14px', fontWeight: 500 }}>
+                {formatNumber(Math.floor((post?.like_count || 378000) * 0.1))}
               </Typography>
             </Box>
           </Box>
 
           {/* Action Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 1 }}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <IconButton size="small" sx={{ color: '#666' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 1, borderTop: '1px solid #f0f0f0' }}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <IconButton size="small" sx={{ color: '#666', padding: 1 }}>
                 <FavoriteIcon fontSize="small" />
               </IconButton>
-              <IconButton size="small" sx={{ color: '#666' }}>
+              <IconButton size="small" sx={{ color: '#666', padding: 1 }}>
                 <ChatBubbleIcon fontSize="small" />
               </IconButton>
-              <IconButton size="small" sx={{ color: '#666' }}>
+              <IconButton size="small" sx={{ color: '#666', padding: 1 }}>
                 <ShareIcon fontSize="small" />
               </IconButton>
             </Box>
-            <IconButton size="small" sx={{ color: '#666' }}>
+            <IconButton size="small" sx={{ color: '#666', padding: 1 }}>
               <BookmarkIcon fontSize="small" />
             </IconButton>
           </Box>
-        </CardContent>
+        </Box>
       </Card>
     );
   };
@@ -417,7 +442,7 @@ const InstagramAnalytics = () => {
           timestamp: Date.now() - (2 * 60 * 60 * 1000), // 2 hours ago
           like_count: 378000,
           comments_count: 248,
-          media_url: 'https://picsum.photos/400/300?random=1'
+          media_url: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
         },
         {
           id: '2',
@@ -425,28 +450,12 @@ const InstagramAnalytics = () => {
           timestamp: Date.now() - (5 * 60 * 60 * 1000), // 5 hours ago
           like_count: 425000,
           comments_count: 189,
-          media_url: 'https://picsum.photos/400/300?random=2'
-        },
-        {
-          id: '3',
-          caption: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-          timestamp: Date.now() - (12 * 60 * 60 * 1000), // 12 hours ago
-          like_count: 312000,
-          comments_count: 156,
-          media_url: 'https://picsum.photos/400/300?random=3'
-        },
-        {
-          id: '4',
-          caption: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-          timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
-          like_count: 287000,
-          comments_count: 134,
-          media_url: 'https://picsum.photos/400/300?random=4'
+          media_url: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
         }
       ];
     }
     
-    return posts.slice(0, 4); // Show only first 4 posts
+    return posts.slice(0, 2); // Show only first 2 posts to match Figma
   };
 
   // Show loading state
@@ -556,7 +565,7 @@ const InstagramAnalytics = () => {
           minHeight: 'calc(100vh - 120px)'
         }}>
           {/* Left Profile Section */}
-          <Box sx={{ flex: '0 0 400px' }}>
+          <Box sx={{ flex: '0 0 380px' }}>
             {selectedAccountData ? (
               <ProfileCard data={selectedAccountData} />
             ) : (
@@ -566,7 +575,7 @@ const InstagramAnalytics = () => {
                   border: "1px solid #e0e0e0",
                   boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
                   background: '#ffffff',
-                  maxWidth: '400px'
+                  maxWidth: '380px'
                 }}
               >
                 <CardContent sx={{ p: 4, textAlign: 'center' }}>
@@ -693,9 +702,9 @@ const InstagramAnalytics = () => {
                   ))}
                 </Box>
 
-                {/* Recent Posts Section */}
+                {/* Recent Posts Section - Full Width */}
                 <Box sx={{ mt: 4 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                     <Typography
                       variant="h6"
                       sx={{
@@ -706,27 +715,14 @@ const InstagramAnalytics = () => {
                     >
                       Recent Posts
                     </Typography>
-                    <Button
-                      variant="text"
-                      sx={{
-                        color: '#7c4dff',
-                        textTransform: 'none',
-                        fontWeight: 500,
-                        fontSize: '14px'
-                      }}
-                    >
-                      View full Analytics →
-                    </Button>
                   </Box>
 
-                  {/* Posts Grid */}
-                  <Grid container spacing={2}>
+                  {/* Posts List - Full Width Instagram Style */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                     {getRecentPosts(selectedAccountData).map((post, index) => (
-                      <Grid item xs={12} md={6} key={post.id || index}>
-                        <RecentPostCard post={post} accountData={selectedAccountData} />
-                      </Grid>
+                      <RecentPostCard key={post.id || index} post={post} accountData={selectedAccountData} />
                     ))}
-                  </Grid>
+                  </Box>
                 </Box>
               </Box>
             ) : (
