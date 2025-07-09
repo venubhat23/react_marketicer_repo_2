@@ -391,8 +391,8 @@ const InstagramAnalytics = () => {
         {/* Main content matching Analytics component layout exactly */}
         <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '15px' }}>
           <Grid container spacing={2}>
-            {/* Profile Section - matching Analytics exact Grid structure */}
-            <Grid item xs={12} sm={3} md={4} sx={{ mt: '-20px', p: 1 }}>
+            {/* Profile Section - Left side */}
+            <Grid item xs={12} md={4} sx={{ mt: '-20px', p: 1 }}>
               {selectedAccountData ? (
                 <ProfileCard data={selectedAccountData} />
               ) : (
@@ -416,37 +416,72 @@ const InstagramAnalytics = () => {
               )}
             </Grid>
 
-            {/* Analytics Cards Section - matching Analytics exact Grid structure */}
-            {selectedAccountData && (
-              <Grid item xs={12} sm={9} md={8}>
-                <Box>
-                  <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 'bold', fontSize: '18px' }}>
-                    Campaign Analytics
+            {/* Campaign Analytics Section - Right side */}
+            <Grid item xs={12} md={8}>
+              <Typography
+                variant="h6"
+                sx={{
+                  mb: 2,
+                  color: '#333',
+                  fontWeight: 'bold',
+                  fontSize: '18px',
+                  mt: '-20px'
+                }}
+              >
+                Campaign Analytics
+              </Typography>
+              {selectedAccountData ? (
+                <Grid container spacing={2}>
+                  {getAnalyticsCards(selectedAccountData).slice(0, 8).map((card, index) => (
+                    <Grid key={index} item xs={12} sm={6} md={6} lg={3}>
+                      <Card
+                        sx={{
+                          borderRadius: 2,
+                          border: "1px solid #e0e0e0",
+                          background: '#ffffff',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                          }
+                        }}
+                      >
+                        <CardContent sx={{ textAlign: "center", p: 3 }}>
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              fontWeight: 700,
+                              color: '#1a1a1a',
+                              mb: 1,
+                              fontSize: '24px'
+                            }}
+                          >
+                            {card.value}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: '#666',
+                              fontSize: '14px',
+                              fontWeight: 500
+                            }}
+                          >
+                            {card.label}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <InstagramIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
+                  <Typography variant="body1" color="textSecondary">
+                    Please select an Instagram account to view analytics
                   </Typography>
-                  <Grid container spacing={1}>
-                    {getAnalyticsCards(selectedAccountData).slice(0, 8).map((card, index) => (
-                      <Grid key={index} item xs={12} sm={6} md={4}>
-                        <Card
-                          sx={{
-                            width: 220,
-                            height: 86,
-                            border: "1px solid #b6b6b6",
-                            borderRadius: "10px",
-                          }}
-                        >
-                          <CardContent sx={{ textAlign: "center", p: 1 }}>
-                            <Typography variant="h6">{card.value}</Typography>
-                            <Typography variant="body2" sx={{ mt: 2 }}>
-                              {card.label}
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
                 </Box>
-              </Grid>
-            )}
+              )}
+            </Grid>
           </Grid>
         </Box>
       </Box>
