@@ -10,7 +10,6 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import ChatBubbleOutline from "@mui/icons-material/ChatBubbleOutline";
-import ShareIcon from '@mui/icons-material/Share';
 import Send from "@mui/icons-material/Send";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import BookmarkIcon from '@mui/icons-material/Bookmark';
