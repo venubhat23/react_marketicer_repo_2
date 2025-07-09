@@ -127,129 +127,134 @@ const InstagramAnalytics = () => {
       <Card
         sx={{
           borderRadius: 2,
-          border: "1px solid #d6d6d6",
-          boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.25)",
-          background: '#fffdfd',
+          border: "1px solid #e0e0e0",
+          boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
+          background: '#ffffff',
+          mb: 2,
           transition: 'all 0.2s ease',
           '&:hover': {
             transform: 'translateY(-1px)',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+            boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
           }
         }}
       >
-        <CardContent sx={{ p: 2 }}>
-          <Grid container spacing={2}>
-            {/* Thumbnail */}
-            <Grid item xs={12} sm={2} md={1}>
-              <Box
-                component="img"
-                src={post.thumbnail_url || "https://via.placeholder.com/75x75?text=No+Image"}
-                alt="Post thumbnail"
-                sx={{
-                  width: 75,
-                  height: 75,
-                  objectFit: "cover",
-                  borderRadius: "4px",
-                }}
-                onError={(e) => {
-                  e.target.src = "https://via.placeholder.com/75x75?text=No+Image";
-                }}
-              />
-            </Grid>
+        <CardContent sx={{ p: 2.5 }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            {/* Profile Image */}
+            <Avatar
+              src={profilePicture || "https://c.animaapp.com/mavezxjciUNcPR/img/ellipse-121-1.png"}
+              alt={username}
+              sx={{ width: 48, height: 48, flexShrink: 0 }}
+            />
 
-            {/* Content */}
-            <Grid item xs={12} sm={10} md={11}>
-              <Box sx={{ mb: 1 }}>
-                <Typography
-                  variant="body1"
-                  sx={{ 
-                    display: "flex", 
-                    justifyContent: "space-between", 
-                    alignItems: "center",
-                    mb: 1,
-                    flexWrap: "wrap",
-                    gap: 1
-                  }}
-                >
-                  <Box component="span" sx={{ fontWeight: 500 }}>
-                    {post.platform}
-                  </Box>
-                  <Typography component="span" color="text.secondary">
-                    {post.brand}
+            {/* Content Area */}
+            <Box sx={{ flex: 1 }}>
+              {/* Header with name, brand, date and View Analytics */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: "14px",
+                      color: '#1a1a1a',
+                      lineHeight: 1.2
+                    }}
+                  >
+                    Influencer
                   </Typography>
-                  <Typography component="span" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#888',
+                      fontSize: "12px",
+                      lineHeight: 1.2
+                    }}
+                  >
+                    @{username}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#888',
+                      fontSize: "12px"
+                    }}
+                  >
+                    @{post.brand}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#888',
+                      fontSize: "12px"
+                    }}
+                  >
                     {new Date(post.date).toLocaleDateString('en-US', { 
                       day: 'numeric', 
                       month: 'short' 
                     })}
                   </Typography>
-                </Typography>
-
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="body2" fontWeight="medium">
-                    {post.brand}
-                  </Typography>
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary"
+                  <Typography
+                    variant="body2"
                     sx={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      mt: 0.5
+                      color: '#6366f1',
+                      fontSize: "12px",
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      '&:hover': { textDecoration: 'underline' }
                     }}
                   >
-                    {post.content || "No content available"}
+                    View full Analytics →
                   </Typography>
                 </Box>
               </Box>
 
-              {/* Engagement metrics */}
-              <Box sx={{ display: "flex", gap: 3, alignItems: "center", flexWrap: "wrap" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <FavoriteIcon sx={{ fontSize: 16, color: "#e91e63" }} />
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 300, color: '#666' }}
-                  >
+              {/* Post content */}
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#666',
+                  fontSize: "13px",
+                  mb: 2,
+                  lineHeight: 1.4
+                }}
+              >
+                {post.content || "Lorem ipsum dolor sit..."}
+              </Typography>
+
+              {/* Engagement metrics in horizontal layout */}
+              <Box sx={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <FavoriteIcon sx={{ fontSize: 16, color: '#888' }} />
+                  <Typography variant="body2" sx={{ color: '#888', fontSize: '13px' }}>
                     {formatNumber(post.likes || 0)}
                   </Typography>
                 </Box>
-
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <ChatBubbleIcon sx={{ fontSize: 16, color: "#2196f3" }} />
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 300, color: '#666' }}
-                  >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <ChatBubbleIcon sx={{ fontSize: 16, color: '#888' }} />
+                  <Typography variant="body2" sx={{ color: '#888', fontSize: '13px' }}>
                     {formatNumber(post.comments || 0)}
                   </Typography>
                 </Box>
-
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <ShareIcon sx={{ fontSize: 16, color: "#4caf50" }} />
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 300, color: '#666' }}
-                  >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <ShareIcon sx={{ fontSize: 16, color: '#888' }} />
+                  <Typography variant="body2" sx={{ color: '#888', fontSize: '13px' }}>
                     {formatNumber(post.shares || 0)}
                   </Typography>
                 </Box>
-
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <LinkIcon sx={{ fontSize: 16, color: "#ff9800" }} />
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 300, color: '#666' }}
-                  >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <LinkIcon sx={{ fontSize: 16, color: '#888' }} />
+                  <Typography variant="body2" sx={{ color: '#888', fontSize: '13px' }}>
                     {formatNumber(post.views || 0)}
                   </Typography>
                 </Box>
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </CardContent>
       </Card>
     );
