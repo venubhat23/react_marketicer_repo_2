@@ -489,7 +489,8 @@ const InstagramAnalytics = () => {
         <Box sx={{ 
           p: 3, 
           backgroundColor: '#f8f9fa',
-          minHeight: 'calc(100vh - 120px)'
+          minHeight: 'calc(100vh - 120px)',
+          width: '100%'
         }}>
           {selectedAccountData ? (
             <Box>
@@ -618,58 +619,68 @@ const InstagramAnalytics = () => {
                 </Box>
               </Box>
 
-              {/* Recent Posts Section - Full Width */}
-              <Box sx={{ mb: 4 }}>
+              {/* Recent Posts Section - Full Width from Left */}
+              <Box sx={{ mb: 4, ml: 0, mr: 0 }}>
                 <Typography
                   variant="h6"
                   sx={{
                     mb: 2,
                     color: '#1a1a1a',
                     fontWeight: 600,
-                    fontSize: '18px'
+                    fontSize: '18px',
+                    ml: 0
                   }}
                 >
                   Recent Posts
                 </Typography>
                 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 2,
+                  width: '100%',
+                  ml: 0,
+                  mr: 0
+                }}>
                   {/* Mock recent posts data */}
                   {selectedAccountData.posts?.slice(0, 4).map((post, index) => (
-                    <BrandTaggedPostCard 
-                      key={index}
-                      post={{
-                        thumbnail_url: `https://picsum.photos/75/75?random=${index + 10}`,
-                        platform: 'Instagram',
-                        brand: selectedAccountData.username,
-                        date: new Date(Date.now() - (index * 86400000)).toISOString(),
-                        content: post.caption || 'Lorem ipsum dolor sit amet consectetur adipisicing elit...',
-                        likes: post.like_count || 378000 + Math.floor(Math.random() * 1000),
-                        comments: post.comments_count || 248 + Math.floor(Math.random() * 100),
-                        shares: Math.floor((post.like_count || 378000) * 0.1),
-                        views: Math.floor((post.like_count || 378000) * 2.5)
-                      }}
-                      username={selectedAccountData.username}
-                      profilePicture={selectedAccountData.profile?.profile_picture_url}
-                    />
+                    <Box key={index} sx={{ width: '100%' }}>
+                      <BrandTaggedPostCard 
+                        post={{
+                          thumbnail_url: `https://picsum.photos/75/75?random=${index + 10}`,
+                          platform: 'Instagram',
+                          brand: selectedAccountData.username,
+                          date: new Date(Date.now() - (index * 86400000)).toISOString(),
+                          content: post.caption || 'Lorem ipsum dolor sit amet consectetur adipisicing elit...',
+                          likes: post.like_count || 378000 + Math.floor(Math.random() * 1000),
+                          comments: post.comments_count || 248 + Math.floor(Math.random() * 100),
+                          shares: Math.floor((post.like_count || 378000) * 0.1),
+                          views: Math.floor((post.like_count || 378000) * 2.5)
+                        }}
+                        username={selectedAccountData.username}
+                        profilePicture={selectedAccountData.profile?.profile_picture_url}
+                      />
+                    </Box>
                   )) || 
                   // Fallback mock data if no posts available
                   [1, 2, 3, 4].map((_, index) => (
-                    <BrandTaggedPostCard 
-                      key={index}
-                      post={{
-                        thumbnail_url: `https://picsum.photos/75/75?random=${index + 20}`,
-                        platform: 'Instagram',
-                        brand: selectedAccountData.username,
-                        date: new Date(Date.now() - (index * 86400000)).toISOString(),
-                        content: 'Lorem ipsum dolor sit amet consectetur adipisicing elit...',
-                        likes: 378000 + Math.floor(Math.random() * 1000),
-                        comments: 248 + Math.floor(Math.random() * 100),
-                        shares: 189 + Math.floor(Math.random() * 50),
-                        views: 945000 + Math.floor(Math.random() * 10000)
-                      }}
-                      username={selectedAccountData.username}
-                      profilePicture={selectedAccountData.profile?.profile_picture_url}
-                    />
+                    <Box key={index} sx={{ width: '100%' }}>
+                      <BrandTaggedPostCard 
+                        post={{
+                          thumbnail_url: `https://picsum.photos/75/75?random=${index + 20}`,
+                          platform: 'Instagram',
+                          brand: selectedAccountData.username,
+                          date: new Date(Date.now() - (index * 86400000)).toISOString(),
+                          content: 'Lorem ipsum dolor sit amet consectetur adipisicing elit...',
+                          likes: 378000 + Math.floor(Math.random() * 1000),
+                          comments: 248 + Math.floor(Math.random() * 100),
+                          shares: 189 + Math.floor(Math.random() * 50),
+                          views: 945000 + Math.floor(Math.random() * 10000)
+                        }}
+                        username={selectedAccountData.username}
+                        profilePicture={selectedAccountData.profile?.profile_picture_url}
+                      />
+                    </Box>
                   ))}
                 </Box>
               </Box>
