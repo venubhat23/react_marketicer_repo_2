@@ -127,7 +127,7 @@ const InstagramAnalytics = () => {
   };
 
   // Recent Posts Component
-  const RecentPostCard = ({ post, username, profilePicture }) => {
+  const SidebarRecentPostCard = ({ post, username, profilePicture }) => {
     const likes = post.like_count || Math.floor(Math.random() * 500) + 100;
     const comments = post.comments_count || Math.floor(Math.random() * 50) + 10;
     const shares = Math.floor(likes * 0.1);
@@ -381,7 +381,7 @@ const InstagramAnalytics = () => {
   };
 
   // Recent Posts component matching BrandProfile design
-  const RecentPostCard = ({ post, accountData, index }) => {
+  const CampaignRecentPostCard = ({ post, accountData, index }) => {
     const formatDate = (timestamp) => {
       const date = new Date(timestamp);
       return date.toLocaleDateString('en-US', { 
@@ -682,7 +682,7 @@ const InstagramAnalytics = () => {
                   
                   {/* Mock recent posts data - you can replace with actual data */}
                   {selectedAccountData.posts?.slice(0, 3).map((post, index) => (
-                    <RecentPostCard 
+                    <SidebarRecentPostCard 
                       key={index}
                       post={post}
                       username={selectedAccountData.username}
@@ -691,7 +691,7 @@ const InstagramAnalytics = () => {
                   )) || 
                   // Fallback mock data if no posts available
                   [1, 2].map((_, index) => (
-                    <RecentPostCard 
+                    <SidebarRecentPostCard 
                       key={index}
                       post={{
                         caption: 'Lorem ipsum dolor sit...',
@@ -857,7 +857,7 @@ const InstagramAnalytics = () => {
                   {/* Posts List - BrandProfile Style */}
                   <Stack spacing={2}>
                     {getRecentPosts(selectedAccountData).map((post, index) => (
-                      <RecentPostCard key={post.id || index} post={post} accountData={selectedAccountData} index={index} />
+                      <CampaignRecentPostCard key={post.id || index} post={post} accountData={selectedAccountData} index={index} />
                     ))}
                   </Stack>
                 </Box>
