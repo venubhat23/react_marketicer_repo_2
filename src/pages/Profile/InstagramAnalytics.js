@@ -437,6 +437,190 @@ const InstagramAnalytics = () => {
     }));
   };
 
+  // Get top performing posts from API data
+  const getTopPerformingPosts = (accountData) => {
+    if (!accountData) return [];
+    
+    // Use real posts from analytics.top_performing_posts
+    const topPosts = accountData.analytics?.top_performing_posts || [];
+    
+    // Map the API data to the expected format
+    return topPosts.map(post => ({
+      id: post.id,
+      caption: post.caption,
+      timestamp: post.timestamp,
+      like_count: post.likes,
+      comments_count: post.comments,
+      media_url: post.media_url,
+      type: post.type,
+      url: post.url,
+      engagement: post.engagement
+    }));
+  };
+
+  // Top Performing Posts component matching RecentPostCard design
+  const TopPerformingPostCard = ({ post, accountData, index }) => {
+    const formatDate = (timestamp) => {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString('en-US', { 
+        day: 'numeric', 
+        month: 'short' 
+      });
+    };
+
+    return (
+      <Card
+        sx={{
+          p: 2,
+          borderRadius: "10px",
+          border: "1px solid #d6d6d6",
+          boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.25)",
+          bgcolor: "#fffdfd",
+          width: '100%',
+          mb: 2,
+          minHeight: '120px' // Increased minimum height
+        }}
+      >
+        <CardContent sx={{ p: 0 }}>
+          <Grid container spacing={2}>
+            {/* Image section - increased size */}
+            <Grid item xs={2}>
+              <Box
+                component="img"
+                src={post?.media_url || `https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80`}
+                alt="Post thumbnail"
+                sx={{
+                  width: 90, // Increased from 75
+                  height: 90, // Increased from 75
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                }}
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/90x90?text=No+Image";
+                }}
+              />
+            </Grid>
+
+            {/* Content section - more space */}
+            <Grid item xs={10}>
+              <Box sx={{ mb: 1 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ 
+                    display: "flex", 
+                    justifyContent: "space-between", 
+                    mb: 1,
+                    alignItems: 'center'
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <InstagramIcon sx={{ fontSize: 20, color: '#E4405F' }} />
+                    <span>Instagram</span>
+                  </Box>
+                  <Typography component="span" color="text.secondary" sx={{ fontSize: '14px' }}>
+                    @{accountData?.username || 'anybrand'}
+                  </Typography>
+                  <Typography component="span" color="text.secondary" sx={{ fontSize: '14px' }}>
+                    {formatDate(post?.timestamp || Date.now())}
+                  </Typography>
+                </Typography>
+
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="body2" fontWeight="medium" sx={{ fontSize: '16px', mb: 0.5 }}>
+                    {accountData?.page_name || accountData?.username || 'Influencer'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontSize: '14px', mb: 0.5 }}>
+                    @{accountData?.username || 'name'}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary"
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      mt: 0.5,
+                      fontSize: '13px',
+                      lineHeight: 1.4
+                    }}
+                  >
+                    {post?.caption || "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."}
+                  </Typography>
+
+                  {/* Additional Post Information */}
+                  <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Post ID:</strong> {post?.id || 'N/A'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Type:</strong> {post?.type || 'IMAGE'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Post URL:</strong> <a href={post?.url} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none' }}>{post?.url ? 'View Post' : 'N/A'}</a>
+                    </Typography>
+                    {post?.thumbnail_url && (
+                      <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                        <strong>Thumbnail URL:</strong> <a href={post?.thumbnail_url} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none' }}>View Thumbnail</a>
+                      </Typography>
+                    )}
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Engagement:</strong> {post?.engagement || 0}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Enhanced stats section */}
+              <Stack direction="row" spacing={3} sx={{ mt: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <FavoriteIcon fontSize="small" sx={{ color: "#e91e63" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
+                  >
+                    {formatNumber(post?.like_count || post?.likes || 378000)}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <ChatBubbleOutline fontSize="small" sx={{ color: "#2196f3" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
+                  >
+                    {formatNumber(post?.comments_count || post?.comments || 248)}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Send fontSize="small" sx={{ color: "#4caf50" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
+                  >
+                    {formatNumber(Math.floor((post?.like_count || post?.likes || 378000) * 0.1))}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <LinkIcon fontSize="small" sx={{ color: "#ff9800" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
+                  >
+                    {formatNumber(post?.views || 122000)}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+    );
+  };
+
   // Show loading state
   if (loading) {
     return (
@@ -716,6 +900,28 @@ const InstagramAnalytics = () => {
             <Box sx={{ width: '100%' }}>
               {selectedAccountData && getRecentPosts(selectedAccountData).map((post, index) => (
                 <RecentPostCard key={post.id || index} post={post} accountData={selectedAccountData} index={index} />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Top Performing Posts Section - FULL WIDTH */}
+          <Box sx={{ width: '100%' }}>
+            <Typography
+              variant="h6"
+              sx={{
+                mb: 2,
+                color: '#1a1a1a',
+                fontWeight: 600,
+                fontSize: '18px'
+              }}
+            >
+              Top Performing Posts
+            </Typography>
+
+            {/* Top Posts List - Full Width */}
+            <Box sx={{ width: '100%' }}>
+              {selectedAccountData && getTopPerformingPosts(selectedAccountData).map((post, index) => (
+                <TopPerformingPostCard key={post.id || index} post={post} accountData={selectedAccountData} index={index} />
               ))}
             </Box>
           </Box>
