@@ -318,18 +318,6 @@ const InstagramAnalytics = () => {
                   <Typography component="span" color="text.secondary" sx={{ fontSize: '14px' }}>
                     {formatDate(post?.timestamp || Date.now())}
                   </Typography>
-                  <Button 
-                    variant="text" 
-                    sx={{ 
-                      color: '#6366f1',
-                      fontSize: '12px',
-                      textTransform: 'none',
-                      minWidth: 'auto',
-                      padding: '4px 8px'
-                    }}
-                  >
-                    View full Analytics →
-                  </Button>
                 </Typography>
 
                 <Box sx={{ mt: 1 }}>
@@ -407,44 +395,25 @@ const InstagramAnalytics = () => {
     );
   };
 
-  // Generate sample recent posts data
+  // Get recent posts from API data
   const getRecentPosts = (accountData) => {
     if (!accountData) return [];
     
-    // Use real posts if available, otherwise generate sample data
-    const posts = accountData.posts || [];
+    // Use real posts from analytics.recent_posts
+    const recentPosts = accountData.analytics?.recent_posts || [];
     
-    // If no real posts, generate sample posts
-    if (posts.length === 0) {
-      return [
-        {
-          id: '1',
-          caption: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-          timestamp: Date.now() - (2 * 60 * 60 * 1000), // 2 hours ago
-          like_count: 378000,
-          comments_count: 248,
-          media_url: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
-        },
-        {
-          id: '2',
-          caption: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-          timestamp: Date.now() - (5 * 60 * 60 * 1000), // 5 hours ago
-          like_count: 425000,
-          comments_count: 189,
-          media_url: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
-        },
-        {
-          id: '3',
-          caption: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-          timestamp: Date.now() - (8 * 60 * 60 * 1000), // 8 hours ago
-          like_count: 325000,
-          comments_count: 156,
-          media_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
-        }
-      ];
-    }
-    
-    return posts.slice(0, 3); // Show more posts to match Figma
+    // Map the API data to the expected format
+    return recentPosts.map(post => ({
+      id: post.id,
+      caption: post.caption,
+      timestamp: post.timestamp,
+      like_count: post.likes,
+      comments_count: post.comments,
+      media_url: post.media_url,
+      type: post.type,
+      url: post.url,
+      engagement: post.engagement
+    }));
   };
 
   // Show loading state
