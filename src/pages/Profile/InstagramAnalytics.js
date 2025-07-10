@@ -597,7 +597,7 @@ const InstagramAnalytics = () => {
                     variant="body2"
                     sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
                   >
-                    {formatNumber(post?.like_count || post?.likes || 378000)}
+                    {formatNumber(post?.like_count || post?.likes || 0)}
                   </Typography>
                 </Box>
 
@@ -607,7 +607,7 @@ const InstagramAnalytics = () => {
                     variant="body2"
                     sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
                   >
-                    {formatNumber(post?.comments_count || post?.comments || 248)}
+                    {formatNumber(post?.comments_count || post?.comments || 0)}
                   </Typography>
                 </Box>
 
@@ -617,7 +617,7 @@ const InstagramAnalytics = () => {
                     variant="body2"
                     sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
                   >
-                    {formatNumber(Math.floor((post?.like_count || post?.likes || 378000) * 0.1))}
+                    {formatNumber(Math.floor((post?.like_count || post?.likes || 0) * 0.1))}
                   </Typography>
                 </Box>
 
@@ -627,7 +627,7 @@ const InstagramAnalytics = () => {
                     variant="body2"
                     sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
                   >
-                    {formatNumber(post?.views || 122000)}
+                    {formatNumber(post?.views || 0)}
                   </Typography>
                 </Box>
               </Stack>
