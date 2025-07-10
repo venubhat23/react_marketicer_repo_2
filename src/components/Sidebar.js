@@ -114,9 +114,9 @@ const Sidebar = () => {
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding>
-            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Link to="/analytics">
+                  <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
+            <Link to="/analytics">
               <Box
                 sx={{
                   display: 'flex',
@@ -158,7 +158,7 @@ const Sidebar = () => {
 
         {/* NEW CONTRACT NAVIGATION ITEM */}
         <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+          <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
             <Link to="/contracts">
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <DescriptionIcon fontSize="medium" />
@@ -169,7 +169,7 @@ const Sidebar = () => {
         </ListItem>
         
         <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+          <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
             <Link to="/marketplace">
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <StorefrontIcon fontSize="medium" />

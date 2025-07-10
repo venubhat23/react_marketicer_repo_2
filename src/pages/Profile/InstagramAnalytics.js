@@ -343,6 +343,27 @@ const InstagramAnalytics = () => {
                   >
                     {post?.caption || "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."}
                   </Typography>
+
+                  {/* Additional Post Information */}
+                  <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Post ID:</strong> {post?.id || 'N/A'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Type:</strong> {post?.type || 'IMAGE'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Post URL:</strong> <a href={post?.url} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none' }}>{post?.url ? 'View Post' : 'N/A'}</a>
+                    </Typography>
+                    {post?.thumbnail_url && (
+                      <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                        <strong>Thumbnail URL:</strong> <a href={post?.thumbnail_url} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none' }}>View Thumbnail</a>
+                      </Typography>
+                    )}
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Engagement:</strong> {post?.engagement || 0}
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
 
