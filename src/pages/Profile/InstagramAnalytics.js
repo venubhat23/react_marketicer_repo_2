@@ -437,6 +437,27 @@ const InstagramAnalytics = () => {
     }));
   };
 
+  // Get top performing posts from API data
+  const getTopPerformingPosts = (accountData) => {
+    if (!accountData) return [];
+    
+    // Use real posts from analytics.top_performing_posts
+    const topPosts = accountData.analytics?.top_performing_posts || [];
+    
+    // Map the API data to the expected format
+    return topPosts.map(post => ({
+      id: post.id,
+      caption: post.caption,
+      timestamp: post.timestamp,
+      like_count: post.likes,
+      comments_count: post.comments,
+      media_url: post.media_url,
+      type: post.type,
+      url: post.url,
+      engagement: post.engagement
+    }));
+  };
+
   // Show loading state
   if (loading) {
     return (
@@ -716,6 +737,28 @@ const InstagramAnalytics = () => {
             <Box sx={{ width: '100%' }}>
               {selectedAccountData && getRecentPosts(selectedAccountData).map((post, index) => (
                 <RecentPostCard key={post.id || index} post={post} accountData={selectedAccountData} index={index} />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Top Performing Posts Section - FULL WIDTH */}
+          <Box sx={{ width: '100%' }}>
+            <Typography
+              variant="h6"
+              sx={{
+                mb: 2,
+                color: '#1a1a1a',
+                fontWeight: 600,
+                fontSize: '18px'
+              }}
+            >
+              Top Performing Posts
+            </Typography>
+
+            {/* Top Posts List - Full Width */}
+            <Box sx={{ width: '100%' }}>
+              {selectedAccountData && getTopPerformingPosts(selectedAccountData).map((post, index) => (
+                <RecentPostCard key={`top-${post.id || index}`} post={post} accountData={selectedAccountData} index={index} />
               ))}
             </Box>
           </Box>
