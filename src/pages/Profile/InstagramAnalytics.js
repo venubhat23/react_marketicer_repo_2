@@ -344,22 +344,38 @@ const InstagramAnalytics = () => {
                     {post?.caption || "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."}
                   </Typography>
 
-                  {/* Additional Post Information */}
+                  {/* All Post Information Fields */}
                   <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                     <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
                       <strong>Post ID:</strong> {post?.id || 'N/A'}
                     </Typography>
                     <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
-                      <strong>Type:</strong> {post?.type || 'IMAGE'}
+                      <strong>Type:</strong> {post?.type || 'N/A'}
                     </Typography>
                     <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
-                      <strong>Post URL:</strong> <a href={post?.url} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none' }}>{post?.url ? 'View Post' : 'N/A'}</a>
+                      <strong>Post URL:</strong> {post?.url ? (
+                        <a href={post.url} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none', marginLeft: '4px' }}>View Post</a>
+                      ) : 'N/A'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Media URL:</strong> {post?.media_url ? (
+                        <a href={post.media_url} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none', marginLeft: '4px' }}>View Media</a>
+                      ) : 'N/A'}
                     </Typography>
                     {post?.thumbnail_url && (
                       <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
-                        <strong>Thumbnail URL:</strong> <a href={post?.thumbnail_url} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none' }}>View Thumbnail</a>
+                        <strong>Thumbnail URL:</strong> <a href={post.thumbnail_url} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'none', marginLeft: '4px' }}>View Thumbnail</a>
                       </Typography>
                     )}
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Timestamp:</strong> {post?.timestamp ? new Date(post.timestamp).toLocaleString() : 'N/A'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Likes:</strong> {formatNumber(post?.likes || 0)}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+                      <strong>Comments:</strong> {formatNumber(post?.comments || 0)}
+                    </Typography>
                     <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
                       <strong>Engagement:</strong> {post?.engagement || 0}
                     </Typography>
@@ -367,7 +383,7 @@ const InstagramAnalytics = () => {
                 </Box>
               </Box>
 
-              {/* Enhanced stats section */}
+              {/* Enhanced stats section using correct API field names */}
               <Stack direction="row" spacing={3} sx={{ mt: 2 }}>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <FavoriteIcon fontSize="small" sx={{ color: "#e91e63" }} />
@@ -375,7 +391,7 @@ const InstagramAnalytics = () => {
                     variant="body2"
                     sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
                   >
-                    {formatNumber(post?.like_count || 378000)}
+                    {formatNumber(post?.likes || 0)}
                   </Typography>
                 </Box>
 
@@ -385,7 +401,7 @@ const InstagramAnalytics = () => {
                     variant="body2"
                     sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
                   >
-                    {formatNumber(post?.comments_count || 248)}
+                    {formatNumber(post?.comments || 0)}
                   </Typography>
                 </Box>
 
@@ -395,7 +411,7 @@ const InstagramAnalytics = () => {
                     variant="body2"
                     sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
                   >
-                    {formatNumber(Math.floor((post?.like_count || 378000) * 0.1))}
+                    {formatNumber(post?.engagement || 0)}
                   </Typography>
                 </Box>
 
@@ -405,7 +421,7 @@ const InstagramAnalytics = () => {
                     variant="body2"
                     sx={{ ml: 0.5, fontWeight: 500, fontSize: '14px' }}
                   >
-                    {formatNumber(post?.views || 122000)}
+                    {post?.type || 'IMAGE'}
                   </Typography>
                 </Box>
               </Stack>
@@ -423,16 +439,17 @@ const InstagramAnalytics = () => {
     // Use real posts from analytics.recent_posts
     const recentPosts = accountData.analytics?.recent_posts || [];
     
-    // Map the API data to the expected format
+    // Return the API data directly with all fields
     return recentPosts.map(post => ({
       id: post.id,
-      caption: post.caption,
-      timestamp: post.timestamp,
-      like_count: post.likes,
-      comments_count: post.comments,
-      media_url: post.media_url,
       type: post.type,
       url: post.url,
+      media_url: post.media_url,
+      thumbnail_url: post.thumbnail_url,
+      caption: post.caption,
+      timestamp: post.timestamp,
+      likes: post.likes,
+      comments: post.comments,
       engagement: post.engagement
     }));
   };

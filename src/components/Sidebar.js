@@ -114,23 +114,7 @@ const Sidebar = () => {
             </ListItemButton>
           </ListItem>
 
-                  <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
-            <Link to="/analytics">
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  color: '#cbaef7',
-                }}
-              >
-                <EqualizerIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Analytics</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
+          
 
         <ListItem disablePadding>
           <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -156,28 +140,9 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
 
-        {/* NEW CONTRACT NAVIGATION ITEM */}
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
-            <Link to="/contracts">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <DescriptionIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Contracts</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
+
         
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
-            <Link to="/marketplace">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <StorefrontIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Marketplace</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
+
 
       </List>
 
