@@ -540,45 +540,6 @@ const InstagramAnalytics = () => {
             {selectedAccountData ? (
               <Box>
                 <ProfileCard data={selectedAccountData} />
-                
-                {/* Recent Posts Section */}
-                <Box sx={{ mt: 3 }}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      mb: 2,
-                      color: '#1a1a1a',
-                      fontWeight: 600,
-                      fontSize: '16px'
-                    }}
-                  >
-                    Recent Posts
-                  </Typography>
-                  
-                  {/* Mock recent posts data - you can replace with actual data */}
-                  {selectedAccountData.posts?.slice(0, 3).map((post, index) => (
-                    <RecentPostCard 
-                      key={index}
-                      post={post}
-                      accountData={selectedAccountData}
-                      index={index}
-                    />
-                  )) || 
-                  // Fallback mock data if no posts available
-                  [1, 2].map((_, index) => (
-                    <RecentPostCard 
-                      key={index}
-                      post={{
-                        caption: 'Lorem ipsum dolor sit...',
-                        like_count: 378000 + Math.floor(Math.random() * 1000),
-                        comments_count: 248 + Math.floor(Math.random() * 100),
-                        timestamp: Date.now() - (index * 86400000)
-                      }}
-                      accountData={selectedAccountData}
-                      index={index}
-                    />
-                  ))}
-                </Box>
               </Box>
             ) : (
               <Card
