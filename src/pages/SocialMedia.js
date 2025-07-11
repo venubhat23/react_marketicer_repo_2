@@ -289,17 +289,11 @@ const SocialMedia =()=>{
                   </IconButton>
                   <Box sx={{ flexGrow: 1 }} />
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     onClick={handleConnectOpen}
                     sx={{
-                      color: "#21d548",
-                      borderColor: "#21d548",
                       width:'15%',
                       mr: 2,
-                      "&:hover": {
-                        borderColor: "#1bb33e",
-                        bgcolor: "rgba(33, 213, 72, 0.04)",
-                      },
                     }}
                   >
                     Connect
@@ -365,12 +359,8 @@ const SocialMedia =()=>{
                         variant="contained"
                         onClick={() => handleDisconnectOpen(user)}
                         sx={{
-                          bgcolor: "#d92c20",
-                          borderColor: "#d92c20",
-                          color:'#fff !important',
                           ml: "auto",
                           width:'15%',
-                          "&:hover": { bgcolor: "#b82318", color:'#fff' },
                         }}
                       >
                         Disconnect
@@ -398,17 +388,10 @@ const SocialMedia =()=>{
                   </IconButton>
                   <Box sx={{ flexGrow: 1 }} />
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     onClick={handleInstaConnectOpen}
                     sx={{
-                      color: "#21d548",
-                      borderColor: "#21d548",
                       width:'15%',
-                      //mr: 2,
-                      "&:hover": {
-                        borderColor: "#1bb33e",
-                        bgcolor: "rgba(33, 213, 72, 0.04)",
-                      },
                     }}
                   >
                     Connect
@@ -474,12 +457,8 @@ const SocialMedia =()=>{
                         variant="contained"
                         onClick={() => handleDisconnectOpen(user)}
                         sx={{
-                          bgcolor: "#d92c20",
-                          borderColor: "#d92c20",
-                          color:'#fff',
                           ml: "auto",
                           width:'15%',
-                          "&:hover": { bgcolor: "#b82318", color:'#fff' },
                         }}
                       >
                         Disconnect

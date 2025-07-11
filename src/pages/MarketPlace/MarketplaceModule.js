@@ -329,7 +329,6 @@ const MarketplaceModule = () => {
           variant="contained" 
           startIcon={<AddIcon />}
           onClick={() => setCurrentView('create')}
-          sx={{ bgcolor: '#882AFF', '&:hover': { bgcolor: '#6a1b9a' } }}
         >
           Create New Post
         </Button>
@@ -495,8 +494,6 @@ const MarketplaceModule = () => {
                     }}
                     sx={{ 
                       flex: 1,
-                      bgcolor: '#882AFF',
-                      '&:hover': { bgcolor: '#6a1b9a' }
                     }}
                   >
                     Bid Now
@@ -717,9 +714,7 @@ const MarketplaceModule = () => {
               disabled={posting || uploading}
               sx={{ 
                 mt: 2,
-                bgcolor: '#882AFF',
                 py: 1.5,
-                '&:hover': { bgcolor: '#6a1b9a' }
               }}
             >
               {posting ? 'Publishing...' : 'Publish Post'}
@@ -792,9 +787,9 @@ const MarketplaceModule = () => {
       </DialogContent>
       <DialogActions>
         <Button onClick={() => setBidDialogOpen(false)}>Cancel</Button>
-        <Button onClick={handleBidSubmit} variant="contained" sx={{ bgcolor: '#882AFF' }}>
-          Submit Bid
-        </Button>
+                        <Button onClick={handleBidSubmit} variant="contained">
+                  Submit Bid
+                </Button>
       </DialogActions>
     </Dialog>
   );
