@@ -331,9 +331,6 @@ const SignUp = () => {
             sx={{
               mt: 2,
               mb: 1,
-              background: '#882AFF',
-              textTransform: 'none',
-              color:'#fff'
             }}
           >
             Get Started

@@ -93,10 +93,58 @@ const theme = createTheme({
           textTransform: 'none', // Prevent uppercase
           borderRadius: 8,
           padding: '10px 20px',
-          color: '#882AFF',
+          backgroundColor: '#882AFF', // Purple background
+          color: '#ffffff', // White text
+          fontWeight: 600,
           '&:hover': {
-            backgroundColor: '#f6edf8',
-            color:'#882AFF'
+            backgroundColor: '#882AFF', // Keep same background on hover
+            color: '#ffffff', // Keep white text on hover
+          },
+          '&:focus': {
+            backgroundColor: '#882AFF', // Keep same background on focus
+            color: '#ffffff', // Keep white text on focus
+          },
+          '&:active': {
+            backgroundColor: '#882AFF', // Keep same background on active/click
+            color: '#ffffff', // Keep white text on active/click
+          },
+          '&.Mui-focusVisible': {
+            backgroundColor: '#882AFF', // Keep same background on focus visible
+            color: '#ffffff', // Keep white text on focus visible
+          },
+          '&.MuiButton-text': {
+            backgroundColor: 'transparent',
+            color: '#882AFF',
+            '&:hover': {
+              backgroundColor: 'rgba(136, 42, 255, 0.1)',
+              color: '#882AFF',
+            },
+          },
+          '&.MuiButton-outlined': {
+            backgroundColor: 'transparent',
+            color: '#882AFF',
+            borderColor: '#882AFF',
+            '&:hover': {
+              backgroundColor: 'rgba(136, 42, 255, 0.1)',
+              borderColor: '#882AFF',
+              color: '#882AFF',
+            },
+          },
+        },
+        contained: {
+          backgroundColor: '#882AFF',
+          color: '#ffffff',
+          '&:hover': {
+            backgroundColor: '#882AFF',
+            color: '#ffffff',
+          },
+          '&:focus': {
+            backgroundColor: '#882AFF',
+            color: '#ffffff',
+          },
+          '&:active': {
+            backgroundColor: '#882AFF',
+            color: '#ffffff',
           },
         },
       },

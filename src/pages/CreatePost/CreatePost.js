@@ -460,7 +460,7 @@ const CreatePost = () => {
               <Box
                 width="10px"
                 height="10px"
-                bgcolor="#7F56D9"
+                bgcolor="#882AFF"
                 borderRadius="4px"
               />
               <Box
@@ -856,20 +856,13 @@ const CreatePost = () => {
 
                   {/* Buttons */}
                   <Box display="flex" gap={2}>
-                    <Button variant="outlined" sx={{ color: '#000', border: '2px solid #7F56D9', display: 'none' }} >Save as Draft</Button>
-                    {/* <Button variant="contained" sx={{bgcolor:'#7F56D9', color:'#fff' }}>Schedule Post</Button> */}
+                                    <Button variant="outlined" sx={{ display: 'none' }} >Save as Draft</Button>
+                {/* <Button variant="contained">Schedule Post</Button> */}
                     <Button
                       variant="contained"
                       sx={{
                         margin: "0.09375rem 1px",
-                        //mb: 2,
-                        bgcolor: '#7F56D9',
-                        color: '#fff',
                         display: 'none',
-                        "&:hover": {
-                          backgroundColor: "#00b3ad !important", // Slightly darker on hover
-
-                        },
                       }}
                       onClick={() => draftModelOpen("schedule")}
                     >
@@ -883,8 +876,6 @@ const CreatePost = () => {
                     disabled={posting || uploading} // Disable when posting or uploading
                     sx={{ 
                       mt: 2, 
-                      bgcolor: '#7F56D9', 
-                      color: '#fff',
                       '&:disabled': {
                         bgcolor: '#9575cd', // Lighter purple when disabled
                         color: '#fff'

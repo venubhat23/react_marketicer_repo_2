@@ -509,14 +509,9 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                         <Button
                             variant="contained"
                             sx={{
-                                backgroundColor: "#882AFF",
-                                color: "white",
                                 borderRadius: "8px",
                                 padding: "6px 16px",
-                                textTransform: "none",
-                                fontWeight: "600",
                                 fontSize: "14px",
-                                "&:hover": { backgroundColor: "#fff" }
                             }}
                             onClick={() => {
                                 if (linkedinAccounts && authCode && authState === LINKEDIN_CRED.state) {

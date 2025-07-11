@@ -550,25 +550,9 @@ const ContractPage = () => {
                   startIcon={<AddIcon />}
                   onClick={handleCreateContract}
                   sx={{
-                    bgcolor: '#7c4dff',
-                    color: 'white',
-                    textTransform: 'none',
                     px: 3,
                     py: 1,
                     borderRadius: 2,
-                    fontWeight: 600,
-                    '&:hover': {
-                      bgcolor: '#7c4dff',
-                    },
-                    '&:focus': {
-                      bgcolor: '#7c4dff',
-                    },
-                    '&:active': {
-                      bgcolor: '#7c4dff',
-                    },
-                    '&:focus-visible': {
-                      bgcolor: '#7c4dff',
-                    },
                   }}
                 >
                   Create Contract
@@ -665,15 +649,7 @@ const ContractPage = () => {
                   borderRadius: '50px',
                   px: 3,
                   py: 1,
-                  textTransform: 'none',
-                  fontWeight: 600,
                   minWidth: 'auto',
-                  bgcolor: showTemplates ? '#7c4dff' : 'transparent',
-                  color: showTemplates ? '#fff' : '#7c4dff',
-                  '&:hover': {
-                    bgcolor: showTemplates ? '#7c4dff' : 'rgba(124,77,255,0.1)',
-                    color:'#fff'
-                  },
                 }}
                 startIcon={<TemplateIcon sx={{ fontSize: 18 }} />}
               >
@@ -731,25 +707,9 @@ const ContractPage = () => {
                   startIcon={<AddIcon />}
                   onClick={handleCreateContract}
                   sx={{
-                    bgcolor: '#7c4dff',
-                    color: 'white',
-                    textTransform: 'none',
                     px: 4,
                     py: 1.5,
                     borderRadius: 2,
-                    fontWeight: 600,
-                    '&:hover': {
-                      bgcolor: '#7c4dff',
-                    },
-                    '&:focus': {
-                      bgcolor: '#7c4dff',
-                    },
-                    '&:active': {
-                      bgcolor: '#7c4dff',
-                    },
-                    '&:focus-visible': {
-                      bgcolor: '#7c4dff',
-                    },
                   }}
                 >
                   Create {showTemplates ? 'Template' : 'Contract'}

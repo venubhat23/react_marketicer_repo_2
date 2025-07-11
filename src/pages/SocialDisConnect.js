@@ -53,10 +53,10 @@ const SocialDisConnect =({onClose, account, getAccounts}) =>{
         </Typography>
         
         <Stack direction="row" spacing={2} sx={{ mt: 2, justifyContent: 'flex-end' }}>
-          <Button variant="outlined" className="disconnectBtn" onClick={onClose} sx={{color:'#000'}} >
+          <Button variant="outlined" className="disconnectBtn" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="contained" className="disconnectBtn" color="error" sx={{color:'#fff'}} onClick={() => handleDisConnect(account, onClose, getAccounts)}>
+          <Button variant="contained" className="disconnectBtn" onClick={() => handleDisConnect(account, onClose, getAccounts)}>
             Disconnect
           </Button>
         </Stack>
