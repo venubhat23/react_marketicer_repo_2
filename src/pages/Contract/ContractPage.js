@@ -453,16 +453,18 @@ const ContractPage = () => {
                   variant="contained"
                   onClick={() => handleItemAction('create-from-template', item.id, item)}
                   sx={{ 
-                    bgcolor: '#4caf50',
-                    color: 'white',
+                    bgcolor: 'white',
+                    color: '#333',
                     textTransform: 'none',
                     px: 2,
                     py: 0.5,
                     borderRadius: 1,
                     fontSize: '0.75rem',
                     fontWeight: 600,
+                    border: '1px solid #e0e0e0',
                     '&:hover': { 
-                      bgcolor: '#388e3c' 
+                      bgcolor: '#f5f5f5',
+                      borderColor: '#ccc'
                     }
                   }}
                   startIcon={<AddIcon fontSize="small" />}
