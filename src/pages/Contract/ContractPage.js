@@ -558,7 +558,16 @@ const ContractPage = () => {
                     borderRadius: 2,
                     fontWeight: 600,
                     '&:hover': {
-                      bgcolor: '#6200ea',
+                      bgcolor: '#7c4dff',
+                    },
+                    '&:focus': {
+                      bgcolor: '#7c4dff',
+                    },
+                    '&:active': {
+                      bgcolor: '#7c4dff',
+                    },
+                    '&:focus-visible': {
+                      bgcolor: '#7c4dff',
                     },
                   }}
                 >
@@ -721,13 +730,23 @@ const ContractPage = () => {
                   onClick={handleCreateContract}
                   sx={{
                     bgcolor: '#7c4dff',
+                    color: 'white',
                     textTransform: 'none',
                     px: 4,
                     py: 1.5,
                     borderRadius: 2,
                     fontWeight: 600,
                     '&:hover': {
-                      bgcolor: '#6200ea',
+                      bgcolor: '#7c4dff',
+                    },
+                    '&:focus': {
+                      bgcolor: '#7c4dff',
+                    },
+                    '&:active': {
+                      bgcolor: '#7c4dff',
+                    },
+                    '&:focus-visible': {
+                      bgcolor: '#7c4dff',
                     },
                   }}
                 >
