@@ -15,12 +15,36 @@ const Login = () => {
   const { login } = useAuth();
   
   const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({});
+
+  
   
   const navigate = useNavigate();
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors((prev) => ({ ...prev, [e.target.name]: '', general: '' }));
+  }
+
+  const validate = () => {
+    const newErrors = {};
+    if (!form.email) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = "Invalid email address";
+
+    if (!form.password) newErrors.password = "Password is required";
+    return newErrors;
+  };
+
+
 
   const handleSubmit = async () => {
+    const validationErrors = validate();
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     try {
       const res = await axios.post("https://api.marketincer.com/api/v1/login", form);
       //localStorage.setItem("token", res.data.token); // Save token
@@ -28,7 +52,18 @@ const Login = () => {
       navigate('/createPost');
       
     } catch (error) {
-      console.error("Login failed", error);
+      //console.error("Login failed", error);
+      if (error.response && error.response.data) {
+        const { errors: serverErrors, message } = error.response.data;
+        if (serverErrors) {
+          setErrors(serverErrors); // Field level errors
+        } else if (message) {
+          setErrors({ general: message }); // General error
+        }
+      } else {
+        setErrors({ general: "Something went wrong. Please try again later." });
+      }
+
     }
   };
 
@@ -65,6 +100,15 @@ const Login = () => {
 
         Welcome back! Please enter your details
       </Typography>
+
+      {/* Show general error */}
+      {errors.general && (
+            <Typography color="error" sx={{ mb: 1, textAlign: 'center', fontSize: '0.875rem' }}>
+              {errors.general}
+            </Typography>
+          )}
+
+
       <Typography 
          variant="h6" 
          fontWeight="400"
@@ -78,6 +122,8 @@ const Login = () => {
             size='small'
             name="email"
             variant="outlined"
+            error={!!errors.email}
+            helperText={errors.email}
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#882AFF'} }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px' } }}
@@ -97,6 +143,8 @@ const Login = () => {
             name="password"
             size='small'
             variant="outlined"
+            error={!!errors.password}
+            helperText={errors.password}
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#882AFF' } }}
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px'} }}

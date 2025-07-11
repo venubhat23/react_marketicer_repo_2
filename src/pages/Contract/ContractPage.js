@@ -650,6 +650,7 @@ const ContractPage = () => {
                   color: !showTemplates ? '#fff' : '#1a237e',
                   '&:hover': {
                     bgcolor: !showTemplates ? '#1a237e' : 'rgba(26,35,126,0.1)',
+                    color:'#fff'
                   },
                 }}
                 startIcon={<CreatedIcon sx={{ fontSize: 18 }} />}
@@ -671,6 +672,7 @@ const ContractPage = () => {
                   color: showTemplates ? '#fff' : '#7c4dff',
                   '&:hover': {
                     bgcolor: showTemplates ? '#7c4dff' : 'rgba(124,77,255,0.1)',
+                    color:'#fff'
                   },
                 }}
                 startIcon={<TemplateIcon sx={{ fontSize: 18 }} />}

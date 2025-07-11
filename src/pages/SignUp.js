@@ -51,6 +51,8 @@ const SignUp = () => {
     terms: false,
   });
 
+  const [errors, setErrors] = useState({});
+
   // const {
   //   control,
   //   watch,
@@ -74,9 +76,28 @@ const SignUp = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+
+    setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const handleSubmit = async () => {
+    const newErrors = {};
+    // Client-side validations
+  if (!formData.user) newErrors.user = "Name is required";
+  if (!formData.email) newErrors.email = "Email is required";
+  else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email";
+  
+  if (!formData.password) newErrors.password = "Password is required";
+  if (!formData.confirmPassword) newErrors.confirmPassword = "Confirm Password is required";
+  else if (formData.password !== formData.confirmPassword)
+    newErrors.confirmPassword = "Passwords do not match";
+  
+  if (!formData.role) newErrors.role = "Role is required";
+  if (!formData.terms) newErrors.terms = "You must accept the terms";
+
+  setErrors(newErrors);
+  if (Object.keys(newErrors).length > 0) return;
+
     try {
       // Validate form data
       if (!formData.user || !formData.email || !formData.password || !formData.confirmPassword || !formData.role) {
@@ -111,7 +132,19 @@ const SignUp = () => {
       toast.error(
         error.response?.data?.message || 'Signup failed. Please try again.'
       );
-      console.error(error);
+      //console.error(error);
+
+      const message = error.response?.data?.message;
+    const serverErrors = error.response?.data?.errors;
+
+    if (serverErrors) {
+      setErrors(serverErrors);
+    } else if (message) {
+      toast.error(message);
+    } else {
+      toast.error("Signup failed. Please try again.");
+    }
+
     }
   };
 
@@ -160,6 +193,8 @@ const SignUp = () => {
         name="user"
         value={formData.user}
         variant="outlined" 
+        error={!!errors.user}
+        helperText={errors.user}
         size='small'
         onChange={handleChange}
         InputLabelProps={{ style: { color: '#dfdfd' } }}
@@ -181,6 +216,8 @@ const SignUp = () => {
             value={formData.email}
             variant="outlined"
             //label="Email"
+            error={!!errors.email}
+            helperText={errors.email}
             type="email"
             required
             onChange={handleChange}
@@ -203,7 +240,8 @@ const SignUp = () => {
             size="small"
             type="password"
             variant="outlined"
-            
+            error={!!errors.password}
+            helperText={errors.password}
             required
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
@@ -225,7 +263,8 @@ const SignUp = () => {
             size="small"
             type="password"
             variant="outlined"
-            //margin="normal"
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword}
             required
             onChange={handleChange}
             InputLabelProps={{ style: { color: '#dfdfd' } }}
@@ -257,6 +296,8 @@ const SignUp = () => {
             name="role"
             //margin="normal"
             value={formData.role}
+            error={!!errors.role}
+            helperText={errors.role}
             onChange={handleChange}
             //input={<OutlinedInput label="Select Role" />}
             sx={{bgcolor:'#fff', mb:'10px'}}
@@ -267,6 +308,9 @@ const SignUp = () => {
               </MenuItem>
             ))}
           </Select>
+          {errors.role && (
+            <Typography color="error" variant="caption">{errors.role}</Typography>
+          )}
         </FormControl>
 
         <label style={{color:'#fff', textAlign:'left'}}>
