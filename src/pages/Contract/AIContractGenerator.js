@@ -17,9 +17,12 @@ import {
   Description as DescriptionIcon,
   Notifications as NotificationsIcon,
   AccountCircle as AccountCircleIcon,
+  PictureAsPdf as PictureAsPdfIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from "../../components/Sidebar";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const AIContractGenerator = ({ onBack = null }) => {
   const navigate = useNavigate();
@@ -237,6 +240,102 @@ const AIContractGenerator = ({ onBack = null }) => {
     return 'Generate AI Contract';
   };
 
+  // PDF Export function with watermarks
+  const handleExportPDF = async () => {
+    if (!generatedContract) {
+      setError('No contract content to export');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Create a temporary div to render the contract content
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.top = '-9999px';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.width = '210mm'; // A4 width
+      tempDiv.style.padding = '20mm';
+      tempDiv.style.fontFamily = 'Arial, sans-serif';
+      tempDiv.style.fontSize = '12px';
+      tempDiv.style.lineHeight = '1.6';
+      tempDiv.style.backgroundColor = 'white';
+      tempDiv.style.color = '#333';
+      
+      // Add contract content with proper formatting
+      const contractContent = generatedContract.replace(/\n/g, '<br>');
+      tempDiv.innerHTML = `
+        <div style="position: relative; min-height: 100vh;">
+          <!-- Main Content -->
+          <div style="position: relative; z-index: 1;">
+            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+              <h1 style="color: #333; font-size: 24px; margin: 0;">${formData.contractName || 'Contract'}</h1>
+              <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">Generated on ${new Date().toLocaleDateString()}</p>
+            </div>
+            <div style="text-align: justify;">
+              ${contractContent}
+            </div>
+          </div>
+          
+          <!-- Watermark -->
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); 
+                      font-size: 48px; color: rgba(0, 0, 0, 0.1); font-weight: bold; z-index: 0; 
+                      white-space: nowrap; pointer-events: none;">
+            GENERATED CONTRACT
+          </div>
+          
+          <!-- Footer -->
+          <div style="position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; 
+                      font-size: 10px; color: #666; border-top: 1px solid #ccc; padding-top: 10px;">
+            This contract was generated using AI Contract Generator | Page 1
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(tempDiv);
+      
+      // Convert to canvas
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: 794, // A4 width in pixels at 96 DPI
+        height: 1123, // A4 height in pixels at 96 DPI
+      });
+      
+      // Remove temporary div
+      document.body.removeChild(tempDiv);
+      
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      
+      // Save the PDF
+      const fileName = `${formData.contractName || 'contract'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+      
+      // Show success message
+      alert('PDF exported successfully!');
+      
+    } catch (err) {
+      setError(`Error exporting PDF: ${err.message}`);
+      console.error('Error exporting PDF:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderRightPanel = () => {
     // Always show content if available (for both edit mode and template mode)
     if (showContractContent || (isCreateFromTemplate && generatedContract)) {
@@ -281,29 +380,52 @@ const AIContractGenerator = ({ onBack = null }) => {
               }}
             />
           </Paper>
-          <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
+          <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
             {isEditMode ? (
-              // Edit mode - Show Update button
-              <Button
-                variant="contained"
-                onClick={handleUpdateContract}
-                disabled={loading}
-                sx={{
-                  bgcolor: '#4caf50',
-                  textTransform: 'none',
-                  px: 4,
-                  py: 1,
-                  borderRadius: 2,
-                  fontWeight: 600,
-                  '&:hover': {
-                    bgcolor: '#388e3c',
-                  },
-                }}
-              >
-                {loading ? <CircularProgress size={20} /> : 'Update Contract'}
-              </Button>
+              // Edit mode - Show Update and Export PDF buttons
+              <>
+                <Button
+                  variant="contained"
+                  onClick={handleUpdateContract}
+                  disabled={loading}
+                  sx={{
+                    bgcolor: '#4caf50',
+                    textTransform: 'none',
+                    px: 4,
+                    py: 1,
+                    borderRadius: 2,
+                    fontWeight: 600,
+                    '&:hover': {
+                      bgcolor: '#388e3c',
+                    },
+                  }}
+                >
+                  {loading ? <CircularProgress size={20} /> : 'Update Contract'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={handleExportPDF}
+                  disabled={loading}
+                  sx={{
+                    color: '#ff5722',
+                    borderColor: '#ff5722',
+                    textTransform: 'none',
+                    px: 3,
+                    py: 1,
+                    borderRadius: 2,
+                    fontWeight: 600,
+                    '&:hover': {
+                      borderColor: '#e64a19',
+                      bgcolor: 'rgba(255, 87, 34, 0.04)',
+                    },
+                  }}
+                  startIcon={<PictureAsPdfIcon />}
+                >
+                  Export PDF
+                </Button>
+              </>
             ) : (
-              // Create mode (both new and from template) - Show Save and Save as Draft buttons only
+              // Create mode (both new and from template) - Show Save, Save as Draft, and Export PDF buttons
               <>
                 <Button
                   variant="contained"
@@ -342,6 +464,27 @@ const AIContractGenerator = ({ onBack = null }) => {
                   }}
                 >
                   {loading ? <CircularProgress size={20} /> : 'Save as Draft'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={handleExportPDF}
+                  disabled={loading}
+                  sx={{
+                    color: '#ff5722',
+                    borderColor: '#ff5722',
+                    textTransform: 'none',
+                    px: 3,
+                    py: 1,
+                    borderRadius: 2,
+                    fontWeight: 600,
+                    '&:hover': {
+                      borderColor: '#e64a19',
+                      bgcolor: 'rgba(255, 87, 34, 0.04)',
+                    },
+                  }}
+                  startIcon={<PictureAsPdfIcon />}
+                >
+                  Export PDF
                 </Button>
               </>
             )}
