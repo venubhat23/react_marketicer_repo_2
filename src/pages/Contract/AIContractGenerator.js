@@ -240,7 +240,7 @@ const AIContractGenerator = ({ onBack = null }) => {
     return 'Generate AI Contract';
   };
 
-  // PDF Export function with watermarks
+  // PDF Export function with proper multi-page support and watermarks
   const handleExportPDF = async () => {
     if (!generatedContract) {
       setError('No contract content to export');
@@ -250,90 +250,6 @@ const AIContractGenerator = ({ onBack = null }) => {
     try {
       setLoading(true);
       
-      // Create a temporary div to render the contract content
-      const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.padding = '20mm';
-      tempDiv.style.fontFamily = 'Arial, sans-serif';
-      tempDiv.style.fontSize = '12px';
-      tempDiv.style.lineHeight = '1.6';
-      tempDiv.style.backgroundColor = 'white';
-      tempDiv.style.color = '#333';
-      
-      // Add contract content with proper formatting
-      const contractContent = generatedContract.replace(/\n/g, '<br>');
-      tempDiv.innerHTML = `
-        <div style="position: relative; min-height: 100vh;">
-          <!-- Main Content -->
-          <div style="position: relative; z-index: 1;">
-            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-              <h1 style="color: #333; font-size: 24px; margin: 0;">${formData.contractName || 'Contract'}</h1>
-              <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">Generated on ${new Date().toLocaleDateString()}</p>
-            </div>
-            <div style="text-align: justify;">
-              ${contractContent}
-            </div>
-          </div>
-          
-          <!-- Enhanced Watermark with Marketincer Logo and Name -->
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                      z-index: 0; pointer-events: none; text-align: center; opacity: 0.08;">
-            <img src="/marketincer.jpg" alt="Marketincer Logo" 
-                 style="width: 200px; height: 200px; object-fit: contain; margin-bottom: 15px; 
-                        filter: grayscale(100%); opacity: 0.3;">
-            <div style="font-size: 28px; font-weight: bold; color: #333; white-space: nowrap; 
-                        text-transform: uppercase; letter-spacing: 2px; font-family: 'Arial', sans-serif;">
-              Marketincer
-            </div>
-          </div>
-          
-          <!-- Additional Watermark Pattern -->
-          <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
-                      z-index: 0; pointer-events: none; opacity: 0.03;">
-            <div style="position: absolute; top: 25%; left: 25%; transform: translate(-50%, -50%) rotate(-45deg); 
-                        font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
-              Marketincer
-            </div>
-            <div style="position: absolute; top: 25%; right: 25%; transform: translate(50%, -50%) rotate(-45deg); 
-                        font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
-              Marketincer
-            </div>
-            <div style="position: absolute; bottom: 25%; left: 25%; transform: translate(-50%, 50%) rotate(-45deg); 
-                        font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
-              Marketincer
-            </div>
-            <div style="position: absolute; bottom: 25%; right: 25%; transform: translate(50%, 50%) rotate(-45deg); 
-                        font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
-              Marketincer
-            </div>
-          </div>
-          
-          <!-- Footer -->
-          <div style="position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; 
-                      font-size: 10px; color: #666; border-top: 1px solid #ccc; padding-top: 10px; z-index: 1;">
-            This contract was generated using Marketincer AI Contract Generator | Page 1
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(tempDiv);
-      
-      // Convert to canvas
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: 794, // A4 width in pixels at 96 DPI
-        height: 1123, // A4 height in pixels at 96 DPI
-      });
-      
-      // Remove temporary div
-      document.body.removeChild(tempDiv);
-      
       // Create PDF
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -341,18 +257,142 @@ const AIContractGenerator = ({ onBack = null }) => {
         format: 'a4'
       });
       
-      const imgData = canvas.toDataURL('image/png');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // Page configuration
+      const pageConfig = {
+        width: 794, // A4 width in pixels at 96 DPI (210mm)
+        height: 1123, // A4 height in pixels at 96 DPI (297mm)
+        padding: 75, // 20mm padding in pixels
+        headerHeight: 100, // Space for header
+        footerHeight: 50, // Space for footer
+      };
+      
+      // Calculate available content height per page
+      const availableHeight = pageConfig.height - pageConfig.headerHeight - pageConfig.footerHeight - (pageConfig.padding * 2);
+      
+      // Split content into chunks that fit on each page
+      const contractLines = generatedContract.split('\n');
+      const linesPerPage = Math.floor(availableHeight / 20); // Approximate 20px per line
+      
+      let pageNumber = 1;
+      let currentLineIndex = 0;
+      
+      while (currentLineIndex < contractLines.length) {
+        // Add new page if not the first page
+        if (pageNumber > 1) {
+          pdf.addPage();
+        }
+        
+        // Get lines for this page
+        const endIndex = Math.min(currentLineIndex + linesPerPage, contractLines.length);
+        const pageLines = contractLines.slice(currentLineIndex, endIndex);
+        const pageContent = pageLines.join('\n');
+        
+        // Create temporary div for this page
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.top = '-9999px';
+        tempDiv.style.left = '-9999px';
+        tempDiv.style.width = `${pageConfig.width}px`;
+        tempDiv.style.height = `${pageConfig.height}px`;
+        tempDiv.style.padding = `${pageConfig.padding}px`;
+        tempDiv.style.fontFamily = 'Arial, sans-serif';
+        tempDiv.style.fontSize = '12px';
+        tempDiv.style.lineHeight = '1.6';
+        tempDiv.style.backgroundColor = 'white';
+        tempDiv.style.color = '#333';
+        tempDiv.style.boxSizing = 'border-box';
+        
+        // Format content for this page
+        const formattedContent = pageContent.replace(/\n/g, '<br>');
+        
+        tempDiv.innerHTML = `
+          <div style="position: relative; height: 100%; display: flex; flex-direction: column;">
+            <!-- Header (only on first page) -->
+            ${pageNumber === 1 ? `
+              <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+                <h1 style="color: #333; font-size: 24px; margin: 0;">${formData.contractName || 'Contract'}</h1>
+                <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">Generated on ${new Date().toLocaleDateString()}</p>
+              </div>
+            ` : ''}
+            
+            <!-- Main Content -->
+            <div style="flex: 1; text-align: justify; position: relative; z-index: 1; overflow: hidden;">
+              ${formattedContent}
+            </div>
+            
+            <!-- Enhanced Watermark with Marketincer Logo -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                        z-index: 0; pointer-events: none; text-align: center; opacity: 0.08;">
+              <div style="font-size: 28px; font-weight: bold; color: #333; white-space: nowrap; 
+                          text-transform: uppercase; letter-spacing: 2px; font-family: 'Arial', sans-serif;">
+                Marketincer
+              </div>
+            </div>
+            
+            <!-- Additional Watermark Pattern -->
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                        z-index: 0; pointer-events: none; opacity: 0.03;">
+              <div style="position: absolute; top: 25%; left: 25%; transform: translate(-50%, -50%) rotate(-45deg); 
+                          font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
+                Marketincer
+              </div>
+              <div style="position: absolute; top: 25%; right: 25%; transform: translate(50%, -50%) rotate(-45deg); 
+                          font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
+                Marketincer
+              </div>
+              <div style="position: absolute; bottom: 25%; left: 25%; transform: translate(-50%, 50%) rotate(-45deg); 
+                          font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
+                Marketincer
+              </div>
+              <div style="position: absolute; bottom: 25%; right: 25%; transform: translate(50%, 50%) rotate(-45deg); 
+                          font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
+                Marketincer
+              </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; 
+                        font-size: 10px; color: #666; border-top: 1px solid #ccc; padding-top: 10px; z-index: 1;">
+              This contract was generated using Marketincer AI Contract Generator | Page ${pageNumber}
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(tempDiv);
+        
+        // Convert to canvas
+        const canvas = await html2canvas(tempDiv, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: pageConfig.width,
+          height: pageConfig.height,
+          windowWidth: pageConfig.width,
+          windowHeight: pageConfig.height,
+        });
+        
+        // Remove temporary div
+        document.body.removeChild(tempDiv);
+        
+        // Add image to PDF
+        const imgData = canvas.toDataURL('image/png');
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        
+        // Move to next set of lines
+        currentLineIndex = endIndex;
+        pageNumber++;
+      }
       
       // Save the PDF
       const fileName = `${formData.contractName || 'contract'}_${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
       
       // Show success message
-      alert('PDF exported successfully with Marketincer watermark!');
+      alert(`PDF exported successfully with ${pageNumber - 1} page(s) and Marketincer watermark!`);
       
     } catch (err) {
       setError(`Error exporting PDF: ${err.message}`);
