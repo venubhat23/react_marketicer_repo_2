@@ -494,121 +494,6 @@ Please note that this is a sample contract and should be reviewed and customized
     try {
       setLoading(true);
       
-      // Create a complete contract template if content is incomplete
-      let completeContract = generatedContract;
-      
-      // If the contract doesn't contain the full content, use a complete template
-      if (!generatedContract.includes('INTELLECTUAL PROPERTY') || 
-          !generatedContract.includes('WARRANTIES AND REPRESENTATIONS') || 
-          !generatedContract.includes('INDEMNIFICATION')) {
-        
-        completeContract = `**COLLABORATION AGREEMENT**
-
-**This Collaboration Agreement ("Agreement") is made and entered into on [DATE] ("Effective Date")**
-
-**BETWEEN:**
-
-**ADIDAS** ("ADIDAS" or "Brand"), a company incorporated under the laws of [STATE/COUNTRY] with its principal place of business at [ADDRESS].
-
-**AND:**
-
-**RAM** ("RAM" or "Influencer"), an individual with their principal place of business at [ADDRESS].
-
-**SCOPE OF COLLABORATION**
-
-1.1 The purpose of this Agreement is to set forth the terms and conditions of the collaboration between ADIDAS and RAM for the creation and publication of social media content featuring ADIDAS products.
-
-**DELIVERABLES AND TIMELINES**
-
-2.1 RAM agrees to create and publish seven (7) social media content posts featuring ADIDAS products within one (1) week from the Effective Date.
-
-2.2 The content posts shall be published on RAM's social media channels, including but not limited to Instagram, TikTok, and Facebook.
-
-2.3 ADIDAS shall provide RAM with the necessary products and materials to create the content posts.
-
-**PAYMENT TERMS**
-
-3.1 In consideration of the services provided by RAM, ADIDAS shall pay RAM a one-time fee of $1,000 (One Thousand United States Dollars).
-
-3.2 The payment shall be made within three (3) business days from the completion of the deliverables.
-
-**CONFIDENTIALITY**
-
-4.1 RAM acknowledges that all information and materials provided by ADIDAS, including but not limited to the products and materials, are confidential and proprietary to ADIDAS.
-
-4.2 RAM agrees not to disclose or use any confidential information for any purpose other than the performance of this Agreement.
-
-**TERMINATION**
-
-5.1 Either party may terminate this Agreement upon written notice to the other party.
-
-5.2 In the event of termination, RAM shall return all confidential information and materials provided by ADIDAS.
-
-5.3 The termination of this Agreement shall not affect the payment obligations of ADIDAS under Section 3.
-
-**INTELLECTUAL PROPERTY**
-
-6.1 RAM assigns to ADIDAS all intellectual property rights in and to the content posts created pursuant to this Agreement.
-
-6.2 ADIDAS shall have the right to use, reproduce, and distribute the content posts in any manner and for any purpose.
-
-**WARRANTIES AND REPRESENTATIONS**
-
-7.1 RAM represents and warrants that:
-
-(a) RAM has the right and authority to enter into this Agreement;
-
-(b) The content posts will not infringe on the intellectual property rights of any third party;
-
-(c) The content posts will comply with all applicable laws and regulations.
-
-**INDEMNIFICATION**
-
-8.1 RAM shall indemnify and hold harmless ADIDAS from and against any claims, damages, and expenses arising out of or related to:
-
-(a) Any breach of RAM's representations and warranties;
-
-(b) Any infringement of intellectual property rights by the content posts;
-
-(c) Any violation of applicable laws and regulations by RAM.
-
-**GOVERNING LAW**
-
-9.1 This Agreement shall be governed by and construed in accordance with the laws of [STATE/COUNTRY].
-
-**DISPUTE RESOLUTION**
-
-10.1 Any dispute or claim arising out of or related to this Agreement shall be resolved through binding arbitration in accordance with the rules of the [ARBITRATION ASSOCIATION].
-
-**ENTIRE AGREEMENT**
-
-11.1 This Agreement constitutes the entire understanding between the parties and supersedes all prior agreements and understandings.
-
-**AMENDMENTS**
-
-12.1 This Agreement may be amended or modified only in writing signed by both parties.
-
-**NOTICES**
-
-13.1 All notices and communications under this Agreement shall be in writing and sent to the addresses specified above.
-
-**ACCEPTANCE**
-
-By signing below, the parties acknowledge that they have read, understand, and agree to the terms and conditions of this Agreement.
-
-**ADIDAS**
-
-Signature: ______________________
-Date: _____________________________
-
-**RAM**
-
-Signature: ______________________
-Date: _____________________________
-
-Please note that this is a sample contract and should be reviewed and customized according to the specific needs and requirements of the parties involved. It is recommended that both parties seek legal advice before signing any agreement.`;
-      }
-      
       // Create a temporary div to render the contract content
       const tempDiv = document.createElement('div');
       tempDiv.style.position = 'absolute';
@@ -621,18 +506,19 @@ Please note that this is a sample contract and should be reviewed and customized
       tempDiv.style.lineHeight = '1.6';
       tempDiv.style.backgroundColor = 'white';
       tempDiv.style.color = '#333';
+      tempDiv.style.minHeight = '100vh';
       
-      // Add contract content with proper formatting
-      const contractContent = completeContract.replace(/\n/g, '<br>');
+      // Add contract content with proper formatting - use actual generated content
+      const contractContent = generatedContract.replace(/\n/g, '<br>');
       tempDiv.innerHTML = `
-        <div style="position: relative; min-height: 100vh;">
+        <div style="position: relative; min-height: 100vh; padding-bottom: 60px;">
           <!-- Main Content -->
           <div style="position: relative; z-index: 1;">
             <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
               <h1 style="color: #333; font-size: 24px; margin: 0;">${formData.contractName || 'Contract'}</h1>
               <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">Generated on ${new Date().toLocaleDateString()}</p>
             </div>
-            <div style="text-align: justify;">
+            <div style="text-align: justify; line-height: 1.6;">
               ${contractContent}
             </div>
           </div>
@@ -649,30 +535,33 @@ Please note that this is a sample contract and should be reviewed and customized
           <!-- Footer -->
           <div style="position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; 
                       font-size: 10px; color: #666; border-top: 1px solid #ccc; padding-top: 10px;">
-            This contract was generated using AI Contract Generator | Page 1
+            This contract was generated using AI Contract Generator
           </div>
         </div>
       `;
       
       document.body.appendChild(tempDiv);
       
+      // Wait for content to render
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Convert to canvas with higher quality settings
       const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         backgroundColor: '#ffffff',
-        width: 794, // A4 width in pixels at 96 DPI
-        height: 1123, // A4 height in pixels at 96 DPI
         logging: false,
         imageTimeout: 15000,
-        removeContainer: true
+        removeContainer: true,
+        width: tempDiv.scrollWidth,
+        height: tempDiv.scrollHeight
       });
       
       // Remove temporary div
       document.body.removeChild(tempDiv);
       
-      // Create PDF with multiple pages if needed
+      // Create PDF with automatic pagination
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -683,28 +572,43 @@ Please note that this is a sample contract and should be reviewed and customized
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      // Calculate if we need multiple pages
-      const canvasRatio = canvas.height / canvas.width;
-      const pdfRatio = pdfHeight / pdfWidth;
+      // Calculate scaling
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / (canvasWidth * 0.264583), pdfHeight / (canvasHeight * 0.264583)); // Convert px to mm
       
-      if (canvasRatio > pdfRatio) {
-        // Content is taller, might need multiple pages
-        const scaledHeight = pdfWidth * canvasRatio;
-        const pagesNeeded = Math.ceil(scaledHeight / pdfHeight);
+      const scaledWidth = canvasWidth * 0.264583 * ratio;
+      const scaledHeight = canvasHeight * 0.264583 * ratio;
+      
+      // Calculate how many pages we need
+      const pagesNeeded = Math.ceil(scaledHeight / pdfHeight);
+      
+      for (let i = 0; i < pagesNeeded; i++) {
+        if (i > 0) pdf.addPage();
         
-        for (let i = 0; i < pagesNeeded; i++) {
-          if (i > 0) pdf.addPage();
-          
-          const yOffset = -(i * pdfHeight);
-          pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, scaledHeight);
-        }
-      } else {
-        // Content fits in one page
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        const yOffset = -(i * pdfHeight / ratio);
+        
+        pdf.addImage(
+          imgData, 
+          'PNG', 
+          (pdfWidth - scaledWidth) / 2, // Center horizontally
+          yOffset, 
+          scaledWidth, 
+          scaledHeight
+        );
+        
+        // Add page number
+        pdf.setFontSize(8);
+        pdf.setTextColor(100);
+        pdf.text(
+          `Page ${i + 1} of ${pagesNeeded}`, 
+          pdfWidth - 20, 
+          pdfHeight - 10
+        );
       }
       
       // Save the PDF
-      const fileName = `${formData.contractName || 'collaboration_agreement'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const fileName = `${formData.contractName || 'contract'}_${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
       
       // Show success message
