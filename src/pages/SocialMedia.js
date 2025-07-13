@@ -361,6 +361,8 @@ const SocialMedia =()=>{
                         sx={{
                           ml: "auto",
                           width:'15%',
+                          bgcolor: "#882AFF",
+                          "&:hover": { bgcolor: "#7625e6" },
                         }}
                       >
                         Disconnect
@@ -459,6 +461,8 @@ const SocialMedia =()=>{
                         sx={{
                           ml: "auto",
                           width:'15%',
+                          bgcolor: "#882AFF",
+                          "&:hover": { bgcolor: "#7625e6" },
                         }}
                       >
                         Disconnect
