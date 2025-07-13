@@ -278,19 +278,43 @@ const AIContractGenerator = ({ onBack = null }) => {
             </div>
           </div>
           
-          <!-- Watermark -->
+          <!-- Enhanced Watermark with Marketincer Logo and Name -->
           <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                      z-index: 0; pointer-events: none; text-align: center; opacity: 0.1;">
-            <img src="/marketincer.jpg" alt="Marketincer Logo" style="width: 150px; height: 150px; object-fit: contain; margin-bottom: 20px;">
-            <div style="font-size: 24px; font-weight: bold; color: #333; white-space: nowrap;">
-              Marketincer Text
+                      z-index: 0; pointer-events: none; text-align: center; opacity: 0.08;">
+            <img src="/marketincer.jpg" alt="Marketincer Logo" 
+                 style="width: 200px; height: 200px; object-fit: contain; margin-bottom: 15px; 
+                        filter: grayscale(100%); opacity: 0.3;">
+            <div style="font-size: 28px; font-weight: bold; color: #333; white-space: nowrap; 
+                        text-transform: uppercase; letter-spacing: 2px; font-family: 'Arial', sans-serif;">
+              Marketincer
+            </div>
+          </div>
+          
+          <!-- Additional Watermark Pattern -->
+          <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                      z-index: 0; pointer-events: none; opacity: 0.03;">
+            <div style="position: absolute; top: 25%; left: 25%; transform: translate(-50%, -50%) rotate(-45deg); 
+                        font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
+              Marketincer
+            </div>
+            <div style="position: absolute; top: 25%; right: 25%; transform: translate(50%, -50%) rotate(-45deg); 
+                        font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
+              Marketincer
+            </div>
+            <div style="position: absolute; bottom: 25%; left: 25%; transform: translate(-50%, 50%) rotate(-45deg); 
+                        font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
+              Marketincer
+            </div>
+            <div style="position: absolute; bottom: 25%; right: 25%; transform: translate(50%, 50%) rotate(-45deg); 
+                        font-size: 20px; font-weight: bold; color: #333; white-space: nowrap;">
+              Marketincer
             </div>
           </div>
           
           <!-- Footer -->
           <div style="position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; 
-                      font-size: 10px; color: #666; border-top: 1px solid #ccc; padding-top: 10px;">
-            This contract was generated using AI Contract Generator | Page 1
+                      font-size: 10px; color: #666; border-top: 1px solid #ccc; padding-top: 10px; z-index: 1;">
+            This contract was generated using Marketincer AI Contract Generator | Page 1
           </div>
         </div>
       `;
@@ -328,7 +352,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       pdf.save(fileName);
       
       // Show success message
-      alert('PDF exported successfully!');
+      alert('PDF exported successfully with Marketincer watermark!');
       
     } catch (err) {
       setError(`Error exporting PDF: ${err.message}`);
