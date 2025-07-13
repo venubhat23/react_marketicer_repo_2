@@ -279,10 +279,12 @@ const AIContractGenerator = ({ onBack = null }) => {
           </div>
           
           <!-- Watermark -->
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); 
-                      font-size: 48px; color: rgba(0, 0, 0, 0.1); font-weight: bold; z-index: 0; 
-                      white-space: nowrap; pointer-events: none;">
-            GENERATED CONTRACT
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                      z-index: 0; pointer-events: none; text-align: center; opacity: 0.1;">
+            <img src="/marketincer.jpg" alt="Marketincer Logo" style="width: 150px; height: 150px; object-fit: contain; margin-bottom: 20px;">
+            <div style="font-size: 24px; font-weight: bold; color: #333; white-space: nowrap;">
+              Marketincer Text
+            </div>
           </div>
           
           <!-- Footer -->
