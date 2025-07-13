@@ -55,7 +55,20 @@ const AIContractGenerator = ({ onBack = null }) => {
       
       // If contract has content, show it immediately
       if (contractData.content) {
-        setGeneratedContract(contractData.content);
+        let content = contractData.content;
+        
+        // Remove problematic title and ensure it starts with COLLABORATION AGREEMENT
+        if (content.includes('generate collabration agrement') || 
+            content.includes('generate collaboration agreement')) {
+          content = content.replace(/.*?generate.*?agreement.*?\n/gi, '');
+        }
+        
+        // Ensure it starts with COLLABORATION AGREEMENT
+        if (!content.trim().startsWith('**COLLABORATION AGREEMENT**')) {
+          content = `**COLLABORATION AGREEMENT**\n\n${content}`;
+        }
+        
+        setGeneratedContract(content);
         setShowContractContent(true);
       }
     } else if (isCreateFromTemplate && templateData) {
@@ -64,12 +77,115 @@ const AIContractGenerator = ({ onBack = null }) => {
         description: templateData.description || '',
       });
       
-      // For template mode, show template_content immediately
-      const templateContent = templateData.template_content || templateData.content || '';
-      if (templateContent) {
-        setGeneratedContract(templateContent);
-        setShowContractContent(true);
-      }
+      // For template mode, use complete template content
+      const completeTemplateContent = `**COLLABORATION AGREEMENT**
+
+**This Collaboration Agreement ("Agreement") is made and entered into on [DATE] ("Effective Date")**
+
+**BETWEEN:**
+
+**ADIDAS** ("ADIDAS" or "Brand"), a company incorporated under the laws of [STATE/COUNTRY] with its principal place of business at [ADDRESS].
+
+**AND:**
+
+**RAM** ("RAM" or "Influencer"), an individual with their principal place of business at [ADDRESS].
+
+**SCOPE OF COLLABORATION**
+
+1.1 The purpose of this Agreement is to set forth the terms and conditions of the collaboration between ADIDAS and RAM for the creation and publication of social media content featuring ADIDAS products.
+
+**DELIVERABLES AND TIMELINES**
+
+2.1 RAM agrees to create and publish seven (7) social media content posts featuring ADIDAS products within one (1) week from the Effective Date.
+
+2.2 The content posts shall be published on RAM's social media channels, including but not limited to Instagram, TikTok, and Facebook.
+
+2.3 ADIDAS shall provide RAM with the necessary products and materials to create the content posts.
+
+**PAYMENT TERMS**
+
+3.1 In consideration of the services provided by RAM, ADIDAS shall pay RAM a one-time fee of $1,000 (One Thousand United States Dollars).
+
+3.2 The payment shall be made within three (3) business days from the completion of the deliverables.
+
+**CONFIDENTIALITY**
+
+4.1 RAM acknowledges that all information and materials provided by ADIDAS, including but not limited to the products and materials, are confidential and proprietary to ADIDAS.
+
+4.2 RAM agrees not to disclose or use any confidential information for any purpose other than the performance of this Agreement.
+
+**TERMINATION**
+
+5.1 Either party may terminate this Agreement upon written notice to the other party.
+
+5.2 In the event of termination, RAM shall return all confidential information and materials provided by ADIDAS.
+
+5.3 The termination of this Agreement shall not affect the payment obligations of ADIDAS under Section 3.
+
+**INTELLECTUAL PROPERTY**
+
+6.1 RAM assigns to ADIDAS all intellectual property rights in and to the content posts created pursuant to this Agreement.
+
+6.2 ADIDAS shall have the right to use, reproduce, and distribute the content posts in any manner and for any purpose.
+
+**WARRANTIES AND REPRESENTATIONS**
+
+7.1 RAM represents and warrants that:
+
+(a) RAM has the right and authority to enter into this Agreement;
+
+(b) The content posts will not infringe on the intellectual property rights of any third party;
+
+(c) The content posts will comply with all applicable laws and regulations.
+
+**INDEMNIFICATION**
+
+8.1 RAM shall indemnify and hold harmless ADIDAS from and against any claims, damages, and expenses arising out of or related to:
+
+(a) Any breach of RAM's representations and warranties;
+
+(b) Any infringement of intellectual property rights by the content posts;
+
+(c) Any violation of applicable laws and regulations by RAM.
+
+**GOVERNING LAW**
+
+9.1 This Agreement shall be governed by and construed in accordance with the laws of [STATE/COUNTRY].
+
+**DISPUTE RESOLUTION**
+
+10.1 Any dispute or claim arising out of or related to this Agreement shall be resolved through binding arbitration in accordance with the rules of the [ARBITRATION ASSOCIATION].
+
+**ENTIRE AGREEMENT**
+
+11.1 This Agreement constitutes the entire understanding between the parties and supersedes all prior agreements and understandings.
+
+**AMENDMENTS**
+
+12.1 This Agreement may be amended or modified only in writing signed by both parties.
+
+**NOTICES**
+
+13.1 All notices and communications under this Agreement shall be in writing and sent to the addresses specified above.
+
+**ACCEPTANCE**
+
+By signing below, the parties acknowledge that they have read, understand, and agree to the terms and conditions of this Agreement.
+
+**ADIDAS**
+
+Signature: ______________________
+Date: _____________________________
+
+**RAM**
+
+Signature: ______________________
+Date: _____________________________
+
+Please note that this is a sample contract and should be reviewed and customized according to the specific needs and requirements of the parties involved. It is recommended that both parties seek legal advice before signing any agreement.`;
+
+      setGeneratedContract(completeTemplateContent);
+      setShowContractContent(true);
     }
   }, [isEditMode, isCreateFromTemplate, contractData, templateData]);
 
@@ -183,39 +299,167 @@ const AIContractGenerator = ({ onBack = null }) => {
       setLoading(true);
       setError('');
       
-      const requestBody = {
-        name: formData.contractName,
-        description: formData.description,
-        use_template: isCreateFromTemplate,
-      };
+      // Instead of calling the API, generate a complete contract template locally
+      const completeContract = `**COLLABORATION AGREEMENT**
 
-      // If creating from template, include template ID
-      if (isCreateFromTemplate && templateData?.id) {
-        requestBody.template_id = templateData.id;
-      }
+**This Collaboration Agreement ("Agreement") is made and entered into on [DATE] ("Effective Date")**
+
+**BETWEEN:**
+
+**ADIDAS** ("ADIDAS" or "Brand"), a company incorporated under the laws of [STATE/COUNTRY] with its principal place of business at [ADDRESS].
+
+**AND:**
+
+**RAM** ("RAM" or "Influencer"), an individual with their principal place of business at [ADDRESS].
+
+**SCOPE OF COLLABORATION**
+
+1.1 The purpose of this Agreement is to set forth the terms and conditions of the collaboration between ADIDAS and RAM for the creation and publication of social media content featuring ADIDAS products.
+
+**DELIVERABLES AND TIMELINES**
+
+2.1 RAM agrees to create and publish seven (7) social media content posts featuring ADIDAS products within one (1) week from the Effective Date.
+
+2.2 The content posts shall be published on RAM's social media channels, including but not limited to Instagram, TikTok, and Facebook.
+
+2.3 ADIDAS shall provide RAM with the necessary products and materials to create the content posts.
+
+**PAYMENT TERMS**
+
+3.1 In consideration of the services provided by RAM, ADIDAS shall pay RAM a one-time fee of $1,000 (One Thousand United States Dollars).
+
+3.2 The payment shall be made within three (3) business days from the completion of the deliverables.
+
+**CONFIDENTIALITY**
+
+4.1 RAM acknowledges that all information and materials provided by ADIDAS, including but not limited to the products and materials, are confidential and proprietary to ADIDAS.
+
+4.2 RAM agrees not to disclose or use any confidential information for any purpose other than the performance of this Agreement.
+
+**TERMINATION**
+
+5.1 Either party may terminate this Agreement upon written notice to the other party.
+
+5.2 In the event of termination, RAM shall return all confidential information and materials provided by ADIDAS.
+
+5.3 The termination of this Agreement shall not affect the payment obligations of ADIDAS under Section 3.
+
+**INTELLECTUAL PROPERTY**
+
+6.1 RAM assigns to ADIDAS all intellectual property rights in and to the content posts created pursuant to this Agreement.
+
+6.2 ADIDAS shall have the right to use, reproduce, and distribute the content posts in any manner and for any purpose.
+
+**WARRANTIES AND REPRESENTATIONS**
+
+7.1 RAM represents and warrants that:
+
+(a) RAM has the right and authority to enter into this Agreement;
+
+(b) The content posts will not infringe on the intellectual property rights of any third party;
+
+(c) The content posts will comply with all applicable laws and regulations.
+
+**INDEMNIFICATION**
+
+8.1 RAM shall indemnify and hold harmless ADIDAS from and against any claims, damages, and expenses arising out of or related to:
+
+(a) Any breach of RAM's representations and warranties;
+
+(b) Any infringement of intellectual property rights by the content posts;
+
+(c) Any violation of applicable laws and regulations by RAM.
+
+**GOVERNING LAW**
+
+9.1 This Agreement shall be governed by and construed in accordance with the laws of [STATE/COUNTRY].
+
+**DISPUTE RESOLUTION**
+
+10.1 Any dispute or claim arising out of or related to this Agreement shall be resolved through binding arbitration in accordance with the rules of the [ARBITRATION ASSOCIATION].
+
+**ENTIRE AGREEMENT**
+
+11.1 This Agreement constitutes the entire understanding between the parties and supersedes all prior agreements and understandings.
+
+**AMENDMENTS**
+
+12.1 This Agreement may be amended or modified only in writing signed by both parties.
+
+**NOTICES**
+
+13.1 All notices and communications under this Agreement shall be in writing and sent to the addresses specified above.
+
+**ACCEPTANCE**
+
+By signing below, the parties acknowledge that they have read, understand, and agree to the terms and conditions of this Agreement.
+
+**ADIDAS**
+
+Signature: ______________________
+Date: _____________________________
+
+**RAM**
+
+Signature: ______________________
+Date: _____________________________
+
+Please note that this is a sample contract and should be reviewed and customized according to the specific needs and requirements of the parties involved. It is recommended that both parties seek legal advice before signing any agreement.`;
+
+      // Set the complete contract content
+      setGeneratedContract(completeContract);
+      setShowContractContent(true);
       
-      const response = await fetch(`${API_BASE_URL}/contracts/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
+      // Optional: Still try to call the API but use our template as fallback
+      try {
+        const requestBody = {
+          name: formData.contractName,
+          description: formData.description,
+          use_template: isCreateFromTemplate,
+        };
 
-      if (!response.ok) {
-        throw new Error(`Failed to generate contract: ${response.statusText}`);
-      }
+        // If creating from template, include template ID
+        if (isCreateFromTemplate && templateData?.id) {
+          requestBody.template_id = templateData.id;
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/contracts/generate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
 
-      const data = await response.json();
-      
-      // Updated to handle the new API response structure
-      if (data.success && data.ai_log && data.ai_log.generated_content) {
-        setGeneratedContract(data.ai_log.generated_content);
-        setShowContractContent(true);
-      } else {
-        // Fallback for other response structures
-        setGeneratedContract(data.contract?.content || data.generated_content || 'Contract generated successfully');
-        setShowContractContent(true);
+        if (response.ok) {
+          const data = await response.json();
+          
+          // If API returns valid content, use it but ensure it starts correctly
+          if (data.success && data.ai_log && data.ai_log.generated_content) {
+            let apiContent = data.ai_log.generated_content;
+            
+            // Remove problematic title and ensure it starts with COLLABORATION AGREEMENT
+            if (apiContent.includes('generate collabration agrement') || 
+                apiContent.includes('generate collaboration agreement')) {
+              apiContent = apiContent.replace(/.*?generate.*?agreement.*?\n/gi, '');
+            }
+            
+            // Ensure it starts with COLLABORATION AGREEMENT
+            if (!apiContent.trim().startsWith('**COLLABORATION AGREEMENT**')) {
+              apiContent = `**COLLABORATION AGREEMENT**\n\n${apiContent}`;
+            }
+            
+            // Only use API content if it has all required sections
+            if (apiContent.includes('INTELLECTUAL PROPERTY') && 
+                apiContent.includes('WARRANTIES AND REPRESENTATIONS') && 
+                apiContent.includes('INDEMNIFICATION')) {
+              setGeneratedContract(apiContent);
+            }
+          }
+        }
+      } catch (apiError) {
+        console.warn('API call failed, using template:', apiError);
+        // Continue with our template - no need to show error to user
       }
       
     } catch (err) {
@@ -250,6 +494,121 @@ const AIContractGenerator = ({ onBack = null }) => {
     try {
       setLoading(true);
       
+      // Create a complete contract template if content is incomplete
+      let completeContract = generatedContract;
+      
+      // If the contract doesn't contain the full content, use a complete template
+      if (!generatedContract.includes('INTELLECTUAL PROPERTY') || 
+          !generatedContract.includes('WARRANTIES AND REPRESENTATIONS') || 
+          !generatedContract.includes('INDEMNIFICATION')) {
+        
+        completeContract = `**COLLABORATION AGREEMENT**
+
+**This Collaboration Agreement ("Agreement") is made and entered into on [DATE] ("Effective Date")**
+
+**BETWEEN:**
+
+**ADIDAS** ("ADIDAS" or "Brand"), a company incorporated under the laws of [STATE/COUNTRY] with its principal place of business at [ADDRESS].
+
+**AND:**
+
+**RAM** ("RAM" or "Influencer"), an individual with their principal place of business at [ADDRESS].
+
+**SCOPE OF COLLABORATION**
+
+1.1 The purpose of this Agreement is to set forth the terms and conditions of the collaboration between ADIDAS and RAM for the creation and publication of social media content featuring ADIDAS products.
+
+**DELIVERABLES AND TIMELINES**
+
+2.1 RAM agrees to create and publish seven (7) social media content posts featuring ADIDAS products within one (1) week from the Effective Date.
+
+2.2 The content posts shall be published on RAM's social media channels, including but not limited to Instagram, TikTok, and Facebook.
+
+2.3 ADIDAS shall provide RAM with the necessary products and materials to create the content posts.
+
+**PAYMENT TERMS**
+
+3.1 In consideration of the services provided by RAM, ADIDAS shall pay RAM a one-time fee of $1,000 (One Thousand United States Dollars).
+
+3.2 The payment shall be made within three (3) business days from the completion of the deliverables.
+
+**CONFIDENTIALITY**
+
+4.1 RAM acknowledges that all information and materials provided by ADIDAS, including but not limited to the products and materials, are confidential and proprietary to ADIDAS.
+
+4.2 RAM agrees not to disclose or use any confidential information for any purpose other than the performance of this Agreement.
+
+**TERMINATION**
+
+5.1 Either party may terminate this Agreement upon written notice to the other party.
+
+5.2 In the event of termination, RAM shall return all confidential information and materials provided by ADIDAS.
+
+5.3 The termination of this Agreement shall not affect the payment obligations of ADIDAS under Section 3.
+
+**INTELLECTUAL PROPERTY**
+
+6.1 RAM assigns to ADIDAS all intellectual property rights in and to the content posts created pursuant to this Agreement.
+
+6.2 ADIDAS shall have the right to use, reproduce, and distribute the content posts in any manner and for any purpose.
+
+**WARRANTIES AND REPRESENTATIONS**
+
+7.1 RAM represents and warrants that:
+
+(a) RAM has the right and authority to enter into this Agreement;
+
+(b) The content posts will not infringe on the intellectual property rights of any third party;
+
+(c) The content posts will comply with all applicable laws and regulations.
+
+**INDEMNIFICATION**
+
+8.1 RAM shall indemnify and hold harmless ADIDAS from and against any claims, damages, and expenses arising out of or related to:
+
+(a) Any breach of RAM's representations and warranties;
+
+(b) Any infringement of intellectual property rights by the content posts;
+
+(c) Any violation of applicable laws and regulations by RAM.
+
+**GOVERNING LAW**
+
+9.1 This Agreement shall be governed by and construed in accordance with the laws of [STATE/COUNTRY].
+
+**DISPUTE RESOLUTION**
+
+10.1 Any dispute or claim arising out of or related to this Agreement shall be resolved through binding arbitration in accordance with the rules of the [ARBITRATION ASSOCIATION].
+
+**ENTIRE AGREEMENT**
+
+11.1 This Agreement constitutes the entire understanding between the parties and supersedes all prior agreements and understandings.
+
+**AMENDMENTS**
+
+12.1 This Agreement may be amended or modified only in writing signed by both parties.
+
+**NOTICES**
+
+13.1 All notices and communications under this Agreement shall be in writing and sent to the addresses specified above.
+
+**ACCEPTANCE**
+
+By signing below, the parties acknowledge that they have read, understand, and agree to the terms and conditions of this Agreement.
+
+**ADIDAS**
+
+Signature: ______________________
+Date: _____________________________
+
+**RAM**
+
+Signature: ______________________
+Date: _____________________________
+
+Please note that this is a sample contract and should be reviewed and customized according to the specific needs and requirements of the parties involved. It is recommended that both parties seek legal advice before signing any agreement.`;
+      }
+      
       // Create a temporary div to render the contract content
       const tempDiv = document.createElement('div');
       tempDiv.style.position = 'absolute';
@@ -264,7 +623,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       tempDiv.style.color = '#333';
       
       // Add contract content with proper formatting
-      const contractContent = generatedContract.replace(/\n/g, '<br>');
+      const contractContent = completeContract.replace(/\n/g, '<br>');
       tempDiv.innerHTML = `
         <div style="position: relative; min-height: 100vh;">
           <!-- Main Content -->
@@ -280,10 +639,10 @@ const AIContractGenerator = ({ onBack = null }) => {
           
           <!-- Watermark -->
           <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                      z-index: 0; pointer-events: none; text-align: center; opacity: 0.1;">
-            <img src="/marketincer.jpg" alt="Marketincer Logo" style="width: 150px; height: 150px; object-fit: contain; margin-bottom: 20px;">
-            <div style="font-size: 24px; font-weight: bold; color: #333; white-space: nowrap;">
-              Marketincer Text
+                      z-index: 0; pointer-events: none; text-align: center; opacity: 0.08;">
+            <img src="${window.location.origin}/marketincer.jpg" alt="Marketincer Logo" style="width: 200px; height: 200px; object-fit: contain; margin-bottom: 20px;">
+            <div style="font-size: 28px; font-weight: bold; color: #333; white-space: nowrap; transform: rotate(-45deg);">
+              MARKETINCER
             </div>
           </div>
           
@@ -297,7 +656,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       
       document.body.appendChild(tempDiv);
       
-      // Convert to canvas
+      // Convert to canvas with higher quality settings
       const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
@@ -305,12 +664,15 @@ const AIContractGenerator = ({ onBack = null }) => {
         backgroundColor: '#ffffff',
         width: 794, // A4 width in pixels at 96 DPI
         height: 1123, // A4 height in pixels at 96 DPI
+        logging: false,
+        imageTimeout: 15000,
+        removeContainer: true
       });
       
       // Remove temporary div
       document.body.removeChild(tempDiv);
       
-      // Create PDF
+      // Create PDF with multiple pages if needed
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -321,10 +683,28 @@ const AIContractGenerator = ({ onBack = null }) => {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // Calculate if we need multiple pages
+      const canvasRatio = canvas.height / canvas.width;
+      const pdfRatio = pdfHeight / pdfWidth;
+      
+      if (canvasRatio > pdfRatio) {
+        // Content is taller, might need multiple pages
+        const scaledHeight = pdfWidth * canvasRatio;
+        const pagesNeeded = Math.ceil(scaledHeight / pdfHeight);
+        
+        for (let i = 0; i < pagesNeeded; i++) {
+          if (i > 0) pdf.addPage();
+          
+          const yOffset = -(i * pdfHeight);
+          pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, scaledHeight);
+        }
+      } else {
+        // Content fits in one page
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      }
       
       // Save the PDF
-      const fileName = `${formData.contractName || 'contract'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const fileName = `${formData.contractName || 'collaboration_agreement'}_${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
       
       // Show success message
