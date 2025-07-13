@@ -209,7 +209,10 @@ const AIContractGenerator = ({ onBack = null }) => {
       const data = await response.json();
       
       // Updated to handle the new API response structure
-      if (data.success && data.ai_log && data.ai_log.generated_content) {
+      if (data.success && data.contract_content) {
+        setGeneratedContract(data.contract_content);
+        setShowContractContent(true);
+      } else if (data.success && data.ai_log && data.ai_log.generated_content) {
         setGeneratedContract(data.ai_log.generated_content);
         setShowContractContent(true);
       } else {
