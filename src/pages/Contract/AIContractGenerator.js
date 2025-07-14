@@ -256,13 +256,41 @@ const AIContractGenerator = ({ onBack = null }) => {
       // Get the actual contract content with proper formatting
       const contractContent = generatedContract.trim();
       
+      // Extract document type from the contract content
+      const extractDocumentType = (content) => {
+        // Look for common patterns to extract document type
+        const patterns = [
+          /\*\*"?(OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?\*\*/i,
+          /\*\*"?(OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?\*\*/i,
+          /^[\s\*]*"?(OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?[\s\*]*$/im,
+          /This\s+(Offer|Service|Employment|Licensing|Partnership|Lease|Purchase|Consultancy)?\s*Agreement/i
+        ];
+        
+        for (const pattern of patterns) {
+          const match = content.match(pattern);
+          if (match) {
+            return match[1] || match[0].replace(/[\*\"]/g, '').trim();
+          }
+        }
+        
+        // Fallback: try to find any capitalized text that might be a title
+        const titleMatch = content.match(/^[\s\*]*([A-Z][A-Z\s]+AGREEMENT?)[\s\*]*$/m);
+        if (titleMatch) {
+          return titleMatch[1].trim();
+        }
+        
+        return 'AGREEMENT'; // Default fallback
+      };
+      
+      const documentType = extractDocumentType(contractContent);
+      
       // Create a temporary div to render the contract content with dynamic sizing
       const tempDiv = document.createElement('div');
       tempDiv.style.position = 'absolute';
       tempDiv.style.top = '-9999px';
       tempDiv.style.left = '-9999px';
       tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.padding = '20mm';
+      tempDiv.style.padding = '25mm 20mm'; // Top/bottom padding increased for better spacing
       tempDiv.style.fontFamily = 'Arial, sans-serif';
       tempDiv.style.fontSize = '12px';
       tempDiv.style.lineHeight = '1.6';
@@ -271,11 +299,18 @@ const AIContractGenerator = ({ onBack = null }) => {
       tempDiv.style.minHeight = '100vh';
       tempDiv.style.boxSizing = 'border-box';
       
-      // Process contract content to preserve formatting
+      // Process contract content to preserve formatting with better bold text handling
       const processedContent = contractContent
-        .replace(/\n\n/g, '</p><p style="margin: 16px 0;">')
+        // Handle bold text patterns
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        // Handle line breaks and paragraphs
+        .replace(/\n\s*\n/g, '</p><p style="margin: 16px 0; page-break-inside: avoid;">')
         .replace(/\n/g, '<br>')
-        .replace(/^/, '<p style="margin: 16px 0;">')
+        // Handle article/section headers
+        .replace(/(<strong>ARTICLE\s+\d+[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 24px; margin-bottom: 16px;">$1</div>')
+        .replace(/(<strong>[^<]*AGREEMENT[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 24px; margin-bottom: 16px; text-align: center;">$1</div>')
+        .replace(/^/, '<p style="margin: 16px 0; page-break-inside: avoid;">')
         .replace(/$/, '</p>');
       
       // Generate current date and time
@@ -292,26 +327,26 @@ const AIContractGenerator = ({ onBack = null }) => {
         hour12: false
       });
       
-      // Create the HTML content with watermark
+      // Create the HTML content with watermark and improved spacing
       tempDiv.innerHTML = `
-        <div style="position: relative; min-height: 100vh; page-break-inside: avoid;">
+        <div style="position: relative; min-height: 100vh;">
           <!-- Main Content Container -->
           <div style="position: relative; z-index: 2; background: white;">
-            <!-- Header -->
-            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-              <h1 style="color: #333; font-size: 24px; margin: 0; font-weight: bold;">${formData.contractName || 'Contract'}</h1>
+            <!-- Header with proper document type -->
+            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; page-break-inside: avoid;">
+              <h1 style="color: #333; font-size: 24px; margin: 0; font-weight: bold;">${documentType}</h1>
               <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">Generated on ${generationDate}</p>
             </div>
             
-            <!-- Contract Content -->
-            <div style="text-align: justify; position: relative; z-index: 2; background: white; padding: 20px 0;">
+            <!-- Contract Content with improved formatting -->
+            <div style="text-align: justify; position: relative; z-index: 2; background: white; padding: 20px 0; page-break-inside: auto;">
               ${processedContent}
             </div>
             
             <!-- Document Generation Details -->
-            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 10px; color: #666;">
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 10px; color: #666; page-break-inside: avoid;">
               <p><strong>Document Generation Details:</strong></p>
-              <ul style="margin: 10px 0; padding-left: 20px;">
+              <ul style="margin: 10px 0; padding-left: 20px; line-height: 1.4;">
                 <li>Generated on: ${generationDate} at ${generationTime}</li>
                 <li>Generation method: AI-assisted template</li>
                 <li>Jurisdiction: As per Indian law and practice</li>
@@ -364,12 +399,13 @@ const AIContractGenerator = ({ onBack = null }) => {
       document.body.appendChild(tempDiv);
       
       // Let the browser render the content
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
       
-      // Get the actual content height to determine if we need multiple pages
+      // Get the actual content height to determine pages with improved calculation
       const contentHeight = tempDiv.scrollHeight;
       const a4HeightPx = 1123; // A4 height in pixels at 96 DPI
-      const totalPages = Math.ceil(contentHeight / a4HeightPx);
+      const effectiveHeightPx = a4HeightPx - 100; // Account for margins and spacing
+      const totalPages = Math.ceil(contentHeight / effectiveHeightPx);
       
       // Create PDF with proper multi-page support
       const pdf = new jsPDF({
@@ -381,7 +417,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      // Convert to canvas with proper scaling
+      // Convert to canvas with proper scaling and improved settings
       const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
@@ -393,6 +429,10 @@ const AIContractGenerator = ({ onBack = null }) => {
         scrollY: 0,
         windowWidth: 794,
         windowHeight: Math.max(contentHeight, a4HeightPx),
+        ignoreElements: (element) => {
+          // Skip elements that might cause issues
+          return element.tagName === 'SCRIPT' || element.tagName === 'STYLE';
+        }
       });
       
       // Remove temporary div
@@ -400,21 +440,32 @@ const AIContractGenerator = ({ onBack = null }) => {
       
       const imgData = canvas.toDataURL('image/png', 1.0);
       
-      // Add pages to PDF
+      // Add pages to PDF with improved page break handling
       if (totalPages <= 1) {
         // Single page
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        
+        // Add page footer
+        pdf.setFontSize(10);
+        pdf.setTextColor(102, 102, 102);
+        pdf.text('Page 1 of 1', pdfWidth - 30, pdfHeight - 10);
+        pdf.text('Generated by Marketincer AI Contract Generator', 10, pdfHeight - 10);
       } else {
-        // Multiple pages
+        // Multiple pages with improved spacing
+        const scaleFactor = pdfHeight / effectiveHeightPx;
+        
         for (let i = 0; i < totalPages; i++) {
           if (i > 0) {
             pdf.addPage();
           }
           
-          const yOffset = -(i * a4HeightPx * (pdfHeight / a4HeightPx));
-          pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, (contentHeight * pdfHeight) / a4HeightPx);
+          // Calculate Y offset for each page with better spacing
+          const yOffset = -(i * effectiveHeightPx * scaleFactor);
+          const imageHeight = (contentHeight * pdfHeight) / effectiveHeightPx;
           
-          // Add page number
+          pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, imageHeight);
+          
+          // Add page footer
           pdf.setFontSize(10);
           pdf.setTextColor(102, 102, 102);
           pdf.text(`Page ${i + 1} of ${totalPages}`, pdfWidth - 30, pdfHeight - 10);
@@ -422,8 +473,9 @@ const AIContractGenerator = ({ onBack = null }) => {
         }
       }
       
-      // Save the PDF
-      const fileName = `${formData.contractName || 'contract'}_${generationDate.replace(/\//g, '-')}.pdf`;
+      // Save the PDF with document type in filename
+      const cleanDocumentType = documentType.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `${cleanDocumentType}_${generationDate.replace(/\//g, '-')}.pdf`;
       pdf.save(fileName);
       
       // Show success message
