@@ -440,6 +440,14 @@ const AIContractGenerator = ({ onBack = null }) => {
   const renderRightPanel = () => {
     // Always show content if available (for both edit mode and template mode)
     if (showContractContent || (isCreateFromTemplate && generatedContract)) {
+      // Convert ** text ** to bold HTML
+      const formatContractContent = (text) => {
+        return text
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\n/g, '<br/>')
+          .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+      };
+
       return (
         <Box>
           <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
@@ -447,20 +455,21 @@ const AIContractGenerator = ({ onBack = null }) => {
              isCreateFromTemplate ? 'Template Content' : 
              'Generated Contract'}
           </Typography>
+          
+          {/* Contract Editor */}
           <Paper
             sx={{
-              p: 3,
+              p: 0,
               bgcolor: '#f8f9fa',
               borderRadius: 2,
-              textAlign: 'left',
-              maxHeight: '400px',
-              overflow: 'auto',
+              mb: 2,
+              border: '1px solid #e0e0e0',
             }}
           >
             <TextField
               fullWidth
               multiline
-              rows={15}
+              rows={8}
               value={generatedContract}
               onChange={(e) => setGeneratedContract(e.target.value)}
               variant="outlined"
@@ -468,6 +477,7 @@ const AIContractGenerator = ({ onBack = null }) => {
               sx={{
                 '& .MuiOutlinedInput-root': {
                   bgcolor: 'white',
+                  borderRadius: '8px 8px 0 0',
                   '& fieldset': {
                     border: 'none',
                   },
@@ -478,9 +488,65 @@ const AIContractGenerator = ({ onBack = null }) => {
                     border: '1px solid #2196f3',
                   },
                 },
+                '& .MuiInputBase-input': {
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                  fontFamily: 'monospace',
+                },
               }}
             />
           </Paper>
+
+          {/* Contract Preview */}
+          <Paper
+            sx={{
+              p: 3,
+              bgcolor: '#ffffff',
+              borderRadius: 2,
+              border: '1px solid #e0e0e0',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              maxHeight: '400px',
+              overflow: 'auto',
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: '#f1f1f1',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: '#c1c1c1',
+                borderRadius: '4px',
+                '&:hover': {
+                  backgroundColor: '#a8a8a8',
+                },
+              },
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600, borderBottom: '2px solid #2196f3', pb: 1 }}>
+              Preview
+            </Typography>
+            
+            <Box
+              sx={{
+                textAlign: 'left',
+                lineHeight: 1.6,
+                fontSize: '14px',
+                color: '#333',
+                '& strong': {
+                  fontWeight: 700,
+                  color: '#1976d2',
+                },
+                '& br': {
+                  marginBottom: '8px',
+                },
+              }}
+              dangerouslySetInnerHTML={{
+                __html: formatContractContent(generatedContract || 'No content to preview')
+              }}
+            />
+          </Paper>
+
           <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
             {isEditMode ? (
               // Edit mode - Show Update and Export PDF buttons
