@@ -254,15 +254,47 @@ const AIContractGenerator = ({ onBack = null }) => {
       setLoading(true);
       
       // Get the actual contract content with proper formatting
-      const contractContent = generatedContract.trim();
+      let contractContent = generatedContract.trim();
       
-      // Extract document type from the contract content
+      // Remove any heading from the contract content (remove first line if it looks like a heading)
+      const lines = contractContent.split('\n');
+      if (lines.length > 0) {
+        // Remove common heading patterns
+        const headingPatterns = [
+          /^\*\*.*AGREEMENT.*\*\*$/i,
+          /^SERVICE AGREEMENT.*$/i,
+          /^OFFER AGREEMENT.*$/i,
+          /^EMPLOYMENT AGREEMENT.*$/i,
+          /^.*AGREEMENT.*$/i
+        ];
+        
+        // Check if first line is a heading and remove it
+        for (const pattern of headingPatterns) {
+          if (pattern.test(lines[0].trim())) {
+            lines.shift(); // Remove the heading line
+            break;
+          }
+        }
+        
+        // Remove any additional empty lines at the start
+        while (lines.length > 0 && lines[0].trim() === '') {
+          lines.shift();
+        }
+        
+        contractContent = lines.join('\n');
+      }
+      
+      // Ensure content starts with the required text
+      const requiredStart = "Here is a professionally drafted service agreement between Lalsbal and Rendns:";
+      if (!contractContent.startsWith(requiredStart)) {
+        contractContent = requiredStart + "\n\n" + contractContent;
+      }
+      
+      // Extract document type from the contract content for filename
       const extractDocumentType = (content) => {
         // Look for common patterns to extract document type
         const patterns = [
           /\*\*"?(OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?\*\*/i,
-          /\*\*"?(OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?\*\*/i,
-          /^[\s\*]*"?(OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?[\s\*]*$/im,
           /This\s+(Offer|Service|Employment|Licensing|Partnership|Lease|Purchase|Consultancy)?\s*Agreement/i
         ];
         
@@ -273,13 +305,7 @@ const AIContractGenerator = ({ onBack = null }) => {
           }
         }
         
-        // Fallback: try to find any capitalized text that might be a title
-        const titleMatch = content.match(/^[\s\*]*([A-Z][A-Z\s]+AGREEMENT?)[\s\*]*$/m);
-        if (titleMatch) {
-          return titleMatch[1].trim();
-        }
-        
-        return 'AGREEMENT'; // Default fallback
+        return 'SERVICE_AGREEMENT'; // Default fallback for Lalsbal and Rendns
       };
       
       const documentType = extractDocumentType(contractContent);
@@ -290,7 +316,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       tempDiv.style.top = '-9999px';
       tempDiv.style.left = '-9999px';
       tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.padding = '25mm 20mm'; // Top/bottom padding increased for better spacing
+      tempDiv.style.padding = '25mm 20mm 30mm 20mm'; // Increased bottom padding for page gaps
       tempDiv.style.fontFamily = 'Arial, sans-serif';
       tempDiv.style.fontSize = '12px';
       tempDiv.style.lineHeight = '1.6';
@@ -304,7 +330,7 @@ const AIContractGenerator = ({ onBack = null }) => {
         // Handle bold text patterns
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        // Handle line breaks and paragraphs
+        // Handle line breaks and paragraphs with page break considerations
         .replace(/\n\s*\n/g, '</p><p style="margin: 16px 0; page-break-inside: avoid;">')
         .replace(/\n/g, '<br>')
         // Handle article/section headers
@@ -327,21 +353,18 @@ const AIContractGenerator = ({ onBack = null }) => {
         hour12: false
       });
       
-      // Create the HTML content with watermark and improved spacing
+      // Create the HTML content with watermark and improved spacing (NO HEADING)
       tempDiv.innerHTML = `
         <div style="position: relative; min-height: 100vh;">
           <!-- Main Content Container -->
           <div style="position: relative; z-index: 2; background: white;">
-            <!-- Header with proper document type -->
-            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; page-break-inside: avoid;">
-              <h1 style="color: #333; font-size: 24px; margin: 0; font-weight: bold;">${documentType}</h1>
-              <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">Generated on ${generationDate}</p>
-            </div>
-            
-            <!-- Contract Content with improved formatting -->
+            <!-- Contract Content with improved formatting (NO HEADER) -->
             <div style="text-align: justify; position: relative; z-index: 2; background: white; padding: 20px 0; page-break-inside: auto;">
               ${processedContent}
             </div>
+            
+            <!-- Page end gap to prevent overlapping -->
+            <div style="height: 80px; page-break-inside: avoid;"></div>
             
             <!-- Document Generation Details -->
             <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 10px; color: #666; page-break-inside: avoid;">
@@ -404,7 +427,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       // Get the actual content height to determine pages with improved calculation
       const contentHeight = tempDiv.scrollHeight;
       const a4HeightPx = 1123; // A4 height in pixels at 96 DPI
-      const effectiveHeightPx = a4HeightPx - 100; // Account for margins and spacing
+      const effectiveHeightPx = a4HeightPx - 200; // Increased margin for page gaps (was 100, now 200)
       const totalPages = Math.ceil(contentHeight / effectiveHeightPx);
       
       // Create PDF with proper multi-page support
@@ -445,13 +468,13 @@ const AIContractGenerator = ({ onBack = null }) => {
         // Single page
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         
-        // Add page footer
+        // Add page footer with more spacing from content
         pdf.setFontSize(10);
         pdf.setTextColor(102, 102, 102);
-        pdf.text('Page 1 of 1', pdfWidth - 30, pdfHeight - 10);
-        pdf.text('Generated by Marketincer AI Contract Generator', 10, pdfHeight - 10);
+        pdf.text('Page 1 of 1', pdfWidth - 30, pdfHeight - 15); // Moved up 5px
+        pdf.text('Generated by Marketincer AI Contract Generator', 10, pdfHeight - 15); // Moved up 5px
       } else {
-        // Multiple pages with improved spacing
+        // Multiple pages with improved spacing and better page gaps
         const scaleFactor = pdfHeight / effectiveHeightPx;
         
         for (let i = 0; i < totalPages; i++) {
@@ -459,17 +482,17 @@ const AIContractGenerator = ({ onBack = null }) => {
             pdf.addPage();
           }
           
-          // Calculate Y offset for each page with better spacing
+          // Calculate Y offset for each page with better spacing and page gaps
           const yOffset = -(i * effectiveHeightPx * scaleFactor);
           const imageHeight = (contentHeight * pdfHeight) / effectiveHeightPx;
           
           pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, imageHeight);
           
-          // Add page footer
+          // Add page footer with more spacing from content
           pdf.setFontSize(10);
           pdf.setTextColor(102, 102, 102);
-          pdf.text(`Page ${i + 1} of ${totalPages}`, pdfWidth - 30, pdfHeight - 10);
-          pdf.text('Generated by Marketincer AI Contract Generator', 10, pdfHeight - 10);
+          pdf.text(`Page ${i + 1} of ${totalPages}`, pdfWidth - 30, pdfHeight - 15); // Moved up 5px
+          pdf.text('Generated by Marketincer AI Contract Generator', 10, pdfHeight - 15); // Moved up 5px
         }
       }
       
