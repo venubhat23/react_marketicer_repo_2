@@ -290,7 +290,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       tempDiv.style.top = '-9999px';
       tempDiv.style.left = '-9999px';
       tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.padding = '25mm 20mm'; // Top/bottom padding increased for better spacing
+      tempDiv.style.padding = '25mm 20mm 40mm 20mm'; // Increased bottom padding for better spacing
       tempDiv.style.fontFamily = 'Arial, sans-serif';
       tempDiv.style.fontSize = '12px';
       tempDiv.style.lineHeight = '1.6';
@@ -329,9 +329,9 @@ const AIContractGenerator = ({ onBack = null }) => {
       
       // Create the HTML content with watermark and improved spacing
       tempDiv.innerHTML = `
-        <div style="position: relative; min-height: 100vh;">
+        <div style="position: relative; min-height: 100vh; padding-bottom: 80px;">
           <!-- Main Content Container -->
-          <div style="position: relative; z-index: 2; background: white;">
+          <div style="position: relative; z-index: 2; background: white; margin-bottom: 50px;">
             <!-- Header with proper document type -->
             <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; page-break-inside: avoid;">
               <h1 style="color: #333; font-size: 24px; margin: 0; font-weight: bold;">${documentType}</h1>
@@ -339,12 +339,12 @@ const AIContractGenerator = ({ onBack = null }) => {
             </div>
             
             <!-- Contract Content with improved formatting -->
-            <div style="text-align: justify; position: relative; z-index: 2; background: white; padding: 20px 0; page-break-inside: auto;">
+            <div style="text-align: justify; position: relative; z-index: 2; background: white; padding: 20px 0; page-break-inside: auto; margin-bottom: 40px; padding-bottom: 30px;">
               ${processedContent}
             </div>
             
             <!-- Document Generation Details -->
-            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 10px; color: #666; page-break-inside: avoid;">
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 10px; color: #666; page-break-inside: avoid; margin-bottom: 60px; padding-bottom: 40px;">
               <p><strong>Document Generation Details:</strong></p>
               <ul style="margin: 10px 0; padding-left: 20px; line-height: 1.4;">
                 <li>Generated on: ${generationDate} at ${generationTime}</li>
