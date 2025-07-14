@@ -20,7 +20,7 @@ import {
   PictureAsPdf as PictureAsPdfIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Sidebar from "../../components/Sidebar";
+import Layout from "../../components/Layout";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -753,36 +753,32 @@ const AIContractGenerator = ({ onBack = null }) => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: '#f8f9fa', minHeight: '100vh' }}>
-      <Grid container>
-        <Grid size={{ md: 1 }} className="side_section">
-          <Sidebar />
-        </Grid>
-        <Grid size={{ md: 11 }}>
-          {/* Header - Updated color to #091a48 */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              backgroundColor: '#091a48', // Updated color
-              borderRadius: 0,
-              color: 'white'
-            }}
-          >
-            <Box sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <IconButton
-                  edge="start"
-                  color="inherit"
-                  aria-label="back"
-                  onClick={handleBack}
-                  sx={{ mr: 1 }}
-                >
-                  <ArrowBackIcon />
+    <Layout>
+      <Box sx={{ flexGrow: 1, bgcolor: '#f8f9fa', minHeight: '100vh' }}>
+        {/* Header - Updated color to #091a48 */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            backgroundColor: '#091a48', // Updated color
+            borderRadius: 0,
+            color: 'white'
+          }}
+        >
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="back"
+                onClick={handleBack}
+                sx={{ mr: 1 }}
+              >
+                <ArrowBackIcon />
                 </IconButton>
                 <Typography variant="h5" sx={{ fontWeight: 600 }}>
                   {getPageTitle()}
@@ -950,10 +946,9 @@ const AIContractGenerator = ({ onBack = null }) => {
               </Grid>
             </Grid>
           </Box>
-        </Grid>
-      </Grid>
-    </Box>
-  );
-};
+        </Box>
+      </Layout>
+    );
+  };
 
 export default AIContractGenerator;
