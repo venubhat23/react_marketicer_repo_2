@@ -290,7 +290,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       tempDiv.style.top = '-9999px';
       tempDiv.style.left = '-9999px';
       tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.padding = '25mm 20mm'; // Top/bottom padding increased for better spacing
+      tempDiv.style.padding = '40mm 20mm'; // Top/bottom padding increased significantly for better spacing
       tempDiv.style.fontFamily = 'Arial, sans-serif';
       tempDiv.style.fontSize = '12px';
       tempDiv.style.lineHeight = '1.6';
@@ -299,18 +299,18 @@ const AIContractGenerator = ({ onBack = null }) => {
       tempDiv.style.minHeight = '100vh';
       tempDiv.style.boxSizing = 'border-box';
       
-      // Process contract content to preserve formatting with better bold text handling
+      // Process contract content to preserve formatting with better bold text handling and improved spacing
       const processedContent = contractContent
         // Handle bold text patterns
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        // Handle line breaks and paragraphs
-        .replace(/\n\s*\n/g, '</p><p style="margin: 16px 0; page-break-inside: avoid;">')
+        // Handle line breaks and paragraphs with increased spacing
+        .replace(/\n\s*\n/g, '</p><p style="margin: 24px 0; page-break-inside: avoid;">')
         .replace(/\n/g, '<br>')
-        // Handle article/section headers
-        .replace(/(<strong>ARTICLE\s+\d+[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 24px; margin-bottom: 16px;">$1</div>')
-        .replace(/(<strong>[^<]*AGREEMENT[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 24px; margin-bottom: 16px; text-align: center;">$1</div>')
-        .replace(/^/, '<p style="margin: 16px 0; page-break-inside: avoid;">')
+        // Handle article/section headers with better spacing
+        .replace(/(<strong>ARTICLE\s+\d+[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 36px; margin-bottom: 24px;">$1</div>')
+        .replace(/(<strong>[^<]*AGREEMENT[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 36px; margin-bottom: 24px; text-align: center;">$1</div>')
+        .replace(/^/, '<p style="margin: 24px 0; page-break-inside: avoid;">')
         .replace(/$/, '</p>');
       
       // Generate current date and time
@@ -332,14 +332,8 @@ const AIContractGenerator = ({ onBack = null }) => {
         <div style="position: relative; min-height: 100vh;">
           <!-- Main Content Container -->
           <div style="position: relative; z-index: 2; background: white;">
-            <!-- Header with proper document type -->
-            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; page-break-inside: avoid;">
-              <h1 style="color: #333; font-size: 24px; margin: 0; font-weight: bold;">${documentType}</h1>
-              <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">Generated on ${generationDate}</p>
-            </div>
-            
-            <!-- Contract Content with improved formatting -->
-            <div style="text-align: justify; position: relative; z-index: 2; background: white; padding: 20px 0; page-break-inside: auto;">
+            <!-- Contract Content with improved formatting and proper spacing -->
+            <div style="text-align: justify; position: relative; z-index: 2; background: white; padding: 20px 0 80px 0; page-break-inside: auto; margin-bottom: 80px;">
               ${processedContent}
             </div>
             
@@ -404,7 +398,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       // Get the actual content height to determine pages with improved calculation
       const contentHeight = tempDiv.scrollHeight;
       const a4HeightPx = 1123; // A4 height in pixels at 96 DPI
-      const effectiveHeightPx = a4HeightPx - 100; // Account for margins and spacing
+      const effectiveHeightPx = a4HeightPx - 200; // Increased spacing to prevent overlapping (was 100, now 200)
       const totalPages = Math.ceil(contentHeight / effectiveHeightPx);
       
       // Create PDF with proper multi-page support
@@ -459,8 +453,9 @@ const AIContractGenerator = ({ onBack = null }) => {
             pdf.addPage();
           }
           
-          // Calculate Y offset for each page with better spacing
-          const yOffset = -(i * effectiveHeightPx * scaleFactor);
+          // Calculate Y offset for each page with additional spacing to prevent overlapping
+          const additionalSpacing = 20; // Additional spacing between pages
+          const yOffset = -(i * (effectiveHeightPx + additionalSpacing) * scaleFactor);
           const imageHeight = (contentHeight * pdfHeight) / effectiveHeightPx;
           
           pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, imageHeight);
