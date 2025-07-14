@@ -290,7 +290,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       tempDiv.style.top = '-9999px';
       tempDiv.style.left = '-9999px';
       tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.padding = '40mm 20mm'; // Top/bottom padding increased significantly for better spacing
+      tempDiv.style.padding = '25mm 20mm 40mm 20mm'; // Increased bottom padding for better spacing
       tempDiv.style.fontFamily = 'Arial, sans-serif';
       tempDiv.style.fontSize = '12px';
       tempDiv.style.lineHeight = '1.6';
@@ -299,19 +299,19 @@ const AIContractGenerator = ({ onBack = null }) => {
       tempDiv.style.minHeight = '100vh';
       tempDiv.style.boxSizing = 'border-box';
       
-      // Process contract content to preserve formatting with better bold text handling and improved spacing
+      // Process contract content to preserve formatting with better bold text handling
       const processedContent = contractContent
         // Handle bold text patterns
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        // Handle line breaks and paragraphs with increased spacing
-        .replace(/\n\s*\n/g, '</p><p style="margin: 24px 0; page-break-inside: avoid;">')
+        // Handle line breaks and paragraphs
+        .replace(/\n\s*\n/g, '</p><p style="margin: 16px 0; page-break-inside: avoid;">')
         .replace(/\n/g, '<br>')
-        // Handle article/section headers with better spacing
-        .replace(/(<strong>ARTICLE\s+\d+[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 36px; margin-bottom: 24px;">$1</div>')
-        .replace(/(<strong>[^<]*AGREEMENT[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 36px; margin-bottom: 24px; text-align: center;">$1</div>')
-        .replace(/^/, '<p style="margin: 24px 0; page-break-inside: avoid;">')
-        .replace(/$/, '</p>');
+        // Handle article/section headers
+        .replace(/(<strong>ARTICLE\s+\d+[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 24px; margin-bottom: 16px;">$1</div>')
+        .replace(/(<strong>[^<]*AGREEMENT[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 24px; margin-bottom: 16px; text-align: center;">$1</div>')
+        .replace(/^/, '<p style="margin: 16px 0; page-break-inside: avoid;">')
+        .replace(/$/, '</p><div style="page-break-after: always; height: 60px; margin-bottom: 50px;"></div>');
       
       // Generate current date and time
       const now = new Date();
@@ -329,16 +329,22 @@ const AIContractGenerator = ({ onBack = null }) => {
       
       // Create the HTML content with watermark and improved spacing
       tempDiv.innerHTML = `
-        <div style="position: relative; min-height: 100vh;">
+        <div style="position: relative; min-height: 100vh; padding-bottom: 80px;">
           <!-- Main Content Container -->
-          <div style="position: relative; z-index: 2; background: white;">
-            <!-- Contract Content with improved formatting and proper spacing -->
-            <div style="text-align: justify; position: relative; z-index: 2; background: white; padding: 20px 0 80px 0; page-break-inside: auto; margin-bottom: 80px;">
+          <div style="position: relative; z-index: 2; background: white; margin-bottom: 50px;">
+            <!-- Header with proper document type -->
+            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; page-break-inside: avoid;">
+              <h1 style="color: #333; font-size: 24px; margin: 0; font-weight: bold;">${documentType}</h1>
+              <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">Generated on ${generationDate}</p>
+            </div>
+            
+            <!-- Contract Content with improved formatting -->
+            <div style="text-align: justify; position: relative; z-index: 2; background: white; padding: 20px 0; page-break-inside: auto; margin-bottom: 40px; padding-bottom: 30px;">
               ${processedContent}
             </div>
             
             <!-- Document Generation Details -->
-            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 10px; color: #666; page-break-inside: avoid;">
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 10px; color: #666; page-break-inside: avoid; margin-bottom: 60px; padding-bottom: 40px;">
               <p><strong>Document Generation Details:</strong></p>
               <ul style="margin: 10px 0; padding-left: 20px; line-height: 1.4;">
                 <li>Generated on: ${generationDate} at ${generationTime}</li>
@@ -398,7 +404,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       // Get the actual content height to determine pages with improved calculation
       const contentHeight = tempDiv.scrollHeight;
       const a4HeightPx = 1123; // A4 height in pixels at 96 DPI
-      const effectiveHeightPx = a4HeightPx - 200; // Increased spacing to prevent overlapping (was 100, now 200)
+      const effectiveHeightPx = a4HeightPx - 150; // Account for margins, spacing, and footer gap
       const totalPages = Math.ceil(contentHeight / effectiveHeightPx);
       
       // Create PDF with proper multi-page support
@@ -439,11 +445,11 @@ const AIContractGenerator = ({ onBack = null }) => {
         // Single page
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         
-        // Add page footer
+        // Add page footer with proper spacing
         pdf.setFontSize(10);
         pdf.setTextColor(102, 102, 102);
-        pdf.text('Page 1 of 1', pdfWidth - 30, pdfHeight - 10);
-        pdf.text('Generated by Marketincer AI Contract Generator', 10, pdfHeight - 10);
+        pdf.text('Page 1 of 1', pdfWidth - 30, pdfHeight - 20);
+        pdf.text('Generated by Marketincer AI Contract Generator', 10, pdfHeight - 20);
       } else {
         // Multiple pages with improved spacing
         const scaleFactor = pdfHeight / effectiveHeightPx;
@@ -453,18 +459,17 @@ const AIContractGenerator = ({ onBack = null }) => {
             pdf.addPage();
           }
           
-          // Calculate Y offset for each page with additional spacing to prevent overlapping
-          const additionalSpacing = 20; // Additional spacing between pages
-          const yOffset = -(i * (effectiveHeightPx + additionalSpacing) * scaleFactor);
+          // Calculate Y offset for each page with better spacing
+          const yOffset = -(i * effectiveHeightPx * scaleFactor);
           const imageHeight = (contentHeight * pdfHeight) / effectiveHeightPx;
           
           pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, imageHeight);
           
-          // Add page footer
+          // Add page footer with proper spacing
           pdf.setFontSize(10);
           pdf.setTextColor(102, 102, 102);
-          pdf.text(`Page ${i + 1} of ${totalPages}`, pdfWidth - 30, pdfHeight - 10);
-          pdf.text('Generated by Marketincer AI Contract Generator', 10, pdfHeight - 10);
+          pdf.text(`Page ${i + 1} of ${totalPages}`, pdfWidth - 30, pdfHeight - 20);
+          pdf.text('Generated by Marketincer AI Contract Generator', 10, pdfHeight - 20);
         }
       }
       
