@@ -243,7 +243,7 @@ const AIContractGenerator = ({ onBack = null }) => {
     return 'Generate AI Contract';
   };
 
-  // PDF Export function with watermarks
+  // PDF Export function with simplified A4 layout
   const handleExportPDF = async () => {
     if (!generatedContract) {
       setError('No contract content to export');
@@ -284,22 +284,15 @@ const AIContractGenerator = ({ onBack = null }) => {
       
       const documentType = extractDocumentType(contractContent);
       
-      // Create a temporary div to render the contract content with dynamic sizing
-      const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.padding = '25mm 20mm 40mm 20mm'; // Increased bottom padding for footer space
-      tempDiv.style.fontFamily = 'Arial, sans-serif';
-      tempDiv.style.fontSize = '12px';
-      tempDiv.style.lineHeight = '1.6';
-      tempDiv.style.backgroundColor = 'white';
-      tempDiv.style.color = '#333';
-      tempDiv.style.minHeight = '100vh';
-      tempDiv.style.boxSizing = 'border-box';
+      // Generate current date
+      const now = new Date();
+      const generationDate = now.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
       
-      // Process contract content to preserve formatting with better bold text handling
+      // Process contract content to preserve formatting
       const processedContent = contractContent
         // Handle bold text patterns
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
@@ -313,182 +306,166 @@ const AIContractGenerator = ({ onBack = null }) => {
         .replace(/^/, '<p style="margin: 16px 0; page-break-inside: avoid; orphans: 3; widows: 3;">')
         .replace(/$/, '</p>');
       
-      // Generate current date and time
-      const now = new Date();
-      const generationDate = now.toLocaleDateString('en-IN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-      const generationTime = now.toLocaleTimeString('en-IN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      });
-      
-      // Create the HTML content with watermark and improved spacing
-      tempDiv.innerHTML = `
-        <div style="position: relative; min-height: 100vh; padding-bottom: 80px;">
-          <!-- Main Content Container -->
-          <div style="position: relative; z-index: 2; background: white; margin-bottom: 50px;">
-            <!-- Header with proper document type -->
-            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; page-break-inside: avoid;">
-              <h1 style="color: #333; font-size: 24px; margin: 0; font-weight: bold;">${documentType}</h1>
-              <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">Generated on ${generationDate}</p>
-            </div>
-            
-            <!-- Contract Content with improved formatting -->
-            <div style="text-align: justify; position: relative; z-index: 2; background: white; padding: 20px 0; page-break-inside: auto; margin-bottom: 40px; padding-bottom: 30px;">
-              ${processedContent}
-            </div>
-            
-            <!-- Document Generation Details -->
-            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 10px; color: #666; page-break-inside: avoid; margin-bottom: 60px;">
-
-              <p><strong>Document Generation Details:</strong></p>
-              <ul style="margin: 10px 0; padding-left: 20px; line-height: 1.4;">
-                <li>Generated on: ${generationDate} at ${generationTime}</li>
-                <li>Generation method: AI-assisted template</li>
-                <li>Jurisdiction: As per Indian law and practice</li>
-                <li>Legal Notice: This is a draft agreement and must be reviewed by qualified legal counsel before execution</li>
-                <li>Stamp Duty: Please ensure appropriate stamp duty is paid as per applicable state laws</li>
-              </ul>
-            </div>
-          </div>
-          
-          <!-- Enhanced Watermark Background -->
-          <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none; overflow: hidden;">
-            <!-- Central Watermark -->
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                        text-align: center; opacity: 0.05; z-index: 1;">
-              <div style="font-size: 48px; font-weight: bold; color: #333; white-space: nowrap; 
-                          text-transform: uppercase; letter-spacing: 3px; font-family: 'Arial', sans-serif;">
-                MARKETINCER
-              </div>
-            </div>
-            
-            <!-- Diagonal Watermarks Pattern -->
-            <div style="position: absolute; top: 20%; left: 20%; transform: rotate(-45deg); 
-                        font-size: 16px; font-weight: bold; color: #333; opacity: 0.03; white-space: nowrap;">
-              MARKETINCER
-            </div>
-            <div style="position: absolute; top: 20%; right: 20%; transform: rotate(-45deg); 
-                        font-size: 16px; font-weight: bold; color: #333; opacity: 0.03; white-space: nowrap;">
-              MARKETINCER
-            </div>
-            <div style="position: absolute; top: 40%; left: 10%; transform: rotate(-45deg); 
-                        font-size: 16px; font-weight: bold; color: #333; opacity: 0.03; white-space: nowrap;">
-              MARKETINCER
-            </div>
-            <div style="position: absolute; top: 40%; right: 10%; transform: rotate(-45deg); 
-                        font-size: 16px; font-weight: bold; color: #333; opacity: 0.03; white-space: nowrap;">
-              MARKETINCER
-            </div>
-            <div style="position: absolute; bottom: 30%; left: 30%; transform: rotate(-45deg); 
-                        font-size: 16px; font-weight: bold; color: #333; opacity: 0.03; white-space: nowrap;">
-              MARKETINCER
-            </div>
-            <div style="position: absolute; bottom: 30%; right: 30%; transform: rotate(-45deg); 
-                        font-size: 16px; font-weight: bold; color: #333; opacity: 0.03; white-space: nowrap;">
-              MARKETINCER
-            </div>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(tempDiv);
-      
-      // Let the browser render the content
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      // Get the actual content height to determine pages with improved calculation
-      const contentHeight = tempDiv.scrollHeight;
-      const a4HeightPx = 1123; // A4 height in pixels at 96 DPI
-      const effectiveHeightPx = a4HeightPx - 150; // Account for margins, spacing, and footer
-      const totalPages = Math.ceil(contentHeight / effectiveHeightPx);
-      
-      // Create PDF with proper multi-page support
+      // Create PDF with proper A4 format
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
       
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20; // 20mm margin on all sides
+      const contentWidth = pageWidth - (margin * 2);
+      const contentHeight = pageHeight - (margin * 2);
+      const lineHeight = 6; // 6mm line height
+      const maxLinesPerPage = Math.floor((contentHeight - 40) / lineHeight); // Reserve space for header and 5 blank lines
       
-      // Convert to canvas with proper scaling and improved settings
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: 794, // A4 width in pixels at 96 DPI
-        height: Math.max(contentHeight, a4HeightPx),
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: 794,
-        windowHeight: Math.max(contentHeight, a4HeightPx),
-        ignoreElements: (element) => {
-          // Skip elements that might cause issues
-          return element.tagName === 'SCRIPT' || element.tagName === 'STYLE';
-        }
-      });
-      
-      // Remove temporary div
-      document.body.removeChild(tempDiv);
-      
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      
-      // Add pages to PDF with improved page break handling
-      if (totalPages <= 1) {
-        // Single page - ensure content fits with proper bottom margin
-        const contentMaxHeight = pdfHeight - 20; // Reserve 20mm for footer
-        const scaledHeight = Math.min(contentMaxHeight, pdfHeight - 15);
+      // Add diagonal watermarks function
+      const addWatermarks = (pdf) => {
+        pdf.setTextColor(200, 200, 200); // Light gray
+        pdf.setFontSize(40);
+        pdf.setFont('helvetica', 'bold');
         
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, scaledHeight);
+        // Calculate diagonal watermark positions
+        const watermarkPositions = [
+          { x: pageWidth * 0.2, y: pageHeight * 0.3 },
+          { x: pageWidth * 0.6, y: pageHeight * 0.2 },
+          { x: pageWidth * 0.3, y: pageHeight * 0.6 },
+          { x: pageWidth * 0.7, y: pageHeight * 0.7 },
+          { x: pageWidth * 0.1, y: pageHeight * 0.8 },
+          { x: pageWidth * 0.8, y: pageHeight * 0.4 }
+        ];
         
-        // Add page footer with proper spacing
-        pdf.setFontSize(10);
-        pdf.setTextColor(102, 102, 102);
-        pdf.text('Page 1 of 1', pdfWidth - 30, pdfHeight - 15);
-        pdf.text('Generated by Marketincer AI Contract Generator', 10, pdfHeight - 15);
-      } else {
-        // Multiple pages with improved spacing and footer positioning
-        const scaleFactor = pdfHeight / effectiveHeightPx;
-        const footerReservedSpace = 20; // Reserve 20mm for footer
-        const contentMaxHeight = pdfHeight - footerReservedSpace;
+        // Add diagonal watermarks
+        watermarkPositions.forEach(pos => {
+          pdf.text('MARKETINCER', pos.x, pos.y, {
+            angle: -45,
+            align: 'center'
+          });
+        });
         
-        for (let i = 0; i < totalPages; i++) {
-          if (i > 0) {
-            pdf.addPage();
+        // Reset text color for content
+        pdf.setTextColor(0, 0, 0);
+      };
+      
+      // Split content into lines and pages
+      const lines = processedContent.split('<br>');
+      const pages = [];
+      let currentPage = [];
+      let currentLineCount = 0;
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].replace(/<[^>]*>/g, '').trim(); // Remove HTML tags for line counting
+        
+        if (line.length > 0) {
+          // Estimate number of lines needed for this content
+          const estimatedLines = Math.ceil(line.length / 80); // Rough estimate based on character count
+          
+          if (currentLineCount + estimatedLines > maxLinesPerPage && currentPage.length > 0) {
+            // Add 5 blank lines to current page
+            for (let j = 0; j < 5; j++) {
+              currentPage.push('');
+            }
+            pages.push(currentPage);
+            currentPage = [];
+            currentLineCount = 0;
           }
           
-          // Calculate Y offset for each page with better spacing
-          const yOffset = -(i * effectiveHeightPx * scaleFactor);
-          const imageHeight = Math.min((contentHeight * pdfHeight) / effectiveHeightPx, contentMaxHeight);
-          
-          // Add image with proper height constraint
-          pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, imageHeight);
-          
-          // Add page footer with proper spacing (ensure it doesn't overlap content)
-          pdf.setFontSize(10);
-          pdf.setTextColor(102, 102, 102);
-          const footerY = Math.max(contentMaxHeight + 5, pdfHeight - 15);
-          pdf.text(`Page ${i + 1} of ${totalPages}`, pdfWidth - 30, footerY);
-          pdf.text('Generated by Marketincer AI Contract Generator', 10, footerY);
-
+          currentPage.push(lines[i]);
+          currentLineCount += estimatedLines;
+        } else {
+          currentPage.push(lines[i]);
+          currentLineCount += 1;
         }
       }
       
-      // Save the PDF with document type in filename
+      // Add remaining content and 5 blank lines to last page
+      if (currentPage.length > 0) {
+        for (let j = 0; j < 5; j++) {
+          currentPage.push('');
+        }
+        pages.push(currentPage);
+      }
+      
+      // Generate PDF pages
+      for (let pageNum = 0; pageNum < pages.length; pageNum++) {
+        if (pageNum > 0) {
+          pdf.addPage();
+        }
+        
+        // Add watermarks to each page
+        addWatermarks(pdf);
+        
+        // Add header on first page
+        if (pageNum === 0) {
+          pdf.setFontSize(18);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(documentType, pageWidth / 2, margin + 10, { align: 'center' });
+          
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(`Generated on ${generationDate}`, pageWidth / 2, margin + 20, { align: 'center' });
+          
+          // Add line below header
+          pdf.setLineWidth(0.5);
+          pdf.line(margin, margin + 25, pageWidth - margin, margin + 25);
+        }
+        
+        // Add content
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'normal');
+        
+        let yPosition = pageNum === 0 ? margin + 35 : margin + 10;
+        
+        for (let lineIndex = 0; lineIndex < pages[pageNum].length; lineIndex++) {
+          const line = pages[pageNum][lineIndex];
+          const cleanLine = line.replace(/<[^>]*>/g, '').trim();
+          
+          if (cleanLine.length > 0) {
+            // Handle bold text
+            if (line.includes('<strong>') && line.includes('</strong>')) {
+              pdf.setFont('helvetica', 'bold');
+            } else {
+              pdf.setFont('helvetica', 'normal');
+            }
+            
+            // Split long lines to fit page width
+            const words = cleanLine.split(' ');
+            let currentLine = '';
+            
+            for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
+              const word = words[wordIndex];
+              const testLine = currentLine + (currentLine ? ' ' : '') + word;
+              const textWidth = pdf.getTextWidth(testLine);
+              
+              if (textWidth > contentWidth && currentLine) {
+                pdf.text(currentLine, margin, yPosition);
+                yPosition += lineHeight;
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            }
+            
+            if (currentLine) {
+              pdf.text(currentLine, margin, yPosition);
+              yPosition += lineHeight;
+            }
+          } else {
+            // Empty line
+            yPosition += lineHeight;
+          }
+        }
+      }
+      
+      // Save the PDF
       const cleanDocumentType = documentType.replace(/[^a-zA-Z0-9]/g, '_');
       const fileName = `${cleanDocumentType}_${generationDate.replace(/\//g, '-')}.pdf`;
       pdf.save(fileName);
       
       // Show success message
-      alert(`PDF exported successfully with ${totalPages} page(s) and Marketincer watermark!`);
+      alert(`PDF exported successfully with ${pages.length} page(s) in standard A4 format!`);
       
     } catch (err) {
       setError(`Error exporting PDF: ${err.message}`);
