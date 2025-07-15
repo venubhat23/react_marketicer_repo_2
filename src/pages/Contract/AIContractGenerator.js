@@ -319,35 +319,23 @@ const AIContractGenerator = ({ onBack = null }) => {
       const contentWidth = pageWidth - (margin * 2);
       const contentHeight = pageHeight - (margin * 2);
       const lineHeight = 6; // 6mm line height
-      const maxLinesPerPage = Math.floor((contentHeight - 40) / lineHeight); // Reserve space for header and 5 blank lines
+             const maxLinesPerPage = Math.floor((contentHeight - 30) / lineHeight); // Reserve space for 5 blank lines
       
-      // Add diagonal watermarks function
-      const addWatermarks = (pdf) => {
-        pdf.setTextColor(200, 200, 200); // Light gray
-        pdf.setFontSize(40);
-        pdf.setFont('helvetica', 'bold');
-        
-        // Calculate diagonal watermark positions
-        const watermarkPositions = [
-          { x: pageWidth * 0.2, y: pageHeight * 0.3 },
-          { x: pageWidth * 0.6, y: pageHeight * 0.2 },
-          { x: pageWidth * 0.3, y: pageHeight * 0.6 },
-          { x: pageWidth * 0.7, y: pageHeight * 0.7 },
-          { x: pageWidth * 0.1, y: pageHeight * 0.8 },
-          { x: pageWidth * 0.8, y: pageHeight * 0.4 }
-        ];
-        
-        // Add diagonal watermarks
-        watermarkPositions.forEach(pos => {
-          pdf.text('MARKETINCER', pos.x, pos.y, {
-            angle: -45,
-            align: 'center'
-          });
-        });
-        
-        // Reset text color for content
-        pdf.setTextColor(0, 0, 0);
-      };
+             // Add single diagonal watermark function
+       const addWatermark = (pdf) => {
+         pdf.setTextColor(200, 200, 200); // Light gray
+         pdf.setFontSize(40);
+         pdf.setFont('helvetica', 'bold');
+         
+         // Add single centered diagonal watermark
+         pdf.text('MARKETINCER', pageWidth / 2, pageHeight / 2, {
+           angle: -45,
+           align: 'center'
+         });
+         
+         // Reset text color for content
+         pdf.setTextColor(0, 0, 0);
+       };
       
       // Split content into lines and pages
       const lines = processedContent.split('<br>');
@@ -388,35 +376,20 @@ const AIContractGenerator = ({ onBack = null }) => {
         pages.push(currentPage);
       }
       
-      // Generate PDF pages
-      for (let pageNum = 0; pageNum < pages.length; pageNum++) {
-        if (pageNum > 0) {
-          pdf.addPage();
-        }
-        
-        // Add watermarks to each page
-        addWatermarks(pdf);
-        
-        // Add header on first page
-        if (pageNum === 0) {
-          pdf.setFontSize(18);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(documentType, pageWidth / 2, margin + 10, { align: 'center' });
-          
-          pdf.setFontSize(12);
-          pdf.setFont('helvetica', 'normal');
-          pdf.text(`Generated on ${generationDate}`, pageWidth / 2, margin + 20, { align: 'center' });
-          
-          // Add line below header
-          pdf.setLineWidth(0.5);
-          pdf.line(margin, margin + 25, pageWidth - margin, margin + 25);
-        }
-        
-        // Add content
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'normal');
-        
-        let yPosition = pageNum === 0 ? margin + 35 : margin + 10;
+             // Generate PDF pages
+       for (let pageNum = 0; pageNum < pages.length; pageNum++) {
+         if (pageNum > 0) {
+           pdf.addPage();
+         }
+         
+         // Add single watermark to each page
+         addWatermark(pdf);
+         
+         // Add content
+         pdf.setFontSize(12);
+         pdf.setFont('helvetica', 'normal');
+         
+         let yPosition = margin + 10;
         
         for (let lineIndex = 0; lineIndex < pages[pageNum].length; lineIndex++) {
           const line = pages[pageNum][lineIndex];
