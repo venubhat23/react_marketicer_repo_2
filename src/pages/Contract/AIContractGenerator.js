@@ -253,30 +253,51 @@ const AIContractGenerator = ({ onBack = null }) => {
     try {
       setLoading(true);
       
-      // Get the actual contract content with proper formatting
-      const contractContent = generatedContract.trim();
+      // Set font properties
+      pdf.setFont('helvetica', isBold ? 'bold' : fontStyle);
+      pdf.setFontSize(fontSize);
+      pdf.setTextColor(0, 0, 0);
       
-      // Extract document type from the contract content
-      const extractDocumentType = (content) => {
-        // Look for common patterns to extract document type
-        const patterns = [
-          /\*\*"?(OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?\*\*/i,
-          /\*\*"?(OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?\*\*/i,
-          /^[\s\*]*"?(OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?[\s\*]*$/im,
-          /This\s+(Offer|Service|Employment|Licensing|Partnership|Lease|Purchase|Consultancy)?\s*Agreement/i
-        ];
+      // Handle title alignment
+      if (isTitle) {
+        checkNewPage(lineHeight * 2);
+        const textWidth = pdf.getTextWidth(text);
+        const x = align === 'center' ? (pdfWidth - textWidth) / 2 : margin;
+        pdf.text(text, x, currentY);
+        currentY += lineHeight * 1.5;
+      } else {
+        // Split text into lines that fit within the page width
+        const words = text.split(' ');
+        let currentLine = '';
         
-        for (const pattern of patterns) {
-          const match = content.match(pattern);
-          if (match) {
-            return match[1] || match[0].replace(/[\*\"]/g, '').trim();
+        for (const word of words) {
+          const testLine = currentLine + (currentLine ? ' ' : '') + word;
+          const textWidth = pdf.getTextWidth(testLine);
+          
+          if (textWidth > contentWidth - 10) {
+            // Current line is full, print it and start new line
+            if (currentLine) {
+              checkNewPage();
+              pdf.text(currentLine, margin, currentY);
+              currentY += lineHeight;
+              currentLine = word;
+            } else {
+              // Single word is too long, force it on the line
+              checkNewPage();
+              pdf.text(word, margin, currentY);
+              currentY += lineHeight;
+              currentLine = '';
+            }
+          } else {
+            currentLine = testLine;
           }
         }
         
-        // Fallback: try to find any capitalized text that might be a title
-        const titleMatch = content.match(/^[\s\*]*([A-Z][A-Z\s]+AGREEMENT?)[\s\*]*$/m);
-        if (titleMatch) {
-          return titleMatch[1].trim();
+        // Print the remaining line
+        if (currentLine) {
+          checkNewPage();
+          pdf.text(currentLine, margin, currentY);
+          currentY += lineHeight;
         }
         
         return 'AGREEMENT'; // Default fallback
@@ -430,6 +451,7 @@ const AIContractGenerator = ({ onBack = null }) => {
             yPosition += lineHeight;
           }
         }
+        continue;
       }
       
       // Save the PDF
@@ -440,13 +462,51 @@ const AIContractGenerator = ({ onBack = null }) => {
       // Show success message
       alert(`PDF exported successfully with ${pages.length} page(s) in standard A4 format!`);
       
-    } catch (err) {
-      setError(`Error exporting PDF: ${err.message}`);
-      console.error('Error exporting PDF:', err);
-    } finally {
-      setLoading(false);
+      // Check for WHEREAS clauses
+      if (cleanLine.startsWith('WHEREAS')) {
+        addFormattedText(cleanLine, {
+          fontSize: 10,
+          addSpaceBefore: lineHeight,
+          addSpaceAfter: lineHeight * 0.5
+        });
+        continue;
+      }
+      
+      // Regular paragraph text
+      if (cleanLine.length > 0) {
+        const spaceBefore = inRecitals ? lineHeight * 0.5 : lineHeight * 0.3;
+        addFormattedText(cleanLine, {
+          fontSize: 10,
+          addSpaceBefore: spaceBefore,
+          addSpaceAfter: lineHeight * 0.3
+        });
+      }
     }
-  };
+    
+    // Add page numbers
+    const totalPages = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(128, 128, 128);
+      pdf.text(`Page ${i} of ${totalPages}`, pdfWidth - 25, pdfHeight - 10);
+    }
+    
+    // Save the PDF
+    const cleanDocumentType = documentType.replace(/[^a-zA-Z0-9]/g, '_');
+    const fileName = `${cleanDocumentType}_${generationDate.replace(/\//g, '-')}.pdf`;
+    pdf.save(fileName);
+    
+    alert(`PDF exported successfully with ${totalPages} page(s)!`);
+    
+  } catch (err) {
+    setError(`Error exporting PDF: ${err.message}`);
+    console.error('Error exporting PDF:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const renderRightPanel = () => {
     // Always show content if available (for both edit mode and template mode)

@@ -44,7 +44,7 @@ function App() {
 
       <AuthProvider>
         <Routes>
-          {/* <Route path="/" element={<LandingPage />} /> */}
+          <Route path="/" element={<InstagramAnalytics />} />
           
           <Route path="/dashboard" element={
               <ProtectedRoute>
