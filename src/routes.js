@@ -21,7 +21,8 @@ import DataDeletion from "@/layouts/dataDeletion";
 import PrivacyPolicy from "@/layouts/privacyPolicy";
 import TermsAndConditions from "@/layouts/TermsAndConditions";
 import Home from "@/layouts/home";
-import PurchaseOrders from "@/layouts/purchaseOrder"
+import PurchaseOrders from "@/layouts/purchaseOrder";
+import Marketplace from "./pages/Marketplace"
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -126,6 +127,15 @@ const routes = [
     route: "/posts",
     // component: <Analytics />,
     component: <ProtectedRoute element={<CreatePost />} />, // Protected
+    roles: ["brand", "admin", "influencer"]
+  },
+  {
+    type: "collapse",
+    name: "Marketplace",
+    key: "marketplace",
+    icon: <Icon fontSize="small">store</Icon>,
+    route: "/marketplace",
+    component: <ProtectedRoute element={<Marketplace />} />, // Protected
     roles: ["brand", "admin", "influencer"]
   },
   {

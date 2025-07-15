@@ -27,6 +27,7 @@ import ContractPage from './pages/Contract/ContractPage';
 import Discover from './pages/Discover';
 import AIContractGenerator from './pages/Contract/AIContractGenerator';
 import MarketplaceModule from './pages/MarketPlace/MarketplaceModule';
+import Marketplace from './pages/Marketplace';
 
 function App() { 
 
@@ -100,7 +101,7 @@ function App() {
           } />
           <Route path="/marketplace" element={
             <ProtectedRoute>
-              <MarketplaceModule />
+              <Marketplace />
             </ProtectedRoute>
           } />
           <Route path="/login" element={<Login />} />
