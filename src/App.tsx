@@ -26,6 +26,7 @@ import FullAnalytics from './pages/Profile/FullAnalytics';
 import ContractPage from './pages/Contract/ContractPage';
 import Discover from './pages/Discover';
 import AIContractGenerator from './pages/Contract/AIContractGenerator';
+import MarketplaceModule from './pages/MarketPlace/MarketplaceModule';
 
 function App() { 
 
@@ -95,6 +96,11 @@ function App() {
           <Route path="/ai-generator" element={
             <ProtectedRoute>
               <AIContractGenerator />
+            </ProtectedRoute>
+          } />
+          <Route path="/marketplace" element={
+            <ProtectedRoute>
+              <MarketplaceModule />
             </ProtectedRoute>
           } />
           <Route path="/login" element={<Login />} />
