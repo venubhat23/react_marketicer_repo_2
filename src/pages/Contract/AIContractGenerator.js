@@ -243,122 +243,15 @@ const AIContractGenerator = ({ onBack = null }) => {
     return 'Generate AI Contract';
   };
 
-  // PDF Export function with watermarks
-// Updated PDF Export function with simplified A4 layout
-// Fixed PDF Export function with proper page breaks and watermark
-// Fixed PDF Export function with proper page breaks and watermark
-const handleExportPDF = async () => {
-  if (!generatedContract) {
-    setError('No contract content to export');
-    return;
-  }
+  // PDF Export function with simplified A4 layout
+  const handleExportPDF = async () => {
+    if (!generatedContract) {
+      setError('No contract content to export');
+      return;
+    }
 
-  try {
-    setLoading(true);
-    
-    // Get the actual contract content with proper formatting
-    const contractContent = generatedContract.trim();
-    
-    // Extract document type from the contract content
-    const extractDocumentType = (content) => {
-      const patterns = [
-        /\*\*"?(COLLABORATION AGREEMENT|OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?\*\*/i,
-        /^[\s\*]*"?(COLLABORATION AGREEMENT|OFFER AGREEMENT|SERVICE AGREEMENT|EMPLOYMENT AGREEMENT|LICENSING AGREEMENT|PARTNERSHIP AGREEMENT|LEASE AGREEMENT|PURCHASE AGREEMENT|CONSULTANCY AGREEMENT|AGREEMENT)"?[\s\*]*$/im,
-        /This\s+(Collaboration|Offer|Service|Employment|Licensing|Partnership|Lease|Purchase|Consultancy)?\s*Agreement/i
-      ];
-      
-      for (const pattern of patterns) {
-        const match = content.match(pattern);
-        if (match) {
-          return match[1] || match[0].replace(/[\*\"]/g, '').trim();
-        }
-      }
-      
-      const titleMatch = content.match(/^[\s\*]*([A-Z][A-Z\s]+AGREEMENT?)[\s\*]*$/m);
-      if (titleMatch) {
-        return titleMatch[1].trim();
-      }
-      
-      return 'AGREEMENT';
-    };
-    
-    const documentType = extractDocumentType(contractContent);
-    
-    // Generate current date
-    const now = new Date();
-    const generationDate = now.toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-    
-    // Create PDF using jsPDF
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true
-    });
-    
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    const margin = 20;
-    const contentWidth = pdfWidth - (margin * 2);
-    const lineHeight = 6;
-    let currentY = margin;
-    
-    // Add watermark function
-    const addWatermark = (pdf) => {
-      pdf.saveGraphicsState();
-      pdf.setGState(new pdf.GState({opacity: 0.05}));
-      pdf.setTextColor(0, 0, 0);
-      pdf.setFontSize(60);
-      pdf.setFont('helvetica', 'bold');
-      
-      // Calculate center position and rotate
-      const centerX = pdfWidth / 2;
-      const centerY = pdfHeight / 2;
-      
-      pdf.text('MARKETINCER', centerX, centerY, {
-        angle: -45,
-        align: 'center',
-        baseline: 'middle'
-      });
-      
-      pdf.restoreGraphicsState();
-    };
-    
-    // Add watermark to first page
-    addWatermark(pdf);
-    
-    // Function to check if we need a new page
-    const checkNewPage = (neededHeight = lineHeight) => {
-      if (currentY + neededHeight > pdfHeight - margin) {
-        pdf.addPage();
-        addWatermark(pdf);
-        currentY = margin;
-        return true;
-      }
-      return false;
-    };
-    
-    // Function to add text with proper wrapping and formatting
-    const addFormattedText = (text, options = {}) => {
-      const {
-        fontSize = 10,
-        fontStyle = 'normal',
-        align = 'left',
-        isBold = false,
-        isTitle = false,
-        addSpaceBefore = 0,
-        addSpaceAfter = 0
-      } = options;
-      
-      // Add space before if specified
-      if (addSpaceBefore > 0) {
-        currentY += addSpaceBefore;
-        checkNewPage();
-      }
+    try {
+      setLoading(true);
       
       // Set font properties
       pdf.setFont('helvetica', isBold ? 'bold' : fontStyle);
@@ -406,88 +299,168 @@ const handleExportPDF = async () => {
           pdf.text(currentLine, margin, currentY);
           currentY += lineHeight;
         }
-      }
-      
-      // Add space after if specified
-      if (addSpaceAfter > 0) {
-        currentY += addSpaceAfter;
-      }
-    };
-    
-    // Parse and format the contract content
-    const lines = contractContent.split('\n');
-    let inRecitals = false;
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      
-      if (line === '') {
-        // Empty line - add small space
-        currentY += lineHeight * 0.5;
-        continue;
-      }
-      
-      // Remove markdown formatting for processing
-      const cleanLine = line.replace(/\*\*/g, '');
-      
-      // Check for main title (COLLABORATION AGREEMENT, etc.)
-      if (cleanLine.includes('AGREEMENT') && cleanLine.length < 50 && !cleanLine.includes('(')) {
-        addFormattedText(cleanLine, {
-          fontSize: 16,
-          isBold: true,
-          isTitle: true,
-          align: 'center',
-          addSpaceBefore: lineHeight,
-          addSpaceAfter: lineHeight * 2
-        });
-        continue;
-      }
-      
-      // Check for article headers
-      if (cleanLine.startsWith('ARTICLE') && cleanLine.includes(':')) {
-        addFormattedText(cleanLine, {
-          fontSize: 12,
-          isBold: true,
-          addSpaceBefore: lineHeight * 2,
-          addSpaceAfter: lineHeight
-        });
-        continue;
-      }
-      
-      // Check for section headers (BETWEEN:, RECITALS, etc.)
-      if (cleanLine === 'BETWEEN:' || cleanLine === 'RECITALS' || cleanLine === 'AND') {
-        addFormattedText(cleanLine, {
-          fontSize: 11,
-          isBold: true,
-          addSpaceBefore: lineHeight * 1.5,
-          addSpaceAfter: lineHeight
-        });
         
-        if (cleanLine === 'RECITALS') {
-          inRecitals = true;
+        return 'AGREEMENT'; // Default fallback
+      };
+      
+      const documentType = extractDocumentType(contractContent);
+      
+      // Generate current date
+      const now = new Date();
+      const generationDate = now.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      
+      // Process contract content to preserve formatting
+      const processedContent = contractContent
+        // Handle bold text patterns
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        // Handle line breaks and paragraphs
+        .replace(/\n\s*\n/g, '</p><p style="margin: 16px 0; page-break-inside: avoid; orphans: 3; widows: 3;">')
+        .replace(/\n/g, '<br>')
+        // Handle article/section headers
+        .replace(/(<strong>ARTICLE\s+\d+[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; page-break-before: auto; margin-top: 24px; margin-bottom: 16px;">$1</div>')
+        .replace(/(<strong>[^<]*AGREEMENT[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 24px; margin-bottom: 16px; text-align: center;">$1</div>')
+        .replace(/^/, '<p style="margin: 16px 0; page-break-inside: avoid; orphans: 3; widows: 3;">')
+        .replace(/$/, '</p>');
+      
+      // Create PDF with proper A4 format
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20; // 20mm margin on all sides
+      const contentWidth = pageWidth - (margin * 2);
+      const contentHeight = pageHeight - (margin * 2);
+      const lineHeight = 6; // 6mm line height
+             const maxLinesPerPage = Math.floor((contentHeight - 30) / lineHeight); // Reserve space for 5 blank lines
+      
+             // Add single diagonal watermark function
+       const addWatermark = (pdf) => {
+         pdf.setTextColor(200, 200, 200); // Light gray
+         pdf.setFontSize(40);
+         pdf.setFont('helvetica', 'bold');
+         
+         // Add single centered diagonal watermark
+         pdf.text('MARKETINCER', pageWidth / 2, pageHeight / 2, {
+           angle: -45,
+           align: 'center'
+         });
+         
+         // Reset text color for content
+         pdf.setTextColor(0, 0, 0);
+       };
+      
+      // Split content into lines and pages
+      const lines = processedContent.split('<br>');
+      const pages = [];
+      let currentPage = [];
+      let currentLineCount = 0;
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].replace(/<[^>]*>/g, '').trim(); // Remove HTML tags for line counting
+        
+        if (line.length > 0) {
+          // Estimate number of lines needed for this content
+          const estimatedLines = Math.ceil(line.length / 80); // Rough estimate based on character count
+          
+          if (currentLineCount + estimatedLines > maxLinesPerPage && currentPage.length > 0) {
+            // Add 5 blank lines to current page
+            for (let j = 0; j < 5; j++) {
+              currentPage.push('');
+            }
+            pages.push(currentPage);
+            currentPage = [];
+            currentLineCount = 0;
+          }
+          
+          currentPage.push(lines[i]);
+          currentLineCount += estimatedLines;
+        } else {
+          currentPage.push(lines[i]);
+          currentLineCount += 1;
+        }
+      }
+      
+      // Add remaining content and 5 blank lines to last page
+      if (currentPage.length > 0) {
+        for (let j = 0; j < 5; j++) {
+          currentPage.push('');
+        }
+        pages.push(currentPage);
+      }
+      
+             // Generate PDF pages
+       for (let pageNum = 0; pageNum < pages.length; pageNum++) {
+         if (pageNum > 0) {
+           pdf.addPage();
+         }
+         
+         // Add single watermark to each page
+         addWatermark(pdf);
+         
+         // Add content
+         pdf.setFontSize(12);
+         pdf.setFont('helvetica', 'normal');
+         
+         let yPosition = margin + 10;
+        
+        for (let lineIndex = 0; lineIndex < pages[pageNum].length; lineIndex++) {
+          const line = pages[pageNum][lineIndex];
+          const cleanLine = line.replace(/<[^>]*>/g, '').trim();
+          
+          if (cleanLine.length > 0) {
+            // Handle bold text
+            if (line.includes('<strong>') && line.includes('</strong>')) {
+              pdf.setFont('helvetica', 'bold');
+            } else {
+              pdf.setFont('helvetica', 'normal');
+            }
+            
+            // Split long lines to fit page width
+            const words = cleanLine.split(' ');
+            let currentLine = '';
+            
+            for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
+              const word = words[wordIndex];
+              const testLine = currentLine + (currentLine ? ' ' : '') + word;
+              const textWidth = pdf.getTextWidth(testLine);
+              
+              if (textWidth > contentWidth && currentLine) {
+                pdf.text(currentLine, margin, yPosition);
+                yPosition += lineHeight;
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            }
+            
+            if (currentLine) {
+              pdf.text(currentLine, margin, yPosition);
+              yPosition += lineHeight;
+            }
+          } else {
+            // Empty line
+            yPosition += lineHeight;
+          }
         }
         continue;
       }
       
-      // Check for party names (RAM, SHAM, etc.)
-      if (cleanLine.match(/^[A-Z]+\s*\(hereinafter/)) {
-        addFormattedText(cleanLine, {
-          fontSize: 10,
-          addSpaceBefore: lineHeight,
-          addSpaceAfter: lineHeight
-        });
-        continue;
-      }
+      // Save the PDF
+      const cleanDocumentType = documentType.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `${cleanDocumentType}_${generationDate.replace(/\//g, '-')}.pdf`;
+      pdf.save(fileName);
       
-      // Check for numbered clauses
-      if (cleanLine.match(/^\d+\.\d+\s+/) || cleanLine.match(/^\d+\.\s+/)) {
-        addFormattedText(cleanLine, {
-          fontSize: 10,
-          addSpaceBefore: lineHeight,
-          addSpaceAfter: lineHeight * 0.5
-        });
-        continue;
-      }
+      // Show success message
+      alert(`PDF exported successfully with ${pages.length} page(s) in standard A4 format!`);
       
       // Check for WHEREAS clauses
       if (cleanLine.startsWith('WHEREAS')) {
