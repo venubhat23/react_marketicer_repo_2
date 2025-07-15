@@ -302,9 +302,9 @@ const handleExportPDF = async () => {
     
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
-    const margin = 20;
+    const margin = 25; // Increased margin for better alignment
     const contentWidth = pdfWidth - (margin * 2);
-    const lineHeight = 6;
+    const baseLineHeight = 5.5; // Adjusted to match preview line height better
     let currentY = margin;
     
     // Add watermark function
@@ -332,7 +332,7 @@ const handleExportPDF = async () => {
     addWatermark(pdf);
     
     // Function to check if we need a new page
-    const checkNewPage = (neededHeight = lineHeight) => {
+    const checkNewPage = (neededHeight = baseLineHeight) => {
       if (currentY + neededHeight > pdfHeight - margin) {
         pdf.addPage();
         addWatermark(pdf);
@@ -345,7 +345,7 @@ const handleExportPDF = async () => {
     // Function to add text with proper wrapping and formatting
     const addFormattedText = (text, options = {}) => {
       const {
-        fontSize = 10,
+        fontSize = 11, // Increased default font size to better match preview
         fontStyle = 'normal',
         align = 'left',
         isBold = false,
@@ -354,16 +354,19 @@ const handleExportPDF = async () => {
         addSpaceAfter = 0
       } = options;
       
+      // Calculate line height based on font size (1.6 ratio like preview)
+      const lineHeight = fontSize * 0.4; // Adjusted for better spacing
+      
       // Add space before if specified
       if (addSpaceBefore > 0) {
         currentY += addSpaceBefore;
         checkNewPage();
       }
       
-      // Set font properties
+      // Set font properties to match preview
       pdf.setFont('helvetica', isBold ? 'bold' : fontStyle);
       pdf.setFontSize(fontSize);
-      pdf.setTextColor(0, 0, 0);
+      pdf.setTextColor(51, 51, 51); // Match preview color (#333)
       
       // Handle title alignment
       if (isTitle) {
@@ -371,28 +374,25 @@ const handleExportPDF = async () => {
         const textWidth = pdf.getTextWidth(text);
         const x = align === 'center' ? (pdfWidth - textWidth) / 2 : margin;
         pdf.text(text, x, currentY);
-        currentY += lineHeight * 1.5;
+        currentY += lineHeight * 1.8; // Better spacing for titles
       } else {
-        // Split text into lines that fit within the page width
+        // Split text into lines that fit within the page width with justified alignment
         const words = text.split(' ');
         let currentLine = '';
+        let lines = [];
         
         for (const word of words) {
           const testLine = currentLine + (currentLine ? ' ' : '') + word;
           const textWidth = pdf.getTextWidth(testLine);
           
-          if (textWidth > contentWidth - 10) {
-            // Current line is full, print it and start new line
+          if (textWidth > contentWidth - 5) { // Reduced margin for better text width
+            // Current line is full, save it and start new line
             if (currentLine) {
-              checkNewPage();
-              pdf.text(currentLine, margin, currentY);
-              currentY += lineHeight;
+              lines.push(currentLine);
               currentLine = word;
             } else {
               // Single word is too long, force it on the line
-              checkNewPage();
-              pdf.text(word, margin, currentY);
-              currentY += lineHeight;
+              lines.push(word);
               currentLine = '';
             }
           } else {
@@ -400,10 +400,38 @@ const handleExportPDF = async () => {
           }
         }
         
-        // Print the remaining line
+        // Add the remaining line
         if (currentLine) {
+          lines.push(currentLine);
+        }
+        
+        // Print all lines with proper spacing
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
           checkNewPage();
-          pdf.text(currentLine, margin, currentY);
+          
+          // For justified alignment, calculate word spacing for all lines except the last
+          if (align === 'justify' && i < lines.length - 1 && line.includes(' ')) {
+            const wordsInLine = line.split(' ');
+            if (wordsInLine.length > 1) {
+              const totalTextWidth = wordsInLine.reduce((total, word) => total + pdf.getTextWidth(word), 0);
+              const availableSpace = contentWidth - totalTextWidth - 5;
+              const gaps = wordsInLine.length - 1;
+              const gapWidth = gaps > 0 ? availableSpace / gaps : 0;
+              
+              let xPos = margin;
+              for (let j = 0; j < wordsInLine.length; j++) {
+                pdf.text(wordsInLine[j], xPos, currentY);
+                xPos += pdf.getTextWidth(wordsInLine[j]) + gapWidth;
+              }
+            } else {
+              pdf.text(line, margin, currentY);
+            }
+          } else {
+            // Regular left alignment or single word
+            pdf.text(line, margin, currentY);
+          }
+          
           currentY += lineHeight;
         }
       }
@@ -423,7 +451,7 @@ const handleExportPDF = async () => {
       
       if (line === '') {
         // Empty line - add small space
-        currentY += lineHeight * 0.5;
+        currentY += baseLineHeight * 0.5;
         continue;
       }
       
@@ -433,12 +461,12 @@ const handleExportPDF = async () => {
       // Check for main title (COLLABORATION AGREEMENT, etc.)
       if (cleanLine.includes('AGREEMENT') && cleanLine.length < 50 && !cleanLine.includes('(')) {
         addFormattedText(cleanLine, {
-          fontSize: 16,
+          fontSize: 18, // Increased for better visibility
           isBold: true,
           isTitle: true,
           align: 'center',
-          addSpaceBefore: lineHeight,
-          addSpaceAfter: lineHeight * 2
+          addSpaceBefore: baseLineHeight,
+          addSpaceAfter: baseLineHeight * 2.5
         });
         continue;
       }
@@ -446,10 +474,10 @@ const handleExportPDF = async () => {
       // Check for article headers
       if (cleanLine.startsWith('ARTICLE') && cleanLine.includes(':')) {
         addFormattedText(cleanLine, {
-          fontSize: 12,
+          fontSize: 13, // Increased for better hierarchy
           isBold: true,
-          addSpaceBefore: lineHeight * 2,
-          addSpaceAfter: lineHeight
+          addSpaceBefore: baseLineHeight * 2,
+          addSpaceAfter: baseLineHeight
         });
         continue;
       }
@@ -457,10 +485,10 @@ const handleExportPDF = async () => {
       // Check for section headers (BETWEEN:, RECITALS, etc.)
       if (cleanLine === 'BETWEEN:' || cleanLine === 'RECITALS' || cleanLine === 'AND') {
         addFormattedText(cleanLine, {
-          fontSize: 11,
+          fontSize: 12, // Increased for better hierarchy
           isBold: true,
-          addSpaceBefore: lineHeight * 1.5,
-          addSpaceAfter: lineHeight
+          addSpaceBefore: baseLineHeight * 1.5,
+          addSpaceAfter: baseLineHeight
         });
         
         if (cleanLine === 'RECITALS') {
@@ -472,9 +500,9 @@ const handleExportPDF = async () => {
       // Check for party names (RAM, SHAM, etc.)
       if (cleanLine.match(/^[A-Z]+\s*\(hereinafter/)) {
         addFormattedText(cleanLine, {
-          fontSize: 10,
-          addSpaceBefore: lineHeight,
-          addSpaceAfter: lineHeight
+          fontSize: 11, // Increased for consistency
+          addSpaceBefore: baseLineHeight,
+          addSpaceAfter: baseLineHeight
         });
         continue;
       }
@@ -482,9 +510,10 @@ const handleExportPDF = async () => {
       // Check for numbered clauses
       if (cleanLine.match(/^\d+\.\d+\s+/) || cleanLine.match(/^\d+\.\s+/)) {
         addFormattedText(cleanLine, {
-          fontSize: 10,
-          addSpaceBefore: lineHeight,
-          addSpaceAfter: lineHeight * 0.5
+          fontSize: 11, // Increased for consistency
+          align: 'justify', // Add justified alignment for clauses
+          addSpaceBefore: baseLineHeight,
+          addSpaceAfter: baseLineHeight * 0.5
         });
         continue;
       }
@@ -492,20 +521,22 @@ const handleExportPDF = async () => {
       // Check for WHEREAS clauses
       if (cleanLine.startsWith('WHEREAS')) {
         addFormattedText(cleanLine, {
-          fontSize: 10,
-          addSpaceBefore: lineHeight,
-          addSpaceAfter: lineHeight * 0.5
+          fontSize: 11, // Increased for consistency
+          align: 'justify', // Add justified alignment for WHEREAS clauses
+          addSpaceBefore: baseLineHeight,
+          addSpaceAfter: baseLineHeight * 0.5
         });
         continue;
       }
       
       // Regular paragraph text
       if (cleanLine.length > 0) {
-        const spaceBefore = inRecitals ? lineHeight * 0.5 : lineHeight * 0.3;
+        const spaceBefore = inRecitals ? baseLineHeight * 0.5 : baseLineHeight * 0.3;
         addFormattedText(cleanLine, {
-          fontSize: 10,
+          fontSize: 11, // Increased for consistency
+          align: 'justify', // Add justified alignment for regular text
           addSpaceBefore: spaceBefore,
-          addSpaceAfter: lineHeight * 0.3
+          addSpaceAfter: baseLineHeight * 0.3
         });
       }
     }
@@ -588,8 +619,8 @@ const handleExportPDF = async () => {
                 },
                 '& .MuiInputBase-input': {
                   fontSize: '14px',
-                  lineHeight: '1.5',
-                  fontFamily: 'monospace',
+                  lineHeight: '1.6', // Match the preview line height
+                  fontFamily: 'Arial, sans-serif', // Match the preview font
                 },
               }}
             />
@@ -627,10 +658,11 @@ const handleExportPDF = async () => {
             
             <Box
               sx={{
-                textAlign: 'left',
+                textAlign: 'justify', // Changed to justify for better text alignment
                 lineHeight: 1.6,
                 fontSize: '14px',
                 color: '#333',
+                fontFamily: 'Arial, sans-serif', // Added consistent font family
                 '& strong': {
                   fontWeight: 700,
                   color: '#1976d2',
