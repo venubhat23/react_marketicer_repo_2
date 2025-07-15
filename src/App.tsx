@@ -104,6 +104,7 @@ function App() {
               <Marketplace />
             </ProtectedRoute>
           } />
+
           <Route path="/login" element={<Login />} />
           <Route path="/sign-up" element={<SignUp />} />
 
