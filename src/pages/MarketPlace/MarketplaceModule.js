@@ -20,7 +20,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Skeleton from "@mui/material/Skeleton";
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Editor from "../../components/Editor";
-import Sidebar from "../../components/Sidebar";
+import Layout from "../../components/Layout";
 
 const MarketplaceModule = () => {
   // User role - You can get this from your auth context
@@ -320,21 +320,52 @@ const MarketplaceModule = () => {
 
   // Brand Listing View
   const BrandListingView = () => (
-    <Box sx={{ padding: '20px' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
+    <Box sx={{ 
+      display: "flex", 
+      flexDirection: "column", 
+      alignItems: "center", 
+      width: "100%" 
+    }}>
+      {/* Title Section */}
+      <Box sx={{ textAlign: "center", mb: 3, maxWidth: 800 }}>
+        <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold', mb: 1 }}>
           My Marketplace Posts
         </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Manage and track your marketplace posts, collaborations, and campaign performance.
+        </Typography>
+      </Box>
+
+      {/* Action Button */}
+      <Box sx={{ mb: 3 }}>
         <Button 
           variant="contained" 
           startIcon={<AddIcon />}
           onClick={() => setCurrentView('create')}
+          sx={{ 
+            bgcolor: '#882AFF', 
+            '&:hover': { bgcolor: '#7625e6' },
+            borderRadius: 2,
+            px: 4,
+            py: 1.5
+          }}
         >
           Create New Post
         </Button>
       </Box>
 
-      <TableContainer component={Paper} sx={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+      {/* Main Content */}
+      <Paper
+        sx={{
+          width: "100%",
+          maxWidth: 1200,
+          borderRadius: 2,
+          border: "1px solid #e0e0e0",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          overflow: 'hidden'
+        }}
+      >
+        <TableContainer>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: '#f5f5f5' }}>
@@ -401,7 +432,8 @@ const MarketplaceModule = () => {
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+        </TableContainer>
+      </Paper>
 
       <Menu
         anchorEl={anchorEl}
@@ -422,12 +454,24 @@ const MarketplaceModule = () => {
 
   // Influencer Feed View
   const InfluencerFeedView = () => (
-    <Box sx={{ padding: '20px' }}>
-      <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold', mb: 3 }}>
-        Marketplace Feed
-      </Typography>
+    <Box sx={{ 
+      display: "flex", 
+      flexDirection: "column", 
+      alignItems: "center", 
+      width: "100%" 
+    }}>
+      {/* Title Section */}
+      <Box sx={{ textAlign: "center", mb: 3, maxWidth: 800 }}>
+        <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold', mb: 1 }}>
+          Marketplace Feed
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Discover exciting collaboration opportunities from brands and start building meaningful partnerships.
+        </Typography>
+      </Box>
       
-      <Grid container spacing={3}>
+      <Box sx={{ width: "100%", maxWidth: 1200 }}>
+        <Grid container spacing={3}>
         {marketplacePosts.map((post) => (
           <Grid item xs={12} md={6} lg={4} key={post.id}>
             <Card sx={{ 
@@ -512,29 +556,42 @@ const MarketplaceModule = () => {
             </Card>
           </Grid>
         ))}
-      </Grid>
+        </Grid>
+      </Box>
     </Box>
   );
 
   // Create Post View
   const CreatePostView = () => (
-    <Box sx={{ padding: '20px' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <IconButton 
-          onClick={() => setCurrentView('listing')}
-          sx={{ mr: 2, color: '#882AFF' }}
-        >
-          <ArrowLeftIcon />
-        </IconButton>
-        <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
-          Create New Post
+    <Box sx={{ 
+      display: "flex", 
+      flexDirection: "column", 
+      alignItems: "center", 
+      width: "100%" 
+    }}>
+      {/* Header Section */}
+      <Box sx={{ textAlign: "center", mb: 3, maxWidth: 800 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+          <IconButton 
+            onClick={() => setCurrentView('listing')}
+            sx={{ mr: 2, color: '#882AFF' }}
+          >
+            <ArrowLeftIcon />
+          </IconButton>
+          <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
+            Create New Post
+          </Typography>
+        </Box>
+        <Typography variant="body1" color="text.secondary">
+          Create a new marketplace post to collaborate with influencers and grow your brand.
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
-        {/* Form Section */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+      <Box sx={{ width: "100%", maxWidth: 1200 }}>
+        <Grid container spacing={3}>
+          {/* Form Section */}
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 2, color: '#882AFF' }}>
               Post Details
             </Typography>
@@ -755,7 +812,8 @@ const MarketplaceModule = () => {
             </Card>
           </Paper>
         </Grid>
-      </Grid>
+        </Grid>
+      </Box>
     </Box>
   );
 
@@ -837,64 +895,91 @@ const MarketplaceModule = () => {
   );
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
-      <Grid container>
-        <Grid item xs={12} md={2}>
-          <Sidebar />
-        </Grid>
-        <Grid item xs={12} md={10}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              backgroundColor: '#091a48',
-              borderRadius: 0
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h6" sx={{ color: '#fff' }}>
-                Marketplace {userRole === 'brand' ? '- Brand Dashboard' : '- Influencer Feed'}
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  variant={userRole === 'brand' ? 'contained' : 'outlined'}
-                  onClick={() => setUserRole('brand')}
-                  sx={{ 
-                    color: userRole === 'brand' ? '#000' : '#fff',
-                    bgcolor: userRole === 'brand' ? '#fff' : 'transparent',
-                    borderColor: '#fff'
-                  }}
-                >
-                  Brand View
-                </Button>
-                <Button
-                  variant={userRole === 'influencer' ? 'contained' : 'outlined'}
-                  onClick={() => setUserRole('influencer')}
-                  sx={{ 
-                    color: userRole === 'influencer' ? '#000' : '#fff',
-                    bgcolor: userRole === 'influencer' ? '#fff' : 'transparent',
-                    borderColor: '#fff'
-                  }}
-                >
-                  Influencer View
-                </Button>
-              </Box>
+    <Layout>
+      <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100vh' }}>
+        <Paper
+          elevation={0}
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            p: 1,
+            backgroundColor: '#091a48',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 0
+          }}
+        >
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <Typography variant="h6" sx={{ color: '#fff' }}>
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="back"
+                sx={{ mr: 2, color: '#fff' }}
+              >
+                <ArrowLeftIcon />
+              </IconButton>
+              Marketplace {userRole === 'brand' ? '- Brand Dashboard' : '- Influencer Feed'}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant={userRole === 'brand' ? 'contained' : 'outlined'}
+                onClick={() => setUserRole('brand')}
+                sx={{ 
+                  color: userRole === 'brand' ? '#000' : '#fff',
+                  bgcolor: userRole === 'brand' ? '#fff' : 'transparent',
+                  borderColor: '#fff'
+                }}
+              >
+                Brand View
+              </Button>
+              <Button
+                variant={userRole === 'influencer' ? 'contained' : 'outlined'}
+                onClick={() => setUserRole('influencer')}
+                sx={{ 
+                  color: userRole === 'influencer' ? '#000' : '#fff',
+                  bgcolor: userRole === 'influencer' ? '#fff' : 'transparent',
+                  borderColor: '#fff'
+                }}
+              >
+                Influencer View
+              </Button>
+              <IconButton size="large" sx={{ color: '#fff' }}>
+                <NotificationsIcon />
+              </IconButton>
+              <IconButton size="large" sx={{ color: '#fff' }}>
+                <AccountCircleIcon />
+              </IconButton>
             </Box>
-          </Paper>
+          </Box>
+        </Paper>
 
-          {/* Main Content */}
-          {userRole === 'brand' ? (
-            currentView === 'listing' ? <BrandListingView /> : <CreatePostView />
-          ) : (
-            <InfluencerFeedView />
-          )}
-        </Grid>
-      </Grid>
+        <Box
+          sx={{
+            p: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ width: "100%", maxWidth: 1200 }}>
+            {/* Main Content */}
+            {userRole === 'brand' ? (
+              currentView === 'listing' ? <BrandListingView /> : <CreatePostView />
+            ) : (
+              <InfluencerFeedView />
+            )}
+          </Box>
+        </Box>
 
-      {/* Dialogs */}
-      <BidDialog />
-      <BidsViewDialog />
-    </Box>
+        {/* Dialogs */}
+        <BidDialog />
+        <BidsViewDialog />
+      </Box>
+    </Layout>
   );
 };
 
