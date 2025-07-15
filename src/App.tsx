@@ -97,11 +97,6 @@ function App() {
               <AIContractGenerator />
             </ProtectedRoute>
           } />
-          <Route path="/marketplace" element={
-            <ProtectedRoute>
-              <MarketplaceModule />
-            </ProtectedRoute>
-          } />
           <Route path="/login" element={<Login />} />
           <Route path="/sign-up" element={<SignUp />} />
 
