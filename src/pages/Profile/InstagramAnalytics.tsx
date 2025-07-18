@@ -5,7 +5,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid2 as Grid,
   Avatar,
   Chip,
   Button,
@@ -22,6 +21,7 @@ import {
   Stack,
   LinearProgress,
 } from '@mui/material';
+import { Grid } from '@mui/material';
 import {
   TrendingUp,
   TrendingDown,
@@ -248,7 +248,7 @@ const InstagramAnalytics: React.FC = () => {
 
         {/* Stats */}
         <Grid container spacing={3} sx={{ mt: 2 }}>
-          <Grid item xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
                 {formatNumber(profileData.followers)}
@@ -267,7 +267,7 @@ const InstagramAnalytics: React.FC = () => {
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
                 {profileData.following}
@@ -286,7 +286,7 @@ const InstagramAnalytics: React.FC = () => {
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
                 {profileData.posts}
@@ -311,7 +311,7 @@ const InstagramAnalytics: React.FC = () => {
       {/* Metrics Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {metricsData.map((metric, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Grid xs={12} sm={6} md={3} key={index}>
             <Card sx={{ p: 2, height: '100%' }}>
               <CardContent sx={{ p: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
@@ -336,7 +336,7 @@ const InstagramAnalytics: React.FC = () => {
 
       {/* Charts */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
               Followers
@@ -352,7 +352,7 @@ const InstagramAnalytics: React.FC = () => {
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
               Following
@@ -368,7 +368,7 @@ const InstagramAnalytics: React.FC = () => {
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
               Engagement Rate
@@ -384,7 +384,7 @@ const InstagramAnalytics: React.FC = () => {
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
               Average Likes
