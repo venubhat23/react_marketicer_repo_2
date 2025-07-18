@@ -247,12 +247,17 @@ const InstagramAnalytics: React.FC = () => {
         </Box>
 
         {/* Stats */}
-        <Grid container spacing={3} sx={{ mt: 2 }}>
-          <Grid item xs={12} md={4}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
-                {formatNumber(profileData.followers)}
-              </Typography>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-around', 
+          flexWrap: 'wrap',
+          gap: 3,
+          mt: 2 
+        }}>
+          <Box sx={{ textAlign: 'center', minWidth: '200px' }}>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
+              {formatNumber(profileData.followers)}
+            </Typography>
               <Typography variant="body2" color="text.secondary">
                 Followers
               </Typography>
@@ -263,15 +268,13 @@ const InstagramAnalytics: React.FC = () => {
                   fontWeight: 'bold'
                 }}
               >
-                {formatChange(profileData.followersChange)} ({profileData.followersChange >= 0 ? '+' : ''}0.61%)
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
-                {profileData.following}
-              </Typography>
+                              {formatChange(profileData.followersChange)} ({profileData.followersChange >= 0 ? '+' : ''}0.61%)
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center', minWidth: '200px' }}>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
+              {profileData.following}
+            </Typography>
               <Typography variant="body2" color="text.secondary">
                 Following
               </Typography>
@@ -282,15 +285,13 @@ const InstagramAnalytics: React.FC = () => {
                   fontWeight: 'bold'
                 }}
               >
-                {formatChange(profileData.followingChange)} (0.00%)
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
-                {profileData.posts}
-              </Typography>
+                              {formatChange(profileData.followingChange)} (0.00%)
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center', minWidth: '200px' }}>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
+              {profileData.posts}
+            </Typography>
               <Typography variant="body2" color="text.secondary">
                 Posts
               </Typography>
@@ -301,17 +302,16 @@ const InstagramAnalytics: React.FC = () => {
                   fontWeight: 'bold'
                 }}
               >
-                {formatChange(profileData.postsChange)} (+0.10%)
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
+                              {formatChange(profileData.postsChange)} (+0.10%)
+            </Typography>
+          </Box>
+        </Box>
       </Card>
 
       {/* Metrics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
         {metricsData.map((metric, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Box key={index} sx={{ flex: '1 1 250px', minWidth: '250px' }}>
             <Card sx={{ p: 2, height: '100%' }}>
               <CardContent sx={{ p: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
@@ -330,13 +330,13 @@ const InstagramAnalytics: React.FC = () => {
                 </Typography>
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       {/* Charts */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
+        <Box sx={{ flex: '1 1 400px', minWidth: '400px' }}>
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
               Followers
@@ -351,8 +351,8 @@ const InstagramAnalytics: React.FC = () => {
               </AreaChart>
             </ResponsiveContainer>
           </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
+        </Box>
+        <Box sx={{ flex: '1 1 400px', minWidth: '400px' }}>
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
               Following
@@ -367,8 +367,8 @@ const InstagramAnalytics: React.FC = () => {
               </LineChart>
             </ResponsiveContainer>
           </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
+        </Box>
+        <Box sx={{ flex: '1 1 400px', minWidth: '400px' }}>
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
               Engagement Rate
@@ -383,8 +383,8 @@ const InstagramAnalytics: React.FC = () => {
               </AreaChart>
             </ResponsiveContainer>
           </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
+        </Box>
+        <Box sx={{ flex: '1 1 400px', minWidth: '400px' }}>
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
               Average Likes
@@ -399,8 +399,8 @@ const InstagramAnalytics: React.FC = () => {
               </AreaChart>
             </ResponsiveContainer>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* Historical Stats Table */}
       <Card sx={{ mb: 4 }}>
