@@ -1,8 +1,6 @@
-import React,{useState} from 'react';
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
 
-// import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Routes, Route } from "react-router-dom";
 import Dashboard from '../src/pages/Dashboard';
 import Login from './pages/Login';
@@ -13,10 +11,6 @@ import SignUp from './pages/SignUp';
 import {AuthProvider} from './authContext/AuthContext'
 import ProtectedRoute from './components/ProctedRoute'
 
-
-import { Box, CssBaseline, Toolbar, Grid } from '@mui/material';
-import Navbar  from './components/Navbar';
-import Sidebar from './components/Sidebar';
 import CreatePost from './pages/CreatePost/CreatePost';
 import Analytics  from './pages/Profile/Analytics';
 import InstagramAnalytics from './pages/Profile/InstagramAnalytics';

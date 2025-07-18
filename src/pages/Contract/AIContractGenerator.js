@@ -451,26 +451,12 @@ const AIContractGenerator = ({ onBack = null }) => {
             yPosition += lineHeight;
           }
         }
-        continue;
       }
       
       // Save the PDF
       const cleanDocumentType = documentType.replace(/[^a-zA-Z0-9]/g, '_');
       const fileName = `${cleanDocumentType}_${generationDate.replace(/\//g, '-')}.pdf`;
       pdf.save(fileName);
-      
-      // Show success message
-      alert(`PDF exported successfully with ${pages.length} page(s) in standard A4 format!`);
-      
-      // Check for WHEREAS clauses
-      if (cleanLine.startsWith('WHEREAS')) {
-        addFormattedText(cleanLine, {
-          fontSize: 10,
-          addSpaceBefore: lineHeight,
-          addSpaceAfter: lineHeight * 0.5
-        });
-        continue;
-      }
       
       // Regular paragraph text
       if (cleanLine.length > 0) {
