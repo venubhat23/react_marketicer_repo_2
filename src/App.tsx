@@ -97,6 +97,21 @@ function App() {
               <MarketplaceModule />
             </ProtectedRoute>
           } />
+          <Route path="/brand/marketplace" element={
+            <ProtectedRoute>
+              <MarketplaceModule />
+            </ProtectedRoute>
+          } />
+          <Route path="/brand/marketplace/new" element={
+            <ProtectedRoute>
+              <MarketplaceModule />
+            </ProtectedRoute>
+          } />
+          <Route path="/influencer/marketplace" element={
+            <ProtectedRoute>
+              <MarketplaceModule />
+            </ProtectedRoute>
+          } />
           <Route path="/login" element={<Login />} />
           <Route path="/sign-up" element={<SignUp />} />
 

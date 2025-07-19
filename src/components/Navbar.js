@@ -1,5 +1,5 @@
 import React,{useState} from 'react';
-import { AppBar, Toolbar, IconButton,Typography, Box,Paper, } from '@mui/material';
+import { AppBar, Toolbar, IconButton,Typography, Box,Paper, Button, Menu, MenuItem } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
   Dashboard as DashboardIcon,
@@ -17,10 +17,27 @@ import {
   Assessment as AssessmentIcon,
   Close as CloseIcon
 } from '@mui/icons-material';
+import { useAuth } from "../authContext/AuthContext";
 
 const Navbar = () => {
 
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const { user, login } = useAuth();
+  const [roleMenuAnchor, setRoleMenuAnchor] = useState(null);
+
+  const handleRoleMenuOpen = (event) => {
+    setRoleMenuAnchor(event.currentTarget);
+  };
+
+  const handleRoleMenuClose = () => {
+    setRoleMenuAnchor(null);
+  };
+
+  const handleRoleChange = (role) => {
+    const token = localStorage.getItem('token') || 'demo-token';
+    login(token, role);
+    handleRoleMenuClose();
+  };
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon /> },
@@ -90,7 +107,28 @@ const Navbar = () => {
             <Typography variant="h4" sx={{ fontWeight: 600 }}>
               jhikjhnoikj
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <Button
+                color="inherit"
+                onClick={handleRoleMenuOpen}
+                sx={{ 
+                  textTransform: 'none',
+                  bgcolor: '#882AFF',
+                  color: 'white',
+                  '&:hover': { bgcolor: '#6a1b9a' }
+                }}
+              >
+                Role: {user?.role || 'influencer'}
+              </Button>
+              <Menu
+                anchorEl={roleMenuAnchor}
+                open={Boolean(roleMenuAnchor)}
+                onClose={handleRoleMenuClose}
+              >
+                <MenuItem onClick={() => handleRoleChange('influencer')}>Influencer</MenuItem>
+                <MenuItem onClick={() => handleRoleChange('brand')}>Brand</MenuItem>
+                <MenuItem onClick={() => handleRoleChange('admin')}>Admin</MenuItem>
+              </Menu>
               <IconButton size="large">
                 <NotificationsIcon />
               </IconButton>

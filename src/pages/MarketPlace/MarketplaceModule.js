@@ -22,21 +22,34 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Editor from "../../components/Editor";
 import Layout from "../../components/Layout";
 import CreateMarketplacePost from "./CreateMarketplacePost";
+import { useAuth } from "../../authContext/AuthContext";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const MarketplaceModule = () => {
-  // User role - You can get this from your auth context
-  const [userRole, setUserRole] = useState('brand'); // 'brand' or 'influencer'
-  const [currentView, setCurrentView] = useState('listing'); // 'listing', 'create', 'feed'
+  const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Determine user role and current view from route
+  const isInfluencer = user?.role === 'influencer';
+  const isBrand = user?.role === 'admin' || user?.role === 'brand';
+  
+  // Determine current view based on route
+  const getCurrentView = () => {
+    const path = location.pathname;
+    if (path.includes('/brand/marketplace/new')) return 'create';
+    if (path.includes('/brand/marketplace')) return 'listing';
+    if (path.includes('/influencer/marketplace')) return 'feed';
+    return isInfluencer ? 'feed' : 'listing';
+  };
+
+  const [currentView, setCurrentView] = useState(getCurrentView());
   
   // Existing states
-  const Categories = ['Electronics', 'Fashion', 'Home & Garden', 'Sports', 'Books', 'Automotive', 'Health & Beauty', 'Toys & Games'];
-  const Genders = ['Male', 'Female', 'Unisex'];
-  const Conditions = ['New', 'Like New', 'Good', 'Fair', 'Poor'];
-  const Locations = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Ahmedabad'];
+  const Categories = ['A', 'B']; // Updated as per specification
+  const TargetAudiences = ['18–24', '24–30', '30–35', 'More than 35']; // Updated as per specification
   const Types = ['Sponsored Post', 'Product Review', 'Brand Collaboration', 'Event Promotion', 'Giveaway', 'Story Feature'];
   const Statuses = ['Published', 'Draft', 'Pending', 'Expired'];
-
-  // Form states are now handled in CreateMarketplacePost component
 
   // Listing states
   const [marketplacePosts, setMarketplacePosts] = useState([]);
@@ -44,19 +57,25 @@ const MarketplaceModule = () => {
   const [selectedPost, setSelectedPost] = useState(null);
   const [bids, setBids] = useState([]);
   const [bidAmount, setBidAmount] = useState("");
-  const [bidMessage, setBidMessage] = useState("");
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
   const [bidsViewOpen, setBidsViewOpen] = useState(false);
 
   useEffect(() => {
-    // Determine user role from localStorage or auth context
-    const token = localStorage.getItem('token');
-    // For demo purposes, you can set role based on some logic
-    // setUserRole(/* your logic here */);
-    
-    // Load marketplace posts
+    // Update view when route changes
+    setCurrentView(getCurrentView());
     loadMarketplacePosts();
-  }, []);
+  }, [location.pathname]);
+
+  // Redirect based on user role
+  useEffect(() => {
+    if (location.pathname === '/marketplace') {
+      if (isInfluencer) {
+        navigate('/influencer/marketplace', { replace: true });
+      } else if (isBrand) {
+        navigate('/brand/marketplace', { replace: true });
+      }
+    }
+  }, [user, location.pathname, navigate, isInfluencer, isBrand]);
 
   const loadMarketplacePosts = () => {
     // Mock data - replace with actual API call
@@ -71,8 +90,12 @@ const MarketplaceModule = () => {
         description: "Looking for fashion influencers to create engaging reels showcasing our new collection",
         budget: "₹10,000",
         deadline: "2024-02-01",
-        category: "Fashion",
+        category: "A",
+        targetAudience: "18–24",
         location: "Mumbai",
+        platform: "Instagram",
+        languages: "Hindi, English",
+        tags: "Fashion, Style, Trendy",
         imageUrl: "https://picsum.photos/400/300?random=1",
         brand: "StyleCo"
       },
@@ -86,8 +109,12 @@ const MarketplaceModule = () => {
         description: "Need tech reviewers for our latest smartphone accessory",
         budget: "₹5,000",
         deadline: "2024-01-30",
-        category: "Electronics",
+        category: "B",
+        targetAudience: "24–30",
         location: "Delhi",
+        platform: "YouTube",
+        languages: "English",
+        tags: "Tech, Review, Gadgets",
         imageUrl: "https://picsum.photos/400/300?random=2",
         brand: "TechCorp"
       },
@@ -101,18 +128,18 @@ const MarketplaceModule = () => {
         description: "Collaborate with fitness influencers for 30-day challenge",
         budget: "₹15,000",
         deadline: "2024-02-15",
-        category: "Sports",
+        category: "A",
+        targetAudience: "30–35",
         location: "Bangalore",
+        platform: "Instagram, YouTube",
+        languages: "English, Kannada",
+        tags: "Fitness, Health, Challenge",
         imageUrl: "https://picsum.photos/400/300?random=3",
         brand: "FitLife"
       }
     ];
     setMarketplacePosts(mockPosts);
   };
-
-  // File upload handlers are now in CreateMarketplacePost component
-
-  // handlePublish is now in CreateMarketplacePost component
 
   const handleMenuClick = (event, post) => {
     setAnchorEl(event.currentTarget);
@@ -125,8 +152,7 @@ const MarketplaceModule = () => {
   };
 
   const handleEdit = () => {
-    // Set the selected post data for editing
-    setCurrentView('create');
+    navigate('/brand/marketplace/new', { state: { editPost: selectedPost } });
     handleMenuClose();
   };
 
@@ -141,6 +167,7 @@ const MarketplaceModule = () => {
       // Add new post
       setMarketplacePosts([newPost, ...marketplacePosts]);
     }
+    navigate('/brand/marketplace');
   };
 
   const handleDelete = () => {
@@ -150,8 +177,8 @@ const MarketplaceModule = () => {
   };
 
   const handleBidSubmit = () => {
-    if (!bidAmount || !bidMessage) {
-      toast.error("Please fill all bid fields!");
+    if (!bidAmount) {
+      toast.error("Please enter bid amount!");
       return;
     }
     
@@ -160,7 +187,6 @@ const MarketplaceModule = () => {
       id: Date.now(),
       postId: selectedPost.id,
       amount: bidAmount,
-      message: bidMessage,
       influencer: "Your Name",
       date: new Date().toISOString().split('T')[0],
       status: "pending"
@@ -169,7 +195,6 @@ const MarketplaceModule = () => {
     setBids([...bids, newBid]);
     toast.success("Bid submitted successfully!");
     setBidAmount("");
-    setBidMessage("");
     setBidDialogOpen(false);
   };
 
@@ -191,12 +216,13 @@ const MarketplaceModule = () => {
         <Button 
           variant="contained" 
           startIcon={<AddIcon />}
-          onClick={() => {
-            setSelectedPost(null); // Clear selected post for new post creation
-            setCurrentView('create');
+          onClick={() => navigate('/brand/marketplace/new')}
+          sx={{ 
+            bgcolor: '#882AFF',
+            '&:hover': { bgcolor: '#6a1b9a' }
           }}
         >
-          Create New Post
+          + Create New Post
         </Button>
       </Box>
 
@@ -294,7 +320,7 @@ const MarketplaceModule = () => {
       </Typography>
       
       <Grid container spacing={3}>
-        {marketplacePosts.map((post) => (
+        {marketplacePosts.filter(post => post.status === 'Published').map((post) => (
           <Grid item xs={12} md={6} lg={4} key={post.id}>
             <Card sx={{ 
               borderRadius: 2, 
@@ -360,6 +386,8 @@ const MarketplaceModule = () => {
                     }}
                     sx={{ 
                       flex: 1,
+                      bgcolor: '#882AFF',
+                      '&:hover': { bgcolor: '#6a1b9a' }
                     }}
                   >
                     Bid Now
@@ -382,8 +410,6 @@ const MarketplaceModule = () => {
     </Box>
   );
 
-
-
   // Bid Dialog
   const BidDialog = () => (
     <Dialog open={bidDialogOpen} onClose={() => setBidDialogOpen(false)} maxWidth="sm" fullWidth>
@@ -394,27 +420,26 @@ const MarketplaceModule = () => {
         </Typography>
         <TextField
           fullWidth
-          label="Your Bid Amount"
+          label="Your Bid Amount (₹)"
           value={bidAmount}
           onChange={(e) => setBidAmount(e.target.value)}
-          placeholder="₹5,000"
+          placeholder="5,000"
           sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="Message to Brand"
-          value={bidMessage}
-          onChange={(e) => setBidMessage(e.target.value)}
-          multiline
-          rows={4}
-          placeholder="Tell them why you're the perfect fit for this campaign..."
+          type="number"
         />
       </DialogContent>
       <DialogActions>
         <Button onClick={() => setBidDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleBidSubmit} variant="contained">
-                  Submit Bid
-                </Button>
+        <Button 
+          onClick={handleBidSubmit} 
+          variant="contained"
+          sx={{ 
+            bgcolor: '#882AFF',
+            '&:hover': { bgcolor: '#6a1b9a' }
+          }}
+        >
+          Place Bid
+        </Button>
       </DialogActions>
     </Dialog>
   );
@@ -431,22 +456,43 @@ const MarketplaceModule = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Influencer</TableCell>
-                  <TableCell>Bid Amount</TableCell>
-                  <TableCell>Message</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Influencer Name</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Bid Amount</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {bids.map((bid) => (
                   <TableRow key={bid.id}>
                     <TableCell>{bid.influencer}</TableCell>
-                    <TableCell>{bid.amount}</TableCell>
-                    <TableCell>{bid.message}</TableCell>
+                    <TableCell>₹{bid.amount}</TableCell>
                     <TableCell>{bid.date}</TableCell>
                     <TableCell>
-                      <Chip label={bid.status} size="small" color="warning" />
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button 
+                          variant="contained" 
+                          size="small" 
+                          color="success"
+                          onClick={() => {
+                            toast.success("Bid accepted!");
+                            setBidsViewOpen(false);
+                          }}
+                        >
+                          Accept
+                        </Button>
+                        <Button 
+                          variant="outlined" 
+                          size="small" 
+                          color="error"
+                          onClick={() => {
+                            toast.info("Bid rejected!");
+                            setBidsViewOpen(false);
+                          }}
+                        >
+                          Reject
+                        </Button>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -461,9 +507,23 @@ const MarketplaceModule = () => {
     </Dialog>
   );
 
+  // Show access denied for users without proper roles
+  if (!user || (!isInfluencer && !isBrand)) {
+    return (
+      <Layout>
+        <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Typography variant="h5" color="error">
+            Access denied. Please log in with appropriate permissions.
+          </Typography>
+        </Box>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
+        {/* Header */}
         <Paper
           elevation={0}
           sx={{
@@ -472,45 +532,22 @@ const MarketplaceModule = () => {
             borderRadius: 0
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6" sx={{ color: '#fff' }}>
-              Marketplace {userRole === 'brand' ? '- Brand Dashboard' : '- Influencer Feed'}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant={userRole === 'brand' ? 'contained' : 'outlined'}
-                onClick={() => setUserRole('brand')}
-                sx={{ 
-                  color: userRole === 'brand' ? '#000' : '#fff',
-                  bgcolor: userRole === 'brand' ? '#fff' : 'transparent',
-                  borderColor: '#fff'
-                }}
-              >
-                Brand View
-              </Button>
-              <Button
-                variant={userRole === 'influencer' ? 'contained' : 'outlined'}
-                onClick={() => setUserRole('influencer')}
-                sx={{ 
-                  color: userRole === 'influencer' ? '#000' : '#fff',
-                  bgcolor: userRole === 'influencer' ? '#fff' : 'transparent',
-                  borderColor: '#fff'
-                }}
-              >
-                Influencer View
-              </Button>
-            </Box>
-          </Box>
+          <Typography variant="h6" sx={{ color: '#fff' }}>
+            {isBrand ? 'Brand Marketplace' : 'Influencer Marketplace'}
+          </Typography>
         </Paper>
 
         {/* Main Content */}
-        {userRole === 'brand' ? (
-          currentView === 'listing' ? <BrandListingView /> : 
-          <CreateMarketplacePost 
-            onBack={() => setCurrentView('listing')} 
-            onPostCreated={handlePostCreated}
-            initialData={selectedPost}
-          />
+        {isBrand ? (
+          currentView === 'create' ? (
+            <CreateMarketplacePost 
+              onBack={() => navigate('/brand/marketplace')} 
+              onPostCreated={handlePostCreated}
+              initialData={location.state?.editPost}
+            />
+          ) : (
+            <BrandListingView />
+          )
         ) : (
           <InfluencerFeedView />
         )}

@@ -149,6 +149,17 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
 
+        <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/marketplace">
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                <StorefrontIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Marketplace</Typography>
+              </Box>
+            </Link>
+          </ListItemButton>
+        </ListItem>
+
       </List>
 
       {/* Footer */}

@@ -14,19 +14,22 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole') || 'influencer'; // Default to influencer
     if (token) {
-      setUser({ token });
+      setUser({ token, role: userRole });
     }
     setLoading(false);
   }, []);
 
-  const login = (token) => {
+  const login = (token, role = 'influencer') => {
     localStorage.setItem('token', token);
-    setUser({ token });
+    localStorage.setItem('userRole', role);
+    setUser({ token, role });
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
     setUser(null);
   };
 
