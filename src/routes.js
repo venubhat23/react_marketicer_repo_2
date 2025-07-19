@@ -1,9 +1,9 @@
 import React from "react";
-import Dashboard from "@/pages/Dashboard";
-import CreatePost from "@/pages/CreatePost/CreatePost";
-import ContractPage from "@/pages/Contract/ContractPage";
-import SocialMedia from "@/pages/SocialMedia";
-import ProtectedRoute from "@/ProtectedRoute";
+import Dashboard from "./pages/Dashboard";
+import CreatePost from "./pages/CreatePost/CreatePost";
+import ContractPage from "./pages/Contract/ContractPage";
+import SocialMedia from "./pages/SocialMedia";
+import ProtectedRoute from "./components/ProctedRoute";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
