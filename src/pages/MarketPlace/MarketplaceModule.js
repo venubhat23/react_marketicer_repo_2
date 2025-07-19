@@ -31,9 +31,9 @@ const MarketplaceModule = () => {
   const navigate = useNavigate();
   
   // Determine user role and current view from route
-  const isAdmin = user?.role === 'admin';
-  const isInfluencer = user?.role === 'influencer';
-  const isBrand = user?.role === 'brand';
+  const isAdmin = user?.role === 'Admin' || user?.role === 'admin';
+  const isInfluencer = user?.role === 'Influencer' || user?.role === 'influencer';
+  const isBrand = user?.role === 'Brand' || user?.role === 'brand';
   
   // Determine current view based on route - Admin can access both views
   const getCurrentView = () => {

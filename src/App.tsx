@@ -29,7 +29,8 @@ const AppRoutes = () => {
 
   // Function to render marketplace routes based on role
   const renderMarketplaceRoutes = () => {
-    if (userRole === 'admin') {
+    // Check for both 'Admin' and 'admin' to handle case inconsistencies
+    if (userRole === 'Admin' || userRole === 'admin') {
       // Admin sees all marketplace routes
       return (
         <>
@@ -55,7 +56,7 @@ const AppRoutes = () => {
           } />
         </>
       );
-    } else if (userRole === 'brand') {
+    } else if (userRole === 'Brand' || userRole === 'brand') {
       // Brand sees only brand routes
       return (
         <>
@@ -76,7 +77,7 @@ const AppRoutes = () => {
           } />
         </>
       );
-    } else if (userRole === 'influencer') {
+    } else if (userRole === 'Influencer' || userRole === 'influencer') {
       // Influencer sees only influencer routes
       return (
         <>

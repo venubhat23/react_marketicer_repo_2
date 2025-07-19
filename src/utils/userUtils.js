@@ -46,7 +46,9 @@ export const clearUserData = () => {
  * @returns {boolean} True if user has the specified role
  */
 export const hasRole = (role) => {
-  return getUserRole() === role;
+  const userRole = getUserRole();
+  // Handle case insensitive comparison
+  return userRole.toLowerCase() === role.toLowerCase();
 };
 
 /**
@@ -54,7 +56,8 @@ export const hasRole = (role) => {
  * @returns {boolean} True if user is admin
  */
 export const isAdmin = () => {
-  return hasRole('admin');
+  const userRole = getUserRole();
+  return userRole === 'Admin' || userRole === 'admin';
 };
 
 /**
@@ -62,7 +65,8 @@ export const isAdmin = () => {
  * @returns {boolean} True if user is brand
  */
 export const isBrand = () => {
-  return hasRole('brand');
+  const userRole = getUserRole();
+  return userRole === 'Brand' || userRole === 'brand';
 };
 
 /**
@@ -70,5 +74,6 @@ export const isBrand = () => {
  * @returns {boolean} True if user is influencer
  */
 export const isInfluencer = () => {
-  return hasRole('influencer');
+  const userRole = getUserRole();
+  return userRole === 'Influencer' || userRole === 'influencer';
 };
