@@ -462,26 +462,28 @@ const MarketplaceModule = () => {
   );
 
   // Influencer Feed View
-  const InfluencerFeedView = () => (
-    <Box sx={{ padding: '20px' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
-          Marketplace
-        </Typography>
-      </Box>
+  const InfluencerFeedView = () => {
+    return (
+      <Box sx={{ padding: '20px' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
+            Marketplace
+          </Typography>
+        </Box>
 
-      {/* Tabs */}
-      <Tabs 
-        value={influencerTab} 
-        onChange={(e, newValue) => setInfluencerTab(newValue)}
-        sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}
-      >
-        <Tab label="Browse Opportunities" />
-        <Tab label="My Bids" />
-      </Tabs>
+        {/* Tabs */}
+        <Tabs 
+          value={influencerTab} 
+          onChange={(e, newValue) => setInfluencerTab(newValue)}
+          sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}
+        >
+          <Tab label="Browse Opportunities" />
+          <Tab label="My Bids" />
+        </Tabs>
 
-      {influencerTab === 0 ? (
-        <Box>
+        {/* Tab Content */}
+        {influencerTab === 0 ? (
+          <Box>
 
       {/* Search and Filter Bar */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -696,16 +698,13 @@ const MarketplaceModule = () => {
           </Button>
         </Box>
       )}
-
-      {/* Tab Content */}
-      {influencerTab === 0 ? (
-        // Marketplace feed content is above
-        <></>
-      ) : (
-        <MyBidsView />
-      )}
-    </Box>
-  );
+          </Box>
+        ) : (
+          <MyBidsView />
+        )}
+      </Box>
+    );
+  };
 
   // Bid Dialog
   const BidDialog = () => (
