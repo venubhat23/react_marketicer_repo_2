@@ -20,7 +20,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Skeleton from "@mui/material/Skeleton";
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Editor from "../../components/Editor";
-import Sidebar from "../../components/Sidebar";
+import Layout from "../../components/Layout";
 import CreateMarketplacePost from "./CreateMarketplacePost";
 
 const MarketplaceModule = () => {
@@ -462,69 +462,64 @@ const MarketplaceModule = () => {
   );
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
-      <Grid container>
-        <Grid item xs={12} md={2}>
-          <Sidebar />
-        </Grid>
-        <Grid item xs={12} md={10}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              backgroundColor: '#091a48',
-              borderRadius: 0
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h6" sx={{ color: '#fff' }}>
-                Marketplace {userRole === 'brand' ? '- Brand Dashboard' : '- Influencer Feed'}
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  variant={userRole === 'brand' ? 'contained' : 'outlined'}
-                  onClick={() => setUserRole('brand')}
-                  sx={{ 
-                    color: userRole === 'brand' ? '#000' : '#fff',
-                    bgcolor: userRole === 'brand' ? '#fff' : 'transparent',
-                    borderColor: '#fff'
-                  }}
-                >
-                  Brand View
-                </Button>
-                <Button
-                  variant={userRole === 'influencer' ? 'contained' : 'outlined'}
-                  onClick={() => setUserRole('influencer')}
-                  sx={{ 
-                    color: userRole === 'influencer' ? '#000' : '#fff',
-                    bgcolor: userRole === 'influencer' ? '#fff' : 'transparent',
-                    borderColor: '#fff'
-                  }}
-                >
-                  Influencer View
-                </Button>
-              </Box>
+    <Layout>
+      <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            backgroundColor: '#091a48',
+            borderRadius: 0
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" sx={{ color: '#fff' }}>
+              Marketplace {userRole === 'brand' ? '- Brand Dashboard' : '- Influencer Feed'}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant={userRole === 'brand' ? 'contained' : 'outlined'}
+                onClick={() => setUserRole('brand')}
+                sx={{ 
+                  color: userRole === 'brand' ? '#000' : '#fff',
+                  bgcolor: userRole === 'brand' ? '#fff' : 'transparent',
+                  borderColor: '#fff'
+                }}
+              >
+                Brand View
+              </Button>
+              <Button
+                variant={userRole === 'influencer' ? 'contained' : 'outlined'}
+                onClick={() => setUserRole('influencer')}
+                sx={{ 
+                  color: userRole === 'influencer' ? '#000' : '#fff',
+                  bgcolor: userRole === 'influencer' ? '#fff' : 'transparent',
+                  borderColor: '#fff'
+                }}
+              >
+                Influencer View
+              </Button>
             </Box>
-          </Paper>
+          </Box>
+        </Paper>
 
-          {/* Main Content */}
-          {userRole === 'brand' ? (
-            currentView === 'listing' ? <BrandListingView /> : 
-            <CreateMarketplacePost 
-              onBack={() => setCurrentView('listing')} 
-              onPostCreated={handlePostCreated}
-              initialData={selectedPost}
-            />
-          ) : (
-            <InfluencerFeedView />
-          )}
-        </Grid>
-      </Grid>
+        {/* Main Content */}
+        {userRole === 'brand' ? (
+          currentView === 'listing' ? <BrandListingView /> : 
+          <CreateMarketplacePost 
+            onBack={() => setCurrentView('listing')} 
+            onPostCreated={handlePostCreated}
+            initialData={selectedPost}
+          />
+        ) : (
+          <InfluencerFeedView />
+        )}
 
-      {/* Dialogs */}
-      <BidDialog />
-      <BidsViewDialog />
-    </Box>
+        {/* Dialogs */}
+        <BidDialog />
+        <BidsViewDialog />
+      </Box>
+    </Layout>
   );
 };
 
