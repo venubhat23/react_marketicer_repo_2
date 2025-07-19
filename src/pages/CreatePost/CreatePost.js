@@ -662,7 +662,7 @@ const CreatePost = () => {
         </Paper>
       <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'20px'}}>
         <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
-          <Grid size={{ xs: 12, sm: 12, md: 12 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%' }}>
+          <Grid size={{ xs: 12, sm: 8, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%' }}>
               {/* Dropdowns */}
               <Box display="flex" gap={2} mb={2} >
                 <FormControl fullWidth>
@@ -893,7 +893,7 @@ const CreatePost = () => {
                   </Button>
           </Grid>
 
-          <Grid  size={{ xs: 2, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height:'100%' }}>
+          <Grid  size={{ xs: 12, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height:'100%' }}>
           <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
                   <Tab label="Instagram" />
                   <Tab label="Linkedin" />
