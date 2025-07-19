@@ -24,7 +24,13 @@ import MarketplaceModule from './pages/MarketPlace/MarketplaceModule';
 // Component that renders routes based on user role
 const AppRoutes = () => {
   const authContext = useAuth();
-  const user = authContext?.user;
+  
+  // Handle the case where authContext might be null
+  if (!authContext) {
+    return <div>Loading...</div>;
+  }
+  
+  const { user } = authContext;
   const userRole = user?.role;
 
   // Function to render marketplace routes based on role
