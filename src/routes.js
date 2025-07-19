@@ -64,6 +64,7 @@ const routes = [
     key: "media",
     icon: <Icon fontSize="small">perm_media</Icon>,
     route: "/media",
+    component: <Media />,
     component: <ProtectedRoute element={<Media />} />, // Protected
     roles: ["admin", "influencer"]
   },
@@ -262,7 +263,12 @@ const routes = [
     route: "/",
     component: <Home />,
   },
-
+{
+    name: "Contract",
+    key: "contract",
+    route: "/contract",
+    component: <ContractPa />,
+  },
 ];
 
 export default routes;

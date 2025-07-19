@@ -7,33 +7,26 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // const [user, setUser] = useState(() => {
+  //   const token = localStorage.getItem('token');
+  //   return token ? { token } : null;
+  // });
+
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('userData');
-    
-    if (token && userData) {
-      try {
-        const parsedUserData = JSON.parse(userData);
-        setUser({ token, ...parsedUserData });
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        // If parsing fails, clear invalid data
-        localStorage.removeItem('token');
-        localStorage.removeItem('userData');
-      }
+    if (token) {
+      setUser({ token });
     }
     setLoading(false);
   }, []);
 
-  const login = (token, userData) => {
+  const login = (token) => {
     localStorage.setItem('token', token);
-    localStorage.setItem('userData', JSON.stringify(userData));
-    setUser({ token, ...userData });
+    setUser({ token });
   };
 
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('userData');
     setUser(null);
   };
 
