@@ -10,6 +10,7 @@ import LandingPage from './pages/LandingPage';
 import SignUp from './pages/SignUp';
 import {AuthProvider} from './authContext/AuthContext'
 import ProtectedRoute from './components/ProctedRoute'
+import DashboardLayout from './components/DashboardLayout'
 
 import CreatePost from './pages/CreatePost/CreatePost';
 import Analytics  from './pages/Profile/Analytics';
@@ -42,7 +43,9 @@ function App() {
           
           <Route path="/dashboard" element={
               <ProtectedRoute>
-                <Dashboard />
+                <DashboardLayout>
+                  <Dashboard />
+                </DashboardLayout>
               </ProtectedRoute>
             } />
           <Route path="/createPost" element={
