@@ -23,6 +23,14 @@ import Discover from './pages/Discover';
 import AIContractGenerator from './pages/Contract/AIContractGenerator';
 import MarketplaceModule from './pages/MarketPlace/MarketplaceModule';
 
+// Demo layout components for role-based sidebar
+import Calendar from './layouts/calendar';
+import Media from './layouts/media';
+import Explore from './layouts/explore';
+import Analytics from './layouts/analytics';
+import Reporting from './layouts/reporting';
+import Invoice from './layouts/invoice';
+
 function App() { 
 
   return (
@@ -100,6 +108,51 @@ function App() {
               <MarketplaceModule />
             </ProtectedRoute>
           } />
+
+          {/* Demo routes for role-based sidebar */}
+          <Route path="/calendar" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Calendar />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/media" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Media />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/explore" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Explore />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/analytics" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Analytics />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/reporting" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Reporting />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/invoice" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Invoice />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+
           <Route path="/login" element={<Login />} />
           <Route path="/sign-up" element={<SignUp />} />
 

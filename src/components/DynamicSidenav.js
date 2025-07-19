@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../authContext/AuthContext';
-import routes from '../routes';
+import routes from '../routes-demo';
 import { getSidebarRoutes } from '../utils/routeUtils';
 
 const DynamicSidenav = ({ isOpen = true }) => {
