@@ -22,8 +22,11 @@ Successfully implemented the marketplace feature according to the provided speci
 
 ### 3. **Updated Sidebar Navigation**
 **File**: `src/components/Sidebar.js`
-- Added marketplace navigation item with StorefrontIcon
-- Integrated marketplace link in the sidebar for easy access
+- **Role-based Navigation**: Dynamic marketplace options based on user role
+- **Admin Role**: Shows both "Marketincer-Brand" and "Marketincer-Influencer" options
+- **Brand Role**: Shows only "Marketincer-Brand" option
+- **Influencer Role**: Shows only "Marketincer-Influencer" option
+- Uses BusinessIcon and PersonIcon for better visual distinction
 
 ### 4. **Added Role Switcher for Testing**
 **File**: `src/components/Navbar.js`
@@ -35,9 +38,13 @@ Successfully implemented the marketplace feature according to the provided speci
 **File**: `src/pages/MarketPlace/MarketplaceModule.js`
 
 #### Key Features Implemented:
-- **Role-based Routing**: Automatically redirects users based on their role
+- **Advanced Role-based Access**: 
+  - **Admin**: Can access both brand and influencer interfaces based on route
+  - **Brand**: Restricted to brand interface only
+  - **Influencer**: Restricted to influencer interface only
+- **Intelligent Routing**: Automatically redirects non-admin users from unauthorized routes
 - **Removed Toggle Buttons**: No more manual brand/influencer view switching
-- **Dynamic View Detection**: Determines current view from route path
+- **Dynamic View Detection**: Determines current view and mode from route path
 - **Updated Categories**: Changed to `A` and `B` as per specification
 - **Target Audiences**: Implemented `18–24`, `24–30`, `30–35`, `More than 35`
 
@@ -91,8 +98,9 @@ Successfully implemented the marketplace feature according to the provided speci
 ## 🎯 **Specification Compliance**
 
 ### ✅ **User Roles Implementation**
-- `admin` or `brand`: Can create and manage posts ✓
-- `influencer`: Can view posts and submit bids ✓
+- **`admin`**: Can access both brand and influencer interfaces, full marketplace management ✓
+- **`brand`**: Can create and manage posts, restricted to brand interface only ✓
+- **`influencer`**: Can view posts and submit bids, restricted to influencer interface only ✓
 
 ### ✅ **Brand Marketplace Features**
 - Route: `/brand/marketplace` ✓
@@ -161,11 +169,16 @@ Successfully implemented the marketplace feature according to the provided speci
 ## 📝 **Usage Instructions**
 
 1. **For Testing**: Use the role switcher in the navbar to switch between roles
-2. **Brand Users**: 
+2. **Admin Users**: 
+   - Can access both "Marketincer-Brand" and "Marketincer-Influencer" from sidebar
+   - Full access to all marketplace functionality
+3. **Brand Users**: 
+   - See only "Marketincer-Brand" in sidebar
    - Visit `/brand/marketplace` to see posts table
    - Click "Create New Post" to add new posts
    - Use "View Bids" to manage influencer bids
-3. **Influencer Users**:
+4. **Influencer Users**:
+   - See only "Marketincer-Influencer" in sidebar
    - Visit `/influencer/marketplace` to see available opportunities
    - Click "Bid Now" to submit bids
    - Use "Message" to communicate with brands

@@ -31,10 +31,11 @@ const MarketplaceModule = () => {
   const navigate = useNavigate();
   
   // Determine user role and current view from route
+  const isAdmin = user?.role === 'admin';
   const isInfluencer = user?.role === 'influencer';
-  const isBrand = user?.role === 'admin' || user?.role === 'brand';
+  const isBrand = user?.role === 'brand';
   
-  // Determine current view based on route
+  // Determine current view based on route - Admin can access both views
   const getCurrentView = () => {
     const path = location.pathname;
     if (path.includes('/brand/marketplace/new')) return 'create';
@@ -43,7 +44,16 @@ const MarketplaceModule = () => {
     return isInfluencer ? 'feed' : 'listing';
   };
 
+  // Determine current interface mode based on route
+  const getCurrentMode = () => {
+    const path = location.pathname;
+    if (path.includes('/brand/marketplace')) return 'brand';
+    if (path.includes('/influencer/marketplace')) return 'influencer';
+    return isInfluencer ? 'influencer' : 'brand';
+  };
+
   const [currentView, setCurrentView] = useState(getCurrentView());
+  const [currentMode, setCurrentMode] = useState(getCurrentMode());
   
   // Existing states
   const Categories = ['A', 'B']; // Updated as per specification
@@ -63,19 +73,30 @@ const MarketplaceModule = () => {
   useEffect(() => {
     // Update view when route changes
     setCurrentView(getCurrentView());
+    setCurrentMode(getCurrentMode());
     loadMarketplacePosts();
   }, [location.pathname]);
 
-  // Redirect based on user role
+  // Redirect based on user role (only for non-admin users accessing wrong routes)
   useEffect(() => {
     if (location.pathname === '/marketplace') {
       if (isInfluencer) {
         navigate('/influencer/marketplace', { replace: true });
-      } else if (isBrand) {
+      } else if (isBrand || isAdmin) {
         navigate('/brand/marketplace', { replace: true });
       }
     }
-  }, [user, location.pathname, navigate, isInfluencer, isBrand]);
+    
+    // Prevent non-admin users from accessing wrong interfaces
+    if (!isAdmin) {
+      const path = location.pathname;
+      if (isBrand && path.includes('/influencer/marketplace')) {
+        navigate('/brand/marketplace', { replace: true });
+      } else if (isInfluencer && path.includes('/brand/marketplace')) {
+        navigate('/influencer/marketplace', { replace: true });
+      }
+    }
+  }, [user, location.pathname, navigate, isInfluencer, isBrand, isAdmin]);
 
   const loadMarketplacePosts = () => {
     // Mock data - replace with actual API call
@@ -508,7 +529,7 @@ const MarketplaceModule = () => {
   );
 
   // Show access denied for users without proper roles
-  if (!user || (!isInfluencer && !isBrand)) {
+  if (!user || (!isInfluencer && !isBrand && !isAdmin)) {
     return (
       <Layout>
         <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -519,6 +540,15 @@ const MarketplaceModule = () => {
       </Layout>
     );
   }
+
+  // Get header title based on current mode
+  const getHeaderTitle = () => {
+    if (currentMode === 'brand') {
+      return isAdmin ? 'Marketincer-Brand Dashboard' : 'Brand Marketplace';
+    } else {
+      return isAdmin ? 'Marketincer-Influencer Feed' : 'Influencer Marketplace';
+    }
+  };
 
   return (
     <Layout>
@@ -533,12 +563,12 @@ const MarketplaceModule = () => {
           }}
         >
           <Typography variant="h6" sx={{ color: '#fff' }}>
-            {isBrand ? 'Brand Marketplace' : 'Influencer Marketplace'}
+            {getHeaderTitle()}
           </Typography>
         </Paper>
 
         {/* Main Content */}
-        {isBrand ? (
+        {(currentMode === 'brand' && (isBrand || isAdmin)) ? (
           currentView === 'create' ? (
             <CreateMarketplacePost 
               onBack={() => navigate('/brand/marketplace')} 
@@ -548,8 +578,14 @@ const MarketplaceModule = () => {
           ) : (
             <BrandListingView />
           )
-        ) : (
+        ) : (currentMode === 'influencer' && (isInfluencer || isAdmin)) ? (
           <InfluencerFeedView />
+        ) : (
+          <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Typography variant="h5" color="error">
+              Access denied. You don't have permission to access this view.
+            </Typography>
+          </Box>
         )}
 
         {/* Dialogs */}
