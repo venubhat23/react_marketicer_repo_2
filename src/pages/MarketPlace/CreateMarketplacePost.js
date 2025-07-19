@@ -2,11 +2,12 @@ import React, { useState, useRef } from "react";
 import {
   Box, Typography, Button, TextField, Avatar, Chip, Select, MenuItem, IconButton, 
   FormControl, Grid, Modal, Paper, Container, InputLabel, CardContent, CardMedia, 
-  Card
+  Card, CircularProgress
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import { toast } from "react-toastify";
 import Editor from "../../components/Editor";
+import { marketplaceApi, uploadApi } from "../../utils/marketplaceApi";
 
 const CreateMarketplacePost = ({ 
   onBack, 
@@ -29,7 +30,15 @@ const CreateMarketplacePost = ({
   const [platform, setPlatform] = useState(initialData?.platform || "");
   const [languages, setLanguages] = useState(initialData?.languages || "");
   const [deadline, setDeadline] = useState(initialData?.deadline || "");
-  const [tags, setTags] = useState(initialData?.tags || "");
+  const [tags, setTags] = useState(() => {
+    if (!initialData?.tags) return "";
+    // If tags is an array, join it to a string
+    if (Array.isArray(initialData.tags)) {
+      return initialData.tags.join(', ');
+    }
+    // If tags is already a string, use it as is
+    return initialData.tags;
+  });
   
   // Upload states
   const [uploadedImageUrl, setUploadedImageUrl] = useState(initialData?.imageUrl || "");
@@ -54,18 +63,7 @@ const CreateMarketplacePost = ({
     if (!file) return;
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      
-      const response = await fetch(
-        "https://kitintellect.tech/storage/public/api/upload/aaFacebook",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      
-      const data = await response.json();
+      const data = await uploadApi.uploadFile(file);
       
       if (data.url) {
         if (type === 'image') {
@@ -74,9 +72,12 @@ const CreateMarketplacePost = ({
           setUploadedVideoUrl(data.url);
         }
         toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded successfully!`);
+      } else {
+        throw new Error("Upload failed");
       }
     } catch (error) {
       toast.error(`${type.charAt(0).toUpperCase() + type.slice(1)} upload failed!`);
+      console.error("Error uploading file:", error);
     } finally {
       setUploading(false);
     }
@@ -97,52 +98,56 @@ const CreateMarketplacePost = ({
   };
 
   const handlePublish = async () => {
-    if (!title || !description || !category || !targetAudience || !budget || !deadline) {
+    if (!title || !description || !category || !targetAudience || !budget || !deadline || !location || !platform || !languages) {
       toast.error("Please fill all required fields!");
       return;
     }
     
     setPosting(true);
+    
+    // Prepare API payload according to specification
     const payloadData = {
       title,
       description,
       category,
-      targetAudience,
-      budget,
+      target_audience: targetAudience,
+      budget: parseFloat(budget.toString().replace(/[^\d.]/g, '')), // Remove currency symbols
       location,
       platform,
       languages,
       deadline,
-      tags,
-      imageUrl: uploadedImageUrl,
-      videoUrl: uploadedVideoUrl,
-      status: "Published"
+      tags: typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : tags,
+      status: "published",
+      brand_name: brandName,
+      media_url: uploadedImageUrl || uploadedVideoUrl,
+      media_type: uploadedImageUrl ? "image" : uploadedVideoUrl ? "video" : null
     };
     
     try {
-      // Replace with actual API call
-      console.log('Publishing marketplace post:', payloadData);
+      let response;
+      if (initialData?.id) {
+        // Update existing post
+        response = await marketplaceApi.updateMarketplacePost(initialData.id, payloadData);
+      } else {
+        // Create new post
+        response = await marketplaceApi.createMarketplacePost(payloadData);
+      }
       
-      // Mock success - create new post object
-      const newPost = {
-        id: initialData?.id || Date.now(),
-        ...payloadData,
-        type: "Sponsored Post", // Default type
-        dateCreated: new Date().toISOString().split('T')[0],
-        views: initialData?.views || 0,
-        brand: brandName
-      };
-      
-      toast.success(initialData ? "Post updated successfully!" : "Post published successfully!");
-      
-      // Callback to parent component
-      if (onPostCreated) {
-        onPostCreated(newPost);
+      if (response.data && response.data.status === 'success') {
+        toast.success(response.data.message || (initialData ? "Post updated successfully!" : "Post published successfully!"));
+        
+        // Callback to parent component with API response data
+        if (onPostCreated) {
+          onPostCreated(response.data.data);
+        }
+      } else {
+        throw new Error(response.data?.message || 'Failed to publish post');
       }
       
     } catch (error) {
       console.error("Error publishing post:", error);
-      toast.error("Failed to publish post");
+      const errorMessage = error.response?.data?.message || error.message || "Failed to publish post";
+      toast.error(errorMessage);
     } finally {
       setPosting(false);
     }
@@ -431,10 +436,10 @@ const CreateMarketplacePost = ({
                 {/* Tags */}
                 {tags && (
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {tags.split(',').map((tag, index) => (
+                    {(typeof tags === 'string' ? tags.split(',') : tags).map((tag, index) => (
                       <Chip 
                         key={index} 
-                        label={tag.trim()} 
+                        label={typeof tag === 'string' ? tag.trim() : tag} 
                         size="small" 
                         sx={{ bgcolor: '#f3e5f5', color: '#7b1fa2' }}
                       />
