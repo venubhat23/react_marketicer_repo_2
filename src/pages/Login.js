@@ -5,6 +5,7 @@ import LoginBg from '../assets/images/loginBG.png';
 import axios from "axios";
 import GoogleIcon from '../assets/images/google_icon.png'
 import { useAuth } from '../authContext/AuthContext';
+import { setUserRole } from '../utils/userUtils';
 
 
 
@@ -48,7 +49,15 @@ const Login = () => {
     try {
       const res = await axios.post("https://api.marketincer.com/api/v1/login", form);
       //localStorage.setItem("token", res.data.token); // Save token
-      login(res.data.token);
+      
+      // Extract user role from the API response
+      const userRole = res.data.user?.role || 'influencer'; // Default to 'influencer' if role not provided
+      
+      // Save user role using utility function
+      setUserRole(userRole);
+      
+      // Pass both token and role to login function
+      login(res.data.token, userRole);
       navigate('/createPost');
       
     } catch (error) {
