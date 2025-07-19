@@ -30,7 +30,15 @@ const CreateMarketplacePost = ({
   const [platform, setPlatform] = useState(initialData?.platform || "");
   const [languages, setLanguages] = useState(initialData?.languages || "");
   const [deadline, setDeadline] = useState(initialData?.deadline || "");
-  const [tags, setTags] = useState(initialData?.tags || "");
+  const [tags, setTags] = useState(() => {
+    if (!initialData?.tags) return "";
+    // If tags is an array, join it to a string
+    if (Array.isArray(initialData.tags)) {
+      return initialData.tags.join(', ');
+    }
+    // If tags is already a string, use it as is
+    return initialData.tags;
+  });
   
   // Upload states
   const [uploadedImageUrl, setUploadedImageUrl] = useState(initialData?.imageUrl || "");
@@ -108,7 +116,7 @@ const CreateMarketplacePost = ({
       platform,
       languages,
       deadline,
-      tags,
+      tags: typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : tags,
       status: "published",
       brand_name: brandName,
       media_url: uploadedImageUrl || uploadedVideoUrl,
@@ -428,10 +436,10 @@ const CreateMarketplacePost = ({
                 {/* Tags */}
                 {tags && (
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {tags.split(',').map((tag, index) => (
+                    {(typeof tags === 'string' ? tags.split(',') : tags).map((tag, index) => (
                       <Chip 
                         key={index} 
-                        label={tag.trim()} 
+                        label={typeof tag === 'string' ? tag.trim() : tag} 
                         size="small" 
                         sx={{ bgcolor: '#f3e5f5', color: '#7b1fa2' }}
                       />
