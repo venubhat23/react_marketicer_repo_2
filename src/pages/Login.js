@@ -1,5 +1,5 @@
 import React,{useState} from 'react'
-import { Button, TextField, Box, Typography, Grid , Divider, InputLabel} from "@mui/material";
+import { Button, TextField, Box, Typography, Grid , Divider} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import LoginBg from '../assets/images/loginBG.png';
 import axios from "axios";
@@ -174,7 +174,7 @@ const Login = () => {
               mb: 2,
             }}
           >
-            <img src={GoogleIcon} alt="my image" width='15' height='15' style={{marginRight:'15px'}} />
+            <img src={GoogleIcon} alt="Google" width='15' height='15' style={{marginRight:'15px'}} />
             Sign in with Google
           </Button>
 
