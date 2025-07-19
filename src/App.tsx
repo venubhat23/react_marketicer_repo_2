@@ -6,7 +6,6 @@ import Dashboard from '../src/pages/Dashboard';
 import Login from './pages/Login';
 import { ThemeProvider } from '@mui/material';
 import theme from './theme';
-import LandingPage from './pages/LandingPage';
 import SignUp from './pages/SignUp';
 import {AuthProvider, useAuth} from './authContext/AuthContext'
 import ProtectedRoute from './components/ProctedRoute'
@@ -24,7 +23,8 @@ import MarketplaceModule from './pages/MarketPlace/MarketplaceModule';
 
 // Component that renders routes based on user role
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const authContext = useAuth();
+  const user = authContext?.user;
   const userRole = user?.role;
 
   // Function to render marketplace routes based on role
