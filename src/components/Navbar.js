@@ -1,5 +1,5 @@
 import React,{useState} from 'react';
-import { AppBar, Toolbar, IconButton,Typography, Box,Paper, } from '@mui/material';
+import { AppBar, Toolbar, IconButton,Typography, Box,Paper, Button, Menu, MenuItem } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
   Dashboard as DashboardIcon,
@@ -17,10 +17,39 @@ import {
   Assessment as AssessmentIcon,
   Close as CloseIcon
 } from '@mui/icons-material';
+import { useAuth } from "../authContext/AuthContext";
 
 const Navbar = () => {
 
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const { user, login } = useAuth();
+  const [roleMenuAnchor, setRoleMenuAnchor] = useState(null);
+
+  const handleRoleMenuOpen = (event) => {
+    setRoleMenuAnchor(event.currentTarget);
+  };
+
+  const handleRoleMenuClose = () => {
+    setRoleMenuAnchor(null);
+  };
+
+  const handleRoleChange = (role) => {
+    const token = localStorage.getItem('token') || 'demo-token';
+    
+    // Force clear and set
+    localStorage.removeItem('userRole');
+    localStorage.setItem('userRole', role);
+    localStorage.setItem('token', token);
+    
+    login(token, role);
+    
+    // Force a page reload to ensure everything updates
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+    
+    handleRoleMenuClose();
+  };
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon /> },
@@ -90,7 +119,102 @@ const Navbar = () => {
             <Typography variant="h4" sx={{ fontWeight: 600 }}>
               jhikjhnoikj
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              {/* Debug: Manual Role Setter */}
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  localStorage.setItem('userRole', 'admin');
+                  localStorage.setItem('token', 'admin-token');
+                  window.location.reload();
+                }}
+                sx={{ 
+                  color: 'red', 
+                  borderColor: 'red',
+                  fontSize: '10px',
+                  minWidth: 'auto',
+                  px: 1
+                }}
+              >
+                Force Admin
+              </Button>
+              
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  localStorage.setItem('userRole', 'brand');
+                  localStorage.setItem('token', 'brand-token');
+                  window.location.reload();
+                }}
+                sx={{ 
+                  color: 'blue', 
+                  borderColor: 'blue',
+                  fontSize: '10px',
+                  minWidth: 'auto',
+                  px: 1
+                }}
+              >
+                Force Brand
+              </Button>
+              
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  localStorage.setItem('userRole', 'influencer');
+                  localStorage.setItem('token', 'influencer-token');
+                  window.location.reload();
+                }}
+                sx={{ 
+                  color: 'green', 
+                  borderColor: 'green',
+                  fontSize: '10px',
+                  minWidth: 'auto',
+                  px: 1
+                }}
+              >
+                Force Influencer
+              </Button>
+              
+              <Button
+                color="inherit"
+                onClick={handleRoleMenuOpen}
+                sx={{ 
+                  textTransform: 'none',
+                  bgcolor: '#882AFF',
+                  color: 'white',
+                  '&:hover': { bgcolor: '#6a1b9a' },
+                  minWidth: '150px'
+                }}
+              >
+                Current Role: {user?.role || 'No Role'}
+              </Button>
+              <Menu
+                anchorEl={roleMenuAnchor}
+                open={Boolean(roleMenuAnchor)}
+                onClose={handleRoleMenuClose}
+              >
+                <MenuItem 
+                  onClick={() => handleRoleChange('admin')}
+                  sx={{ bgcolor: user?.role === 'admin' ? '#e3f2fd' : 'transparent' }}
+                >
+                  Admin {user?.role === 'admin' && '✓'}
+                </MenuItem>
+                <MenuItem 
+                  onClick={() => handleRoleChange('brand')}
+                  sx={{ bgcolor: user?.role === 'brand' ? '#e3f2fd' : 'transparent' }}
+                >
+                  Brand {user?.role === 'brand' && '✓'}
+                </MenuItem>
+                <MenuItem 
+                  onClick={() => handleRoleChange('influencer')}
+                  sx={{ bgcolor: user?.role === 'influencer' ? '#e3f2fd' : 'transparent' }}
+                >
+                  Influencer {user?.role === 'influencer' && '✓'}
+                </MenuItem>
+              </Menu>
               <IconButton size="large">
                 <NotificationsIcon />
               </IconButton>

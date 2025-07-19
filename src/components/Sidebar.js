@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Avatar,
   Box,
   Divider,
   List,
   ListItem,
-  ListItemIcon,
   Typography,
   ListItemButton,
   IconButton,
@@ -34,8 +33,11 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DescriptionIcon from '@mui/icons-material/Description';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import BusinessIcon from '@mui/icons-material/Business';
+import PersonIcon from '@mui/icons-material/Person';
 import { Link, useNavigate } from "react-router-dom";
 import LanguageIcon from '@mui/icons-material/Language';
+import { useAuth } from "../authContext/AuthContext";
 
 const footerItems = [
   { icon: <MessageSquareIcon />, active: true },
@@ -44,12 +46,66 @@ const footerItems = [
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [, forceUpdate] = useState({});
+
+  // Force re-render when user changes
+  useEffect(() => {
+    forceUpdate({});
+  }, [user]);
 
   const handleLogout = () => {
     localStorage.clear();      // Clear local storage
     sessionStorage.clear();    // Clear session storage (optional)
     navigate("/login");        // Redirect to login page
   };
+
+  // Determine which marketplace options to show based on role
+  const getMarketplaceOptions = () => {
+    const role = user?.role;
+    const options = [];
+
+    if (role === 'admin') {
+      // Admin sees both options
+      options.push(
+        {
+          link: '/brand/marketplace',
+          icon: <BusinessIcon fontSize="medium" />,
+          label: 'Marketincer-Brand'
+        },
+        {
+          link: '/influencer/marketplace',
+          icon: <PersonIcon fontSize="medium" />,
+          label: 'Marketincer-Influencer'
+        }
+      );
+    } else if (role === 'brand') {
+      // Brand sees only brand option
+      options.push({
+        link: '/brand/marketplace',
+        icon: <BusinessIcon fontSize="medium" />,
+        label: 'Marketincer-Brand'
+      });
+    } else if (role === 'influencer') {
+      // Influencer sees only influencer option
+      options.push({
+        link: '/influencer/marketplace',
+        icon: <PersonIcon fontSize="medium" />,
+        label: 'Marketincer-Influencer'
+      });
+    } else {
+      // Fallback - if no role or unknown role, show influencer option
+      options.push({
+        link: '/influencer/marketplace',
+        icon: <PersonIcon fontSize="medium" />,
+        label: 'Marketincer-Influencer'
+      });
+    }
+
+    return options;
+  };
+
+  const marketplaceOptions = getMarketplaceOptions();
 
   return(
     <Box sx={{ bgcolor: "#091a48", flexDirection: "column", width:"100%", height: "100vh" }}>
@@ -148,6 +204,22 @@ const Sidebar = () => {
             </Link>
           </ListItemButton>
         </ListItem>
+
+        {/* Dynamic Marketplace Options Based on Role */}
+        {marketplaceOptions.map((option, index) => (
+          <ListItem key={`marketplace-${index}`} disablePadding>
+            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Link to={option.link}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                  {option.icon}
+                  <Typography variant="body2" sx={{ fontSize: '10px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                    {option.label}
+                  </Typography>
+                </Box>
+              </Link>
+            </ListItemButton>
+          </ListItem>
+        ))}
 
       </List>
 
