@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   List,
@@ -12,7 +12,7 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../authContext/AuthContext';
 import routes from '../routes';
-import { getSidebarRoutes } from '../utils/routeUtils';
+import { getSidebarRoutes, testRoleBasedFiltering } from '../utils/routeUtils';
 
 const DynamicSidenav = ({ isOpen = true }) => {
   const { user } = useAuth();
@@ -20,6 +20,14 @@ const DynamicSidenav = ({ isOpen = true }) => {
 
   // Get filtered routes based on user role
   const filteredRoutes = getSidebarRoutes(routes, user?.role);
+
+  // Test role-based filtering in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && user?.role) {
+      console.log('Current user role:', user.role);
+      testRoleBasedFiltering(routes);
+    }
+  }, [user?.role]);
 
   return (
     <Box

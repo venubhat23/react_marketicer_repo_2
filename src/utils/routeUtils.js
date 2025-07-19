@@ -19,7 +19,14 @@ export const getFilteredRoutes = (routes, userRole) => {
     }
 
     // Check if user's role is in the route's allowed roles
-    return route.roles.some(role => role.toLowerCase() === normalizedUserRole);
+    const hasAccess = route.roles.some(role => role.toLowerCase() === normalizedUserRole);
+    
+    // Debug logging (remove in production)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Route: ${route.name}, User Role: ${normalizedUserRole}, Route Roles: ${route.roles}, Access: ${hasAccess}`);
+    }
+    
+    return hasAccess;
   });
 };
 
@@ -31,5 +38,36 @@ export const getFilteredRoutes = (routes, userRole) => {
  */
 export const getSidebarRoutes = (routes, userRole) => {
   const filteredRoutes = getFilteredRoutes(routes, userRole);
-  return filteredRoutes.filter(route => route.type === "collapse");
+  
+  // Only return routes that should be displayed in the sidebar
+  const sidebarRoutes = filteredRoutes.filter(route => route.type === "collapse");
+  
+  // Debug logging (remove in production)
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Total routes: ${routes.length}, Filtered routes: ${filteredRoutes.length}, Sidebar routes: ${sidebarRoutes.length}`);
+    console.log('Sidebar routes:', sidebarRoutes.map(r => r.name));
+  }
+  
+  return sidebarRoutes;
+};
+
+/**
+ * Test function to verify role-based filtering works correctly
+ * @param {Array} routes - Array of route objects
+ */
+export const testRoleBasedFiltering = (routes) => {
+  console.log('=== Testing Role-Based Filtering ===');
+  
+  const testRoles = ['Admin', 'Influencer', 'Brand'];
+  
+  testRoles.forEach(role => {
+    console.log(`\n--- Testing role: ${role} ---`);
+    const sidebarRoutes = getSidebarRoutes(routes, role);
+    console.log(`Visible routes for ${role}:`, sidebarRoutes.map(r => r.name));
+  });
+  
+  console.log('\n=== Expected Results ===');
+  console.log('Admin should see: Dashboard, Create Post, Contract, Analytics, Social Media');
+  console.log('Influencer should see: Dashboard, Create Post, Social Media');
+  console.log('Brand should see: Dashboard, Contract, Analytics');
 };
