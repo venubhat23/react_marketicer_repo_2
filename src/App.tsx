@@ -6,6 +6,7 @@ import Dashboard from '../src/pages/Dashboard';
 import Login from './pages/Login';
 import { ThemeProvider } from '@mui/material';
 import theme from './theme';
+import LandingPage from './pages/LandingPage';
 import SignUp from './pages/SignUp';
 import {AuthProvider} from './authContext/AuthContext'
 import ProtectedRoute from './components/ProctedRoute'
