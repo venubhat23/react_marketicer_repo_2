@@ -65,40 +65,41 @@ const Sidebar = () => {
     const role = user?.role;
     const options = [];
 
-    if (role === 'admin') {
+    // Check for both 'Admin' and 'admin' to handle case inconsistencies
+    if (role === 'Admin' || role === 'admin') {
       // Admin sees both options
       options.push(
         {
           link: '/brand/marketplace',
           icon: <BusinessIcon fontSize="medium" />,
-          label: 'Marketincer-Brand'
+          label: 'Marketplace-Brand'
         },
         {
           link: '/influencer/marketplace',
           icon: <PersonIcon fontSize="medium" />,
-          label: 'Marketincer-Influencer'
+          label: 'Marketplace-Influencer'
         }
       );
-    } else if (role === 'brand') {
+    } else if (role === 'Brand' || role === 'brand') {
       // Brand sees only brand option
       options.push({
         link: '/brand/marketplace',
         icon: <BusinessIcon fontSize="medium" />,
-        label: 'Marketincer-Brand'
+        label: 'Marketplace-Brand'
       });
-    } else if (role === 'influencer') {
+    } else if (role === 'Influencer' || role === 'influencer') {
       // Influencer sees only influencer option
       options.push({
         link: '/influencer/marketplace',
         icon: <PersonIcon fontSize="medium" />,
-        label: 'Marketincer-Influencer'
+        label: 'Marketplace-Influencer'
       });
     } else {
       // Fallback - if no role or unknown role, show influencer option
       options.push({
         link: '/influencer/marketplace',
         icon: <PersonIcon fontSize="medium" />,
-        label: 'Marketincer-Influencer'
+        label: 'Marketplace-Influencer'
       });
     }
 
