@@ -9,6 +9,7 @@ import theme from './theme';
 import SignUp from './pages/SignUp';
 import {AuthProvider, useAuth} from './authContext/AuthContext'
 import ProtectedRoute from './components/ProctedRoute'
+import { getUserRole } from './utils/userUtils';
 
 import CreatePost from './pages/CreatePost/CreatePost';
 import Analytics  from './pages/Profile/Analytics';
@@ -23,15 +24,8 @@ import MarketplaceModule from './pages/MarketPlace/MarketplaceModule';
 
 // Component that renders routes based on user role
 const AppRoutes = () => {
-  const authContext = useAuth();
-  
-  // Handle the case where authContext might be null
-  if (!authContext) {
-    return <div>Loading...</div>;
-  }
-  
-  const { user } = authContext;
-  const userRole = user?.role;
+  // Get user role using utility function
+  const userRole = getUserRole();
 
   // Function to render marketplace routes based on role
   const renderMarketplaceRoutes = () => {
