@@ -7,16 +7,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // const [user, setUser] = useState(() => {
-  //   const token = localStorage.getItem('token');
-  //   return token ? { token } : null;
-  // });
-
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userRole = localStorage.getItem('userRole') || 'influencer'; // Default to influencer
     if (token) {
-      setUser({ token, role: userRole });
+      const newUser = { token, role: userRole };
+      setUser(newUser);
     }
     setLoading(false);
   }, []);
@@ -24,7 +20,8 @@ export const AuthProvider = ({ children }) => {
   const login = (token, role = 'influencer') => {
     localStorage.setItem('token', token);
     localStorage.setItem('userRole', role);
-    setUser({ token, role });
+    const newUser = { token, role };
+    setUser(newUser);
   };
 
   const logout = () => {

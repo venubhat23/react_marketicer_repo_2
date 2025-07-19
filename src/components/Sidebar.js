@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Avatar,
   Box,
@@ -47,6 +47,12 @@ const footerItems = [
 const Sidebar = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [, forceUpdate] = useState({});
+
+  // Force re-render when user changes
+  useEffect(() => {
+    forceUpdate({});
+  }, [user]);
 
   const handleLogout = () => {
     localStorage.clear();      // Clear local storage
@@ -82,6 +88,13 @@ const Sidebar = () => {
       });
     } else if (role === 'influencer') {
       // Influencer sees only influencer option
+      options.push({
+        link: '/influencer/marketplace',
+        icon: <PersonIcon fontSize="medium" />,
+        label: 'Marketincer-Influencer'
+      });
+    } else {
+      // Fallback - if no role or unknown role, show influencer option
       options.push({
         link: '/influencer/marketplace',
         icon: <PersonIcon fontSize="medium" />,
