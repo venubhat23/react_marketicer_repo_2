@@ -21,6 +21,8 @@ import ContractPage from './pages/Contract/ContractPage'
 import Discover from './pages/Discover';
 import AIContractGenerator from './pages/Contract/AIContractGenerator';
 import MarketplaceModule from './pages/MarketPlace/MarketplaceModule';
+import MarketplacePostDetail from './pages/MarketPlace/MarketplacePostDetail';
+import MarketplaceStatistics from './pages/MarketPlace/MarketplaceStatistics';
 import SettingPage from './pages/Setting/SettingPage';
 
 // Component that renders routes based on user role
@@ -40,12 +42,27 @@ const AppRoutes = () => {
               <MarketplaceModule />
             </ProtectedRoute>
           } />
+          <Route path="/marketplace/:id" element={
+            <ProtectedRoute>
+              <MarketplacePostDetail />
+            </ProtectedRoute>
+          } />
+          <Route path="/marketplace/statistics" element={
+            <ProtectedRoute>
+              <MarketplaceStatistics />
+            </ProtectedRoute>
+          } />
           <Route path="/brand/marketplace" element={
             <ProtectedRoute>
               <MarketplaceModule />
             </ProtectedRoute>
           } />
           <Route path="/brand/marketplace/new" element={
+            <ProtectedRoute>
+              <MarketplaceModule />
+            </ProtectedRoute>
+          } />
+          <Route path="/brand/marketplace/edit/:id" element={
             <ProtectedRoute>
               <MarketplaceModule />
             </ProtectedRoute>
@@ -66,12 +83,27 @@ const AppRoutes = () => {
               <MarketplaceModule />
             </ProtectedRoute>
           } />
+          <Route path="/marketplace/:id" element={
+            <ProtectedRoute>
+              <MarketplacePostDetail />
+            </ProtectedRoute>
+          } />
+          <Route path="/marketplace/statistics" element={
+            <ProtectedRoute>
+              <MarketplaceStatistics />
+            </ProtectedRoute>
+          } />
           <Route path="/brand/marketplace" element={
             <ProtectedRoute>
               <MarketplaceModule />
             </ProtectedRoute>
           } />
           <Route path="/brand/marketplace/new" element={
+            <ProtectedRoute>
+              <MarketplaceModule />
+            </ProtectedRoute>
+          } />
+          <Route path="/brand/marketplace/edit/:id" element={
             <ProtectedRoute>
               <MarketplaceModule />
             </ProtectedRoute>
@@ -85,6 +117,11 @@ const AppRoutes = () => {
           <Route path="/marketplace" element={
             <ProtectedRoute>
               <MarketplaceModule />
+            </ProtectedRoute>
+          } />
+          <Route path="/marketplace/:id" element={
+            <ProtectedRoute>
+              <MarketplacePostDetail />
             </ProtectedRoute>
           } />
           <Route path="/influencer/marketplace" element={

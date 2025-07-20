@@ -59,17 +59,18 @@ const MarketplaceModule = () => {
   const [currentView, setCurrentView] = useState(getCurrentView());
   const [currentMode, setCurrentMode] = useState(getCurrentMode());
   
-  // Existing states
-  const Categories = ['A', 'B']; // Updated as per specification
-  const TargetAudiences = ['18–24', '24–30', '30–35', 'More than 35']; // Updated as per specification
+  // Updated constants as per API specification
+  const Categories = ['A', 'B'];
+  const TargetAudiences = ['18–24', '24–30', '30–35', 'More than 35'];
   const Types = ['Sponsored Post', 'Product Review', 'Brand Collaboration', 'Event Promotion', 'Giveaway', 'Story Feature'];
-  const Statuses = ['Published', 'Draft', 'Pending', 'Expired'];
+  const Statuses = ['published', 'draft', 'archived']; // Updated as per API spec
 
   // Search and Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [targetAudienceFilter, setTargetAudienceFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
   // Listing states
@@ -77,6 +78,7 @@ const MarketplaceModule = () => {
   const [selectedPost, setSelectedPost] = useState(null);
   const [bids, setBids] = useState([]);
   const [bidAmount, setBidAmount] = useState("");
+  const [bidMessage, setBidMessage] = useState("");
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
   const [bidsViewOpen, setBidsViewOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -87,23 +89,37 @@ const MarketplaceModule = () => {
   const [influencerView, setInfluencerView] = useState('feed'); // 'feed' or 'bids'
   const [myBids, setMyBids] = useState([]);
 
+  // Statistics state
+  const [statistics, setStatistics] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
   // Debounced search effect
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      if (searchQuery || statusFilter || typeFilter || categoryFilter) {
-        loadMarketplacePosts();
-      }
+      setCurrentPage(1); // Reset to first page when searching
+      loadMarketplacePosts();
     }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery, statusFilter, typeFilter, categoryFilter]);
+  }, [searchQuery, statusFilter, typeFilter, categoryFilter, targetAudienceFilter]);
 
   useEffect(() => {
     // Update view when route changes
     setCurrentView(getCurrentView());
     setCurrentMode(getCurrentMode());
+    setCurrentPage(1);
     loadMarketplacePosts();
+    loadStatistics();
   }, [location.pathname]);
+
+  // Load posts when page changes
+  useEffect(() => {
+    loadMarketplacePosts();
+  }, [currentPage]);
 
   // Load bids when influencer switches to bids view
   useEffect(() => {
@@ -140,35 +156,116 @@ const MarketplaceModule = () => {
       
       if (currentMode === 'influencer') {
         // Load marketplace feed for influencers
-        response = await MarketplaceAPI.getMarketplaceFeed({
-          page: 1,
-          limit: 20,
-          category: categoryFilter,
-          search: searchQuery
-        });
+        if (searchQuery) {
+          // Use search endpoint for influencers
+          response = await MarketplaceAPI.searchMarketplacePosts({
+            q: searchQuery,
+            category: categoryFilter,
+            target_audience: targetAudienceFilter,
+            page: currentPage,
+            per_page: 10
+          });
+        } else {
+          // Use regular feed endpoint
+          response = await MarketplaceAPI.getMarketplaceFeed({
+            category: categoryFilter,
+            target_audience: targetAudienceFilter,
+            page: currentPage,
+            per_page: 10
+          });
+        }
       } else {
         // Load brand posts for brands/admins
-        response = await MarketplaceAPI.getBrandPosts({
-          page: 1,
-          limit: 20,
-          status: statusFilter,
-          category: categoryFilter,
-          type: typeFilter,
-          search: searchQuery
-        });
+        response = await MarketplaceAPI.getMyMarketplacePosts();
+        
+        // Apply client-side filtering for brand posts since the API doesn't support search for brand posts
+        if (response.success && response.data) {
+          let filteredPosts = response.data;
+          
+          if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filteredPosts = filteredPosts.filter(post => 
+              post.title?.toLowerCase().includes(query) ||
+              post.description?.toLowerCase().includes(query) ||
+              post.brand_name?.toLowerCase().includes(query)
+            );
+          }
+          
+          if (statusFilter) {
+            filteredPosts = filteredPosts.filter(post => post.status === statusFilter);
+          }
+          
+          if (categoryFilter) {
+            filteredPosts = filteredPosts.filter(post => post.category === categoryFilter);
+          }
+          
+          if (targetAudienceFilter) {
+            filteredPosts = filteredPosts.filter(post => post.target_audience === targetAudienceFilter);
+          }
+          
+          response.data = filteredPosts;
+        }
       }
       
       if (response.success && response.data) {
-        setMarketplacePosts(response.data.posts || []);
+        // Transform API response to match existing component expectations
+        const transformedPosts = response.data.map(post => ({
+          id: post.id,
+          title: post.title,
+          description: post.description,
+          brand: post.brand_name || 'Unknown Brand',
+          brand_name: post.brand_name,
+          budget: typeof post.budget === 'number' ? `₹${post.budget.toLocaleString()}` : post.budget,
+          deadline: post.deadline,
+          location: post.location,
+          platform: post.platform,
+          languages: post.languages,
+          category: post.category,
+          targetAudience: post.target_audience,
+          target_audience: post.target_audience,
+          tags: post.tags,
+          imageUrl: post.media_url,
+          media_url: post.media_url,
+          media_type: post.media_type,
+          status: post.status,
+          views: post.views_count || 0,
+          views_count: post.views_count || 0,
+          bids_count: post.bids_count || 0,
+          dateCreated: post.created_at ? new Date(post.created_at).toLocaleDateString() : '',
+          created_at: post.created_at,
+          updated_at: post.updated_at,
+          user_has_bid: post.user_has_bid || false,
+          user_bid: post.user_bid,
+          // Legacy fields for backward compatibility
+          type: 'Sponsored Post'
+        }));
+        
+        setMarketplacePosts(transformedPosts);
+        
+        // Update pagination if available
+        if (response.pagination) {
+          setCurrentPage(response.pagination.current_page || 1);
+          setTotalPages(Math.ceil((response.pagination.total_count || 0) / (response.pagination.per_page || 10)));
+          setTotalCount(response.pagination.total_count || 0);
+        }
       } else {
-        throw new Error('Failed to load posts');
+        throw new Error(response.error?.message || 'Failed to load posts');
       }
     } catch (error) {
       console.error('Error loading marketplace posts:', error);
       
       // Fallback to mock data if API fails
       const mockData = MarketplaceAPI.getMockMarketplaceData();
-      setMarketplacePosts(mockData.posts);
+      const transformedMockPosts = mockData.posts.map(post => ({
+        ...post,
+        brand: post.brand_name,
+        targetAudience: post.target_audience,
+        views: post.views_count,
+        dateCreated: new Date(post.created_at).toLocaleDateString(),
+        imageUrl: post.media_url,
+        type: 'Sponsored Post'
+      }));
+      setMarketplacePosts(transformedMockPosts);
       
       toast.error(handleApiError(error));
     } finally {
@@ -179,12 +276,29 @@ const MarketplaceModule = () => {
   const loadMyBids = async () => {
     setBidsLoading(true);
     try {
-      const response = await MarketplaceAPI.getInfluencerBids();
+      const response = await MarketplaceAPI.getMyBids();
       
       if (response.success && response.data) {
-        setMyBids(response.data.bids || []);
+        // Transform API response to match existing component expectations
+        const transformedBids = response.data.map(bid => ({
+          id: bid.id,
+          amount: typeof bid.amount === 'number' ? bid.amount : parseFloat(bid.amount?.toString().replace(/[₹,]/g, '') || 0),
+          status: bid.status,
+          message: bid.message,
+          submittedDate: bid.created_at ? new Date(bid.created_at).toLocaleDateString() : '',
+          created_at: bid.created_at,
+          updated_at: bid.updated_at,
+          // Post details
+          postId: bid.marketplace_post?.id,
+          postTitle: bid.marketplace_post?.title,
+          brand: bid.marketplace_post?.brand_name,
+          description: bid.marketplace_post?.description,
+          deadline: bid.marketplace_post?.deadline
+        }));
+        
+        setMyBids(transformedBids);
       } else {
-        throw new Error('Failed to load bids');
+        throw new Error(response.error?.message || 'Failed to load bids');
       }
     } catch (error) {
       console.error('Error loading my bids:', error);
@@ -233,6 +347,19 @@ const MarketplaceModule = () => {
     }
   };
 
+  const loadStatistics = async () => {
+    try {
+      const response = await MarketplaceAPI.getMarketplaceStatistics();
+      
+      if (response.success && response.data) {
+        setStatistics(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading statistics:', error);
+      // Statistics are optional, don't show error to user
+    }
+  };
+
   const handleEditDirect = (post) => {
     navigate('/brand/marketplace/new', { state: { editPost: post } });
   };
@@ -243,20 +370,24 @@ const MarketplaceModule = () => {
       
       if (selectedPost) {
         // Update existing post
-        const response = await MarketplaceAPI.updatePost(selectedPost.id, newPost);
+        const response = await MarketplaceAPI.updateMarketplacePost(selectedPost.id, newPost);
         if (response.success) {
-          setMarketplacePosts(marketplacePosts.map(post => 
-            post.id === selectedPost.id ? { ...post, ...newPost } : post
-          ));
-          toast.success("Post updated successfully!");
+          // Refresh the posts list
+          await loadMarketplacePosts();
+          toast.success(response.message || "Post updated successfully!");
+        } else {
+          throw new Error(response.error?.message || 'Failed to update post');
         }
         setSelectedPost(null);
       } else {
         // Create new post
-        const response = await MarketplaceAPI.createPost(newPost);
+        const response = await MarketplaceAPI.createMarketplacePost(newPost);
         if (response.success) {
-          setMarketplacePosts([response.data, ...marketplacePosts]);
-          toast.success("Post created successfully!");
+          // Refresh the posts list
+          await loadMarketplacePosts();
+          toast.success(response.message || "Post created successfully!");
+        } else {
+          throw new Error(response.error?.message || 'Failed to create post');
         }
       }
       
@@ -276,11 +407,14 @@ const MarketplaceModule = () => {
     
     try {
       setLoading(true);
-      const response = await MarketplaceAPI.deletePost(post.id);
+      const response = await MarketplaceAPI.deleteMarketplacePost(post.id);
       
       if (response.success) {
-        setMarketplacePosts(marketplacePosts.filter(p => p.id !== post.id));
-        toast.success("Post deleted successfully!");
+        // Refresh the posts list
+        await loadMarketplacePosts();
+        toast.success(response.message || "Post deleted successfully!");
+      } else {
+        throw new Error(response.error?.message || 'Failed to delete post');
       }
     } catch (error) {
       console.error('Error deleting post:', error);
@@ -299,20 +433,29 @@ const MarketplaceModule = () => {
     try {
       setLoading(true);
       const bidData = {
-        amount: `₹${bidAmount}`,
-        message: `Bid submitted for ${selectedPost.title}`,
-        portfolio_links: []
+        amount: bidAmount,
+        message: bidMessage || `Bid submitted for ${selectedPost.title}`
       };
       
-      const response = await MarketplaceAPI.submitBid(selectedPost.id, bidData);
+      const response = await MarketplaceAPI.createBid(selectedPost.id, bidData);
       
       if (response.success) {
-        toast.success("Bid submitted successfully!");
+        toast.success(response.message || "Bid submitted successfully!");
         setBidAmount("");
+        setBidMessage("");
         setBidDialogOpen(false);
         
         // Track post view when bidding
-        await MarketplaceAPI.trackPostView(selectedPost.id);
+        try {
+          await MarketplaceAPI.trackPostView(selectedPost.id);
+        } catch (viewError) {
+          console.error('Error tracking post view:', viewError);
+        }
+        
+        // Refresh posts to update bid status
+        await loadMarketplacePosts();
+      } else {
+        throw new Error(response.error?.message || 'Failed to submit bid');
       }
     } catch (error) {
       console.error('Error submitting bid:', error);
@@ -327,10 +470,24 @@ const MarketplaceModule = () => {
     setBidsLoading(true);
     
     try {
-      const response = await MarketplaceAPI.getPostBids(post.id);
+      const response = await MarketplaceAPI.getMarketplacePostBids(post.id);
       
       if (response.success && response.data) {
-        setBids(response.data.bids || []);
+        // Transform API response to match existing component expectations
+        const transformedBids = (response.data.bids || []).map(bid => ({
+          id: bid.id,
+          amount: typeof bid.amount === 'number' ? `₹${bid.amount.toLocaleString()}` : bid.amount,
+          status: bid.status,
+          message: bid.message,
+          created_at: bid.created_at,
+          updated_at: bid.updated_at,
+          influencer: {
+            name: bid.influencer_name,
+            email: bid.influencer_email
+          }
+        }));
+        
+        setBids(transformedBids);
       } else {
         setBids([]);
       }
@@ -341,6 +498,31 @@ const MarketplaceModule = () => {
     } finally {
       setBidsLoading(false);
       setBidsViewOpen(true);
+    }
+  };
+
+  const handleBidStatusUpdate = async (bidId, status) => {
+    try {
+      let response;
+      
+      if (status === 'accepted') {
+        response = await MarketplaceAPI.acceptBid(bidId);
+      } else if (status === 'rejected') {
+        response = await MarketplaceAPI.rejectBid(bidId);
+      } else {
+        throw new Error('Invalid bid status');
+      }
+      
+      if (response.success) {
+        toast.success(response.message || `Bid ${status} successfully!`);
+        // Refresh bids list
+        await handleViewBids(selectedPost);
+      } else {
+        throw new Error(response.error?.message || `Failed to ${status} bid`);
+      }
+    } catch (error) {
+      console.error(`Error ${status} bid:`, error);
+      toast.error(handleApiError(error));
     }
   };
 
@@ -380,11 +562,12 @@ const MarketplaceModule = () => {
     setStatusFilter('');
     setTypeFilter('');
     setCategoryFilter('');
+    setTargetAudienceFilter('');
   };
 
   // Check if any filters are active
   const hasActiveFilters = () => {
-    return searchQuery || statusFilter || typeFilter || categoryFilter;
+    return searchQuery || statusFilter || typeFilter || categoryFilter || targetAudienceFilter;
   };
 
   // Brand Listing View
@@ -520,6 +703,23 @@ const MarketplaceModule = () => {
                 </Select>
               </FormControl>
 
+              <FormControl size="small" sx={{ minWidth: 140 }}>
+                <InputLabel>Target Audience</InputLabel>
+                <Select
+                  value={targetAudienceFilter}
+                  onChange={(e) => setTargetAudienceFilter(e.target.value)}
+                  label="Target Audience"
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {TargetAudiences.map((audience) => (
+                    <MenuItem key={audience} value={audience}>
+                      {audience}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
               {hasActiveFilters() && (
                 <Button
                   variant="text"
@@ -643,12 +843,12 @@ const MarketplaceModule = () => {
                       label={post.status} 
                       size="small" 
                       sx={{
-                        bgcolor: post.status === 'Published' ? '#e8f5e8' : 
-                                post.status === 'Draft' ? '#fff3e0' : 
-                                post.status === 'Pending' ? '#e3f2fd' : '#f5f5f5',
-                        color: post.status === 'Published' ? '#2e7d32' : 
-                               post.status === 'Draft' ? '#f57c00' : 
-                               post.status === 'Pending' ? '#1976d2' : '#616161',
+                        bgcolor: post.status === 'published' ? '#e8f5e8' : 
+                                post.status === 'draft' ? '#fff3e0' : 
+                                post.status === 'archived' ? '#f5f5f5' : '#e3f2fd',
+                        color: post.status === 'published' ? '#2e7d32' : 
+                               post.status === 'draft' ? '#f57c00' : 
+                               post.status === 'archived' ? '#616161' : '#1976d2',
                         fontWeight: 'medium'
                       }}
                     />
@@ -717,7 +917,7 @@ const MarketplaceModule = () => {
 
   // Influencer Feed View
   const InfluencerFeedView = () => {
-    const filteredPosts = getFilteredPosts.filter(post => post.status === 'Published');
+    const filteredPosts = getFilteredPosts.filter(post => post.status === 'published');
     
     return (
       <Box sx={{ 
@@ -1094,26 +1294,74 @@ const MarketplaceModule = () => {
             </Card>
           )))}
           
-            {/* Load More Button */}
-            <Box sx={{ textAlign: 'center', mt: 3, mb: 2 }}>
-              <Button 
-                variant="outlined" 
-                size="large"
-                sx={{
-                  borderColor: '#882AFF',
-                  color: '#882AFF',
-                  fontWeight: 'bold',
-                  borderRadius: 3,
-                  px: 4,
-                  py: 1.5,
-                  '&:hover': {
-                    borderColor: '#6a1b9a',
-                    bgcolor: '#f3e5f5'
-                  }
-                }}
-              >
-                Load More Posts
-              </Button>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                gap: 2,
+                mt: 4, 
+                mb: 2 
+              }}>
+                <Button
+                  variant="outlined"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  sx={{
+                    borderColor: '#882AFF',
+                    color: '#882AFF',
+                    '&:hover': {
+                      borderColor: '#6a1b9a',
+                      bgcolor: '#f3e5f5'
+                    },
+                    '&:disabled': {
+                      borderColor: '#ccc',
+                      color: '#ccc'
+                    }
+                  }}
+                >
+                  Previous
+                </Button>
+                
+                <Typography variant="body2" sx={{ 
+                  px: 2, 
+                  py: 1, 
+                  bgcolor: '#f8f9ff',
+                  borderRadius: 2,
+                  border: '1px solid #e1e7ff',
+                  fontWeight: 'medium'
+                }}>
+                  Page {currentPage} of {totalPages}
+                </Typography>
+                
+                <Button
+                  variant="outlined"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  sx={{
+                    borderColor: '#882AFF',
+                    color: '#882AFF',
+                    '&:hover': {
+                      borderColor: '#6a1b9a',
+                      bgcolor: '#f3e5f5'
+                    },
+                    '&:disabled': {
+                      borderColor: '#ccc',
+                      color: '#ccc'
+                    }
+                  }}
+                >
+                  Next
+                </Button>
+              </Box>
+            )}
+            
+            {/* Results Summary */}
+            <Box sx={{ textAlign: 'center', mt: 2, mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Showing {((currentPage - 1) * 10) + 1}-{Math.min(currentPage * 10, totalCount)} of {totalCount} opportunities
+              </Typography>
             </Box>
           </Box>
           </>
@@ -1302,36 +1550,103 @@ const MarketplaceModule = () => {
   // Bid Dialog
   const BidDialog = () => (
     <Dialog open={bidDialogOpen} onClose={() => setBidDialogOpen(false)} maxWidth="sm" fullWidth>
-      <DialogTitle>Submit Your Bid</DialogTitle>
-      <DialogContent>
-        <Typography variant="body1" sx={{ mb: 2 }}>
+      <DialogTitle sx={{ pb: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#882AFF' }}>
+          Submit Your Bid
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
           Bidding for: <strong>{selectedPost?.title}</strong>
         </Typography>
-        <TextField
-          fullWidth
-          label="Your Bid Amount (₹)"
-          value={bidAmount}
-          onChange={(e) => setBidAmount(e.target.value)}
-          placeholder="5,000"
-          sx={{ mb: 2 }}
-          type="number"
-          disabled={loading}
-        />
+      </DialogTitle>
+      <DialogContent sx={{ pt: 1 }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="body2" sx={{ mb: 1, fontWeight: 'medium' }}>
+            Bid Amount (₹) *
+          </Typography>
+          <TextField
+            fullWidth
+            value={bidAmount}
+            onChange={(e) => setBidAmount(e.target.value)}
+            placeholder="5000"
+            type="number"
+            disabled={loading}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': { borderColor: '#882AFF' },
+                '&.Mui-focused fieldset': { borderColor: '#882AFF' }
+              }
+            }}
+          />
+        </Box>
+        
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" sx={{ mb: 1, fontWeight: 'medium' }}>
+            Message (Optional)
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            value={bidMessage}
+            onChange={(e) => setBidMessage(e.target.value)}
+            placeholder="Tell the brand why you're the perfect fit for this campaign..."
+            disabled={loading}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': { borderColor: '#882AFF' },
+                '&.Mui-focused fieldset': { borderColor: '#882AFF' }
+              }
+            }}
+          />
+        </Box>
+
+        {selectedPost && (
+          <Box sx={{ 
+            p: 2, 
+            bgcolor: '#f8f9ff', 
+            borderRadius: 2, 
+            border: '1px solid #e1e7ff',
+            mt: 2
+          }}>
+            <Typography variant="body2" sx={{ fontWeight: 'medium', mb: 1 }}>
+              Campaign Details:
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              Budget: <strong>{selectedPost.budget}</strong>
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              Deadline: <strong>{selectedPost.deadline}</strong>
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Platform: <strong>{selectedPost.platform}</strong>
+            </Typography>
+          </Box>
+        )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setBidDialogOpen(false)} disabled={loading}>
+      <DialogActions sx={{ p: 3, pt: 2 }}>
+        <Button 
+          onClick={() => {
+            setBidDialogOpen(false);
+            setBidAmount("");
+            setBidMessage("");
+          }} 
+          disabled={loading}
+          sx={{ color: '#666' }}
+        >
           Cancel
         </Button>
         <Button 
           onClick={handleBidSubmit} 
           variant="contained"
-          disabled={loading}
+          disabled={loading || !bidAmount}
           sx={{ 
             bgcolor: '#882AFF',
-            '&:hover': { bgcolor: '#6a1b9a' }
+            '&:hover': { bgcolor: '#6a1b9a' },
+            '&:disabled': { bgcolor: '#ccc' },
+            px: 3
           }}
         >
-          {loading ? <CircularProgress size={20} color="inherit" /> : 'Place Bid'}
+          {loading ? <CircularProgress size={20} color="inherit" /> : 'Submit Bid'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -1394,12 +1709,7 @@ const MarketplaceModule = () => {
                             color="success"
                             onClick={async () => {
                               try {
-                                await MarketplaceAPI.updateBidStatus(bid.id, { 
-                                  status: 'accepted',
-                                  message: 'Congratulations! Your bid has been accepted.'
-                                });
-                                toast.success("Bid accepted!");
-                                handleViewBids(selectedPost); // Refresh bids
+                                await handleBidStatusUpdate(bid.id, 'accepted');
                               } catch (error) {
                                 toast.error(handleApiError(error));
                               }
@@ -1413,12 +1723,7 @@ const MarketplaceModule = () => {
                             color="error"
                             onClick={async () => {
                               try {
-                                await MarketplaceAPI.updateBidStatus(bid.id, { 
-                                  status: 'rejected',
-                                  message: 'Thank you for your interest. We went with another influencer.'
-                                });
-                                toast.info("Bid rejected!");
-                                handleViewBids(selectedPost); // Refresh bids
+                                await handleBidStatusUpdate(bid.id, 'rejected');
                               } catch (error) {
                                 toast.error(handleApiError(error));
                               }

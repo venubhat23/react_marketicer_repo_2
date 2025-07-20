@@ -117,33 +117,33 @@ const CreateMarketplacePost = ({
       
       if (initialData?.id) {
         // Update existing post
-        response = await MarketplaceAPI.updatePost(initialData.id, payloadData);
+        response = await MarketplaceAPI.updateMarketplacePost(initialData.id, payloadData);
       } else {
         // Create new post
-        response = await MarketplaceAPI.createPost(payloadData);
+        response = await MarketplaceAPI.createMarketplacePost(payloadData);
       }
       
-      if (response.success) {
-        const newPost = {
-          id: initialData?.id || response.data?.id || Date.now(),
-          ...payloadData,
-          imageUrl: uploadedImageUrl, // Keep both formats for compatibility
-          videoUrl: uploadedVideoUrl,
-          dateCreated: new Date().toISOString().split('T')[0],
-          views: initialData?.views || 0,
-          brand: brandName,
-          bids_count: initialData?.bids_count || 0
-        };
-        
-        toast.success(initialData ? "Post updated successfully!" : "Post published successfully!");
-        
-        // Callback to parent component
-        if (onPostCreated) {
-          onPostCreated(newPost);
+              if (response.success) {
+          const newPost = {
+            id: initialData?.id || response.data?.id || Date.now(),
+            ...payloadData,
+            imageUrl: uploadedImageUrl, // Keep both formats for compatibility
+            videoUrl: uploadedVideoUrl,
+            dateCreated: new Date().toISOString().split('T')[0],
+            views: initialData?.views || 0,
+            brand: brandName,
+            bids_count: initialData?.bids_count || 0
+          };
+          
+          toast.success(response.message || (initialData ? "Post updated successfully!" : "Post published successfully!"));
+          
+          // Callback to parent component
+          if (onPostCreated) {
+            onPostCreated(newPost);
+          }
+        } else {
+          throw new Error(response.error?.message || 'Failed to publish post');
         }
-      } else {
-        throw new Error(response.error?.message || 'Failed to publish post');
-      }
       
     } catch (error) {
       console.error("Error publishing post:", error);
