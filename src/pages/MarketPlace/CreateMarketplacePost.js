@@ -229,49 +229,49 @@ const CreateMarketplacePost = ({
                   />
                 </Box>
                 
-                {/* Title */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                    Title *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter an engaging post title"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        bgcolor: '#f8f9fa',
-                        '&:hover fieldset': { borderColor: '#882AFF' },
-                        '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                      }
-                    }}
-                  />
-                </Box>
-                
-                {/* Description */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                    Description *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={4}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe your campaign requirements in detail..."
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        bgcolor: '#f8f9fa',
-                        '&:hover fieldset': { borderColor: '#882AFF' },
-                        '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                      }
-                    }}
-                  />
-                </Box>
+                {/* Title and Description */}
+                <Grid container spacing={2} sx={{ mb: 3 }}>
+                  <Grid item xs={6}>
+                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
+                      Title *
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Enter an engaging post title"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          bgcolor: '#f8f9fa',
+                          '&:hover fieldset': { borderColor: '#882AFF' },
+                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
+                        }
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
+                      Description *
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={4}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Describe your campaign requirements in detail..."
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          bgcolor: '#f8f9fa',
+                          '&:hover fieldset': { borderColor: '#882AFF' },
+                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
+                        }
+                      }}
+                    />
+                  </Grid>
+                </Grid>
                 
                 {/* Media Upload */}
                 <Box sx={{ mb: 3 }}>
