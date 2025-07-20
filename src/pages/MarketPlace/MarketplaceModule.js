@@ -231,9 +231,6 @@ const MarketplaceModule = () => {
   const BrandListingView = () => (
     <Box sx={{ padding: '20px' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
-          My Marketplace Posts
-        </Typography>
         <Button 
           variant="contained" 
           startIcon={<AddIcon />}
