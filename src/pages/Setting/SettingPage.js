@@ -199,8 +199,10 @@ const SettingPage = () => {
         try {
           await updatePersonalInfo.mutateAsync(personalFormData);
           setPersonalEditMode(false);
+          toast.success('Personal information updated successfully');
         } catch (error) {
           // Error is handled by the hook
+          console.error('Failed to update personal information:', error);
         }
       };
 
@@ -215,8 +217,10 @@ const SettingPage = () => {
             company_website: companyFormData.company_website,
           });
           setCompanyEditMode(false);
+          toast.success('Company details updated successfully');
         } catch (error) {
           // Error is handled by the hook
+          console.error('Failed to update company details:', error);
         }
       };
     
@@ -235,8 +239,10 @@ const SettingPage = () => {
             new_password: '',
             confirm_password: '',
           });
+          toast.success('Password updated successfully');
         } catch (error) {
           // Error is handled by the hook
+          console.error('Failed to change password:', error);
         }
       };
 
