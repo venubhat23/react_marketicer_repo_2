@@ -337,21 +337,10 @@ const MarketplaceModule = () => {
   // Brand Listing View
   const BrandListingView = () => (
     <Box sx={{ padding: '20px' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
           My Marketplace Posts
         </Typography>
-        <Button 
-          variant="contained" 
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/brand/marketplace/new')}
-          sx={{ 
-            bgcolor: '#882AFF',
-            '&:hover': { bgcolor: '#6a1b9a' }
-          }}
-        >
-          + Create New Post
-        </Button>
       </Box>
 
       {loading ? (
@@ -368,7 +357,7 @@ const MarketplaceModule = () => {
                 <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Budget</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Date Created</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Views</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Deadline</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Bids</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
               </TableRow>
@@ -414,10 +403,9 @@ const MarketplaceModule = () => {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <VisibilityIcon fontSize="small" color="action" />
-                      <Typography variant="body2">{post.views_count || 0}</Typography>
-                    </Box>
+                    <Typography variant="body2">
+                      {post.deadline ? new Date(post.deadline).toLocaleDateString() : 'Not specified'}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Button 
@@ -448,6 +436,20 @@ const MarketplaceModule = () => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        PaperProps={{
+          sx: {
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            mt: 1
+          }
+        }}
       >
         <MenuItem onClick={handleEdit}>
           <EditIcon sx={{ mr: 1 }} />
@@ -902,9 +904,25 @@ const MarketplaceModule = () => {
             borderRadius: 0
           }}
         >
-          <Typography variant="h6" sx={{ color: '#fff' }}>
-            {getHeaderTitle()}
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" sx={{ color: '#fff' }}>
+              {getHeaderTitle()}
+            </Typography>
+            {(currentMode === 'brand' && (isBrand || isAdmin) && currentView === 'listing') && (
+              <Button 
+                variant="contained" 
+                startIcon={<AddIcon />}
+                onClick={() => navigate('/brand/marketplace/new')}
+                sx={{ 
+                  bgcolor: '#882AFF',
+                  '&:hover': { bgcolor: '#6a1b9a' },
+                  color: '#fff'
+                }}
+              >
+                + Create New Post
+              </Button>
+            )}
+          </Box>
         </Paper>
 
         {/* Main Content */}
