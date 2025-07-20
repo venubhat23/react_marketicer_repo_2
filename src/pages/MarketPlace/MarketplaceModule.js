@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import {
   Box, Typography, Button, TextField, Avatar, Chip, Select, MenuItem, IconButton, Card, FormControl,
   Tab, Tabs, Checkbox, Grid, Modal, Paper, AppBar, Toolbar, Container, InputLabel, ListItemText,
@@ -69,8 +69,6 @@ const MarketplaceModule = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [dateFromFilter, setDateFromFilter] = useState('');
-  const [dateToFilter, setDateToFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
   // Listing states
@@ -226,18 +224,15 @@ const MarketplaceModule = () => {
     setBidsViewOpen(true);
   };
 
-  // Filter and Search Logic
-  const getFilteredPosts = () => {
+  // Filter and Search Logic - Optimized with useMemo to prevent unnecessary re-renders
+  const getFilteredPosts = useMemo(() => {
     let filtered = [...marketplacePosts];
 
-    // Search filter
+    // Search filter - only search by title
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(post => 
-        post.title.toLowerCase().includes(query) ||
-        post.description.toLowerCase().includes(query) ||
-        post.brand.toLowerCase().includes(query) ||
-        post.tags.toLowerCase().includes(query)
+        post.title && post.title.toLowerCase().includes(query)
       );
     }
 
@@ -256,17 +251,8 @@ const MarketplaceModule = () => {
       filtered = filtered.filter(post => post.category === categoryFilter);
     }
 
-    // Date range filter
-    if (dateFromFilter) {
-      filtered = filtered.filter(post => new Date(post.dateCreated) >= new Date(dateFromFilter));
-    }
-
-    if (dateToFilter) {
-      filtered = filtered.filter(post => new Date(post.dateCreated) <= new Date(dateToFilter));
-    }
-
     return filtered;
-  };
+  }, [marketplacePosts, searchQuery, statusFilter, typeFilter, categoryFilter]);
 
   // Clear all filters
   const clearAllFilters = () => {
@@ -274,18 +260,16 @@ const MarketplaceModule = () => {
     setStatusFilter('');
     setTypeFilter('');
     setCategoryFilter('');
-    setDateFromFilter('');
-    setDateToFilter('');
   };
 
   // Check if any filters are active
   const hasActiveFilters = () => {
-    return searchQuery || statusFilter || typeFilter || categoryFilter || dateFromFilter || dateToFilter;
+    return searchQuery || statusFilter || typeFilter || categoryFilter;
   };
 
   // Brand Listing View
   const BrandListingView = () => {
-    const filteredPosts = getFilteredPosts();
+    const filteredPosts = getFilteredPosts;
 
     return (
       <Box sx={{ padding: '20px' }}>
@@ -304,7 +288,7 @@ const MarketplaceModule = () => {
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
             <TextField
               fullWidth
-              placeholder="Search by title, description, brand, or tags..."
+              placeholder="Search by title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
@@ -415,32 +399,6 @@ const MarketplaceModule = () => {
                   ))}
                 </Select>
               </FormControl>
-
-              <TextField
-                size="small"
-                type="date"
-                label="From Date"
-                value={dateFromFilter}
-                onChange={(e) => setDateFromFilter(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                sx={{ 
-                  minWidth: 140,
-                  '& .MuiOutlinedInput-root': { borderRadius: 2 }
-                }}
-              />
-
-              <TextField
-                size="small"
-                type="date"
-                label="To Date"
-                value={dateToFilter}
-                onChange={(e) => setDateToFilter(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                sx={{ 
-                  minWidth: 140,
-                  '& .MuiOutlinedInput-root': { borderRadius: 2 }
-                }}
-              />
 
               {hasActiveFilters() && (
                 <Button
@@ -619,14 +577,52 @@ const MarketplaceModule = () => {
   };
 
   // Influencer Feed View
-  const InfluencerFeedView = () => (
-    <Box sx={{ padding: '20px' }}>
-      <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold', mb: 3 }}>
-        Marketplace Feed
-      </Typography>
-      
-      <Grid container spacing={3}>
-        {marketplacePosts.filter(post => post.status === 'Published').map((post) => (
+  const InfluencerFeedView = () => {
+    const filteredPosts = getFilteredPosts.filter(post => post.status === 'Published');
+    
+    return (
+      <Box sx={{ padding: '20px' }}>
+        <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold', mb: 3 }}>
+          Marketplace Feed
+        </Typography>
+        
+        {/* Search Bar */}
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            fullWidth
+            placeholder="Search by title..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ color: '#882AFF', mr: 1 }} />,
+              endAdornment: searchQuery && (
+                <IconButton 
+                  size="small" 
+                  onClick={() => setSearchQuery('')}
+                  sx={{ color: '#666' }}
+                >
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              ),
+              sx: {
+                borderRadius: 2,
+                backgroundColor: 'white',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e1e7ff',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#882AFF',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#882AFF',
+                }
+              }
+            }}
+          />
+        </Box>
+        
+        <Grid container spacing={3}>
+          {filteredPosts.map((post) => (
           <Grid item xs={12} md={6} lg={4} key={post.id}>
             <Card sx={{ 
               borderRadius: 2, 
@@ -711,10 +707,11 @@ const MarketplaceModule = () => {
               </CardContent>
             </Card>
           </Grid>
-        ))}
-      </Grid>
-    </Box>
-  );
+                  ))}
+        </Grid>
+      </Box>
+    );
+  };
 
   // Bid Dialog
   const BidDialog = () => (
