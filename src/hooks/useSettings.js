@@ -37,12 +37,14 @@ export const useUpdatePersonalInformation = () => {
       toast.success(data.message || 'Personal information updated successfully');
     },
     onError: (error) => {
-      const errorMessage = error.message || 'Failed to update personal information';
-      toast.error(errorMessage);
+      console.error('Personal information update error:', error);
       
       // Handle validation errors
       if (error.errors && Array.isArray(error.errors)) {
         error.errors.forEach(err => toast.error(err));
+      } else {
+        const errorMessage = error.message || 'Failed to update personal information';
+        toast.error(errorMessage);
       }
     },
   });
@@ -66,12 +68,14 @@ export const useUpdateCompanyDetails = () => {
       toast.success(data.message || 'Company details updated successfully');
     },
     onError: (error) => {
-      const errorMessage = error.message || 'Failed to update company details';
-      toast.error(errorMessage);
+      console.error('Company details update error:', error);
       
       // Handle validation errors
       if (error.errors && Array.isArray(error.errors)) {
         error.errors.forEach(err => toast.error(err));
+      } else {
+        const errorMessage = error.message || 'Failed to update company details';
+        toast.error(errorMessage);
       }
     },
   });
@@ -85,12 +89,14 @@ export const useChangePassword = () => {
       toast.success(data.message || 'Password updated successfully');
     },
     onError: (error) => {
-      const errorMessage = error.message || 'Failed to update password';
-      toast.error(errorMessage);
+      console.error('Password change error:', error);
       
       // Handle validation errors
       if (error.errors && Array.isArray(error.errors)) {
         error.errors.forEach(err => toast.error(err));
+      } else {
+        const errorMessage = error.message || 'Failed to update password';
+        toast.error(errorMessage);
       }
     },
   });
