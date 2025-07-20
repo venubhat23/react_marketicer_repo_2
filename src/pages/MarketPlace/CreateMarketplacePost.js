@@ -191,14 +191,16 @@ const CreateMarketplacePost = ({
 
       {/* Main Content - 50/50 Split */}
       <Box sx={{ padding: '24px' }}>
-        <Grid container spacing={3} sx={{ height: 'calc(100vh - 120px)' }}>
+        <Grid container spacing={3}>
           
           {/* Left Panel - Form (50%) */}
-          <Grid item xs={12} md={6} sx={{ height: '100%' }}>
+          <Grid item xs={12} md={6}>
             <Card sx={{ 
               borderRadius: 3, 
-              boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-              height: '100%',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+              height: 'fit-content',
+              minHeight: '500px',
+              maxHeight: '80vh',
               overflow: 'auto'
             }}>
               <CardContent sx={{ p: 4 }}>
@@ -570,15 +572,17 @@ const CreateMarketplacePost = ({
           </Grid>
           
           {/* Right Panel - Live Preview (50%) */}
-          <Grid item xs={12} md={6} sx={{ height: '100%' }}>
+          <Grid item xs={12} md={6}>
             <Card sx={{ 
               borderRadius: 3, 
-              boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-              height: '100%',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+              height: 'fit-content',
+              minHeight: '500px',
+              maxHeight: '80vh',
               overflow: 'auto',
               background: 'linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%)'
             }}>
-              <CardContent sx={{ p: 4, height: '100%' }}>
+                              <CardContent sx={{ p: 4, textAlign: 'center' }}>
                 <Typography variant="h6" sx={{ 
                   mb: 3, 
                   color: '#882AFF', 
@@ -593,7 +597,7 @@ const CreateMarketplacePost = ({
                 <Card sx={{ 
                   borderRadius: 3, 
                   boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-                  mb: 3,
+                  mb: 2,
                   background: 'white',
                   border: '1px solid #e1e7ff'
                 }}>
@@ -601,31 +605,31 @@ const CreateMarketplacePost = ({
                   {uploadedImageUrl ? (
                     <CardMedia
                       component="img"
-                      height="240"
+                      height="160"
                       image={uploadedImageUrl}
                       alt="Preview"
                       sx={{ borderRadius: '12px 12px 0 0' }}
                     />
                   ) : (
                     <Box sx={{ 
-                      height: 240, 
+                      height: 160, 
                       bgcolor: '#f5f5f5', 
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center',
                       borderRadius: '12px 12px 0 0'
                     }}>
-                      <PhotoCamera sx={{ fontSize: 60, color: '#ddd' }} />
+                      <PhotoCamera sx={{ fontSize: 40, color: '#ddd' }} />
                     </Box>
                   )}
                   
-                  <CardContent sx={{ p: 3 }}>
+                  <CardContent sx={{ p: 2 }}>
                     {/* Brand Name */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <Avatar sx={{ bgcolor: '#882AFF', width: 32, height: 32, mr: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                      <Avatar sx={{ bgcolor: '#882AFF', width: 28, height: 28, mr: 1 }}>
                         {brandName.charAt(0)}
                       </Avatar>
-                      <Typography variant="body2" sx={{ color: '#666', fontWeight: 600 }}>
+                      <Typography variant="body2" sx={{ color: '#666', fontWeight: 600, fontSize: '0.85rem' }}>
                         {brandName}
                       </Typography>
                     </Box>
@@ -633,9 +637,9 @@ const CreateMarketplacePost = ({
                     {/* Title */}
                     <Typography variant="h6" sx={{ 
                       fontWeight: 700, 
-                      mb: 2, 
+                      mb: 1.5, 
                       color: '#333',
-                      fontSize: '1.3rem',
+                      fontSize: '1.1rem',
                       lineHeight: 1.3
                     }}>
                       {title || 'Your Post Title Will Appear Here'}
@@ -644,71 +648,72 @@ const CreateMarketplacePost = ({
                     {/* Description */}
                     <Typography variant="body2" sx={{ 
                       color: '#666', 
-                      mb: 3,
-                      lineHeight: 1.6
+                      mb: 2,
+                      lineHeight: 1.5,
+                      fontSize: '0.85rem'
                     }}>
-                      {description || 'Your detailed post description will be displayed here. This gives influencers a clear understanding of your campaign requirements.'}
+                      {description ? (description.length > 100 ? description.substring(0, 100) + '...' : description) : 'Your detailed post description will be displayed here...'}
                     </Typography>
                     
                     {/* Budget Badge */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <LocalOffer sx={{ color: '#4caf50', mr: 1 }} />
-                      <Typography variant="h5" sx={{ 
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                      <LocalOffer sx={{ color: '#4caf50', mr: 1, fontSize: 18 }} />
+                      <Typography variant="h6" sx={{ 
                         color: '#4caf50', 
                         fontWeight: 800,
-                        fontSize: '1.8rem'
+                        fontSize: '1.2rem'
                       }}>
                         {budget ? `₹${budget}` : '₹0'}
                       </Typography>
                     </Box>
                     
                     {/* Details Grid */}
-                    <Stack spacing={2}>
-                      {deadline && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Schedule sx={{ color: '#ff9800', mr: 1, fontSize: 20 }} />
-                          <Typography variant="body2" sx={{ color: '#666' }}>
-                            Deadline: {deadline}
-                          </Typography>
-                        </Box>
-                      )}
-                      
-                      {location && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <LocationOn sx={{ color: '#f44336', mr: 1, fontSize: 20 }} />
-                          <Typography variant="body2" sx={{ color: '#666' }}>
-                            {location}
-                          </Typography>
-                        </Box>
-                      )}
-                      
-                      {targetAudience && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <People sx={{ color: '#2196f3', mr: 1, fontSize: 20 }} />
-                          <Typography variant="body2" sx={{ color: '#666' }}>
-                            Target: {targetAudience}
-                          </Typography>
-                        </Box>
-                      )}
-                      
-                      {platform && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Language sx={{ color: '#9c27b0', mr: 1, fontSize: 20 }} />
-                          <Typography variant="body2" sx={{ color: '#666' }}>
-                            Platform: {platform}
-                          </Typography>
-                        </Box>
-                      )}
+                    <Stack spacing={1}>
+                                              {deadline && (
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Schedule sx={{ color: '#ff9800', mr: 1, fontSize: 16 }} />
+                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                              Deadline: {deadline}
+                            </Typography>
+                          </Box>
+                        )}
+                        
+                        {location && (
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <LocationOn sx={{ color: '#f44336', mr: 1, fontSize: 16 }} />
+                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                              {location}
+                            </Typography>
+                          </Box>
+                        )}
+                        
+                        {targetAudience && (
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <People sx={{ color: '#2196f3', mr: 1, fontSize: 16 }} />
+                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                              Target: {targetAudience}
+                            </Typography>
+                          </Box>
+                        )}
+                        
+                        {platform && (
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Language sx={{ color: '#9c27b0', mr: 1, fontSize: 16 }} />
+                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                              Platform: {platform}
+                            </Typography>
+                          </Box>
+                        )}
                     </Stack>
                     
                     {/* Tags */}
                     {tags && (
-                      <Box sx={{ mt: 3 }}>
-                        <Typography variant="body2" sx={{ color: '#666', mb: 1, fontWeight: 600 }}>
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="body2" sx={{ color: '#666', mb: 1, fontWeight: 600, fontSize: '0.8rem' }}>
                           Tags:
                         </Typography>
-                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                          {tags.split(',').map((tag, index) => (
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                          {tags.split(',').slice(0, 3).map((tag, index) => (
                             <Chip 
                               key={index} 
                               label={tag.trim()} 
@@ -717,10 +722,17 @@ const CreateMarketplacePost = ({
                                 bgcolor: '#e8f5e8', 
                                 color: '#2e7d32',
                                 fontWeight: 600,
+                                fontSize: '0.7rem',
+                                height: '20px',
                                 '&:hover': { bgcolor: '#c8e6c9' }
                               }}
                             />
                           ))}
+                          {tags.split(',').length > 3 && (
+                            <Typography variant="caption" sx={{ color: '#999', alignSelf: 'center' }}>
+                              +{tags.split(',').length - 3} more
+                            </Typography>
+                          )}
                         </Box>
                       </Box>
                     )}
@@ -729,26 +741,27 @@ const CreateMarketplacePost = ({
                 
                 {/* Additional Preview Info */}
                 <Box sx={{ 
-                  p: 3, 
+                  p: 2, 
                   bgcolor: 'rgba(136, 42, 255, 0.05)', 
-                  borderRadius: 3,
+                  borderRadius: 2,
                   border: '1px solid rgba(136, 42, 255, 0.1)'
                 }}>
                   <Typography variant="body2" sx={{ 
                     color: '#882AFF', 
                     fontWeight: 600,
                     textAlign: 'center',
-                    mb: 1
+                    mb: 0.5,
+                    fontSize: '0.85rem'
                   }}>
                     💡 Preview Tips
                   </Typography>
                   <Typography variant="body2" sx={{ 
                     color: '#666', 
                     textAlign: 'center',
-                    fontSize: '0.9rem'
+                    fontSize: '0.75rem',
+                    lineHeight: 1.4
                   }}>
-                    This is how your post will appear to influencers in the marketplace. 
-                    Make sure all details are accurate and compelling!
+                    This is how your post will appear to influencers. Make sure all details are accurate!
                   </Typography>
                 </Box>
               </CardContent>
