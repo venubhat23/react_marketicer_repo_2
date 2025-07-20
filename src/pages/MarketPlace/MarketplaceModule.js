@@ -578,7 +578,7 @@ const MarketplaceModule = () => {
 
   // Influencer Feed View
   const InfluencerFeedView = () => {
-    const filteredPosts = getFilteredPosts().filter(post => post.status === 'Published');
+    const filteredPosts = getFilteredPosts.filter(post => post.status === 'Published');
     
     return (
       <Box sx={{ padding: '20px' }}>
