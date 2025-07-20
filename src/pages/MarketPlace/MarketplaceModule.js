@@ -581,8 +581,19 @@ const MarketplaceModule = () => {
     const filteredPosts = getFilteredPosts.filter(post => post.status === 'Published');
     
     return (
-      <Box sx={{ padding: '20px' }}>
-        <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold', mb: 3 }}>
+      <Box sx={{ 
+        maxWidth: '800px', 
+        margin: '0 auto', 
+        padding: '20px',
+        minHeight: '100vh',
+        backgroundColor: '#f8f9fa'
+      }}>
+        <Typography variant="h4" sx={{ 
+          color: '#882AFF', 
+          fontWeight: 'bold', 
+          mb: 3,
+          textAlign: 'center'
+        }}>
           Marketplace Feed
         </Typography>
         
@@ -590,7 +601,7 @@ const MarketplaceModule = () => {
         <Box sx={{ mb: 3 }}>
           <TextField
             fullWidth
-            placeholder="Search by title..."
+            placeholder="Search opportunities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{
@@ -605,7 +616,7 @@ const MarketplaceModule = () => {
                 </IconButton>
               ),
               sx: {
-                borderRadius: 2,
+                borderRadius: 3,
                 backgroundColor: 'white',
                 '& .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#e1e7ff',
@@ -621,67 +632,198 @@ const MarketplaceModule = () => {
           />
         </Box>
         
-        <Grid container spacing={3}>
-          {filteredPosts.map((post) => (
-          <Grid item xs={12} md={6} lg={4} key={post.id}>
-            <Card sx={{ 
-              borderRadius: 2, 
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              '&:hover': { boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }
+        {/* Feed Container */}
+        <Box sx={{ 
+          maxHeight: 'calc(100vh - 200px)', 
+          overflowY: 'auto',
+          paddingRight: '8px',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#f1f1f1',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#882AFF',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: '#6a1b9a',
+          },
+        }}>
+          {filteredPosts.map((post, index) => (
+            <Card key={post.id} sx={{ 
+              mb: 3,
+              borderRadius: 3, 
+              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+              border: '1px solid #e1e7ff',
+              backgroundColor: 'white',
+              overflow: 'hidden',
+              '&:hover': { 
+                boxShadow: '0 4px 20px rgba(136, 42, 255, 0.15)',
+                borderColor: '#882AFF'
+              },
+              transition: 'all 0.3s ease'
             }}>
-              <CardMedia
-                component="img"
-                height="200"
-                image={post.imageUrl}
-                alt={post.title}
-              />
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                  {post.title}
-                </Typography>
-                
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {post.description}
-                </Typography>
-                
-                <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-                  <Chip label={post.type} size="small" sx={{ bgcolor: '#e3f2fd', color: '#1976d2' }} />
-                  <Chip label={post.category} size="small" sx={{ bgcolor: '#f3e5f5', color: '#7b1fa2' }} />
+              {/* Post Header */}
+              <Box sx={{ 
+                p: 2, 
+                borderBottom: '1px solid #f0f0f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Avatar sx={{ 
+                    bgcolor: '#882AFF', 
+                    width: 40, 
+                    height: 40,
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}>
+                    {post.brand.charAt(0).toUpperCase()}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#333' }}>
+                      {post.brand}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Posted • {post.views} views
+                    </Typography>
+                  </Box>
                 </Box>
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
-                    {post.budget}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Deadline: {post.deadline}
-                  </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Chip 
+                    label={post.type} 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: '#e3f2fd', 
+                      color: '#1976d2',
+                      fontWeight: 'bold',
+                      fontSize: '11px'
+                    }} 
+                  />
+                  <Chip 
+                    label={post.category} 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: '#f3e5f5', 
+                      color: '#7b1fa2',
+                      fontWeight: 'bold',
+                      fontSize: '11px'
+                    }} 
+                  />
                 </Box>
+              </Box>
+
+              {/* Post Content */}
+              <Box>
+                {/* Image */}
+                <CardMedia
+                  component="img"
+                  height="300"
+                  image={post.imageUrl}
+                  alt={post.title}
+                  sx={{ 
+                    objectFit: 'cover',
+                    cursor: 'pointer'
+                  }}
+                />
                 
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <LocationOnIcon fontSize="small" color="action" />
-                  <Typography variant="body2" color="text.secondary">
-                    {post.location}
+                {/* Content Body */}
+                <CardContent sx={{ p: 2 }}>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 'bold', 
+                    mb: 1,
+                    color: '#333',
+                    fontSize: '18px'
+                  }}>
+                    {post.title}
                   </Typography>
-                </Box>
-                
+                  
+                  <Typography variant="body2" color="text.secondary" sx={{ 
+                    mb: 2,
+                    lineHeight: 1.6,
+                    fontSize: '14px'
+                  }}>
+                    {post.description}
+                  </Typography>
+                  
+                  {/* Budget and Deadline */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    mb: 2,
+                    p: 1.5,
+                    bgcolor: '#f8f9ff',
+                    borderRadius: 2,
+                    border: '1px solid #e1e7ff'
+                  }}>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        Budget
+                      </Typography>
+                      <Typography variant="h6" sx={{ 
+                        color: '#882AFF', 
+                        fontWeight: 'bold',
+                        fontSize: '16px'
+                      }}>
+                        {post.budget}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        Deadline
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#333' }}>
+                        {post.deadline}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  
+                  {/* Location */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <LocationOnIcon fontSize="small" sx={{ color: '#882AFF' }} />
+                    <Typography variant="body2" color="text.secondary">
+                      {post.location}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Box>
+
+              {/* Action Buttons */}
+              <Box sx={{ 
+                p: 2, 
+                borderTop: '1px solid #f0f0f0',
+                bgcolor: '#fafbff'
+              }}>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <Button 
                     variant="outlined" 
-                    size="small"
+                    size="medium"
                     startIcon={<ChatBubbleOutlineIcon />}
                     sx={{ 
                       flex: 1,
                       borderColor: '#882AFF',
                       color: '#882AFF',
-                      '&:hover': { borderColor: '#6a1b9a', bgcolor: '#f3e5f5' }
+                      fontWeight: 'bold',
+                      borderRadius: 2,
+                      py: 1,
+                      '&:hover': { 
+                        borderColor: '#6a1b9a', 
+                        bgcolor: '#f3e5f5',
+                        transform: 'translateY(-1px)'
+                      },
+                      transition: 'all 0.2s ease'
                     }}
                   >
                     Message
                   </Button>
                   <Button 
                     variant="contained" 
-                    size="small"
+                    size="medium"
                     onClick={() => {
                       setSelectedPost(post);
                       setBidDialogOpen(true);
@@ -689,26 +831,45 @@ const MarketplaceModule = () => {
                     sx={{ 
                       flex: 1,
                       bgcolor: '#882AFF',
-                      '&:hover': { bgcolor: '#6a1b9a' }
+                      fontWeight: 'bold',
+                      borderRadius: 2,
+                      py: 1,
+                      '&:hover': { 
+                        bgcolor: '#6a1b9a',
+                        transform: 'translateY(-1px)'
+                      },
+                      transition: 'all 0.2s ease'
                     }}
                   >
                     Bid Now
                   </Button>
                 </Box>
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    By {post.brand}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {post.views} views
-                  </Typography>
-                </Box>
-              </CardContent>
+              </Box>
             </Card>
-          </Grid>
-                  ))}
-        </Grid>
+          ))}
+          
+          {/* Load More Button */}
+          <Box sx={{ textAlign: 'center', mt: 3, mb: 2 }}>
+            <Button 
+              variant="outlined" 
+              size="large"
+              sx={{
+                borderColor: '#882AFF',
+                color: '#882AFF',
+                fontWeight: 'bold',
+                borderRadius: 3,
+                px: 4,
+                py: 1.5,
+                '&:hover': {
+                  borderColor: '#6a1b9a',
+                  bgcolor: '#f3e5f5'
+                }
+              }}
+            >
+              Load More Posts
+            </Button>
+          </Box>
+        </Box>
       </Box>
     );
   };
