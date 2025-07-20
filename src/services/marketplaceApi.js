@@ -2,237 +2,493 @@ import AxiosManager from '../utils/api';
 
 /**
  * Marketplace API Service
- * Handles all marketplace-related API calls
+ * Complete implementation based on API documentation
  */
 
-// Base endpoints
-const MARKETPLACE_ENDPOINTS = {
-  POSTS: '/api/v1/marketplace/posts',
-  FEED: '/api/v1/marketplace/feed',
-  BIDS: '/api/v1/marketplace/posts',
-  MESSAGES: '/api/v1/messages',
-  UPLOAD: '/api/v1/upload',
-  USER_PROFILE: '/api/v1/user/profile',
-  ANALYTICS: '/api/v1/marketplace/posts'
-};
+// Base endpoints as per API specification
+const API_BASE = '/api/v1';
 
 /**
- * Authentication & User Management
- */
-export const getUserProfile = async () => {
-  try {
-    const response = await AxiosManager.get(MARKETPLACE_ENDPOINTS.USER_PROFILE);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-    throw error;
-  }
-};
-
-/**
- * Marketplace Posts Management (Brand)
+ * MARKETPLACE POSTS ENDPOINTS
  */
 
-// Get all posts by brand
-export const getBrandPosts = async (params = {}) => {
-  try {
-    const queryParams = {
-      page: params.page || 1,
-      limit: params.limit || 10,
-      status: params.status || '',
-      category: params.category || '',
-      ...params
-    };
-    
-    const response = await AxiosManager.get(MARKETPLACE_ENDPOINTS.POSTS, queryParams);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching brand posts:', error);
-    throw error;
-  }
-};
-
-// Create new post
-export const createPost = async (postData) => {
-  try {
-    const response = await AxiosManager.post(MARKETPLACE_ENDPOINTS.POSTS, postData);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating post:', error);
-    throw error;
-  }
-};
-
-// Update post
-export const updatePost = async (postId, postData) => {
-  try {
-    const response = await AxiosManager.put(`${MARKETPLACE_ENDPOINTS.POSTS}/${postId}`, postData);
-    return response.data;
-  } catch (error) {
-    console.error('Error updating post:', error);
-    throw error;
-  }
-};
-
-// Delete post
-export const deletePost = async (postId) => {
-  try {
-    const response = await AxiosManager.delete(`${MARKETPLACE_ENDPOINTS.POSTS}/${postId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error deleting post:', error);
-    throw error;
-  }
-};
-
-/**
- * Marketplace Feed (Influencer)
- */
-
-// Get marketplace feed
+// Get Marketplace Feed (Influencers Only)
 export const getMarketplaceFeed = async (params = {}) => {
   try {
     const queryParams = {
-      page: params.page || 1,
-      limit: params.limit || 12,
       category: params.category || '',
-      location: params.location || '',
-      budget_min: params.budget_min || '',
-      budget_max: params.budget_max || '',
-      sort_by: params.sort_by || 'created_at',
-      order: params.order || 'desc',
+      target_audience: params.target_audience || '',
+      page: params.page || 1,
+      per_page: params.per_page || 10,
       ...params
     };
     
-    const response = await AxiosManager.get(MARKETPLACE_ENDPOINTS.FEED, queryParams);
-    return response.data;
+    const response = await AxiosManager.get(`${API_BASE}/marketplace_posts`, queryParams);
+    return {
+      success: true,
+      data: response.data.data || [],
+      pagination: response.data.pagination
+    };
   } catch (error) {
     console.error('Error fetching marketplace feed:', error);
-    throw error;
+    return handleApiResponse(error);
   }
 };
 
-// Get single post details
+// Get My Marketplace Posts (Brands/Admin Only)
+export const getMyMarketplacePosts = async () => {
+  try {
+    const response = await AxiosManager.get(`${API_BASE}/marketplace_posts/my_posts`);
+    return {
+      success: true,
+      data: response.data.data || []
+    };
+  } catch (error) {
+    console.error('Error fetching my marketplace posts:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Get Single Marketplace Post
+export const getMarketplacePost = async (postId) => {
+  try {
+    const response = await AxiosManager.get(`${API_BASE}/marketplace_posts/${postId}`);
+    return {
+      success: true,
+      data: response.data.data
+    };
+  } catch (error) {
+    console.error('Error fetching marketplace post:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Create Marketplace Post (Brands/Admin Only)
+export const createMarketplacePost = async (postData) => {
+  try {
+    const payload = {
+      marketplace_post: {
+        title: postData.title,
+        description: postData.description,
+        category: postData.category,
+        target_audience: postData.targetAudience || postData.target_audience,
+        budget: parseFloat(postData.budget?.toString().replace(/[₹,]/g, '') || 0),
+        location: postData.location,
+        platform: postData.platform,
+        languages: postData.languages,
+        deadline: postData.deadline,
+        tags: postData.tags,
+        status: postData.status || 'published',
+        brand_name: postData.brand_name || postData.brandName || 'Your Brand',
+        media_url: postData.media_url || postData.imageUrl,
+        media_type: postData.media_type || (postData.imageUrl ? 'image' : 'text')
+      }
+    };
+    
+    const response = await AxiosManager.post(`${API_BASE}/marketplace_posts`, payload);
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message
+    };
+  } catch (error) {
+    console.error('Error creating marketplace post:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Update Marketplace Post (Brands/Admin Only)
+export const updateMarketplacePost = async (postId, postData) => {
+  try {
+    const payload = {
+      marketplace_post: {
+        title: postData.title,
+        description: postData.description,
+        category: postData.category,
+        target_audience: postData.targetAudience || postData.target_audience,
+        budget: parseFloat(postData.budget?.toString().replace(/[₹,]/g, '') || 0),
+        location: postData.location,
+        platform: postData.platform,
+        languages: postData.languages,
+        deadline: postData.deadline,
+        tags: postData.tags,
+        status: postData.status || 'published',
+        brand_name: postData.brand_name || postData.brandName,
+        media_url: postData.media_url || postData.imageUrl,
+        media_type: postData.media_type || (postData.imageUrl ? 'image' : 'text')
+      }
+    };
+    
+    const response = await AxiosManager.put(`${API_BASE}/marketplace_posts/${postId}`, payload);
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message
+    };
+  } catch (error) {
+    console.error('Error updating marketplace post:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Delete Marketplace Post (Brands/Admin Only)
+export const deleteMarketplacePost = async (postId) => {
+  try {
+    const response = await AxiosManager.delete(`${API_BASE}/marketplace_posts/${postId}`);
+    return {
+      success: true,
+      message: response.data.message
+    };
+  } catch (error) {
+    console.error('Error deleting marketplace post:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Search Marketplace Posts (Influencers Only)
+export const searchMarketplacePosts = async (searchParams) => {
+  try {
+    const queryParams = {
+      q: searchParams.q || '',
+      category: searchParams.category || '',
+      target_audience: searchParams.target_audience || '',
+      budget_min: searchParams.budget_min || '',
+      budget_max: searchParams.budget_max || '',
+      deadline_from: searchParams.deadline_from || '',
+      deadline_to: searchParams.deadline_to || '',
+      location: searchParams.location || '',
+      platform: searchParams.platform || '',
+      page: searchParams.page || 1,
+      per_page: searchParams.per_page || 10
+    };
+    
+    const response = await AxiosManager.get(`${API_BASE}/marketplace_posts/search`, queryParams);
+    return {
+      success: true,
+      data: response.data.data || [],
+      pagination: response.data.pagination
+    };
+  } catch (error) {
+    console.error('Error searching marketplace posts:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Get Statistics
+export const getMarketplaceStatistics = async () => {
+  try {
+    const response = await AxiosManager.get(`${API_BASE}/marketplace_posts/statistics`);
+    return {
+      success: true,
+      data: response.data.data
+    };
+  } catch (error) {
+    console.error('Error fetching marketplace statistics:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Get Marketplace Insights (Admin Only)
+export const getMarketplaceInsights = async () => {
+  try {
+    const response = await AxiosManager.get(`${API_BASE}/marketplace_posts/insights`);
+    return {
+      success: true,
+      data: response.data.data
+    };
+  } catch (error) {
+    console.error('Error fetching marketplace insights:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Get Recommended Posts (Influencers Only)
+export const getRecommendedPosts = async (limit = 10) => {
+  try {
+    const response = await AxiosManager.get(`${API_BASE}/marketplace_posts/recommended`, { limit });
+    return {
+      success: true,
+      data: response.data.data || []
+    };
+  } catch (error) {
+    console.error('Error fetching recommended posts:', error);
+    return handleApiResponse(error);
+  }
+};
+
+/**
+ * BIDS ENDPOINTS
+ */
+
+// Get Bids for Marketplace Post (Brands/Admin Only)
+export const getMarketplacePostBids = async (marketplacePostId) => {
+  try {
+    const response = await AxiosManager.get(`${API_BASE}/marketplace_posts/${marketplacePostId}/bids`);
+    return {
+      success: true,
+      data: response.data.data
+    };
+  } catch (error) {
+    console.error('Error fetching marketplace post bids:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Create Bid (Influencers Only)
+export const createBid = async (marketplacePostId, bidData) => {
+  try {
+    const payload = {
+      bid: {
+        amount: parseFloat(bidData.amount?.toString().replace(/[₹,]/g, '') || 0),
+        message: bidData.message || ''
+      }
+    };
+    
+    const response = await AxiosManager.post(`${API_BASE}/marketplace_posts/${marketplacePostId}/bids`, payload);
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message
+    };
+  } catch (error) {
+    console.error('Error creating bid:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Get Single Bid
+export const getBid = async (bidId) => {
+  try {
+    const response = await AxiosManager.get(`${API_BASE}/bids/${bidId}`);
+    return {
+      success: true,
+      data: response.data.data
+    };
+  } catch (error) {
+    console.error('Error fetching bid:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Update Bid (Influencers Only - Own Pending Bids)
+export const updateBid = async (bidId, bidData) => {
+  try {
+    const payload = {
+      bid: {
+        amount: parseFloat(bidData.amount?.toString().replace(/[₹,]/g, '') || 0),
+        message: bidData.message || ''
+      }
+    };
+    
+    const response = await AxiosManager.put(`${API_BASE}/bids/${bidId}`, payload);
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message
+    };
+  } catch (error) {
+    console.error('Error updating bid:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Delete Bid (Influencers Only - Own Pending Bids)
+export const deleteBid = async (bidId) => {
+  try {
+    const response = await AxiosManager.delete(`${API_BASE}/bids/${bidId}`);
+    return {
+      success: true,
+      message: response.data.message
+    };
+  } catch (error) {
+    console.error('Error deleting bid:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Accept Bid (Brands/Admin Only)
+export const acceptBid = async (bidId) => {
+  try {
+    const response = await AxiosManager.post(`${API_BASE}/bids/${bidId}/accept`);
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message
+    };
+  } catch (error) {
+    console.error('Error accepting bid:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Reject Bid (Brands/Admin Only)
+export const rejectBid = async (bidId) => {
+  try {
+    const response = await AxiosManager.post(`${API_BASE}/bids/${bidId}/reject`);
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message
+    };
+  } catch (error) {
+    console.error('Error rejecting bid:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Get My Bids (Influencers Only)
+export const getMyBids = async () => {
+  try {
+    const response = await AxiosManager.get(`${API_BASE}/bids/my_bids`);
+    return {
+      success: true,
+      data: response.data.data || []
+    };
+  } catch (error) {
+    console.error('Error fetching my bids:', error);
+    return handleApiResponse(error);
+  }
+};
+
+/**
+ * UTILITY FUNCTIONS
+ */
+
+// Handle API Response
+const handleApiResponse = (error) => {
+  if (error.response) {
+    const { status, data } = error.response;
+    return {
+      success: false,
+      error: {
+        status,
+        message: data?.message || data?.error || getErrorMessage(status),
+        errors: data?.errors || []
+      }
+    };
+  } else if (error.request) {
+    return {
+      success: false,
+      error: {
+        status: 0,
+        message: 'Network error. Please check your internet connection.',
+        errors: []
+      }
+    };
+  } else {
+    return {
+      success: false,
+      error: {
+        status: 0,
+        message: error.message || 'An unexpected error occurred',
+        errors: []
+      }
+    };
+  }
+};
+
+// Get Error Message by Status Code
+const getErrorMessage = (status) => {
+  switch (status) {
+    case 400:
+      return 'Invalid request data';
+    case 401:
+      return 'Authentication required. Please log in.';
+    case 403:
+      return 'Access denied. You don\'t have permission to perform this action.';
+    case 404:
+      return 'Resource not found';
+    case 422:
+      return 'Validation errors occurred';
+    case 500:
+      return 'Server error. Please try again later.';
+    default:
+      return 'An unexpected error occurred';
+  }
+};
+
+// Handle API Error (Legacy function for backward compatibility)
+export const handleApiError = (error) => {
+  const response = handleApiResponse(error);
+  return response.error?.message || 'An unexpected error occurred';
+};
+
+/**
+ * LEGACY FUNCTIONS (for backward compatibility with existing code)
+ */
+
+// Legacy: Get Brand Posts
+export const getBrandPosts = async (params = {}) => {
+  return await getMyMarketplacePosts();
+};
+
+// Legacy: Create Post
+export const createPost = async (postData) => {
+  return await createMarketplacePost(postData);
+};
+
+// Legacy: Update Post
+export const updatePost = async (postId, postData) => {
+  return await updateMarketplacePost(postId, postData);
+};
+
+// Legacy: Delete Post
+export const deletePost = async (postId) => {
+  return await deleteMarketplacePost(postId);
+};
+
+// Legacy: Get Post Details
 export const getPostDetails = async (postId) => {
-  try {
-    const response = await AxiosManager.get(`${MARKETPLACE_ENDPOINTS.POSTS}/${postId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching post details:', error);
-    throw error;
-  }
+  return await getMarketplacePost(postId);
 };
 
-/**
- * Bidding System
- */
-
-// Submit bid (Influencer)
+// Legacy: Submit Bid
 export const submitBid = async (postId, bidData) => {
-  try {
-    const response = await AxiosManager.post(`${MARKETPLACE_ENDPOINTS.BIDS}/${postId}/bids`, bidData);
-    return response.data;
-  } catch (error) {
-    console.error('Error submitting bid:', error);
-    throw error;
-  }
+  return await createBid(postId, bidData);
 };
 
-// Get bids for post (Brand)
-export const getPostBids = async (postId, params = {}) => {
-  try {
-    const queryParams = {
-      page: params.page || 1,
-      limit: params.limit || 10,
-      status: params.status || '',
-      ...params
-    };
-    
-    const response = await AxiosManager.get(`${MARKETPLACE_ENDPOINTS.BIDS}/${postId}/bids`, queryParams);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching post bids:', error);
-    throw error;
-  }
+// Legacy: Get Post Bids
+export const getPostBids = async (postId) => {
+  return await getMarketplacePostBids(postId);
 };
 
-// Update bid status (Brand)
+// Legacy: Update Bid Status
 export const updateBidStatus = async (bidId, statusData) => {
-  try {
-    const response = await AxiosManager.put(`/api/v1/marketplace/bids/${bidId}/status`, statusData);
-    return response.data;
-  } catch (error) {
-    console.error('Error updating bid status:', error);
-    throw error;
+  if (statusData.status === 'accepted') {
+    return await acceptBid(bidId);
+  } else if (statusData.status === 'rejected') {
+    return await rejectBid(bidId);
   }
+  return { success: false, error: { message: 'Invalid status' } };
 };
 
-// Get influencer's own bids (Influencer)
-export const getInfluencerBids = async (params = {}) => {
+// Legacy: Get Influencer Bids
+export const getInfluencerBids = async () => {
+  return await getMyBids();
+};
+
+// Legacy: Track Post View
+export const trackPostView = async (postId) => {
   try {
-    const queryParams = {
-      page: params.page || 1,
-      limit: params.limit || 20,
-      status: params.status || '',
-      ...params
+    // This would increment view count when influencer views a post
+    const response = await AxiosManager.post(`${API_BASE}/marketplace_posts/${postId}/view`);
+    return {
+      success: true,
+      data: response.data
     };
-    
-    const response = await AxiosManager.get(
-      '/api/v1/marketplace/influencer/bids',
-      { params: queryParams }
-    );
-    return response.data;
   } catch (error) {
-    console.error('Error fetching influencer bids:', error);
-    throw error;
+    console.error('Error tracking post view:', error);
+    return handleApiResponse(error);
   }
 };
 
-/**
- * Messaging System
- */
-
-// Send message
-export const sendMessage = async (messageData) => {
-  try {
-    const response = await AxiosManager.post(MARKETPLACE_ENDPOINTS.MESSAGES, messageData);
-    return response.data;
-  } catch (error) {
-    console.error('Error sending message:', error);
-    throw error;
-  }
-};
-
-// Get conversation messages
-export const getMessages = async (recipientId, params = {}) => {
-  try {
-    const queryParams = {
-      recipient_id: recipientId,
-      page: params.page || 1,
-      limit: params.limit || 50,
-      ...params
-    };
-    
-    const response = await AxiosManager.get(MARKETPLACE_ENDPOINTS.MESSAGES, queryParams);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching messages:', error);
-    throw error;
-  }
-};
-
-/**
- * File Upload
- */
-
-// Upload media
+// Legacy: Upload Media
 export const uploadMedia = async (file, type = 'image') => {
   try {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('type', type);
     
-    // Use the existing upload endpoint from CreateMarketplacePost
     const response = await fetch(
       'https://kitintellect.tech/storage/public/api/upload/aaFacebook',
       {
@@ -261,249 +517,97 @@ export const uploadMedia = async (file, type = 'image') => {
     };
   } catch (error) {
     console.error('Error uploading media:', error);
-    throw error;
+    return handleApiResponse(error);
   }
 };
 
-/**
- * Analytics & Tracking
- */
-
-// Track post view
-export const trackPostView = async (postId) => {
+// Legacy: Send Message
+export const sendMessage = async (messageData) => {
   try {
-    const response = await AxiosManager.post(`${MARKETPLACE_ENDPOINTS.POSTS}/${postId}/view`);
-    return response.data;
+    const response = await AxiosManager.post(`${API_BASE}/messages`, messageData);
+    return {
+      success: true,
+      data: response.data.data
+    };
   } catch (error) {
-    console.error('Error tracking post view:', error);
-    throw error;
+    console.error('Error sending message:', error);
+    return handleApiResponse(error);
   }
 };
 
-// Get post analytics (Brand)
-export const getPostAnalytics = async (postId) => {
-  try {
-    const response = await AxiosManager.get(`${MARKETPLACE_ENDPOINTS.ANALYTICS}/${postId}/analytics`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching post analytics:', error);
-    throw error;
-  }
-};
-
-/**
- * Search and Filter Utilities
- */
-
-// Search posts with filters
-export const searchPosts = async (searchParams) => {
-  try {
-    const isInfluencerFeed = searchParams.view === 'influencer';
-    const endpoint = isInfluencerFeed ? MARKETPLACE_ENDPOINTS.FEED : MARKETPLACE_ENDPOINTS.POSTS;
-    
-    const response = await AxiosManager.get(endpoint, searchParams);
-    return response.data;
-  } catch (error) {
-    console.error('Error searching posts:', error);
-    throw error;
-  }
-};
-
-/**
- * Batch Operations
- */
-
-// Batch update post statuses
-export const batchUpdatePostStatus = async (postIds, status) => {
-  try {
-    const response = await AxiosManager.patch('/api/v1/marketplace/posts/batch-update', {
-      post_ids: postIds,
-      status: status
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error batch updating posts:', error);
-    throw error;
-  }
-};
-
-// Batch delete posts
-export const batchDeletePosts = async (postIds) => {
-  try {
-    const response = await AxiosManager.delete('/api/v1/marketplace/posts/batch-delete', {
-      data: { post_ids: postIds }
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error batch deleting posts:', error);
-    throw error;
-  }
-};
-
-/**
- * Statistics and Insights
- */
-
-// Get marketplace statistics
-export const getMarketplaceStats = async () => {
-  try {
-    const response = await AxiosManager.get('/api/v1/marketplace/stats');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching marketplace stats:', error);
-    throw error;
-  }
-};
-
-// Get user activity insights
-export const getUserActivityInsights = async (params = {}) => {
-  try {
-    const response = await AxiosManager.get('/api/v1/marketplace/insights', params);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching user insights:', error);
-    throw error;
-  }
-};
-
-/**
- * Error Handling Utilities
- */
-
-// Handle API errors with user-friendly messages
-export const handleApiError = (error) => {
-  if (error.response) {
-    // Server responded with error status
-    const { status, data } = error.response;
-    
-    switch (status) {
-      case 400:
-        return data.error?.message || 'Invalid request data';
-      case 401:
-        return 'Authentication required. Please log in.';
-      case 403:
-        return 'Access denied. You don\'t have permission to perform this action.';
-      case 404:
-        return 'Resource not found';
-      case 409:
-        return data.error?.message || 'Resource already exists';
-      case 429:
-        return 'Too many requests. Please try again later.';
-      case 500:
-        return 'Server error. Please try again later.';
-      default:
-        return data.error?.message || 'An unexpected error occurred';
-    }
-  } else if (error.request) {
-    // Network error
-    return 'Network error. Please check your internet connection.';
-  } else {
-    // Other error
-    return error.message || 'An unexpected error occurred';
-  }
-};
-
-/**
- * Mock Data for Development (fallback when API is not available)
- */
+// Legacy: Get Mock Data (fallback)
 export const getMockMarketplaceData = () => {
   return {
     posts: [
       {
         id: 1,
-        title: "Instagram Reel for Fashion Brand",
-        type: "Sponsored Post",
-        status: "Published",
-        dateCreated: "2024-01-15",
-        views: 150,
-        description: "Looking for fashion influencers to create engaging reels showcasing our new collection",
-        budget: "₹10,000",
-        deadline: "2024-02-01",
-        category: "A",
-        targetAudience: "18–24",
+        title: "Fashion Brand Collaboration",
+        description: "Looking for fashion influencers to promote our new collection...",
+        brand_name: "Fashion Co.",
+        budget: 5000.00,
+        deadline: "2024-02-15",
         location: "Mumbai",
         platform: "Instagram",
-        languages: "Hindi, English",
-        tags: "Fashion, Style, Trendy",
-        imageUrl: "https://picsum.photos/400/300?random=1",
-        brand: "StyleCo",
-        bids_count: 5
-      },
-      {
-        id: 2,
-        title: "Product Review - Tech Gadget",
-        type: "Product Review",
-        status: "Published",
-        dateCreated: "2024-01-12",
-        views: 89,
-        description: "Need tech reviewers for our latest smartphone accessory",
-        budget: "₹5,000",
-        deadline: "2024-01-30",
-        category: "B",
-        targetAudience: "24–30",
-        location: "Delhi",
-        platform: "YouTube",
-        languages: "English",
-        tags: "Tech, Review, Gadgets",
-        imageUrl: "https://picsum.photos/400/300?random=2",
-        brand: "TechCorp",
-        bids_count: 3
+        category: "A",
+        target_audience: "24–30",
+        tags: ["Fashion", "Style"],
+        media_url: "https://picsum.photos/400/300?random=1",
+        media_type: "image",
+        views_count: 125,
+        bids_count: 8,
+        created_at: "2024-01-15T10:30:00Z",
+        user_has_bid: false,
+        status: "published"
       }
     ],
     pagination: {
       current_page: 1,
-      total_pages: 1,
-      total_items: 2,
-      items_per_page: 10
+      per_page: 10,
+      total_count: 1
     }
   };
 };
 
 // Default export with all API functions
 const MarketplaceAPI = {
-  // User Management
-  getUserProfile,
+  // New API functions (matching specification)
+  getMarketplaceFeed,
+  getMyMarketplacePosts,
+  getMarketplacePost,
+  createMarketplacePost,
+  updateMarketplacePost,
+  deleteMarketplacePost,
+  searchMarketplacePosts,
+  getMarketplaceStatistics,
+  getMarketplaceInsights,
+  getRecommendedPosts,
   
-  // Posts Management
+  // Bids
+  getMarketplacePostBids,
+  createBid,
+  getBid,
+  updateBid,
+  deleteBid,
+  acceptBid,
+  rejectBid,
+  getMyBids,
+  
+  // Utility
+  handleApiError,
+  trackPostView,
+  uploadMedia,
+  sendMessage,
+  
+  // Legacy functions (for backward compatibility)
   getBrandPosts,
   createPost,
   updatePost,
   deletePost,
   getPostDetails,
-  
-  // Feed
-  getMarketplaceFeed,
-  
-  // Bidding
   submitBid,
   getPostBids,
   updateBidStatus,
   getInfluencerBids,
-  
-  // Messaging
-  sendMessage,
-  getMessages,
-  
-  // File Upload
-  uploadMedia,
-  
-  // Analytics
-  trackPostView,
-  getPostAnalytics,
-  
-  // Search & Filter
-  searchPosts,
-  
-  // Batch Operations
-  batchUpdatePostStatus,
-  batchDeletePosts,
-  
-  // Statistics
-  getMarketplaceStats,
-  getUserActivityInsights,
-  
-  // Utilities
-  handleApiError,
   getMockMarketplaceData
 };
 
