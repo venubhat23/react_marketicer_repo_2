@@ -240,7 +240,7 @@ const MarketplaceModule = () => {
             '&:hover': { bgcolor: '#6a1b9a' }
           }}
         >
-          + Create New Post
+          Create New Post
         </Button>
       </Box>
 
