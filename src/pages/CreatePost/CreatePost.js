@@ -661,264 +661,327 @@ const CreatePost = () => {
                 </Box>
               </Box>
         </Paper>
-      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'20px'}}>
-        <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
-          <Grid size={{ xs: 12, sm: 8, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%' }}>
-              {/* Dropdowns */}
-              <Box display="flex" gap={2} mb={2} >
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-label">Brand</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="Brand"
-                    size="small"
-                    value={brandName}
-                    onChange={(e) => setBrandName(e.target.value)}
-                    sx={{ height:'40px',mt:'6px', color:'#882AFF'}}
-                  >
-                    {Brands.map((brand) => (
-                      <MenuItem key={brand} value={brand} sx={{color:'#882AFF'}} >{brand}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+      {/* Main Content */}
+      <Box sx={{ padding: '24px' }}>
+        {/* User Input Section */}
+        <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', mb: 3 }}>
+          <CardContent sx={{ p: 4 }}>
+            <Typography variant="h6" sx={{ mb: 3, color: '#333', fontWeight: 600 }}>
+              Create Post
+            </Typography>
+            {/* Dropdowns */}
+            <Box display="flex" gap={2} mb={3} flexWrap="wrap">
+              <FormControl sx={{ minWidth: 200 }}>
+                <InputLabel id="demo-simple-select-label">Brand</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Brand"
+                  size="small"
+                  value={brandName}
+                  onChange={(e) => setBrandName(e.target.value)}
+                  sx={{ height:'40px', color:'#882AFF'}}
+                >
+                  {Brands.map((brand) => (
+                    <MenuItem key={brand} value={brand} sx={{color:'#882AFF'}} >{brand}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-                <FormControl fullWidth>
-                  <InputLabel id="multi-user-label">Social Media</InputLabel>
-                  <Select
-                    labelId="multi-user-label"
-                    multiple
-                    size="small"
-                    value={selectedUsers.map((user) => user.id)}
-                    onChange={handleUsersChange}
-                    input={<OutlinedInput label="Select Users" />}
-                    sx={{ height:'40px',mt:'6px', color:'#882AFF'}}
-                    renderValue={(selected) => 
-                      selectedUsers.map(user => user.name).join(', ')
+              <FormControl sx={{ minWidth: 250 }}>
+                <InputLabel id="multi-user-label">Social Media</InputLabel>
+                <Select
+                  labelId="multi-user-label"
+                  multiple
+                  size="small"
+                  value={selectedUsers.map((user) => user.id)}
+                  onChange={handleUsersChange}
+                  input={<OutlinedInput label="Select Users" />}
+                  sx={{ height:'40px', color:'#882AFF'}}
+                  renderValue={(selected) => 
+                    selectedUsers.map(user => user.name).join(', ')
+                  }
+                >
+                  {pages.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      <ListItemIcon sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
+                        <Avatar src={user.picture_url} alt={user.name} sx={{ width: '22px', height: '22px' }} />
+                        {getPlatformIcon(user.page_type)}
+                      </ListItemIcon>
+                      
+                      <ListItemText primary={user.name} sx={{color:'#882AFF'}} />
+                      <Checkbox className="custom-checkbox"
+                      sx={{bgcolor:'#cbaef7', width:'10px', height:'10px', color:'#cbaef7'}}
+                        checked={selectedUsers.some((selected) => selected.id === user.id)}
+                      />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* User Chips */}
+            <Box display="flex" gap={1} flexWrap="wrap" mb={3}>
+              {selectedUsers.map((user) => (
+                <Chip
+                  className="custom-chip"
+                  key={user.id}
+                  avatar={<>  {getPlatformIcon(user.page_type)}  <Avatar src={user.picture_url} sx={{ width: '22px', height: '22px' }} />  </>}
+                  label={user.name}
+                  onClick={() => {
+                    setSelectUser(user); // Set the selected user for preview
+                  }}
+                  onDelete={() => { 
+                    setSelectedUsers(prev => prev.filter(u => u.id !== user.id));
+                    if (selectedChipId === user.social_id) {
+                      setSelectedChipId(null);
+                      setSelectUser('');
                     }
-                  >
-                    {pages.map((user) => (
-                      <MenuItem key={user.id} value={user.id}>
-                        <ListItemIcon sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
-                          {/* {(user.name)} */}
-                          <Avatar src={user.picture_url} alt={user.name} sx={{ width: '22px', height: '22px' }} />
-                          {getPlatformIcon(user.page_type)}
-                        </ListItemIcon>
-                        
-                        <ListItemText primary={user.name} sx={{color:'#882AFF'}} />
-                        <Checkbox className="custom-checkbox"
-                        sx={{bgcolor:'#cbaef7', width:'10px', height:'10px', color:'#cbaef7'}}
-                          checked={selectedUsers.some((selected) => selected.id === user.id)}
-                        />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
+                  }} 
+                  sx={{
+                    border: selectedChipId === user.social_id ? '2px solid #5ebfa6' : 'none',
+                    backgroundColor: selectedChipId === user.social_id ? '#ddd' : 'default',
+                    boxShadow: selectedChipId === user.social_id ? '0 0 5px rgba(127,86,217,0.6)' : 'none'
+                  }}
+                />
+              ))}
 
-              {/* User Chips */}
-
-              <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
-
-                {selectedUsers.map((user) => (
-                  <Chip
-                    className="custom-chip"
-                    key={user.id}
-                    avatar={<>  {getPlatformIcon(user.page_type)}  <Avatar src={user.picture_url} sx={{ width: '22px', height: '22px' }} />  </>}
-                    label={user.name}
-                    onClick={() => {
-                      //handleAvatarClick(user.social_id);
-                      //setSelectedChipId(user.social_id);
-                      setSelectUser(user); // Set the selected user for preview
-                    }}
-                    onDelete={() => { 
-                      setSelectedUsers(prev => prev.filter(u => u.id !== user.id));
-                      if (selectedChipId === user.social_id) {
-                        setSelectedChipId(null);
-                        setSelectUser('');
-                      }
-                    }} 
+              {selectedPages.includes(pages.social_id) && (
+                <Box
+                  sx={{
+                    background: "white",
+                    width: 20,
+                    height: 20,
+                    alignItems: "center",
+                  }}
+                >
+                  <CheckCircleOutlineIcon
                     sx={{
-                      border: selectedChipId === user.social_id ? '2px solid #5ebfa6' : 'none',
-                      backgroundColor: selectedChipId === user.social_id ? '#ddd' : 'default',
-                      boxShadow: selectedChipId === user.social_id ? '0 0 5px rgba(127,86,217,0.6)' : 'none'
-                    }}
-                    />
-                    
-                ))}
-
-                {selectedPages.includes(pages.social_id) && (
-                  <Box
-                    sx={{
-                      background: "white",
+                      color: "#5ebfa6",
+                      fontSize: 20,
                       width: 20,
-                      height: 20,
-                      alignItems: "center",
+                      height: 20
                     }}
-                  >
-                    <CheckCircleOutlineIcon
-                      sx={{
-                        color: "#5ebfa6",
-                        fontSize: 20,
-                        width: 20,
-                        height: 20
-                      }}
-                    />
-                  </Box>
-                )}
+                  />
+                </Box>
+              )}
+            </Box>
 
+            {/* Post Content Editor */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontWeight: 500, color: '#333' }}>
+                Post Content
+              </Typography>
+              <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 2, bgcolor: '#f8f9fa' }}>
+                <Editor value={postContent} onChange={setPostContent} />
               </Box>
-
-              {/* Text Field */}
-              <Editor value={postContent} onChange={setPostContent} />
-
-              <Typography variant="caption" display="block" mb={2}>
+              <Typography variant="caption" display="block" sx={{ mt: 1, color: '#666' }}>
                 275 characters left
               </Typography>
+            </Box>
 
-              {/* Uploaded Images */}
-              <Box display="flex" gap={1} mb={2}>
-                {uploadedImageUrl && (
-                  <Box position="relative">
-                    <Avatar
-                      variant="rounded"
-                      src={uploadedImageUrl}
-                      sx={{ width: 80, height: 80 }}
-                    />
-                    <IconButton
-                      size="small"
-                      sx={{
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        bgcolor: 'white',
-                      }}
-                      onClick={() => {
-                        setUploadedImageUrl("");
-                        setUploadedFileName("");
-                        setFile(null);
-                      }}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                )}
-
-              </Box>
-
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                flexDirection="column"
-                sx={{
-                  //width: "100%",
-                  padding: "16px",
-                  border: "1px solid #f0f0f0",
-                  borderRadius: "8px",
-                  backgroundColor: "#fff",
-                  textAlign: "center",
-                  cursor: "pointer",
-                  my: 2,
-                  margin: "10px",
-                  marginLeft: "0px",
-                  boxShadow: '0px 2px 1px -1px rgb(247 247 247 / 12%), 0px 1px 1px 0px rgb(247 247 247 / 12%), 0px 1px 3px 0px rgb(247 247 247 / 12%)'
-                }}
-                onClick={handleBoxClick}
-                onDrop={handleDrop} // ✅ Handles dropped files
-                onDragOver={(e) => e.preventDefault()} // ✅ Prevents default drag behavior
-              >
-
-
-                <Typography variant="body1" sx={{ color: "#000", }}>
-                  +  Upload Media
+            {/* Uploaded Images Preview */}
+            {uploadedImageUrl && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="body1" sx={{ mb: 1, fontWeight: 500, color: '#333' }}>
+                  Uploaded Media
                 </Typography>
-
-                {uploadedFileName && (
-                  <Typography variant="body2" sx={{
-                    color: "#444", mt: 1, whiteSpace: "nowrap", // ✅ Ensures text does not wrap
-                    overflow: "hidden", // ✅ Hides overflow text
-                    textOverflow: "ellipsis", maxWidth: "400px",
-                  }}>
-                    Selected File: {uploadedFileName}
-                  </Typography>
-                )}
-
-                {uploading && <Typography variant="body2">Uploading...</Typography>}
-              </Box>
-
-                  {/* Hidden File Input */}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    style={{ display: "none" }}
+                <Box position="relative" sx={{ display: 'inline-block' }}>
+                  <Avatar
+                    variant="rounded"
+                    src={uploadedImageUrl}
+                    sx={{ width: 120, height: 120, borderRadius: 2 }}
                   />
-
-                  {/* Buttons */}
-                  <Box display="flex" gap={2}>
-                                    <Button variant="outlined" sx={{ display: 'none' }} >Save as Draft</Button>
-                {/* <Button variant="contained">Schedule Post</Button> */}
-                    <Button
-                      variant="contained"
-                      sx={{
-                        margin: "0.09375rem 1px",
-                        display: 'none',
-                      }}
-                      onClick={() => draftModelOpen("schedule")}
-                    >
-                      Schedule Post
-                    </Button>
-                  </Box>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={handlePublish}
-                    disabled={posting || uploading} // Disable when posting or uploading
-                    sx={{ 
-                      mt: 2, 
-                      '&:disabled': {
-                        bgcolor: '#9575cd', // Lighter purple when disabled
-                        color: '#fff'
+                  <IconButton
+                    size="small"
+                    sx={{
+                      position: 'absolute',
+                      top: -8,
+                      right: -8,
+                      bgcolor: 'white',
+                      boxShadow: 1,
+                      '&:hover': {
+                        bgcolor: '#f5f5f5'
                       }
                     }}
+                    onClick={() => {
+                      setUploadedImageUrl("");
+                      setUploadedFileName("");
+                      setFile(null);
+                    }}
                   >
-                    {posting ? (
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <CircularProgress size={20} sx={{ color: '#fff' }} />
-                        Publishing...
-                      </Box>
-                    ) : (
-                      'Publish Now'
-                    )}
-                  </Button>
-          </Grid>
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Box>
+            )}
 
-          <Grid  size={{ xs: 12, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height:'100%' }}>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
-                  <Tab label="Instagram" />
-                  <Tab label="Linkedin" />
-                  <Tab label="Facebook" />
-                </Tabs>
+            {/* Upload Media Box */}
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              flexDirection="column"
+              sx={{
+                padding: "24px",
+                border: "2px dashed #e0e0e0",
+                borderRadius: "12px",
+                backgroundColor: "#fafafa",
+                textAlign: "center",
+                cursor: "pointer",
+                mb: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  borderColor: '#882AFF',
+                  bgcolor: '#f5f0ff'
+                }
+              }}
+              onClick={handleBoxClick}
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+            >
+              <ImageIcon sx={{ fontSize: 48, color: '#882AFF', mb: 1 }} />
+              <Typography variant="h6" sx={{ color: "#882AFF", fontWeight: 600, mb: 1 }}>
+                Upload Media
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#666" }}>
+                Click to browse or drag and drop your files here
+              </Typography>
 
-                <TabPanel value={tabValue} index={0}>
-                  <Grid item xs={12} md={12} lg={12}>
-                    {renderPreviewContent(0)}
-                  </Grid>
-                </TabPanel>
-                <TabPanel value={tabValue} index={1}>
-                  <Grid item xs={12} md={12} lg={12}>
-                    {renderPreviewContent(1)}
-                  </Grid>
-                </TabPanel>
-                <TabPanel value={tabValue} index={2}>
-                  <Grid item xs={12} md={12} lg={12}>
-                    {renderPreviewContent(2)}
-                  </Grid>
-                </TabPanel>
-          </Grid>
-        </Grid>
-          
+              {uploadedFileName && (
+                <Typography variant="body2" sx={{
+                  color: "#444", 
+                  mt: 2, 
+                  p: 1,
+                  bgcolor: '#e8f5e8',
+                  borderRadius: 1,
+                  maxWidth: "300px",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
+                }}>
+                  Selected: {uploadedFileName}
+                </Typography>
+              )}
+
+              {uploading && (
+                <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={16} />
+                  <Typography variant="body2">Uploading...</Typography>
+                </Box>
+              )}
+            </Box>
+
+            {/* Hidden File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+            />
+
+            {/* Action Buttons */}
+            <Box display="flex" gap={2} justifyContent="flex-end">
+              <Button 
+                variant="outlined" 
+                sx={{ 
+                  textTransform: 'none',
+                  borderColor: '#882AFF',
+                  color: '#882AFF',
+                  '&:hover': {
+                    borderColor: '#7c1fa2',
+                    bgcolor: '#f5f0ff'
+                  }
+                }}
+              >
+                Save as Draft
+              </Button>
+              <Button
+                variant="outlined"
+                sx={{
+                  textTransform: 'none',
+                  borderColor: '#882AFF',
+                  color: '#882AFF',
+                  '&:hover': {
+                    borderColor: '#7c1fa2',
+                    bgcolor: '#f5f0ff'
+                  }
+                }}
+                onClick={() => draftModelOpen("schedule")}
+              >
+                Schedule Post
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handlePublish}
+                disabled={posting || uploading}
+                sx={{ 
+                  bgcolor: '#882AFF',
+                  textTransform: 'none',
+                  px: 4,
+                  '&:hover': {
+                    bgcolor: '#7c1fa2'
+                  },
+                  '&:disabled': {
+                    bgcolor: '#9575cd',
+                    color: '#fff'
+                  }
+                }}
+              >
+                {posting ? (
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <CircularProgress size={20} sx={{ color: '#fff' }} />
+                    Publishing...
+                  </Box>
+                ) : (
+                  'Publish Post'
+                )}
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* Live Preview Section */}
+        <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+          <CardContent sx={{ p: 4 }}>
+            <Typography variant="h6" sx={{ mb: 3, color: '#333', fontWeight: 600 }}>
+              Live Preview
+            </Typography>
+            
+            <Tabs 
+              value={tabValue} 
+              onChange={handleTabChange} 
+              aria-label="platform preview tabs"
+              sx={{
+                mb: 3,
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  '&.Mui-selected': {
+                    color: '#882AFF'
+                  }
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#882AFF'
+                }
+              }}
+            >
+              <Tab label="Instagram" />
+              <Tab label="LinkedIn" />
+              <Tab label="Facebook" />
+            </Tabs>
+
+            <TabPanel value={tabValue} index={0}>
+              {renderPreviewContent(0)}
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              {renderPreviewContent(1)}
+            </TabPanel>
+            <TabPanel value={tabValue} index={2}>
+              {renderPreviewContent(2)}
+            </TabPanel>
+          </CardContent>
+        </Card>
       </Box>
           
       </Box>
