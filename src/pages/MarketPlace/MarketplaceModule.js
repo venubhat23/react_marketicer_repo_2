@@ -3,7 +3,7 @@ import {
   Box, Typography, Button, TextField, Avatar, Chip, Select, MenuItem, IconButton, Card, FormControl,
   Tab, Tabs, Checkbox, Grid, Modal, Paper, AppBar, Toolbar, Container, InputLabel, ListItemText,
   CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack, ListItemIcon, CircularProgress,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Menu, Badge, Dialog, DialogTitle, DialogContent, DialogActions
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Badge, Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from '@mui/icons-material/Close';
@@ -63,7 +63,6 @@ const MarketplaceModule = () => {
 
   // Listing states
   const [marketplacePosts, setMarketplacePosts] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
   const [bids, setBids] = useState([]);
   const [bidAmount, setBidAmount] = useState("");
@@ -162,19 +161,8 @@ const MarketplaceModule = () => {
     setMarketplacePosts(mockPosts);
   };
 
-  const handleMenuClick = (event, post) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedPost(post);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedPost(null);
-  };
-
-  const handleEdit = () => {
-    navigate('/brand/marketplace/new', { state: { editPost: selectedPost } });
-    handleMenuClose();
+  const handleEditDirect = (post) => {
+    navigate('/brand/marketplace/new', { state: { editPost: post } });
   };
 
   const handlePostCreated = (newPost) => {
@@ -191,10 +179,9 @@ const MarketplaceModule = () => {
     navigate('/brand/marketplace');
   };
 
-  const handleDelete = () => {
-    setMarketplacePosts(marketplacePosts.filter(post => post.id !== selectedPost.id));
+  const handleDeleteDirect = (post) => {
+    setMarketplacePosts(marketplacePosts.filter(p => p.id !== post.id));
     toast.success("Post deleted successfully!");
-    handleMenuClose();
   };
 
   const handleBidSubmit = () => {
@@ -230,20 +217,6 @@ const MarketplaceModule = () => {
   // Brand Listing View
   const BrandListingView = () => (
     <Box sx={{ padding: '20px' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Button 
-          variant="contained" 
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/brand/marketplace/new')}
-          sx={{ 
-            bgcolor: '#882AFF',
-            '&:hover': { bgcolor: '#6a1b9a' }
-          }}
-        >
-          + Create New Post
-        </Button>
-      </Box>
-
       <TableContainer component={Paper} sx={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
         <Table>
           <TableHead>
@@ -252,7 +225,7 @@ const MarketplaceModule = () => {
               <TableCell sx={{ fontWeight: 'bold' }}>Type</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Date Created</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Views</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Deadline</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Bids</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
             </TableRow>
@@ -283,12 +256,7 @@ const MarketplaceModule = () => {
                   />
                 </TableCell>
                 <TableCell>{post.dateCreated}</TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <VisibilityIcon fontSize="small" color="action" />
-                    {post.views}
-                  </Box>
-                </TableCell>
+                <TableCell>{post.deadline}</TableCell>
                 <TableCell>
                   <Button 
                     variant="outlined" 
@@ -300,33 +268,28 @@ const MarketplaceModule = () => {
                   </Button>
                 </TableCell>
                 <TableCell>
-                  <IconButton 
-                    onClick={(e) => handleMenuClick(e, post)}
-                    sx={{ color: '#882AFF' }}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton 
+                      onClick={() => handleEditDirect(post)}
+                      sx={{ color: '#882AFF', '&:hover': { bgcolor: '#f3e5f5' } }}
+                      size="small"
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton 
+                      onClick={() => handleDeleteDirect(post)}
+                      sx={{ color: '#f44336', '&:hover': { bgcolor: '#ffebee' } }}
+                      size="small"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={handleEdit}>
-          <EditIcon sx={{ mr: 1 }} />
-          Edit
-        </MenuItem>
-        <MenuItem onClick={handleDelete}>
-          <DeleteIcon sx={{ mr: 1 }} />
-          Delete
-        </MenuItem>
-      </Menu>
     </Box>
   );
 
@@ -556,12 +519,30 @@ const MarketplaceModule = () => {
           sx={{
             p: 2,
             backgroundColor: '#091a48',
-            borderRadius: 0
+            borderRadius: 0,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}
         >
           <Typography variant="h6" sx={{ color: '#fff' }}>
             {getHeaderTitle()}
           </Typography>
+          
+          {/* Add Create New Post button to top nav for brand/admin users */}
+          {(currentMode === 'brand' && (isBrand || isAdmin) && currentView !== 'create') && (
+            <Button 
+              variant="contained" 
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/brand/marketplace/new')}
+              sx={{ 
+                bgcolor: '#882AFF',
+                '&:hover': { bgcolor: '#6a1b9a' }
+              }}
+            >
+              + Create New Post
+            </Button>
+          )}
         </Paper>
 
         {/* Main Content */}
