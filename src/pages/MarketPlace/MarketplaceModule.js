@@ -82,6 +82,10 @@ const MarketplaceModule = () => {
   const [loading, setLoading] = useState(false);
   const [postsLoading, setPostsLoading] = useState(false);
   const [bidsLoading, setBidsLoading] = useState(false);
+  
+  // Influencer view toggle states
+  const [influencerView, setInfluencerView] = useState('feed'); // 'feed' or 'bids'
+  const [myBids, setMyBids] = useState([]);
 
   // Debounced search effect
   useEffect(() => {
@@ -100,6 +104,13 @@ const MarketplaceModule = () => {
     setCurrentMode(getCurrentMode());
     loadMarketplacePosts();
   }, [location.pathname]);
+
+  // Load bids when influencer switches to bids view
+  useEffect(() => {
+    if (currentMode === 'influencer' && influencerView === 'bids') {
+      loadMyBids();
+    }
+  }, [influencerView, currentMode]);
 
   // Redirect based on user role (only for non-admin users accessing wrong routes)
   useEffect(() => {
@@ -162,6 +173,63 @@ const MarketplaceModule = () => {
       toast.error(handleApiError(error));
     } finally {
       setPostsLoading(false);
+    }
+  };
+
+  const loadMyBids = async () => {
+    setBidsLoading(true);
+    try {
+      const response = await MarketplaceAPI.getInfluencerBids();
+      
+      if (response.success && response.data) {
+        setMyBids(response.data.bids || []);
+      } else {
+        throw new Error('Failed to load bids');
+      }
+    } catch (error) {
+      console.error('Error loading my bids:', error);
+      
+      // Fallback to mock data if API fails
+      const mockBids = [
+        {
+          id: 1,
+          postId: 1,
+          postTitle: "Instagram Reel for Fashion Brand",
+          amount: 8000,
+          status: "pending",
+          submittedDate: "2024-01-20",
+          brand: "StyleCo",
+          description: "Looking for fashion influencers to create engaging reels",
+          deadline: "2024-02-01"
+        },
+        {
+          id: 2,
+          postId: 2,
+          postTitle: "Product Review - Tech Gadget",
+          amount: 12000,
+          status: "accepted",
+          submittedDate: "2024-01-18",
+          brand: "TechGuru",
+          description: "Need honest reviews for our latest smartphone",
+          deadline: "2024-01-30"
+        },
+        {
+          id: 3,
+          postId: 3,
+          postTitle: "Food Blog Feature",
+          amount: 5000,
+          status: "rejected",
+          submittedDate: "2024-01-15",
+          brand: "FoodieWorld",
+          description: "Feature our restaurant in your food blog",
+          deadline: "2024-01-25"
+        }
+      ];
+      setMyBids(mockBids);
+      
+      toast.error(handleApiError(error));
+    } finally {
+      setBidsLoading(false);
     }
   };
 
@@ -665,43 +733,88 @@ const MarketplaceModule = () => {
           mb: 3,
           textAlign: 'center'
         }}>
-          Marketplace Feed
+          {influencerView === 'feed' ? 'Marketplace Feed' : 'My Bids'}
         </Typography>
         
-        {/* Search Bar */}
-        <Box sx={{ mb: 3 }}>
-          <TextField
-            fullWidth
-            placeholder="Search opportunities..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: <SearchIcon sx={{ color: '#882AFF', mr: 1 }} />,
-              endAdornment: searchQuery && (
-                <IconButton 
-                  size="small" 
-                  onClick={() => setSearchQuery('')}
-                  sx={{ color: '#666' }}
-                >
-                  <ClearIcon fontSize="small" />
-                </IconButton>
-              ),
-              sx: {
-                borderRadius: 3,
-                backgroundColor: 'white',
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#e1e7ff',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#882AFF',
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#882AFF',
+        {/* View Toggle Switch */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          mb: 3 
+        }}>
+          <Tabs
+            value={influencerView}
+            onChange={(e, newValue) => setInfluencerView(newValue)}
+            sx={{
+              backgroundColor: 'white',
+              borderRadius: 3,
+              minHeight: '48px',
+              '& .MuiTabs-indicator': {
+                backgroundColor: '#882AFF',
+                height: '3px',
+                borderRadius: '3px 3px 0 0'
+              },
+              '& .MuiTab-root': {
+                minWidth: '120px',
+                fontWeight: 'bold',
+                color: '#666',
+                '&.Mui-selected': {
+                  color: '#882AFF'
                 }
               }
             }}
-          />
+          >
+            <Tab 
+              label="Feed" 
+              value="feed"
+              icon={<ShoppingCartIcon />}
+              iconPosition="start"
+            />
+            <Tab 
+              label="My Bids" 
+              value="bids"
+              icon={<CheckCircleOutlineIcon />}
+              iconPosition="start"
+            />
+          </Tabs>
         </Box>
+        
+        {influencerView === 'feed' && (
+          <>
+            {/* Search Bar */}
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                fullWidth
+                placeholder="Search opportunities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ color: '#882AFF', mr: 1 }} />,
+                  endAdornment: searchQuery && (
+                    <IconButton 
+                      size="small" 
+                      onClick={() => setSearchQuery('')}
+                      sx={{ color: '#666' }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  ),
+                  sx: {
+                    borderRadius: 3,
+                    backgroundColor: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#e1e7ff',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#882AFF',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#882AFF',
+                    }
+                  }
+                }}
+              />
+            </Box>
         
         {/* Feed Container */}
         <Box sx={{ 
@@ -981,28 +1094,207 @@ const MarketplaceModule = () => {
             </Card>
           )))}
           
-          {/* Load More Button */}
-          <Box sx={{ textAlign: 'center', mt: 3, mb: 2 }}>
-            <Button 
-              variant="outlined" 
-              size="large"
-              sx={{
-                borderColor: '#882AFF',
-                color: '#882AFF',
-                fontWeight: 'bold',
-                borderRadius: 3,
-                px: 4,
-                py: 1.5,
-                '&:hover': {
-                  borderColor: '#6a1b9a',
-                  bgcolor: '#f3e5f5'
-                }
-              }}
-            >
-              Load More Posts
-            </Button>
+            {/* Load More Button */}
+            <Box sx={{ textAlign: 'center', mt: 3, mb: 2 }}>
+              <Button 
+                variant="outlined" 
+                size="large"
+                sx={{
+                  borderColor: '#882AFF',
+                  color: '#882AFF',
+                  fontWeight: 'bold',
+                  borderRadius: 3,
+                  px: 4,
+                  py: 1.5,
+                  '&:hover': {
+                    borderColor: '#6a1b9a',
+                    bgcolor: '#f3e5f5'
+                  }
+                }}
+              >
+                Load More Posts
+              </Button>
+            </Box>
           </Box>
-        </Box>
+          </>
+        )}
+
+        {/* My Bids View */}
+        {influencerView === 'bids' && (
+          <Box>
+            {bidsLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress sx={{ color: '#882AFF' }} />
+              </Box>
+            ) : myBids.length === 0 ? (
+              <Box sx={{ 
+                textAlign: 'center', 
+                py: 8,
+                backgroundColor: 'white',
+                borderRadius: 3,
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+              }}>
+                <CheckCircleOutlineIcon sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                  No Bids Submitted Yet
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Browse the feed and submit bids on opportunities you're interested in!
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => setInfluencerView('feed')}
+                  sx={{
+                    mt: 3,
+                    bgcolor: '#882AFF',
+                    '&:hover': { bgcolor: '#6a1b9a' }
+                  }}
+                >
+                  Browse Opportunities
+                </Button>
+              </Box>
+            ) : (
+              <Grid container spacing={3}>
+                {myBids.map((bid) => (
+                  <Grid item xs={12} md={6} lg={4} key={bid.id}>
+                    <Card sx={{
+                      height: '100%',
+                      borderRadius: 3,
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                      }
+                    }}>
+                      <CardContent sx={{ p: 3 }}>
+                        {/* Bid Status Badge */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Chip
+                            label={bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
+                            size="small"
+                            sx={{
+                              bgcolor: 
+                                bid.status === 'accepted' ? '#4caf50' :
+                                bid.status === 'rejected' ? '#f44336' :
+                                '#ff9800',
+                              color: 'white',
+                              fontWeight: 'bold'
+                            }}
+                          />
+                          <Typography variant="body2" color="text.secondary">
+                            {bid.submittedDate}
+                          </Typography>
+                        </Box>
+
+                        {/* Post Title */}
+                        <Typography variant="h6" sx={{ 
+                          fontWeight: 'bold', 
+                          mb: 1,
+                          color: '#333',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {bid.postTitle}
+                        </Typography>
+
+                        {/* Brand */}
+                        <Typography variant="body2" sx={{ 
+                          color: '#882AFF', 
+                          fontWeight: 'bold',
+                          mb: 1
+                        }}>
+                          by {bid.brand}
+                        </Typography>
+
+                        {/* Description */}
+                        <Typography variant="body2" color="text.secondary" sx={{ 
+                          mb: 2,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {bid.description}
+                        </Typography>
+
+                        {/* Bid Amount */}
+                        <Box sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center',
+                          bgcolor: '#f8f9fa',
+                          p: 2,
+                          borderRadius: 2,
+                          mb: 2
+                        }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Your Bid:
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            color: '#882AFF', 
+                            fontWeight: 'bold' 
+                          }}>
+                            ₹{bid.amount.toLocaleString()}
+                          </Typography>
+                        </Box>
+
+                        {/* Deadline */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <LocationOnIcon sx={{ color: '#666', fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" color="text.secondary">
+                            Deadline: {bid.deadline}
+                          </Typography>
+                        </Box>
+
+                        {/* Action Buttons */}
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            fullWidth
+                            sx={{
+                              borderColor: '#882AFF',
+                              color: '#882AFF',
+                              '&:hover': {
+                                borderColor: '#6a1b9a',
+                                bgcolor: '#f3e5f5'
+                              }
+                            }}
+                            onClick={() => {
+                              // Navigate to post details or open message dialog
+                              toast.info('View post details functionality coming soon!');
+                            }}
+                          >
+                            View Post
+                          </Button>
+                          {bid.status === 'accepted' && (
+                            <Button
+                              variant="contained"
+                              size="small"
+                              fullWidth
+                              sx={{
+                                bgcolor: '#4caf50',
+                                '&:hover': { bgcolor: '#388e3c' }
+                              }}
+                              onClick={() => {
+                                toast.info('Start project functionality coming soon!');
+                              }}
+                            >
+                              Start Project
+                            </Button>
+                          )}
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Box>
+        )}
       </Box>
     );
   };

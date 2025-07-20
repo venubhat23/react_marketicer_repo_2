@@ -167,6 +167,27 @@ export const updateBidStatus = async (bidId, statusData) => {
   }
 };
 
+// Get influencer's own bids (Influencer)
+export const getInfluencerBids = async (params = {}) => {
+  try {
+    const queryParams = {
+      page: params.page || 1,
+      limit: params.limit || 20,
+      status: params.status || '',
+      ...params
+    };
+    
+    const response = await AxiosManager.get(
+      '/api/v1/marketplace/influencer/bids',
+      { params: queryParams }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching influencer bids:', error);
+    throw error;
+  }
+};
+
 /**
  * Messaging System
  */
@@ -457,6 +478,7 @@ const MarketplaceAPI = {
   submitBid,
   getPostBids,
   updateBidStatus,
+  getInfluencerBids,
   
   // Messaging
   sendMessage,
