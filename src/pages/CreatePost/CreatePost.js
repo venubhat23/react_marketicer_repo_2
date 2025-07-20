@@ -661,37 +661,16 @@ const CreatePost = () => {
                 </Box>
               </Box>
         </Paper>
-      {/* Main Content - 50/50 Vertical Split */}
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        height: 'calc(100vh - 120px)', 
-        padding: '16px',
-        gap: 2
-      }}>
-        {/* Top Half - User Input Section */}
-        <Box sx={{ 
-          flex: '1 1 50%', 
-          minHeight: 0,
-          overflow: 'auto'
-        }}>
-          <Card sx={{ 
-            borderRadius: 3, 
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)', 
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            <CardContent sx={{ 
-              p: 3, 
-              flex: 1,
-              overflow: 'auto',
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
-              <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
-                Create Post
-              </Typography>
+      {/* Main Content */}
+      <Box sx={{ padding: '24px' }}>
+        <Grid container spacing={3} direction="column" sx={{ height: 'calc(100vh - 140px)' }}>
+          {/* Top Half - User Input Section */}
+          <Grid xs={6} sx={{ height: '50%' }}>
+            <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', height: '100%' }}>
+              <CardContent sx={{ p: 4, height: '100%', overflow: 'auto' }}>
+                <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+                  Create Post
+                </Typography>
               {/* Dropdowns - Compact Layout */}
               <Box display="flex" gap={1} mb={2} flexWrap="wrap">
                 <FormControl sx={{ minWidth: 150, flex: 1 }}>
@@ -916,68 +895,52 @@ const CreatePost = () => {
                 </Box>
               </Box>
 
-              {/* Hidden File Input */}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                style={{ display: "none" }}
-              />
-            </CardContent>
-          </Card>
-        </Box>
+                {/* Hidden File Input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                />
+              </CardContent>
+            </Card>
+          </Grid>
 
-        {/* Bottom Half - Live Preview Section */}
-        <Box sx={{ 
-          flex: '1 1 50%', 
-          minHeight: 0,
-          overflow: 'auto'
-        }}>
-          <Card sx={{ 
-            borderRadius: 3, 
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            <CardContent sx={{ 
-              p: 3, 
-              flex: 1,
-              overflow: 'auto',
-              display: 'flex',
-              flexDirection: 'column'
+          {/* Bottom Half - Live Preview Section */}
+          <Grid xs={6} sx={{ height: '50%' }}>
+            <Card sx={{ 
+              borderRadius: 3, 
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+              height: '100%'
             }}>
-              <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
-                Live Preview
-              </Typography>
-              
-              <Tabs 
-                value={tabValue} 
-                onChange={handleTabChange} 
-                aria-label="platform preview tabs"
-                sx={{
-                  mb: 2,
-                  minHeight: '36px',
-                  '& .MuiTab-root': {
-                    textTransform: 'none',
-                    fontWeight: 500,
-                    minHeight: '36px',
-                    fontSize: '0.875rem',
-                    '&.Mui-selected': {
-                      color: '#882AFF'
+              <CardContent sx={{ p: 4, height: '100%', overflow: 'auto' }}>
+                <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+                  Live Preview
+                </Typography>
+                
+                <Tabs 
+                  value={tabValue} 
+                  onChange={handleTabChange} 
+                  aria-label="platform preview tabs"
+                  sx={{
+                    mb: 2,
+                    '& .MuiTab-root': {
+                      textTransform: 'none',
+                      fontWeight: 500,
+                      '&.Mui-selected': {
+                        color: '#882AFF'
+                      }
+                    },
+                    '& .MuiTabs-indicator': {
+                      backgroundColor: '#882AFF'
                     }
-                  },
-                  '& .MuiTabs-indicator': {
-                    backgroundColor: '#882AFF'
-                  }
-                }}
-              >
-                <Tab label="Instagram" />
-                <Tab label="LinkedIn" />
-                <Tab label="Facebook" />
-              </Tabs>
+                  }}
+                >
+                  <Tab label="Instagram" />
+                  <Tab label="LinkedIn" />
+                  <Tab label="Facebook" />
+                </Tabs>
 
-              <Box sx={{ flex: 1, overflow: 'auto' }}>
                 <TabPanel value={tabValue} index={0}>
                   {renderPreviewContent(0)}
                 </TabPanel>
@@ -987,10 +950,10 @@ const CreatePost = () => {
                 <TabPanel value={tabValue} index={2}>
                   {renderPreviewContent(2)}
                 </TabPanel>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
       </Box>
           
       </Box>
