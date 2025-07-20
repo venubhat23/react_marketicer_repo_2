@@ -232,6 +232,17 @@ const Sidebar = () => {
             <ListItem key={index} disablePadding sx={{ mb: 0.5, p: 0 }} />
           ))}
 
+          <ListItem disablePadding>
+            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/settingPage">
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                <SettingsIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Setting</Typography>
+              </Box>
+              </Link>
+            </ListItemButton>
+          </ListItem>
+
           {/* Logout item */}
           <ListItem disablePadding>
             <ListItemButton onClick={handleLogout} sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -241,9 +252,14 @@ const Sidebar = () => {
               </Box>
             </ListItemButton>
           </ListItem>
+
+          
+
         </List>
 
         <Divider sx={{ bgcolor: "rgba(255,255,255,0.1)", my: 1.5 }} />
+
+        
       </Box>
     </Box>
   );

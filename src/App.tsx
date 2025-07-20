@@ -17,10 +17,11 @@ import InstagramAnalytics from './pages/Profile/InstagramAnalytics';
 import Analytics2 from './pages/Profile/Analytics2';
 import SocialMedia from './pages/SocialMedia';
 import FullAnalytics from './pages/Profile/FullAnalytics';
-import ContractPage from './pages/Contract/ContractPage';
+import ContractPage from './pages/Contract/ContractPage'
 import Discover from './pages/Discover';
 import AIContractGenerator from './pages/Contract/AIContractGenerator';
 import MarketplaceModule from './pages/MarketPlace/MarketplaceModule';
+import SettingPage from './pages/Setting/SettingPage';
 
 // Component that renders routes based on user role
 const AppRoutes = () => {
@@ -159,6 +160,12 @@ const AppRoutes = () => {
       <Route path="/ai-generator" element={
         <ProtectedRoute>
           <AIContractGenerator />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/settingPage" element={
+        <ProtectedRoute>
+          <SettingPage />
         </ProtectedRoute>
       } />
       
