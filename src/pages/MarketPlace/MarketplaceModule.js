@@ -15,6 +15,9 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PriceTagIcon from '@mui/icons-material/LocalOffer';
 import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon } from '@mui/icons-material';
 import { MoreVert as MoreVertIcon, Edit as EditIcon, Delete as DeleteIcon, Visibility as VisibilityIcon, Add as AddIcon } from '@mui/icons-material';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ClearIcon from '@mui/icons-material/Clear';
 import { toast } from "react-toastify";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Skeleton from "@mui/material/Skeleton";
@@ -60,6 +63,15 @@ const MarketplaceModule = () => {
   const TargetAudiences = ['18–24', '24–30', '30–35', 'More than 35']; // Updated as per specification
   const Types = ['Sponsored Post', 'Product Review', 'Brand Collaboration', 'Event Promotion', 'Giveaway', 'Story Feature'];
   const Statuses = ['Published', 'Draft', 'Pending', 'Expired'];
+
+  // Search and Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [dateFromFilter, setDateFromFilter] = useState('');
+  const [dateToFilter, setDateToFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   // Listing states
   const [marketplacePosts, setMarketplacePosts] = useState([]);
@@ -214,24 +226,305 @@ const MarketplaceModule = () => {
     setBidsViewOpen(true);
   };
 
+  // Filter and Search Logic
+  const getFilteredPosts = () => {
+    let filtered = [...marketplacePosts];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(post => 
+        post.title.toLowerCase().includes(query) ||
+        post.description.toLowerCase().includes(query) ||
+        post.brand.toLowerCase().includes(query) ||
+        post.tags.toLowerCase().includes(query)
+      );
+    }
+
+    // Status filter
+    if (statusFilter) {
+      filtered = filtered.filter(post => post.status === statusFilter);
+    }
+
+    // Type filter
+    if (typeFilter) {
+      filtered = filtered.filter(post => post.type === typeFilter);
+    }
+
+    // Category filter
+    if (categoryFilter) {
+      filtered = filtered.filter(post => post.category === categoryFilter);
+    }
+
+    // Date range filter
+    if (dateFromFilter) {
+      filtered = filtered.filter(post => new Date(post.dateCreated) >= new Date(dateFromFilter));
+    }
+
+    if (dateToFilter) {
+      filtered = filtered.filter(post => new Date(post.dateCreated) <= new Date(dateToFilter));
+    }
+
+    return filtered;
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('');
+    setTypeFilter('');
+    setCategoryFilter('');
+    setDateFromFilter('');
+    setDateToFilter('');
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = () => {
+    return searchQuery || statusFilter || typeFilter || categoryFilter || dateFromFilter || dateToFilter;
+  };
+
   // Brand Listing View
-  const BrandListingView = () => (
-    <Box sx={{ padding: '20px' }}>
-      <TableContainer component={Paper} sx={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-              <TableCell sx={{ fontWeight: 'bold' }}>Title</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Type</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Date Created</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Deadline</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Bids</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {marketplacePosts.map((post) => (
+  const BrandListingView = () => {
+    const filteredPosts = getFilteredPosts();
+
+    return (
+      <Box sx={{ padding: '20px' }}>
+        {/* Search and Filter Section */}
+        <Paper 
+          elevation={2} 
+          sx={{ 
+            p: 3, 
+            mb: 3, 
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%)',
+            border: '1px solid #e1e7ff'
+          }}
+        >
+          {/* Search Bar */}
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+            <TextField
+              fullWidth
+              placeholder="Search by title, description, brand, or tags..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: <SearchIcon sx={{ color: '#882AFF', mr: 1 }} />,
+                endAdornment: searchQuery && (
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setSearchQuery('')}
+                    sx={{ color: '#666' }}
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                ),
+                sx: {
+                  borderRadius: 2,
+                  backgroundColor: 'white',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#e1e7ff',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#882AFF',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#882AFF',
+                  }
+                }
+              }}
+            />
+            <Button
+              variant={showFilters ? "contained" : "outlined"}
+              startIcon={<FilterListIcon />}
+              onClick={() => setShowFilters(!showFilters)}
+              sx={{
+                minWidth: '140px',
+                borderRadius: 2,
+                bgcolor: showFilters ? '#882AFF' : 'transparent',
+                borderColor: '#882AFF',
+                color: showFilters ? 'white' : '#882AFF',
+                '&:hover': {
+                  bgcolor: showFilters ? '#6a1b9a' : '#f3e5f5',
+                  borderColor: '#6a1b9a'
+                }
+              }}
+            >
+              Filters
+            </Button>
+          </Box>
+
+          {/* Filter Options */}
+          {showFilters && (
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: 2, 
+              alignItems: 'center',
+              p: 2,
+              backgroundColor: 'white',
+              borderRadius: 2,
+              border: '1px solid #e1e7ff'
+            }}>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  label="Status"
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {Statuses.map((status) => (
+                    <MenuItem key={status} value={status}>
+                      {status}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: 140 }}>
+                <InputLabel>Type</InputLabel>
+                <Select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  label="Type"
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {Types.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Category</InputLabel>
+                <Select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  label="Category"
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {Categories.map((category) => (
+                    <MenuItem key={category} value={category}>
+                      Category {category}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <TextField
+                size="small"
+                type="date"
+                label="From Date"
+                value={dateFromFilter}
+                onChange={(e) => setDateFromFilter(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ 
+                  minWidth: 140,
+                  '& .MuiOutlinedInput-root': { borderRadius: 2 }
+                }}
+              />
+
+              <TextField
+                size="small"
+                type="date"
+                label="To Date"
+                value={dateToFilter}
+                onChange={(e) => setDateToFilter(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ 
+                  minWidth: 140,
+                  '& .MuiOutlinedInput-root': { borderRadius: 2 }
+                }}
+              />
+
+              {hasActiveFilters() && (
+                <Button
+                  variant="text"
+                  startIcon={<ClearIcon />}
+                  onClick={clearAllFilters}
+                  sx={{ 
+                    color: '#f44336',
+                    '&:hover': { bgcolor: '#ffebee' }
+                  }}
+                >
+                  Clear All
+                </Button>
+              )}
+            </Box>
+          )}
+
+          {/* Results Summary */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {filteredPosts.length} of {marketplacePosts.length} posts
+              {hasActiveFilters() && (
+                <Chip 
+                  label="Filtered" 
+                  size="small" 
+                  sx={{ ml: 1, bgcolor: '#882AFF', color: 'white' }}
+                />
+              )}
+            </Typography>
+          </Box>
+        </Paper>
+
+        {/* Table */}
+        <TableContainer 
+          component={Paper} 
+          sx={{ 
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+            borderRadius: 3,
+            overflow: 'hidden'
+          }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow sx={{ 
+                bgcolor: 'linear-gradient(135deg, #882AFF 0%, #6a1b9a 100%)',
+                '& .MuiTableCell-root': {
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '0.95rem'
+                }
+              }}>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Title</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Type</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Status</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Date Created</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Deadline</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Budget</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Bids</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredPosts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <SearchIcon sx={{ fontSize: 48, color: '#ccc' }} />
+                      <Typography variant="h6" color="text.secondary">
+                        {hasActiveFilters() ? 'No posts match your filters' : 'No posts found'}
+                      </Typography>
+                      {hasActiveFilters() && (
+                        <Button 
+                          variant="outlined" 
+                          onClick={clearAllFilters}
+                          sx={{ borderColor: '#882AFF', color: '#882AFF' }}
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredPosts.map((post) => (
               <TableRow key={post.id} hover>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -248,50 +541,82 @@ const MarketplaceModule = () => {
                     sx={{ bgcolor: '#e3f2fd', color: '#1976d2' }}
                   />
                 </TableCell>
-                <TableCell>
-                  <Chip 
-                    label={post.status} 
-                    size="small" 
-                    color={post.status === 'Published' ? 'success' : post.status === 'Draft' ? 'warning' : 'default'}
-                  />
-                </TableCell>
-                <TableCell>{post.dateCreated}</TableCell>
-                <TableCell>{post.deadline}</TableCell>
-                <TableCell>
-                  <Button 
-                    variant="outlined" 
-                    size="small"
-                    onClick={() => handleViewBids(post)}
-                    sx={{ color: '#882AFF', borderColor: '#882AFF' }}
-                  >
-                    View Bids
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <IconButton 
-                      onClick={() => handleEditDirect(post)}
-                      sx={{ color: '#882AFF', '&:hover': { bgcolor: '#f3e5f5' } }}
+                  <TableCell>
+                    <Chip 
+                      label={post.status} 
+                      size="small" 
+                      sx={{
+                        bgcolor: post.status === 'Published' ? '#e8f5e8' : 
+                                post.status === 'Draft' ? '#fff3e0' : 
+                                post.status === 'Pending' ? '#e3f2fd' : '#f5f5f5',
+                        color: post.status === 'Published' ? '#2e7d32' : 
+                               post.status === 'Draft' ? '#f57c00' : 
+                               post.status === 'Pending' ? '#1976d2' : '#616161',
+                        fontWeight: 'medium'
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ color: '#666' }}>{post.dateCreated}</TableCell>
+                  <TableCell sx={{ color: '#666' }}>{post.deadline}</TableCell>
+                  <TableCell>
+                    <Typography variant="h6" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
+                      {post.budget}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="outlined" 
                       size="small"
+                      onClick={() => handleViewBids(post)}
+                      sx={{ 
+                        color: '#882AFF', 
+                        borderColor: '#882AFF',
+                        borderRadius: 2,
+                        '&:hover': {
+                          bgcolor: '#f3e5f5',
+                          borderColor: '#6a1b9a'
+                        }
+                      }}
                     >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton 
-                      onClick={() => handleDeleteDirect(post)}
-                      sx={{ color: '#f44336', '&:hover': { bgcolor: '#ffebee' } }}
-                      size="small"
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
-  );
+                      View Bids
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <IconButton 
+                        onClick={() => handleEditDirect(post)}
+                        sx={{ 
+                          color: '#882AFF', 
+                          '&:hover': { bgcolor: '#f3e5f5' },
+                          borderRadius: 2
+                        }}
+                        size="small"
+                        title="Edit Post"
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton 
+                        onClick={() => handleDeleteDirect(post)}
+                        sx={{ 
+                          color: '#f44336', 
+                          '&:hover': { bgcolor: '#ffebee' },
+                          borderRadius: 2
+                        }}
+                        size="small"
+                        title="Delete Post"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    );
+  };
 
   // Influencer Feed View
   const InfluencerFeedView = () => (
