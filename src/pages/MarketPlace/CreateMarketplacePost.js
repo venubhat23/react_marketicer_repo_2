@@ -8,6 +8,7 @@ import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import { PhotoCamera, Videocam, LocationOn, Schedule, LocalOffer, Category, People, Language } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import Editor from "../../components/Editor";
+import MarketplaceAPI, { handleApiError } from "../../services/marketplaceApi";
 
 const CreateMarketplacePost = ({ 
   onBack, 
@@ -55,29 +56,19 @@ const CreateMarketplacePost = ({
     if (!file) return;
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      const response = await MarketplaceAPI.uploadMedia(file, type);
       
-      const response = await fetch(
-        "https://kitintellect.tech/storage/public/api/upload/aaFacebook",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      
-      const data = await response.json();
-      
-      if (data.url) {
+      if (response.success && response.data.url) {
         if (type === 'image') {
-          setUploadedImageUrl(data.url);
+          setUploadedImageUrl(response.data.url);
         } else {
-          setUploadedVideoUrl(data.url);
+          setUploadedVideoUrl(response.data.url);
         }
         toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded successfully!`);
       }
     } catch (error) {
-      toast.error(`${type.charAt(0).toUpperCase() + type.slice(1)} upload failed!`);
+      console.error('Upload error:', error);
+      toast.error(handleApiError(error));
     } finally {
       setUploading(false);
     }
@@ -109,41 +100,54 @@ const CreateMarketplacePost = ({
       description,
       category,
       targetAudience,
-      budget,
+      budget: budget.startsWith('₹') ? budget : `₹${budget}`,
       location,
       platform,
       languages,
       deadline,
       tags,
-      imageUrl: uploadedImageUrl,
-      videoUrl: uploadedVideoUrl,
-      status: "Published"
+      image_url: uploadedImageUrl,
+      video_url: uploadedVideoUrl,
+      status: "published",
+      type: "Sponsored Post"
     };
     
     try {
-      // Replace with actual API call
-      console.log('Publishing marketplace post:', payloadData);
+      let response;
       
-      // Mock success - create new post object
-      const newPost = {
-        id: initialData?.id || Date.now(),
-        ...payloadData,
-        type: "Sponsored Post", // Default type
-        dateCreated: new Date().toISOString().split('T')[0],
-        views: initialData?.views || 0,
-        brand: brandName
-      };
+      if (initialData?.id) {
+        // Update existing post
+        response = await MarketplaceAPI.updatePost(initialData.id, payloadData);
+      } else {
+        // Create new post
+        response = await MarketplaceAPI.createPost(payloadData);
+      }
       
-      toast.success(initialData ? "Post updated successfully!" : "Post published successfully!");
-      
-      // Callback to parent component
-      if (onPostCreated) {
-        onPostCreated(newPost);
+      if (response.success) {
+        const newPost = {
+          id: initialData?.id || response.data?.id || Date.now(),
+          ...payloadData,
+          imageUrl: uploadedImageUrl, // Keep both formats for compatibility
+          videoUrl: uploadedVideoUrl,
+          dateCreated: new Date().toISOString().split('T')[0],
+          views: initialData?.views || 0,
+          brand: brandName,
+          bids_count: initialData?.bids_count || 0
+        };
+        
+        toast.success(initialData ? "Post updated successfully!" : "Post published successfully!");
+        
+        // Callback to parent component
+        if (onPostCreated) {
+          onPostCreated(newPost);
+        }
+      } else {
+        throw new Error(response.error?.message || 'Failed to publish post');
       }
       
     } catch (error) {
       console.error("Error publishing post:", error);
-      toast.error("Failed to publish post");
+      toast.error(handleApiError(error));
     } finally {
       setPosting(false);
     }

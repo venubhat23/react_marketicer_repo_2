@@ -27,6 +27,7 @@ import Layout from "../../components/Layout";
 import CreateMarketplacePost from "./CreateMarketplacePost";
 import { useAuth } from "../../authContext/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
+import MarketplaceAPI, { handleApiError } from "../../services/marketplaceApi";
 
 const MarketplaceModule = () => {
   const { user } = useAuth();
@@ -78,6 +79,20 @@ const MarketplaceModule = () => {
   const [bidAmount, setBidAmount] = useState("");
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
   const [bidsViewOpen, setBidsViewOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [bidsLoading, setBidsLoading] = useState(false);
+
+  // Debounced search effect
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (searchQuery || statusFilter || typeFilter || categoryFilter) {
+        loadMarketplacePosts();
+      }
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, statusFilter, typeFilter, categoryFilter]);
 
   useEffect(() => {
     // Update view when route changes
@@ -107,121 +122,158 @@ const MarketplaceModule = () => {
     }
   }, [user, location.pathname, navigate, isInfluencer, isBrand, isAdmin]);
 
-  const loadMarketplacePosts = () => {
-    // Mock data - replace with actual API call
-    const mockPosts = [
-      {
-        id: 1,
-        title: "Instagram Reel for Fashion Brand",
-        type: "Sponsored Post",
-        status: "Published",
-        dateCreated: "2024-01-15",
-        views: 150,
-        description: "Looking for fashion influencers to create engaging reels showcasing our new collection",
-        budget: "₹10,000",
-        deadline: "2024-02-01",
-        category: "A",
-        targetAudience: "18–24",
-        location: "Mumbai",
-        platform: "Instagram",
-        languages: "Hindi, English",
-        tags: "Fashion, Style, Trendy",
-        imageUrl: "https://picsum.photos/400/300?random=1",
-        brand: "StyleCo"
-      },
-      {
-        id: 2,
-        title: "Product Review - Tech Gadget",
-        type: "Product Review",
-        status: "Published",
-        dateCreated: "2024-01-12",
-        views: 89,
-        description: "Need tech reviewers for our latest smartphone accessory",
-        budget: "₹5,000",
-        deadline: "2024-01-30",
-        category: "B",
-        targetAudience: "24–30",
-        location: "Delhi",
-        platform: "YouTube",
-        languages: "English",
-        tags: "Tech, Review, Gadgets",
-        imageUrl: "https://picsum.photos/400/300?random=2",
-        brand: "TechCorp"
-      },
-      {
-        id: 3,
-        title: "Fitness Challenge Campaign",
-        type: "Brand Collaboration",
-        status: "Draft",
-        dateCreated: "2024-01-10",
-        views: 45,
-        description: "Collaborate with fitness influencers for 30-day challenge",
-        budget: "₹15,000",
-        deadline: "2024-02-15",
-        category: "A",
-        targetAudience: "30–35",
-        location: "Bangalore",
-        platform: "Instagram, YouTube",
-        languages: "English, Kannada",
-        tags: "Fitness, Health, Challenge",
-        imageUrl: "https://picsum.photos/400/300?random=3",
-        brand: "FitLife"
+  const loadMarketplacePosts = async () => {
+    setPostsLoading(true);
+    try {
+      let response;
+      
+      if (currentMode === 'influencer') {
+        // Load marketplace feed for influencers
+        response = await MarketplaceAPI.getMarketplaceFeed({
+          page: 1,
+          limit: 20,
+          category: categoryFilter,
+          search: searchQuery
+        });
+      } else {
+        // Load brand posts for brands/admins
+        response = await MarketplaceAPI.getBrandPosts({
+          page: 1,
+          limit: 20,
+          status: statusFilter,
+          category: categoryFilter,
+          type: typeFilter,
+          search: searchQuery
+        });
       }
-    ];
-    setMarketplacePosts(mockPosts);
+      
+      if (response.success && response.data) {
+        setMarketplacePosts(response.data.posts || []);
+      } else {
+        throw new Error('Failed to load posts');
+      }
+    } catch (error) {
+      console.error('Error loading marketplace posts:', error);
+      
+      // Fallback to mock data if API fails
+      const mockData = MarketplaceAPI.getMockMarketplaceData();
+      setMarketplacePosts(mockData.posts);
+      
+      toast.error(handleApiError(error));
+    } finally {
+      setPostsLoading(false);
+    }
   };
 
   const handleEditDirect = (post) => {
     navigate('/brand/marketplace/new', { state: { editPost: post } });
   };
 
-  const handlePostCreated = (newPost) => {
-    if (selectedPost) {
-      // Update existing post
-      setMarketplacePosts(marketplacePosts.map(post => 
-        post.id === selectedPost.id ? newPost : post
-      ));
-      setSelectedPost(null);
-    } else {
-      // Add new post
-      setMarketplacePosts([newPost, ...marketplacePosts]);
+  const handlePostCreated = async (newPost) => {
+    try {
+      setLoading(true);
+      
+      if (selectedPost) {
+        // Update existing post
+        const response = await MarketplaceAPI.updatePost(selectedPost.id, newPost);
+        if (response.success) {
+          setMarketplacePosts(marketplacePosts.map(post => 
+            post.id === selectedPost.id ? { ...post, ...newPost } : post
+          ));
+          toast.success("Post updated successfully!");
+        }
+        setSelectedPost(null);
+      } else {
+        // Create new post
+        const response = await MarketplaceAPI.createPost(newPost);
+        if (response.success) {
+          setMarketplacePosts([response.data, ...marketplacePosts]);
+          toast.success("Post created successfully!");
+        }
+      }
+      
+      navigate('/brand/marketplace');
+    } catch (error) {
+      console.error('Error saving post:', error);
+      toast.error(handleApiError(error));
+    } finally {
+      setLoading(false);
     }
-    navigate('/brand/marketplace');
   };
 
-  const handleDeleteDirect = (post) => {
-    setMarketplacePosts(marketplacePosts.filter(p => p.id !== post.id));
-    toast.success("Post deleted successfully!");
+  const handleDeleteDirect = async (post) => {
+    if (!window.confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const response = await MarketplaceAPI.deletePost(post.id);
+      
+      if (response.success) {
+        setMarketplacePosts(marketplacePosts.filter(p => p.id !== post.id));
+        toast.success("Post deleted successfully!");
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast.error(handleApiError(error));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleBidSubmit = () => {
+  const handleBidSubmit = async () => {
     if (!bidAmount) {
       toast.error("Please enter bid amount!");
       return;
     }
     
-    // Mock bid submission
-    const newBid = {
-      id: Date.now(),
-      postId: selectedPost.id,
-      amount: bidAmount,
-      influencer: "Your Name",
-      date: new Date().toISOString().split('T')[0],
-      status: "pending"
-    };
-    
-    setBids([...bids, newBid]);
-    toast.success("Bid submitted successfully!");
-    setBidAmount("");
-    setBidDialogOpen(false);
+    try {
+      setLoading(true);
+      const bidData = {
+        amount: `₹${bidAmount}`,
+        message: `Bid submitted for ${selectedPost.title}`,
+        portfolio_links: []
+      };
+      
+      const response = await MarketplaceAPI.submitBid(selectedPost.id, bidData);
+      
+      if (response.success) {
+        toast.success("Bid submitted successfully!");
+        setBidAmount("");
+        setBidDialogOpen(false);
+        
+        // Track post view when bidding
+        await MarketplaceAPI.trackPostView(selectedPost.id);
+      }
+    } catch (error) {
+      console.error('Error submitting bid:', error);
+      toast.error(handleApiError(error));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleViewBids = (post) => {
+  const handleViewBids = async (post) => {
     setSelectedPost(post);
-    // Load bids for this post
-    const postBids = bids.filter(bid => bid.postId === post.id);
-    setBids(postBids);
-    setBidsViewOpen(true);
+    setBidsLoading(true);
+    
+    try {
+      const response = await MarketplaceAPI.getPostBids(post.id);
+      
+      if (response.success && response.data) {
+        setBids(response.data.bids || []);
+      } else {
+        setBids([]);
+      }
+    } catch (error) {
+      console.error('Error fetching bids:', error);
+      toast.error(handleApiError(error));
+      setBids([]);
+    } finally {
+      setBidsLoading(false);
+      setBidsViewOpen(true);
+    }
   };
 
   // Filter and Search Logic - Optimized with useMemo to prevent unnecessary re-renders
@@ -461,7 +513,26 @@ const MarketplaceModule = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredPosts.length === 0 ? (
+              {postsLoading ? (
+                // Loading skeleton rows
+                [...Array(5)].map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Skeleton variant="circular" width={40} height={40} />
+                        <Skeleton variant="text" width={200} />
+                      </Box>
+                    </TableCell>
+                    <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={80} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={80} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={80} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                  </TableRow>
+                ))
+              ) : filteredPosts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
@@ -652,7 +723,43 @@ const MarketplaceModule = () => {
             background: '#6a1b9a',
           },
         }}>
-          {filteredPosts.map((post, index) => (
+          {postsLoading ? (
+            // Loading skeleton cards
+            [...Array(3)].map((_, index) => (
+              <Card key={index} sx={{ 
+                mb: 3,
+                borderRadius: 3, 
+                boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                border: '1px solid #e1e7ff',
+                backgroundColor: 'white'
+              }}>
+                <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Skeleton variant="circular" width={40} height={40} />
+                  <Box sx={{ flex: 1 }}>
+                    <Skeleton variant="text" width="60%" />
+                    <Skeleton variant="text" width="40%" />
+                  </Box>
+                </Box>
+                <Skeleton variant="rectangular" height={300} />
+                <Box sx={{ p: 2 }}>
+                  <Skeleton variant="text" width="80%" />
+                  <Skeleton variant="text" width="100%" />
+                  <Skeleton variant="text" width="60%" />
+                </Box>
+              </Card>
+            ))
+          ) : filteredPosts.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <SearchIcon sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
+              <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
+                No opportunities found
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {hasActiveFilters() ? 'Try adjusting your search filters' : 'Check back later for new opportunities'}
+              </Typography>
+            </Box>
+          ) : (
+            filteredPosts.map((post, index) => (
             <Card key={post.id} sx={{ 
               mb: 3,
               borderRadius: 3, 
@@ -804,6 +911,25 @@ const MarketplaceModule = () => {
                     variant="outlined" 
                     size="medium"
                     startIcon={<ChatBubbleOutlineIcon />}
+                    onClick={async () => {
+                      try {
+                        const messageData = {
+                          recipient_id: post.brand_id || 'brand_user_id',
+                          message: `Hi! I'm interested in your "${post.title}" campaign. I'd love to discuss this opportunity further.`,
+                          post_id: post.id,
+                          type: 'text'
+                        };
+                        
+                        const response = await MarketplaceAPI.sendMessage(messageData);
+                        
+                        if (response.success) {
+                          toast.success('Message sent successfully!');
+                        }
+                      } catch (error) {
+                        console.error('Error sending message:', error);
+                        toast.error(handleApiError(error));
+                      }
+                    }}
                     sx={{ 
                       flex: 1,
                       borderColor: '#882AFF',
@@ -824,9 +950,16 @@ const MarketplaceModule = () => {
                   <Button 
                     variant="contained" 
                     size="medium"
-                    onClick={() => {
+                    onClick={async () => {
                       setSelectedPost(post);
                       setBidDialogOpen(true);
+                      
+                      // Track post view when user opens bid dialog
+                      try {
+                        await MarketplaceAPI.trackPostView(post.id);
+                      } catch (error) {
+                        console.error('Error tracking post view:', error);
+                      }
                     }}
                     sx={{ 
                       flex: 1,
@@ -846,7 +979,7 @@ const MarketplaceModule = () => {
                 </Box>
               </Box>
             </Card>
-          ))}
+          )))}
           
           {/* Load More Button */}
           <Box sx={{ textAlign: 'center', mt: 3, mb: 2 }}>
@@ -890,19 +1023,23 @@ const MarketplaceModule = () => {
           placeholder="5,000"
           sx={{ mb: 2 }}
           type="number"
+          disabled={loading}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setBidDialogOpen(false)}>Cancel</Button>
+        <Button onClick={() => setBidDialogOpen(false)} disabled={loading}>
+          Cancel
+        </Button>
         <Button 
           onClick={handleBidSubmit} 
           variant="contained"
+          disabled={loading}
           sx={{ 
             bgcolor: '#882AFF',
             '&:hover': { bgcolor: '#6a1b9a' }
           }}
         >
-          Place Bid
+          {loading ? <CircularProgress size={20} color="inherit" /> : 'Place Bid'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -913,7 +1050,11 @@ const MarketplaceModule = () => {
     <Dialog open={bidsViewOpen} onClose={() => setBidsViewOpen(false)} maxWidth="md" fullWidth>
       <DialogTitle>Bids for: {selectedPost?.title}</DialogTitle>
       <DialogContent>
-        {bids.length === 0 ? (
+        {bidsLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : bids.length === 0 ? (
           <Typography>No bids yet for this post.</Typography>
         ) : (
           <TableContainer>
@@ -923,40 +1064,78 @@ const MarketplaceModule = () => {
                   <TableCell sx={{ fontWeight: 'bold' }}>Influencer Name</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Bid Amount</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {bids.map((bid) => (
                   <TableRow key={bid.id}>
-                    <TableCell>{bid.influencer}</TableCell>
-                    <TableCell>₹{bid.amount}</TableCell>
-                    <TableCell>{bid.date}</TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button 
-                          variant="contained" 
-                          size="small" 
-                          color="success"
-                          onClick={() => {
-                            toast.success("Bid accepted!");
-                            setBidsViewOpen(false);
-                          }}
-                        >
-                          Accept
-                        </Button>
-                        <Button 
-                          variant="outlined" 
-                          size="small" 
-                          color="error"
-                          onClick={() => {
-                            toast.info("Bid rejected!");
-                            setBidsViewOpen(false);
-                          }}
-                        >
-                          Reject
-                        </Button>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar sx={{ width: 32, height: 32 }}>
+                          {bid.influencer?.name?.charAt(0) || 'I'}
+                        </Avatar>
+                        {bid.influencer?.name || 'Influencer'}
                       </Box>
+                    </TableCell>
+                    <TableCell>{bid.amount}</TableCell>
+                    <TableCell>{new Date(bid.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={bid.status} 
+                        size="small"
+                        sx={{
+                          bgcolor: bid.status === 'accepted' ? '#e8f5e8' : 
+                                 bid.status === 'rejected' ? '#ffebee' : '#e3f2fd',
+                          color: bid.status === 'accepted' ? '#2e7d32' : 
+                               bid.status === 'rejected' ? '#d32f2f' : '#1976d2'
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {bid.status === 'pending' && (
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Button 
+                            variant="contained" 
+                            size="small" 
+                            color="success"
+                            onClick={async () => {
+                              try {
+                                await MarketplaceAPI.updateBidStatus(bid.id, { 
+                                  status: 'accepted',
+                                  message: 'Congratulations! Your bid has been accepted.'
+                                });
+                                toast.success("Bid accepted!");
+                                handleViewBids(selectedPost); // Refresh bids
+                              } catch (error) {
+                                toast.error(handleApiError(error));
+                              }
+                            }}
+                          >
+                            Accept
+                          </Button>
+                          <Button 
+                            variant="outlined" 
+                            size="small" 
+                            color="error"
+                            onClick={async () => {
+                              try {
+                                await MarketplaceAPI.updateBidStatus(bid.id, { 
+                                  status: 'rejected',
+                                  message: 'Thank you for your interest. We went with another influencer.'
+                                });
+                                toast.info("Bid rejected!");
+                                handleViewBids(selectedPost); // Refresh bids
+                              } catch (error) {
+                                toast.error(handleApiError(error));
+                              }
+                            }}
+                          >
+                            Reject
+                          </Button>
+                        </Box>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
