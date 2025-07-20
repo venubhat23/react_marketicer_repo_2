@@ -582,7 +582,7 @@ const MarketplaceModule = () => {
     
     return (
       <Box sx={{ 
-        maxWidth: '800px', 
+        maxWidth: '1200px', 
         margin: '0 auto', 
         padding: '20px',
         minHeight: '100vh',
