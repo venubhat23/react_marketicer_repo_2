@@ -362,47 +362,8 @@ const CreateMarketplacePost = ({
 
   return (
     <Layout>
-      <Box sx={{ flexGrow: 1, bgcolor: '#f8f9fa', minHeight: '100vh' }}>
+      <Box>
         {/* Header - Updated color to #091a48 */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 2,
-            backgroundColor: '#091a48', // Updated color to match AIContractGenerator
-            borderRadius: 0,
-            color: 'white'
-          }}
-        >
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="back"
-                onClick={handleBack}
-                sx={{ mr: 1 }}
-              >
-                <ArrowBackIcon />
-              </IconButton>
-              <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                {initialData ? 'Edit Marketplace Post' : 'Create Marketplace Post'}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <IconButton size="large" sx={{ color: 'white' }}>
-                <NotificationsIcon />
-              </IconButton>
-              <IconButton size="large" sx={{ color: 'white' }}>
-                <AccountCircleIcon />
-              </IconButton>
-            </Box>
-          </Box>
-        </Paper>
-
         {/* Error Alert */}
         {error && (
           <Alert severity="error" sx={{ m: 2 }} onClose={() => setError('')}>
