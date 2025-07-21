@@ -12,8 +12,8 @@ import {
   Grid, Modal, Paper,
   AppBar, Toolbar, Container, InputLabel, ListItemText,
   CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack,ListItemIcon,
-  CircularProgress, // Add this import
-  Select,
+  CircularProgress,
+  Select
 } from "@mui/material";
 import {
     AccountCircle,
@@ -51,6 +51,12 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import FacebookIcon from '../../assets/images/facebook.png';
 import InstaIcon from '../../assets/images/instagram.png';
 import LinkedInIcon from '../../assets/images/linkedin.png';
+import { 
+  useGetSettings, 
+  useUpdatePersonalInformation, 
+  useUpdateCompanyDetails, 
+  useChangePassword 
+} from '../../hooks/useSettings';
 
 
 const ITEM_HEIGHT = 48;
@@ -100,49 +106,157 @@ const tabData = [
 
 const SettingPage = () => {
     const [selectedTab, setSelectedTab] = useState(0);
-    const [editMode, setEditMode] = useState(true);
+    const [personalEditMode, setPersonalEditMode] = useState(false);
+    const [companyEditMode, setCompanyEditMode] = useState(false);
+    
+    // API hooks
+    const { data: settingsData, isLoading: settingsLoading, error: settingsError } = useGetSettings();
+    const updatePersonalInfo = useUpdatePersonalInformation();
+    const updateCompanyDetails = useUpdateCompanyDetails();
+    const changePassword = useChangePassword();
+    
+    // Personal Information Form State
     const [personalFormData, setPersonalFormData] = useState({
-        firstName: 'Olivia',
-        lastName: 'Rhye',
-        email: 'olivia@untitledu.com',
-        phoneCode: 'US',
-        phoneNumber: '',
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone_number: '',
         bio: '',
+        avatar_url: '',
+      });
+
+    // Company Details Form State  
+    const [companyFormData, setCompanyFormData] = useState({
+        company_name: '',
+        gst_name: '',
+        gst_number: '',
+        company_phone: '',
+        company_address: '',
+        company_website: '',
       });
     
-      const handleChange = (e) => {
+    // Password Form State
+    const [passwordFormData, setPasswordFormData] = useState({
+        current_password: '',
+        new_password: '',
+        confirm_password: '',
+      });
+
+    // Load data from API when available
+    useEffect(() => {
+      if (settingsData?.data) {
+        const { personal_information, company_details } = settingsData.data;
+        
+        if (personal_information) {
+          setPersonalFormData({
+            first_name: personal_information.first_name || '',
+            last_name: personal_information.last_name || '',
+            email: personal_information.email || '',
+            phone_number: personal_information.phone_number || '',
+            bio: personal_information.bio || '',
+            avatar_url: personal_information.avatar_url || '',
+          });
+        }
+
+        if (company_details) {
+          setCompanyFormData({
+            company_name: company_details.name || '',
+            gst_name: company_details.gst_name || '',
+            gst_number: company_details.gst_number || '',
+            company_phone: company_details.phone_number || '',
+            company_address: company_details.address || '',
+            company_website: company_details.website || '',
+          });
+        }
+      }
+    }, [settingsData]);
+    
+    const handlePersonalChange = (e) => {
         const { name, value } = e.target;
         setPersonalFormData((prev) => ({
           ...prev,
           [name]: value,
         }));
       };
-    
-      const handleSave = () => {
-        console.log('Saved data:', personalFormData);
-        setEditMode(false);
-      };
 
-      const [formData, setFormData] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmNewPassword: '',
-      });
-    
-      const handlePasswordChange = (e) => {
+    const handleCompanyChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
+        setCompanyFormData((prev) => ({
           ...prev,
           [name]: value,
         }));
       };
     
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('Password Updated:', formData);
-        // Add validation or API call here
+      const handlePasswordChange = (e) => {
+        const { name, value } = e.target;
+        setPasswordFormData((prev) => ({
+          ...prev,
+          [name]: value,
+        }));
       };
 
+      const handlePersonalSave = async () => {
+        try {
+          await updatePersonalInfo.mutateAsync(personalFormData);
+          setPersonalEditMode(false);
+          toast.success('Personal information updated successfully');
+        } catch (error) {
+          // Error is handled by the hook
+          console.error('Failed to update personal information:', error);
+        }
+      };
+
+      const handleCompanySave = async () => {
+        try {
+          await updateCompanyDetails.mutateAsync({
+            company_name: companyFormData.company_name,
+            gst_name: companyFormData.gst_name,
+            gst_number: companyFormData.gst_number,
+            company_phone: companyFormData.company_phone,
+            company_address: companyFormData.company_address,
+            company_website: companyFormData.company_website,
+          });
+          setCompanyEditMode(false);
+          toast.success('Company details updated successfully');
+        } catch (error) {
+          // Error is handled by the hook
+          console.error('Failed to update company details:', error);
+        }
+      };
+    
+      const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (passwordFormData.new_password !== passwordFormData.confirm_password) {
+          toast.error("Password confirmation doesn't match");
+          return;
+        }
+
+        try {
+          await changePassword.mutateAsync(passwordFormData);
+          setPasswordFormData({
+            current_password: '',
+            new_password: '',
+            confirm_password: '',
+          });
+          toast.success('Password updated successfully');
+        } catch (error) {
+          // Error is handled by the hook
+          console.error('Failed to change password:', error);
+        }
+      };
+
+
+  // Show loading state
+  if (settingsLoading) {
+    return (
+      <Layout>
+        <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Box>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -241,7 +355,7 @@ const SettingPage = () => {
             <Grid size={{ xs: 2, sm: 4, md: 4 }} >
             <Avatar
                 alt="Profile"
-                src="https://randomuser.me/api/portraits/women/65.jpg"
+                src={personalFormData.avatar_url || "https://randomuser.me/api/portraits/women/65.jpg"}
                 sx={{ width: 80, height: 80 }}
             />
             </Grid>
@@ -250,11 +364,11 @@ const SettingPage = () => {
             <Grid size={{ xs: 2, sm: 4, md: 4 }} >
             <TextField
                 label="First Name"
-                name="firstName"
-                value={personalFormData.firstName}
-                onChange={handleChange}
+                name="first_name"
+                value={personalFormData.first_name}
+                onChange={handlePersonalChange}
                 fullWidth
-                disabled={!editMode}
+                disabled={!personalEditMode}
             />
             </Grid>
 
@@ -262,11 +376,11 @@ const SettingPage = () => {
             <Grid size={{ xs: 2, sm: 4, md: 4 }} >
             <TextField
                 label="Last Name"
-                name="lastName"
-                value={personalFormData.lastName}
-                onChange={handleChange}
+                name="last_name"
+                value={personalFormData.last_name}
+                onChange={handlePersonalChange}
                 fullWidth
-                disabled={!editMode}
+                disabled={!personalEditMode}
             />
             </Grid>
 
@@ -276,39 +390,35 @@ const SettingPage = () => {
                 label="Email"
                 name="email"
                 value={personalFormData.email}
-                onChange={handleChange}
+                onChange={handlePersonalChange}
                 fullWidth
-                disabled={!editMode}
+                disabled={!personalEditMode}
             />
             </Grid>
 
             {/* Phone */}
             <Grid size={{ xs: 2, sm: 4, md: 4 }} >
-            <FormControl fullWidth>
-                <InputLabel>Country</InputLabel>
-                <Select
-                name="phoneCode"
-                value={personalFormData.phoneCode}
-                label="Country"
-                onChange={handleChange}
-                disabled={!editMode}
-                >
-                {countryCodes.map((country) => (
-                    <MenuItem key={country.code} value={country.code}>
-                    {country.code}
-                    </MenuItem>
-                ))}
-                </Select>
-            </FormControl>
-            </Grid>
-            <Grid size={{ xs: 2, sm: 4, md: 4 }} >
             <TextField
                 label="Phone Number"
-                name="phoneNumber"
-                value={personalFormData.phoneNumber}
-                onChange={handleChange}
+                name="phone_number"
+                value={personalFormData.phone_number}
+                onChange={handlePersonalChange}
                 fullWidth
-                disabled={!editMode}
+                disabled={!personalEditMode}
+                placeholder="+1 (555) 000-0000"
+            />
+            </Grid>
+
+            {/* Avatar URL */}
+            <Grid size={{ xs: 2, sm: 4, md: 4 }} >
+            <TextField
+                label="Avatar URL"
+                name="avatar_url"
+                value={personalFormData.avatar_url}
+                onChange={handlePersonalChange}
+                fullWidth
+                disabled={!personalEditMode}
+                placeholder="https://example.com/avatar.jpg"
             />
             </Grid>
 
@@ -318,23 +428,27 @@ const SettingPage = () => {
                 label="Bio"
                 name="bio"
                 value={personalFormData.bio}
-                onChange={handleChange}
+                onChange={handlePersonalChange}
                 fullWidth
                 multiline
                 minRows={4}
-                disabled={!editMode}
+                disabled={!personalEditMode}
             />
             </Grid>
 
             {/* Buttons */}
             <Grid item xs={12} textAlign="right">
-            {!editMode ? (
-                <Button variant="outlined" onClick={() => setEditMode(true)}>
+            {!personalEditMode ? (
+                <Button variant="outlined" onClick={() => setPersonalEditMode(true)}>
                 Edit
                 </Button>
             ) : (
-                <Button variant="contained" onClick={handleSave}>
-                Save Changes
+                <Button 
+                  variant="contained" 
+                  onClick={handlePersonalSave}
+                  disabled={updatePersonalInfo.isPending}
+                >
+                  {updatePersonalInfo.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
             )}
             </Grid>
@@ -348,23 +462,23 @@ const SettingPage = () => {
         <Grid container spacing={2}>
             <Grid size={{ xs: 2, sm: 6, md: 6 }}>
             <TextField
-                label="Name"
-                name="name"
-                //value={formData.name}
-                onChange={handleChange}
+                label="Company Name"
+                name="company_name"
+                value={companyFormData.company_name}
+                onChange={handleCompanyChange}
                 fullWidth
-                disabled={!editMode}
+                disabled={!companyEditMode}
             />
             </Grid>
 
             <Grid size={{ xs: 2, sm: 6, md: 6 }} >
             <TextField
                 label="GST Name"
-                name="gstName"
-                //value={formData.gstName}
-                onChange={handleChange}
+                name="gst_name"
+                value={companyFormData.gst_name}
+                onChange={handleCompanyChange}
                 fullWidth
-                disabled={!editMode}
+                disabled={!companyEditMode}
                 placeholder="Enter your GST Name"
             />
             </Grid>
@@ -372,88 +486,65 @@ const SettingPage = () => {
             <Grid size={{ xs: 2, sm: 6, md: 6 }} >
             <TextField
                 label="GST Number"
-                name="gstNumber"
-                //value={formData.gstNumber}
-                onChange={handleChange}
+                name="gst_number"
+                value={companyFormData.gst_number}
+                onChange={handleCompanyChange}
                 fullWidth
-                disabled={!editMode}
+                disabled={!companyEditMode}
                 placeholder="XXX XXXX XXXX"
             />
             </Grid>
 
             <Grid size={{ xs: 2, sm: 6, md: 6 }} >
-            <FormControl fullWidth>
-                <InputLabel>Code</InputLabel>
-                <Select
-                name="phoneCode"
-                //value={formData.phoneCode}
-                onChange={handleChange}
-                disabled={!editMode}
-                >
-                {countryCodes.map((item) => (
-                    <MenuItem key={item.code} value={item.code}>
-                    {item.code}
-                    </MenuItem>
-                ))}
-                </Select>
-            </FormControl>
-            </Grid>
-
-            <Grid size={{ xs: 2, sm: 6, md: 6 }} >
             <TextField
-                label="Phone Number"
-                name="phoneNumber"
-                //value={formData.phoneNumber}
-                onChange={handleChange}
+                label="Company Phone"
+                name="company_phone"
+                value={companyFormData.company_phone}
+                onChange={handleCompanyChange}
                 fullWidth
-                disabled={!editMode}
+                disabled={!companyEditMode}
                 placeholder="+1 (555) 000-0000"
             />
             </Grid>
 
-            <Grid size={{ xs: 2, sm: 6, md: 6 }} >
+            <Grid size={{ xs: 2, sm: 12, md: 12 }} >
             <TextField
                 label="Company Address"
-                name="address"
-                //value={formData.address}
-                onChange={handleChange}
+                name="company_address"
+                value={companyFormData.company_address}
+                onChange={handleCompanyChange}
                 fullWidth
-                disabled={!editMode}
+                disabled={!companyEditMode}
                 placeholder="Enter your Address"
+                multiline
+                minRows={3}
             />
             </Grid>
 
             <Grid size={{ xs: 2, sm: 6, md: 6 }} >
             <TextField
                 label="Website"
-                name="website"
-                //value={formData.website}
-                onChange={handleChange}
+                name="company_website"
+                value={companyFormData.company_website}
+                onChange={handleCompanyChange}
                 fullWidth
-                disabled={!editMode}
-                placeholder="http://"
-            />
-            </Grid>
-
-            <Grid size={{ xs: 2, sm: 6, md: 6 }} >
-            <TextField
-                label="Email"
-                name="email"
-                //value={formData.email}
-                onChange={handleChange}
-                fullWidth
-                disabled={!editMode}
+                disabled={!companyEditMode}
+                placeholder="https://www.example.com"
             />
             </Grid>
 
             <Grid item xs={12} textAlign="right">
-            {!editMode ? (
-                <Button variant="outlined" onClick={() => setEditMode(true)}>
+            {!companyEditMode ? (
+                <Button variant="outlined" onClick={() => setCompanyEditMode(true)}>
                 Edit
                 </Button>
             ) : (
-                <Button variant="contained" onClick={handleSave}>
-                Save Changes
+                <Button 
+                  variant="contained" 
+                  onClick={handleCompanySave}
+                  disabled={updateCompanyDetails.isPending}
+                >
+                  {updateCompanyDetails.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
             )}
             </Grid>
@@ -461,18 +552,19 @@ const SettingPage = () => {
     </Box>
         </TabPanel>
         <TabPanel value={selectedTab} index={2}>
-          <Box>
-          <form onSubmit={handleSubmit}>
+          <Box p={3} maxWidth="600px" mx="auto">
+          <form onSubmit={handlePasswordSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
-              label="Password"
+              label="Current Password"
               type="password"
-              name="currentPassword"
-              value={formData.currentPassword}
+              name="current_password"
+              value={passwordFormData.current_password}
               onChange={handlePasswordChange}
               fullWidth
               placeholder="Enter current password"
+              required
             />
           </Grid>
 
@@ -480,11 +572,12 @@ const SettingPage = () => {
             <TextField
               label="New Password"
               type="password"
-              name="newPassword"
-              value={formData.newPassword}
+              name="new_password"
+              value={passwordFormData.new_password}
               onChange={handlePasswordChange}
               fullWidth
               placeholder="Enter new password"
+              required
             />
           </Grid>
 
@@ -492,11 +585,12 @@ const SettingPage = () => {
             <TextField
               label="Confirm New Password"
               type="password"
-              name="confirmNewPassword"
-              value={formData.confirmNewPassword}
+              name="confirm_password"
+              value={passwordFormData.confirm_password}
               onChange={handlePasswordChange}
               fullWidth
               placeholder="Confirm new password"
+              required
             />
           </Grid>
 
@@ -506,9 +600,10 @@ const SettingPage = () => {
               variant="contained"
               color="secondary"
               fullWidth
+              disabled={changePassword.isPending}
               sx={{ backgroundColor: '#7E22CE' }} // Purple color as in image
             >
-              Update Password
+              {changePassword.isPending ? 'Updating...' : 'Update Password'}
             </Button>
           </Grid>
         </Grid>

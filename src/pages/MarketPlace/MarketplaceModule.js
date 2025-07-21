@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import {
   Box, Typography, Button, TextField, Avatar, Chip, Select, MenuItem, IconButton, Card, FormControl,
   Tab, Tabs, Checkbox, Grid, Modal, Paper, AppBar, Toolbar, Container, InputLabel, ListItemText,
   CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack, ListItemIcon, CircularProgress,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Menu, Badge, Dialog, DialogTitle, DialogContent, DialogActions
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Badge, Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from '@mui/icons-material/Close';
@@ -15,6 +15,9 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PriceTagIcon from '@mui/icons-material/LocalOffer';
 import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon } from '@mui/icons-material';
 import { MoreVert as MoreVertIcon, Edit as EditIcon, Delete as DeleteIcon, Visibility as VisibilityIcon, Add as AddIcon } from '@mui/icons-material';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ClearIcon from '@mui/icons-material/Clear';
 import { toast } from "react-toastify";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Skeleton from "@mui/material/Skeleton";
@@ -25,7 +28,7 @@ import CreateMarketplacePost from "./CreateMarketplacePost";
 import MyBidsView from "./MyBidsView";
 import { useAuth } from "../../authContext/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import { marketplaceApi, bidsApi } from "../../utils/marketplaceApi";
+import MarketplaceAPI, { handleApiError } from "../../services/marketplaceApi";
 
 const MarketplaceModule = () => {
   const { user } = useAuth();
@@ -57,61 +60,74 @@ const MarketplaceModule = () => {
   const [currentView, setCurrentView] = useState(getCurrentView());
   const [currentMode, setCurrentMode] = useState(getCurrentMode());
   
-  // Existing states
-  const Categories = ['A', 'B']; // Updated as per specification
-  const TargetAudiences = ['18–24', '24–30', '30–35', 'More than 35']; // Updated as per specification
+  // Updated constants as per API specification
+  const Categories = ['A', 'B'];
+  const TargetAudiences = ['18–24', '24–30', '30–35', 'More than 35'];
   const Types = ['Sponsored Post', 'Product Review', 'Brand Collaboration', 'Event Promotion', 'Giveaway', 'Story Feature'];
-  const Statuses = ['Published', 'Draft', 'Pending', 'Expired'];
+  const Statuses = ['published', 'draft', 'archived']; // Updated as per API spec
+
+  // Search and Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [targetAudienceFilter, setTargetAudienceFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   // Listing states
   const [marketplacePosts, setMarketplacePosts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
   const [bids, setBids] = useState([]);
   const [bidAmount, setBidAmount] = useState("");
   const [bidMessage, setBidMessage] = useState("");
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
   const [bidsViewOpen, setBidsViewOpen] = useState(false);
-  const [submittingBid, setSubmittingBid] = useState(false);
-  const [pagination, setPagination] = useState({
-    current_page: 1,
-    per_page: 10,
-    total_count: 0
-  });
+  const [loading, setLoading] = useState(false);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [bidsLoading, setBidsLoading] = useState(false);
   
-  // Search and filter states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedTargetAudience, setSelectedTargetAudience] = useState("");
-  
-  // Influencer tab state
-  const [influencerTab, setInfluencerTab] = useState(0); // 0: Feed, 1: My Bids
+  // Influencer view toggle states
+  const [influencerView, setInfluencerView] = useState('feed'); // 'feed' or 'bids'
+  const [myBids, setMyBids] = useState([]);
+
+  // Statistics state
+  const [statistics, setStatistics] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  // Debounced search effect
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      setCurrentPage(1); // Reset to first page when searching
+      loadMarketplacePosts();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, statusFilter, typeFilter, categoryFilter, targetAudienceFilter]);
 
   useEffect(() => {
     // Update view when route changes
     setCurrentView(getCurrentView());
     setCurrentMode(getCurrentMode());
+    setCurrentPage(1);
+    loadMarketplacePosts();
+    loadStatistics();
   }, [location.pathname]);
 
+  // Load posts when page changes
   useEffect(() => {
-    // Load marketplace posts when component mounts or mode changes
     loadMarketplacePosts();
-  }, [currentMode]);
+  }, [currentPage]);
 
-  // Debounced search effect
+  // Load bids when influencer switches to bids view
   useEffect(() => {
-    if (currentMode === 'influencer' && influencerTab === 0) {
-      const timeoutId = setTimeout(() => {
-        loadMarketplacePosts(1, { 
-          category: selectedCategory, 
-          target_audience: selectedTargetAudience 
-        });
-      }, 500);
-      
-      return () => clearTimeout(timeoutId);
+    if (currentMode === 'influencer' && influencerView === 'bids') {
+      loadMyBids();
     }
-  }, [searchQuery, currentMode, influencerTab]);
+  }, [influencerView, currentMode]);
 
   // Redirect based on user role (only for non-admin users accessing wrong routes)
   useEffect(() => {
@@ -134,102 +150,278 @@ const MarketplaceModule = () => {
     }
   }, [user, location.pathname, navigate, isInfluencer, isBrand, isAdmin]);
 
-  const loadMarketplacePosts = async (page = 1, filters = {}) => {
-    setLoading(true);
+  const loadMarketplacePosts = async () => {
+    setPostsLoading(true);
     try {
       let response;
       
       if (currentMode === 'influencer') {
         // Load marketplace feed for influencers
-        const params = {
-          page,
-          per_page: pagination.per_page,
-          ...filters
-        };
-        
         if (searchQuery) {
-          // Use search endpoint if there's a search query
-          response = await marketplaceApi.searchMarketplacePosts({
+          // Use search endpoint for influencers
+          response = await MarketplaceAPI.searchMarketplacePosts({
             q: searchQuery,
-            ...params
+            category: categoryFilter,
+            target_audience: targetAudienceFilter,
+            page: currentPage,
+            per_page: 10
           });
         } else {
           // Use regular feed endpoint
-          response = await marketplaceApi.getMarketplaceFeed(params);
+          response = await MarketplaceAPI.getMarketplaceFeed({
+            category: categoryFilter,
+            target_audience: targetAudienceFilter,
+            page: currentPage,
+            per_page: 10
+          });
         }
       } else {
-        // Load my posts for brands/admin
-        response = await marketplaceApi.getMyMarketplacePosts();
-      }
-      
-      if (response.data && response.data.status === 'success') {
-        setMarketplacePosts(response.data.data || []);
+        // Load brand posts for brands/admins
+        response = await MarketplaceAPI.getMyMarketplacePosts();
         
-        if (response.data.pagination) {
-          setPagination(response.data.pagination);
+        // Apply client-side filtering for brand posts since the API doesn't support search for brand posts
+        if (response.success && response.data) {
+          let filteredPosts = response.data;
+          
+          if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filteredPosts = filteredPosts.filter(post => 
+              post.title?.toLowerCase().includes(query) ||
+              post.description?.toLowerCase().includes(query) ||
+              post.brand_name?.toLowerCase().includes(query)
+            );
+          }
+          
+          if (statusFilter) {
+            filteredPosts = filteredPosts.filter(post => post.status === statusFilter);
+          }
+          
+          if (categoryFilter) {
+            filteredPosts = filteredPosts.filter(post => post.category === categoryFilter);
+          }
+          
+          if (targetAudienceFilter) {
+            filteredPosts = filteredPosts.filter(post => post.target_audience === targetAudienceFilter);
+          }
+          
+          response.data = filteredPosts;
         }
       }
-    } catch (error) {
-      console.error("Error loading marketplace posts:", error);
-      toast.error("Failed to load marketplace posts");
       
-      // Fallback to empty array on error
-      setMarketplacePosts([]);
+      if (response.success && response.data) {
+        // Transform API response to match existing component expectations
+        const transformedPosts = response.data.map(post => ({
+          id: post.id,
+          title: post.title,
+          description: post.description,
+          brand: post.brand_name || 'Unknown Brand',
+          brand_name: post.brand_name,
+          budget: typeof post.budget === 'number' ? `₹${post.budget.toLocaleString()}` : post.budget,
+          deadline: post.deadline,
+          location: post.location,
+          platform: post.platform,
+          languages: post.languages,
+          category: post.category,
+          targetAudience: post.target_audience,
+          target_audience: post.target_audience,
+          tags: post.tags,
+          imageUrl: post.media_url,
+          media_url: post.media_url,
+          media_type: post.media_type,
+          status: post.status,
+          views: post.views_count || 0,
+          views_count: post.views_count || 0,
+          bids_count: post.bids_count || 0,
+          dateCreated: post.created_at ? new Date(post.created_at).toLocaleDateString() : '',
+          created_at: post.created_at,
+          updated_at: post.updated_at,
+          user_has_bid: post.user_has_bid || false,
+          user_bid: post.user_bid,
+          // Legacy fields for backward compatibility
+          type: 'Sponsored Post'
+        }));
+        
+        setMarketplacePosts(transformedPosts);
+        
+        // Update pagination if available
+        if (response.pagination) {
+          setCurrentPage(response.pagination.current_page || 1);
+          setTotalPages(Math.ceil((response.pagination.total_count || 0) / (response.pagination.per_page || 10)));
+          setTotalCount(response.pagination.total_count || 0);
+        }
+      } else {
+        throw new Error(response.error?.message || 'Failed to load posts');
+      }
+    } catch (error) {
+      console.error('Error loading marketplace posts:', error);
+      
+      // Fallback to mock data if API fails
+      const mockData = MarketplaceAPI.getMockMarketplaceData();
+      const transformedMockPosts = mockData.posts.map(post => ({
+        ...post,
+        brand: post.brand_name,
+        targetAudience: post.target_audience,
+        views: post.views_count,
+        dateCreated: new Date(post.created_at).toLocaleDateString(),
+        imageUrl: post.media_url,
+        type: 'Sponsored Post'
+      }));
+      setMarketplacePosts(transformedMockPosts);
+      
+      toast.error(handleApiError(error));
+    } finally {
+      setPostsLoading(false);
+    }
+  };
+
+  const loadMyBids = async () => {
+    setBidsLoading(true);
+    try {
+      const response = await MarketplaceAPI.getMyBids();
+      
+      if (response.success && response.data) {
+        // Transform API response to match existing component expectations
+        const transformedBids = response.data.map(bid => ({
+          id: bid.id,
+          amount: typeof bid.amount === 'number' ? bid.amount : parseFloat(bid.amount?.toString().replace(/[₹,]/g, '') || 0),
+          status: bid.status,
+          message: bid.message,
+          submittedDate: bid.created_at ? new Date(bid.created_at).toLocaleDateString() : '',
+          created_at: bid.created_at,
+          updated_at: bid.updated_at,
+          // Post details
+          postId: bid.marketplace_post?.id,
+          postTitle: bid.marketplace_post?.title,
+          brand: bid.marketplace_post?.brand_name,
+          description: bid.marketplace_post?.description,
+          deadline: bid.marketplace_post?.deadline
+        }));
+        
+        setMyBids(transformedBids);
+      } else {
+        throw new Error(response.error?.message || 'Failed to load bids');
+      }
+    } catch (error) {
+      console.error('Error loading my bids:', error);
+      
+      // Fallback to mock data if API fails
+      const mockBids = [
+        {
+          id: 1,
+          postId: 1,
+          postTitle: "Instagram Reel for Fashion Brand",
+          amount: 8000,
+          status: "pending",
+          submittedDate: "2024-01-20",
+          brand: "StyleCo",
+          description: "Looking for fashion influencers to create engaging reels",
+          deadline: "2024-02-01"
+        },
+        {
+          id: 2,
+          postId: 2,
+          postTitle: "Product Review - Tech Gadget",
+          amount: 12000,
+          status: "accepted",
+          submittedDate: "2024-01-18",
+          brand: "TechGuru",
+          description: "Need honest reviews for our latest smartphone",
+          deadline: "2024-01-30"
+        },
+        {
+          id: 3,
+          postId: 3,
+          postTitle: "Food Blog Feature",
+          amount: 5000,
+          status: "rejected",
+          submittedDate: "2024-01-15",
+          brand: "FoodieWorld",
+          description: "Feature our restaurant in your food blog",
+          deadline: "2024-01-25"
+        }
+      ];
+      setMyBids(mockBids);
+      
+      toast.error(handleApiError(error));
+    } finally {
+      setBidsLoading(false);
+    }
+  };
+
+  const loadStatistics = async () => {
+    try {
+      const response = await MarketplaceAPI.getMarketplaceStatistics();
+      
+      if (response.success && response.data) {
+        setStatistics(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading statistics:', error);
+      // Statistics are optional, don't show error to user
+    }
+  };
+
+  const handleEditDirect = (post) => {
+    navigate('/brand/marketplace/new', { state: { editPost: post } });
+  };
+
+  const handlePostCreated = async (newPost) => {
+    try {
+      setLoading(true);
+      
+      if (selectedPost) {
+        // Update existing post
+        const response = await MarketplaceAPI.updateMarketplacePost(selectedPost.id, newPost);
+        if (response.success) {
+          // Refresh the posts list
+          await loadMarketplacePosts();
+          toast.success(response.message || "Post updated successfully!");
+        } else {
+          throw new Error(response.error?.message || 'Failed to update post');
+        }
+        setSelectedPost(null);
+      } else {
+        // Create new post
+        const response = await MarketplaceAPI.createMarketplacePost(newPost);
+        if (response.success) {
+          // Refresh the posts list
+          await loadMarketplacePosts();
+          toast.success(response.message || "Post created successfully!");
+        } else {
+          throw new Error(response.error?.message || 'Failed to create post');
+        }
+      }
+      
+      navigate('/brand/marketplace');
+    } catch (error) {
+      console.error('Error saving post:', error);
+      toast.error(handleApiError(error));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleMenuClick = (event, post) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedPost(post);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedPost(null);
-  };
-
-  const handleEdit = () => {
-    navigate('/brand/marketplace/new', { state: { editPost: selectedPost } });
-    handleMenuClose();
-  };
-
-  const handlePostCreated = (newPost) => {
-    if (selectedPost) {
-      // Update existing post
-      setMarketplacePosts(marketplacePosts.map(post => 
-        post.id === selectedPost.id ? newPost : post
-      ));
-      setSelectedPost(null);
-    } else {
-      // Add new post
-      setMarketplacePosts([newPost, ...marketplacePosts]);
-    }
-    navigate('/brand/marketplace');
-  };
-
-  const handleDelete = async () => {
-    if (!selectedPost?.id) {
-      toast.error("No post selected!");
+  const handleDeleteDirect = async (post) => {
+    if (!window.confirm('Are you sure you want to delete this post?')) {
       return;
     }
     
     try {
-      const response = await marketplaceApi.deleteMarketplacePost(selectedPost.id);
+      setLoading(true);
+      const response = await MarketplaceAPI.deleteMarketplacePost(post.id);
       
-      if (response.data && response.data.status === 'success') {
-        setMarketplacePosts(marketplacePosts.filter(post => post.id !== selectedPost.id));
-        toast.success(response.data.message || "Post deleted successfully!");
+      if (response.success) {
+        // Refresh the posts list
+        await loadMarketplacePosts();
+        toast.success(response.message || "Post deleted successfully!");
       } else {
-        throw new Error(response.data?.message || 'Failed to delete post');
+        throw new Error(response.error?.message || 'Failed to delete post');
       }
     } catch (error) {
-      console.error("Error deleting post:", error);
-      const errorMessage = error.response?.data?.message || error.message || "Failed to delete post";
-      toast.error(errorMessage);
+      console.error('Error deleting post:', error);
+      toast.error(handleApiError(error));
     } finally {
-      handleMenuClose();
+      setLoading(false);
     }
   };
 
@@ -239,59 +431,144 @@ const MarketplaceModule = () => {
       return;
     }
     
-    if (!selectedPost?.id) {
-      toast.error("No post selected!");
-      return;
-    }
-    
-    setSubmittingBid(true);
     try {
+      setLoading(true);
       const bidData = {
-        amount: parseFloat(bidAmount.toString().replace(/[^\d.]/g, '')),
-        message: bidMessage || ""
+        amount: bidAmount,
+        message: bidMessage || `Bid submitted for ${selectedPost.title}`
       };
       
-      const response = await bidsApi.createBid(selectedPost.id, bidData);
+      const response = await MarketplaceAPI.createBid(selectedPost.id, bidData);
       
-      if (response.data && response.data.status === 'success') {
-        toast.success(response.data.message || "Bid submitted successfully!");
+      if (response.success) {
+        toast.success(response.message || "Bid submitted successfully!");
         setBidAmount("");
         setBidMessage("");
         setBidDialogOpen(false);
         
-        // Reload marketplace posts to update bid counts
-        loadMarketplacePosts();
+        // Track post view when bidding
+        try {
+          await MarketplaceAPI.trackPostView(selectedPost.id);
+        } catch (viewError) {
+          console.error('Error tracking post view:', viewError);
+        }
+        
+        // Refresh posts to update bid status
+        await loadMarketplacePosts();
       } else {
-        throw new Error(response.data?.message || 'Failed to submit bid');
+        throw new Error(response.error?.message || 'Failed to submit bid');
       }
     } catch (error) {
-      console.error("Error submitting bid:", error);
-      const errorMessage = error.response?.data?.message || error.message || "Failed to submit bid";
-      toast.error(errorMessage);
+      console.error('Error submitting bid:', error);
+      toast.error(handleApiError(error));
     } finally {
-      setSubmittingBid(false);
+      setLoading(false);
     }
   };
 
   const handleViewBids = async (post) => {
     setSelectedPost(post);
-    setLoading(true);
+    setBidsLoading(true);
+    
     try {
-      const response = await bidsApi.getBidsForPost(post.id);
+      const response = await MarketplaceAPI.getMarketplacePostBids(post.id);
       
-      if (response.data && response.data.status === 'success') {
-        setBids(response.data.data.bids || []);
+      if (response.success && response.data) {
+        // Transform API response to match existing component expectations
+        const transformedBids = (response.data.bids || []).map(bid => ({
+          id: bid.id,
+          amount: typeof bid.amount === 'number' ? `₹${bid.amount.toLocaleString()}` : bid.amount,
+          status: bid.status,
+          message: bid.message,
+          created_at: bid.created_at,
+          updated_at: bid.updated_at,
+          influencer: {
+            name: bid.influencer_name,
+            email: bid.influencer_email
+          }
+        }));
+        
+        setBids(transformedBids);
       } else {
         setBids([]);
       }
     } catch (error) {
-      console.error("Error loading bids:", error);
-      toast.error("Failed to load bids");
+      console.error('Error fetching bids:', error);
+      toast.error(handleApiError(error));
       setBids([]);
     } finally {
-      setLoading(false);
+      setBidsLoading(false);
+      setBidsViewOpen(true);
     }
-    setBidsViewOpen(true);
+  };
+
+  const handleBidStatusUpdate = async (bidId, status) => {
+    try {
+      let response;
+      
+      if (status === 'accepted') {
+        response = await MarketplaceAPI.acceptBid(bidId);
+      } else if (status === 'rejected') {
+        response = await MarketplaceAPI.rejectBid(bidId);
+      } else {
+        throw new Error('Invalid bid status');
+      }
+      
+      if (response.success) {
+        toast.success(response.message || `Bid ${status} successfully!`);
+        // Refresh bids list
+        await handleViewBids(selectedPost);
+      } else {
+        throw new Error(response.error?.message || `Failed to ${status} bid`);
+      }
+    } catch (error) {
+      console.error(`Error ${status} bid:`, error);
+      toast.error(handleApiError(error));
+    }
+  };
+
+  // Filter and Search Logic - Optimized with useMemo to prevent unnecessary re-renders
+  const getFilteredPosts = useMemo(() => {
+    let filtered = [...marketplacePosts];
+
+    // Search filter - only search by title
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(post => 
+        post.title && post.title.toLowerCase().includes(query)
+      );
+    }
+
+    // Status filter
+    if (statusFilter) {
+      filtered = filtered.filter(post => post.status === statusFilter);
+    }
+
+    // Type filter
+    if (typeFilter) {
+      filtered = filtered.filter(post => post.type === typeFilter);
+    }
+
+    // Category filter
+    if (categoryFilter) {
+      filtered = filtered.filter(post => post.category === categoryFilter);
+    }
+
+    return filtered;
+  }, [marketplacePosts, searchQuery, statusFilter, typeFilter, categoryFilter]);
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('');
+    setTypeFilter('');
+    setCategoryFilter('');
+    setTargetAudienceFilter('');
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = () => {
+    return searchQuery || statusFilter || typeFilter || categoryFilter || targetAudienceFilter;
   };
 
   const handleAcceptBid = async (bidId) => {
@@ -335,372 +612,978 @@ const MarketplaceModule = () => {
   };
 
   // Brand Listing View
-  const BrandListingView = () => (
-    <Box sx={{ padding: '20px' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
-          My Marketplace Posts
-        </Typography>
-        <Button 
-          variant="contained" 
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/brand/marketplace/new')}
+  const BrandListingView = () => {
+    const filteredPosts = getFilteredPosts;
+
+    return (
+      <Box sx={{ padding: '20px' }}>
+        {/* Search and Filter Section */}
+        <Paper 
+          elevation={2} 
           sx={{ 
-            bgcolor: '#882AFF',
-            '&:hover': { bgcolor: '#6a1b9a' }
+            p: 3, 
+            mb: 3, 
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%)',
+            border: '1px solid #e1e7ff'
           }}
         >
-          + Create New Post
-        </Button>
-      </Box>
+          {/* Search Bar */}
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+            <TextField
+              fullWidth
+              placeholder="Search by title..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: <SearchIcon sx={{ color: '#882AFF', mr: 1 }} />,
+                endAdornment: searchQuery && (
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setSearchQuery('')}
+                    sx={{ color: '#666' }}
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                ),
+                sx: {
+                  borderRadius: 2,
+                  backgroundColor: 'white',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#e1e7ff',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#882AFF',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#882AFF',
+                  }
+                }
+              }}
+            />
+            <Button
+              variant={showFilters ? "contained" : "outlined"}
+              startIcon={<FilterListIcon />}
+              onClick={() => setShowFilters(!showFilters)}
+              sx={{
+                minWidth: '140px',
+                borderRadius: 2,
+                bgcolor: showFilters ? '#882AFF' : 'transparent',
+                borderColor: '#882AFF',
+                color: showFilters ? 'white' : '#882AFF',
+                '&:hover': {
+                  bgcolor: showFilters ? '#6a1b9a' : '#f3e5f5',
+                  borderColor: '#6a1b9a'
+                }
+              }}
+            >
+              Filters
+            </Button>
+          </Box>
 
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <TableContainer component={Paper} sx={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          {/* Filter Options */}
+          {showFilters && (
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: 2, 
+              alignItems: 'center',
+              p: 2,
+              backgroundColor: 'white',
+              borderRadius: 2,
+              border: '1px solid #e1e7ff'
+            }}>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  label="Status"
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {Statuses.map((status) => (
+                    <MenuItem key={status} value={status}>
+                      {status}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: 140 }}>
+                <InputLabel>Type</InputLabel>
+                <Select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  label="Type"
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {Types.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Category</InputLabel>
+                <Select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  label="Category"
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {Categories.map((category) => (
+                    <MenuItem key={category} value={category}>
+                      Category {category}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: 140 }}>
+                <InputLabel>Target Audience</InputLabel>
+                <Select
+                  value={targetAudienceFilter}
+                  onChange={(e) => setTargetAudienceFilter(e.target.value)}
+                  label="Target Audience"
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {TargetAudiences.map((audience) => (
+                    <MenuItem key={audience} value={audience}>
+                      {audience}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {hasActiveFilters() && (
+                <Button
+                  variant="text"
+                  startIcon={<ClearIcon />}
+                  onClick={clearAllFilters}
+                  sx={{ 
+                    color: '#f44336',
+                    '&:hover': { bgcolor: '#ffebee' }
+                  }}
+                >
+                  Clear All
+                </Button>
+              )}
+            </Box>
+          )}
+
+          {/* Results Summary */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {filteredPosts.length} of {marketplacePosts.length} posts
+              {hasActiveFilters() && (
+                <Chip 
+                  label="Filtered" 
+                  size="small" 
+                  sx={{ ml: 1, bgcolor: '#882AFF', color: 'white' }}
+                />
+              )}
+            </Typography>
+          </Box>
+        </Paper>
+
+        {/* Table */}
+        <TableContainer 
+          component={Paper} 
+          sx={{ 
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+            borderRadius: 3,
+            overflow: 'hidden'
+          }}
+        >
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                <TableCell sx={{ fontWeight: 'bold' }}>Title</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Category</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Budget</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Date Created</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Views</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Bids</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+              <TableRow sx={{ 
+                bgcolor: 'linear-gradient(135deg, #882AFF 0%, #6a1b9a 100%)',
+                '& .MuiTableCell-root': {
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '0.95rem'
+                }
+              }}>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Title</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Type</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Status</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Date Created</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Deadline</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Budget</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Bids</TableCell>
+                <TableCell sx={{ bgcolor: '#882AFF' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {marketplacePosts.map((post) => (
-                <TableRow key={post.id} hover>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar src={post.media_url} sx={{ width: 40, height: 40 }} />
-                      <Box>
-                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                          {post.title}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {post.platform} • {post.location}
-                        </Typography>
+              {postsLoading ? (
+                // Loading skeleton rows
+                [...Array(5)].map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Skeleton variant="circular" width={40} height={40} />
+                        <Skeleton variant="text" width={200} />
                       </Box>
+                    </TableCell>
+                    <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={80} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={80} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={80} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                  </TableRow>
+                ))
+              ) : filteredPosts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <SearchIcon sx={{ fontSize: 48, color: '#ccc' }} />
+                      <Typography variant="h6" color="text.secondary">
+                        {hasActiveFilters() ? 'No posts match your filters' : 'No posts found'}
+                      </Typography>
+                      {hasActiveFilters() && (
+                        <Button 
+                          variant="outlined" 
+                          onClick={clearAllFilters}
+                          sx={{ borderColor: '#882AFF', color: '#882AFF' }}
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
                     </Box>
                   </TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={post.category} 
-                      size="small" 
-                      sx={{ bgcolor: '#f3e5f5', color: '#7b1fa2' }}
-                    />
-                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredPosts.map((post) => (
+              <TableRow key={post.id} hover>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar src={post.imageUrl} sx={{ width: 40, height: 40 }} />
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {post.title}
+                    </Typography>
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Chip 
+                    label={post.type} 
+                    size="small" 
+                    sx={{ bgcolor: '#e3f2fd', color: '#1976d2' }}
+                  />
+                </TableCell>
                   <TableCell>
                     <Chip 
                       label={post.status} 
                       size="small" 
-                      color={post.status === 'published' ? 'success' : post.status === 'draft' ? 'warning' : 'default'}
+                      sx={{
+                        bgcolor: post.status === 'published' ? '#e8f5e8' : 
+                                post.status === 'draft' ? '#fff3e0' : 
+                                post.status === 'archived' ? '#f5f5f5' : '#e3f2fd',
+                        color: post.status === 'published' ? '#2e7d32' : 
+                               post.status === 'draft' ? '#f57c00' : 
+                               post.status === 'archived' ? '#616161' : '#1976d2',
+                        fontWeight: 'medium'
+                      }}
                     />
                   </TableCell>
+                  <TableCell sx={{ color: '#666' }}>{post.dateCreated}</TableCell>
+                  <TableCell sx={{ color: '#666' }}>{post.deadline}</TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#882AFF' }}>
-                      ₹{post.budget?.toLocaleString()}
+                    <Typography variant="h6" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
+                      {post.budget}
                     </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {new Date(post.created_at).toLocaleDateString()}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <VisibilityIcon fontSize="small" color="action" />
-                      <Typography variant="body2">{post.views_count || 0}</Typography>
-                    </Box>
                   </TableCell>
                   <TableCell>
                     <Button 
                       variant="outlined" 
                       size="small"
                       onClick={() => handleViewBids(post)}
-                      sx={{ color: '#882AFF', borderColor: '#882AFF' }}
+                      sx={{ 
+                        color: '#882AFF', 
+                        borderColor: '#882AFF',
+                        borderRadius: 2,
+                        '&:hover': {
+                          bgcolor: '#f3e5f5',
+                          borderColor: '#6a1b9a'
+                        }
+                      }}
                     >
-                      View Bids ({post.bids_count || 0})
+                      View Bids
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <IconButton 
-                      onClick={(e) => handleMenuClick(e, post)}
-                      sx={{ color: '#882AFF' }}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <IconButton 
+                        onClick={() => handleEditDirect(post)}
+                        sx={{ 
+                          color: '#882AFF', 
+                          '&:hover': { bgcolor: '#f3e5f5' },
+                          borderRadius: 2
+                        }}
+                        size="small"
+                        title="Edit Post"
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton 
+                        onClick={() => handleDeleteDirect(post)}
+                        sx={{ 
+                          color: '#f44336', 
+                          '&:hover': { bgcolor: '#ffebee' },
+                          borderRadius: 2
+                        }}
+                        size="small"
+                        title="Delete Post"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      )}
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={handleEdit}>
-          <EditIcon sx={{ mr: 1 }} />
-          Edit
-        </MenuItem>
-        <MenuItem onClick={handleDelete}>
-          <DeleteIcon sx={{ mr: 1 }} />
-          Delete
-        </MenuItem>
-      </Menu>
-    </Box>
-  );
+              )))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    );
+  };
 
   // Influencer Feed View
   const InfluencerFeedView = () => {
+    const filteredPosts = getFilteredPosts.filter(post => post.status === 'published');
+    
     return (
-      <Box sx={{ padding: '20px' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
-            Marketplace
-          </Typography>
+      <Box sx={{ 
+        maxWidth: '1200px', 
+        margin: '0 auto', 
+        padding: '20px',
+        minHeight: '100vh',
+        backgroundColor: '#f8f9fa'
+      }}>
+        <Typography variant="h4" sx={{ 
+          color: '#882AFF', 
+          fontWeight: 'bold', 
+          mb: 3,
+          textAlign: 'center'
+        }}>
+          {influencerView === 'feed' ? 'Marketplace Feed' : 'My Bids'}
+        </Typography>
+        
+        {/* View Toggle Switch */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          mb: 3 
+        }}>
+          <Tabs
+            value={influencerView}
+            onChange={(e, newValue) => setInfluencerView(newValue)}
+            sx={{
+              backgroundColor: 'white',
+              borderRadius: 3,
+              minHeight: '48px',
+              '& .MuiTabs-indicator': {
+                backgroundColor: '#882AFF',
+                height: '3px',
+                borderRadius: '3px 3px 0 0'
+              },
+              '& .MuiTab-root': {
+                minWidth: '120px',
+                fontWeight: 'bold',
+                color: '#666',
+                '&.Mui-selected': {
+                  color: '#882AFF'
+                }
+              }
+            }}
+          >
+            <Tab 
+              label="Feed" 
+              value="feed"
+              icon={<ShoppingCartIcon />}
+              iconPosition="start"
+            />
+            <Tab 
+              label="My Bids" 
+              value="bids"
+              icon={<CheckCircleOutlineIcon />}
+              iconPosition="start"
+            />
+          </Tabs>
         </Box>
-
-        {/* Tabs */}
-        <Tabs 
-          value={influencerTab} 
-          onChange={(e, newValue) => setInfluencerTab(newValue)}
-          sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}
-        >
-          <Tab label="Browse Opportunities" />
-          <Tab label="My Bids" />
-        </Tabs>
-
-        {/* Tab Content */}
-        {influencerTab === 0 ? (
-          <Box>
-
-      {/* Search and Filter Bar */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-        <TextField
-          placeholder="Search posts..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          size="small"
-          sx={{ minWidth: 200 }}
-        />
         
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Category</InputLabel>
-          <Select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            label="Category"
-          >
-            <MenuItem value="">All</MenuItem>
-            {Categories.map(cat => (
-              <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        {influencerView === 'feed' && (
+          <>
+            {/* Search Bar */}
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                fullWidth
+                placeholder="Search opportunities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ color: '#882AFF', mr: 1 }} />,
+                  endAdornment: searchQuery && (
+                    <IconButton 
+                      size="small" 
+                      onClick={() => setSearchQuery('')}
+                      sx={{ color: '#666' }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  ),
+                  sx: {
+                    borderRadius: 3,
+                    backgroundColor: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#e1e7ff',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#882AFF',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#882AFF',
+                    }
+                  }
+                }}
+              />
+            </Box>
         
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Target Audience</InputLabel>
-          <Select
-            value={selectedTargetAudience}
-            onChange={(e) => setSelectedTargetAudience(e.target.value)}
-            label="Target Audience"
-          >
-            <MenuItem value="">All</MenuItem>
-            {TargetAudiences.map(audience => (
-              <MenuItem key={audience} value={audience}>{audience}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        
-        <Button 
-          variant="contained" 
-          onClick={() => loadMarketplacePosts(1, { 
-            category: selectedCategory, 
-            target_audience: selectedTargetAudience 
-          })}
-          sx={{ bgcolor: '#882AFF', '&:hover': { bgcolor: '#6a1b9a' } }}
-        >
-          Apply Filters
-        </Button>
-      </Box>
-
-      {loading ? (
-        <Grid container spacing={3}>
-          {[1,2,3,4,5,6].map((item) => (
-            <Grid item xs={12} md={6} lg={4} key={item}>
-              <Card sx={{ borderRadius: 2 }}>
-                <Skeleton variant="rectangular" height={200} />
-                <CardContent>
-                  <Skeleton variant="text" height={30} />
-                  <Skeleton variant="text" height={20} />
-                  <Skeleton variant="text" height={20} />
-                  <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                    <Skeleton variant="rectangular" width={80} height={32} />
-                    <Skeleton variant="rectangular" width={80} height={32} />
+        {/* Feed Container */}
+        <Box sx={{ 
+          maxHeight: 'calc(100vh - 200px)', 
+          overflowY: 'auto',
+          paddingRight: '8px',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#f1f1f1',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#882AFF',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: '#6a1b9a',
+          },
+        }}>
+          {postsLoading ? (
+            // Loading skeleton cards
+            [...Array(3)].map((_, index) => (
+              <Card key={index} sx={{ 
+                mb: 3,
+                borderRadius: 3, 
+                boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                border: '1px solid #e1e7ff',
+                backgroundColor: 'white'
+              }}>
+                <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Skeleton variant="circular" width={40} height={40} />
+                  <Box sx={{ flex: 1 }}>
+                    <Skeleton variant="text" width="60%" />
+                    <Skeleton variant="text" width="40%" />
                   </Box>
-                </CardContent>
+                </Box>
+                <Skeleton variant="rectangular" height={300} />
+                <Box sx={{ p: 2 }}>
+                  <Skeleton variant="text" width="80%" />
+                  <Skeleton variant="text" width="100%" />
+                  <Skeleton variant="text" width="60%" />
+                </Box>
               </Card>
-            </Grid>
-          ))}
-        </Grid>
-      ) : (
-        <Grid container spacing={3}>
-          {marketplacePosts.map((post) => (
-                      <Grid item xs={12} md={6} lg={4} key={post.id}>
-            <Card sx={{ 
-              borderRadius: 2, 
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              '&:hover': { boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }
+            ))
+          ) : filteredPosts.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <SearchIcon sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
+              <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
+                No opportunities found
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {hasActiveFilters() ? 'Try adjusting your search filters' : 'Check back later for new opportunities'}
+              </Typography>
+            </Box>
+          ) : (
+            filteredPosts.map((post, index) => (
+            <Card key={post.id} sx={{ 
+              mb: 3,
+              borderRadius: 3, 
+              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+              border: '1px solid #e1e7ff',
+              backgroundColor: 'white',
+              overflow: 'hidden',
+              '&:hover': { 
+                boxShadow: '0 4px 20px rgba(136, 42, 255, 0.15)',
+                borderColor: '#882AFF'
+              },
+              transition: 'all 0.3s ease'
             }}>
-              {post.media_url && (
-                <CardMedia
-                  component={post.media_type === 'video' ? 'video' : 'img'}
-                  height="200"
-                  image={post.media_url}
-                  src={post.media_url}
-                  alt={post.title}
-                  controls={post.media_type === 'video'}
-                />
-              )}
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                  {post.title}
-                </Typography>
-                
-                <Typography variant="body2" color="text.secondary" sx={{ 
-                  mb: 2,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden'
-                }}>
-                  {post.description}
-                </Typography>
-                
-                <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-                  <Chip label={post.category} size="small" sx={{ bgcolor: '#f3e5f5', color: '#7b1fa2' }} />
-                  <Chip label={post.target_audience} size="small" sx={{ bgcolor: '#e3f2fd', color: '#1976d2' }} />
-                  <Chip label={post.platform} size="small" sx={{ bgcolor: '#e8f5e8', color: '#2e7d32' }} />
-                </Box>
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" sx={{ color: '#882AFF', fontWeight: 'bold' }}>
-                    ₹{post.budget?.toLocaleString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Deadline: {new Date(post.deadline).toLocaleDateString()}
-                  </Typography>
-                </Box>
-                
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <LocationOnIcon fontSize="small" color="action" />
-                  <Typography variant="body2" color="text.secondary">
-                    {post.location}
-                  </Typography>
-                </Box>
-
-                {/* Tags */}
-                {post.tags && post.tags.length > 0 && (
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                      Tags:
+              {/* Post Header */}
+              <Box sx={{ 
+                p: 2, 
+                borderBottom: '1px solid #f0f0f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Avatar sx={{ 
+                    bgcolor: '#882AFF', 
+                    width: 40, 
+                    height: 40,
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}>
+                    {post.brand.charAt(0).toUpperCase()}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#333' }}>
+                      {post.brand}
                     </Typography>
-                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                      {post.tags.map((tag, index) => (
-                        <Chip key={index} label={tag} size="small" variant="outlined" />
-                      ))}
+                    <Typography variant="caption" color="text.secondary">
+                      Posted • {post.views} views
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Chip 
+                    label={post.type} 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: '#e3f2fd', 
+                      color: '#1976d2',
+                      fontWeight: 'bold',
+                      fontSize: '11px'
+                    }} 
+                  />
+                  <Chip 
+                    label={post.category} 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: '#f3e5f5', 
+                      color: '#7b1fa2',
+                      fontWeight: 'bold',
+                      fontSize: '11px'
+                    }} 
+                  />
+                </Box>
+              </Box>
+
+              {/* Post Content */}
+              <Box>
+                {/* Image */}
+                <CardMedia
+                  component="img"
+                  height="300"
+                  image={post.imageUrl}
+                  alt={post.title}
+                  sx={{ 
+                    objectFit: 'cover',
+                    cursor: 'pointer'
+                  }}
+                />
+                
+                {/* Content Body */}
+                <CardContent sx={{ p: 2 }}>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 'bold', 
+                    mb: 1,
+                    color: '#333',
+                    fontSize: '18px'
+                  }}>
+                    {post.title}
+                  </Typography>
+                  
+                  <Typography variant="body2" color="text.secondary" sx={{ 
+                    mb: 2,
+                    lineHeight: 1.6,
+                    fontSize: '14px'
+                  }}>
+                    {post.description}
+                  </Typography>
+                  
+                  {/* Budget and Deadline */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    mb: 2,
+                    p: 1.5,
+                    bgcolor: '#f8f9ff',
+                    borderRadius: 2,
+                    border: '1px solid #e1e7ff'
+                  }}>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        Budget
+                      </Typography>
+                      <Typography variant="h6" sx={{ 
+                        color: '#882AFF', 
+                        fontWeight: 'bold',
+                        fontSize: '16px'
+                      }}>
+                        {post.budget}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        Deadline
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#333' }}>
+                        {post.deadline}
+                      </Typography>
                     </Box>
                   </Box>
-                )}
-                
-                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                  
+                  {/* Location */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <LocationOnIcon fontSize="small" sx={{ color: '#882AFF' }} />
+                    <Typography variant="body2" color="text.secondary">
+                      {post.location}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Box>
+
+              {/* Action Buttons */}
+              <Box sx={{ 
+                p: 2, 
+                borderTop: '1px solid #f0f0f0',
+                bgcolor: '#fafbff'
+              }}>
+                <Box sx={{ display: 'flex', gap: 1 }}>
                   <Button 
                     variant="outlined" 
-                    size="small"
+                    size="medium"
                     startIcon={<ChatBubbleOutlineIcon />}
+                    onClick={async () => {
+                      try {
+                        const messageData = {
+                          recipient_id: post.brand_id || 'brand_user_id',
+                          message: `Hi! I'm interested in your "${post.title}" campaign. I'd love to discuss this opportunity further.`,
+                          post_id: post.id,
+                          type: 'text'
+                        };
+                        
+                        const response = await MarketplaceAPI.sendMessage(messageData);
+                        
+                        if (response.success) {
+                          toast.success('Message sent successfully!');
+                        }
+                      } catch (error) {
+                        console.error('Error sending message:', error);
+                        toast.error(handleApiError(error));
+                      }
+                    }}
                     sx={{ 
                       flex: 1,
                       borderColor: '#882AFF',
                       color: '#882AFF',
-                      '&:hover': { borderColor: '#6a1b9a', bgcolor: '#f3e5f5' }
+                      fontWeight: 'bold',
+                      borderRadius: 2,
+                      py: 1,
+                      '&:hover': { 
+                        borderColor: '#6a1b9a', 
+                        bgcolor: '#f3e5f5',
+                        transform: 'translateY(-1px)'
+                      },
+                      transition: 'all 0.2s ease'
                     }}
                   >
                     Message
                   </Button>
                   <Button 
                     variant="contained" 
-                    size="small"
-                    onClick={() => {
+                    size="medium"
+                    onClick={async () => {
                       setSelectedPost(post);
                       setBidDialogOpen(true);
+                      
+                      // Track post view when user opens bid dialog
+                      try {
+                        await MarketplaceAPI.trackPostView(post.id);
+                      } catch (error) {
+                        console.error('Error tracking post view:', error);
+                      }
                     }}
                     disabled={post.user_has_bid}
                     sx={{ 
                       flex: 1,
-                      bgcolor: post.user_has_bid ? '#ccc' : '#882AFF',
-                      '&:hover': { bgcolor: post.user_has_bid ? '#ccc' : '#6a1b9a' }
+                      bgcolor: '#882AFF',
+                      fontWeight: 'bold',
+                      borderRadius: 2,
+                      py: 1,
+                      '&:hover': { 
+                        bgcolor: '#6a1b9a',
+                        transform: 'translateY(-1px)'
+                      },
+                      transition: 'all 0.2s ease'
                     }}
                   >
                     {post.user_has_bid ? 'Bid Placed' : 'Bid Now'}
                   </Button>
                 </Box>
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="caption" color="text.secondary">
-                    By {post.brand_name}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      {post.views_count} views
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {post.bids_count} bids
-                    </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
+              </Box>
             </Card>
-          </Grid>
-        ))}
-        </Grid>
-      )}
-
-      {/* Pagination */}
-      {pagination.total_count > pagination.per_page && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-          <Button 
-            disabled={pagination.current_page === 1}
-            onClick={() => loadMarketplacePosts(pagination.current_page - 1)}
-            sx={{ mr: 1 }}
-          >
-            Previous
-          </Button>
-          <Typography sx={{ mx: 2, alignSelf: 'center' }}>
-            Page {pagination.current_page} of {Math.ceil(pagination.total_count / pagination.per_page)}
-          </Typography>
-          <Button 
-            disabled={pagination.current_page >= Math.ceil(pagination.total_count / pagination.per_page)}
-            onClick={() => loadMarketplacePosts(pagination.current_page + 1)}
-            sx={{ ml: 1 }}
-          >
-            Next
-          </Button>
-        </Box>
-      )}
+          )))}
+          
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                gap: 2,
+                mt: 4, 
+                mb: 2 
+              }}>
+                <Button
+                  variant="outlined"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  sx={{
+                    borderColor: '#882AFF',
+                    color: '#882AFF',
+                    '&:hover': {
+                      borderColor: '#6a1b9a',
+                      bgcolor: '#f3e5f5'
+                    },
+                    '&:disabled': {
+                      borderColor: '#ccc',
+                      color: '#ccc'
+                    }
+                  }}
+                >
+                  Previous
+                </Button>
+                
+                <Typography variant="body2" sx={{ 
+                  px: 2, 
+                  py: 1, 
+                  bgcolor: '#f8f9ff',
+                  borderRadius: 2,
+                  border: '1px solid #e1e7ff',
+                  fontWeight: 'medium'
+                }}>
+                  Page {currentPage} of {totalPages}
+                </Typography>
+                
+                <Button
+                  variant="outlined"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  sx={{
+                    borderColor: '#882AFF',
+                    color: '#882AFF',
+                    '&:hover': {
+                      borderColor: '#6a1b9a',
+                      bgcolor: '#f3e5f5'
+                    },
+                    '&:disabled': {
+                      borderColor: '#ccc',
+                      color: '#ccc'
+                    }
+                  }}
+                >
+                  Next
+                </Button>
+              </Box>
+            )}
+            
+            {/* Results Summary */}
+            <Box sx={{ textAlign: 'center', mt: 2, mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Showing {((currentPage - 1) * 10) + 1}-{Math.min(currentPage * 10, totalCount)} of {totalCount} opportunities
+              </Typography>
+            </Box>
           </Box>
-        ) : (
-          <MyBidsView />
+          </>
+        )}
+
+        {/* My Bids View */}
+        {influencerView === 'bids' && (
+          <Box>
+            {bidsLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress sx={{ color: '#882AFF' }} />
+              </Box>
+            ) : myBids.length === 0 ? (
+              <Box sx={{ 
+                textAlign: 'center', 
+                py: 8,
+                backgroundColor: 'white',
+                borderRadius: 3,
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+              }}>
+                <CheckCircleOutlineIcon sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                  No Bids Submitted Yet
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Browse the feed and submit bids on opportunities you're interested in!
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => setInfluencerView('feed')}
+                  sx={{
+                    mt: 3,
+                    bgcolor: '#882AFF',
+                    '&:hover': { bgcolor: '#6a1b9a' }
+                  }}
+                >
+                  Browse Opportunities
+                </Button>
+              </Box>
+            ) : (
+              <Grid container spacing={3}>
+                {myBids.map((bid) => (
+                  <Grid item xs={12} md={6} lg={4} key={bid.id}>
+                    <Card sx={{
+                      height: '100%',
+                      borderRadius: 3,
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                      }
+                    }}>
+                      <CardContent sx={{ p: 3 }}>
+                        {/* Bid Status Badge */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Chip
+                            label={bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
+                            size="small"
+                            sx={{
+                              bgcolor: 
+                                bid.status === 'accepted' ? '#4caf50' :
+                                bid.status === 'rejected' ? '#f44336' :
+                                '#ff9800',
+                              color: 'white',
+                              fontWeight: 'bold'
+                            }}
+                          />
+                          <Typography variant="body2" color="text.secondary">
+                            {bid.submittedDate}
+                          </Typography>
+                        </Box>
+
+                        {/* Post Title */}
+                        <Typography variant="h6" sx={{ 
+                          fontWeight: 'bold', 
+                          mb: 1,
+                          color: '#333',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {bid.postTitle}
+                        </Typography>
+
+                        {/* Brand */}
+                        <Typography variant="body2" sx={{ 
+                          color: '#882AFF', 
+                          fontWeight: 'bold',
+                          mb: 1
+                        }}>
+                          by {bid.brand}
+                        </Typography>
+
+                        {/* Description */}
+                        <Typography variant="body2" color="text.secondary" sx={{ 
+                          mb: 2,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {bid.description}
+                        </Typography>
+
+                        {/* Bid Amount */}
+                        <Box sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center',
+                          bgcolor: '#f8f9fa',
+                          p: 2,
+                          borderRadius: 2,
+                          mb: 2
+                        }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Your Bid:
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            color: '#882AFF', 
+                            fontWeight: 'bold' 
+                          }}>
+                            ₹{bid.amount.toLocaleString()}
+                          </Typography>
+                        </Box>
+
+                        {/* Deadline */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <LocationOnIcon sx={{ color: '#666', fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" color="text.secondary">
+                            Deadline: {bid.deadline}
+                          </Typography>
+                        </Box>
+
+                        {/* Action Buttons */}
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            fullWidth
+                            sx={{
+                              borderColor: '#882AFF',
+                              color: '#882AFF',
+                              '&:hover': {
+                                borderColor: '#6a1b9a',
+                                bgcolor: '#f3e5f5'
+                              }
+                            }}
+                            onClick={() => {
+                              // Navigate to post details or open message dialog
+                              toast.info('View post details functionality coming soon!');
+                            }}
+                          >
+                            View Post
+                          </Button>
+                          {bid.status === 'accepted' && (
+                            <Button
+                              variant="contained"
+                              size="small"
+                              fullWidth
+                              sx={{
+                                bgcolor: '#4caf50',
+                                '&:hover': { bgcolor: '#388e3c' }
+                              }}
+                              onClick={() => {
+                                toast.info('Start project functionality coming soon!');
+                              }}
+                            >
+                              Start Project
+                            </Button>
+                          )}
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Box>
         )}
       </Box>
     );
@@ -709,51 +1592,103 @@ const MarketplaceModule = () => {
   // Bid Dialog
   const BidDialog = () => (
     <Dialog open={bidDialogOpen} onClose={() => setBidDialogOpen(false)} maxWidth="sm" fullWidth>
-      <DialogTitle>Submit Your Bid</DialogTitle>
-      <DialogContent>
-        <Typography variant="body1" sx={{ mb: 2 }}>
+      <DialogTitle sx={{ pb: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#882AFF' }}>
+          Submit Your Bid
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
           Bidding for: <strong>{selectedPost?.title}</strong>
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Budget: ₹{selectedPost?.budget?.toLocaleString()}
-        </Typography>
+      </DialogTitle>
+      <DialogContent sx={{ pt: 1 }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="body2" sx={{ mb: 1, fontWeight: 'medium' }}>
+            Bid Amount (₹) *
+          </Typography>
+          <TextField
+            fullWidth
+            value={bidAmount}
+            onChange={(e) => setBidAmount(e.target.value)}
+            placeholder="5000"
+            type="number"
+            disabled={loading}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': { borderColor: '#882AFF' },
+                '&.Mui-focused fieldset': { borderColor: '#882AFF' }
+              }
+            }}
+          />
+        </Box>
         
-        <TextField
-          fullWidth
-          label="Your Bid Amount (₹)"
-          value={bidAmount}
-          onChange={(e) => setBidAmount(e.target.value)}
-          placeholder="5,000"
-          sx={{ mb: 2 }}
-          type="number"
-        />
-        
-        <TextField
-          fullWidth
-          label="Message (Optional)"
-          value={bidMessage}
-          onChange={(e) => setBidMessage(e.target.value)}
-          placeholder="Tell them why you're the perfect fit for this campaign..."
-          multiline
-          rows={3}
-          sx={{ mb: 2 }}
-        />
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" sx={{ mb: 1, fontWeight: 'medium' }}>
+            Message (Optional)
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            value={bidMessage}
+            onChange={(e) => setBidMessage(e.target.value)}
+            placeholder="Tell the brand why you're the perfect fit for this campaign..."
+            disabled={loading}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': { borderColor: '#882AFF' },
+                '&.Mui-focused fieldset': { borderColor: '#882AFF' }
+              }
+            }}
+          />
+        </Box>
+
+        {selectedPost && (
+          <Box sx={{ 
+            p: 2, 
+            bgcolor: '#f8f9ff', 
+            borderRadius: 2, 
+            border: '1px solid #e1e7ff',
+            mt: 2
+          }}>
+            <Typography variant="body2" sx={{ fontWeight: 'medium', mb: 1 }}>
+              Campaign Details:
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              Budget: <strong>{selectedPost.budget}</strong>
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              Deadline: <strong>{selectedPost.deadline}</strong>
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Platform: <strong>{selectedPost.platform}</strong>
+            </Typography>
+          </Box>
+        )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setBidDialogOpen(false)} disabled={submittingBid}>
+      <DialogActions sx={{ p: 3, pt: 2 }}>
+        <Button 
+          onClick={() => {
+            setBidDialogOpen(false);
+            setBidAmount("");
+            setBidMessage("");
+          }} 
+          disabled={loading}
+          sx={{ color: '#666' }}
+        >
           Cancel
         </Button>
         <Button 
           onClick={handleBidSubmit} 
           variant="contained"
-          disabled={submittingBid || !bidAmount}
-          startIcon={submittingBid ? <CircularProgress size={20} /> : null}
+          disabled={loading || !bidAmount}
           sx={{ 
             bgcolor: '#882AFF',
-            '&:hover': { bgcolor: '#6a1b9a' }
+            '&:hover': { bgcolor: '#6a1b9a' },
+            '&:disabled': { bgcolor: '#ccc' },
+            px: 3
           }}
         >
-          {submittingBid ? 'Placing Bid...' : 'Place Bid'}
+          {loading ? <CircularProgress size={20} color="inherit" /> : 'Submit Bid'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -771,8 +1706,8 @@ const MarketplaceModule = () => {
         </Box>
       </DialogTitle>
       <DialogContent>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+        {bidsLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
             <CircularProgress />
           </Box>
         ) : bids.length === 0 ? (
@@ -787,6 +1722,7 @@ const MarketplaceModule = () => {
                   <TableCell sx={{ fontWeight: 'bold' }}>Message</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -794,49 +1730,41 @@ const MarketplaceModule = () => {
                 {bids.map((bid) => (
                   <TableRow key={bid.id}>
                     <TableCell>
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                          {bid.influencer_name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {bid.influencer_email}
-                        </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar sx={{ width: 32, height: 32 }}>
+                          {bid.influencer?.name?.charAt(0) || 'I'}
+                        </Avatar>
+                        {bid.influencer?.name || 'Influencer'}
                       </Box>
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#882AFF' }}>
-                        ₹{bid.amount?.toLocaleString()}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {bid.message || 'No message provided'}
-                      </Typography>
-                    </TableCell>
+                    <TableCell>{bid.amount}</TableCell>
+                    <TableCell>{new Date(bid.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Chip 
                         label={bid.status} 
-                        size="small" 
-                        color={
-                          bid.status === 'accepted' ? 'success' : 
-                          bid.status === 'rejected' ? 'error' : 
-                          'warning'
-                        }
+                        size="small"
+                        sx={{
+                          bgcolor: bid.status === 'accepted' ? '#e8f5e8' : 
+                                 bid.status === 'rejected' ? '#ffebee' : '#e3f2fd',
+                          color: bid.status === 'accepted' ? '#2e7d32' : 
+                               bid.status === 'rejected' ? '#d32f2f' : '#1976d2'
+                        }}
                       />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">
-                        {new Date(bid.created_at).toLocaleDateString()}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      {bid.status === 'pending' ? (
+                      {bid.status === 'pending' && (
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Button 
                             variant="contained" 
                             size="small" 
                             color="success"
-                            onClick={() => handleAcceptBid(bid.id)}
+                            onClick={async () => {
+                              try {
+                                await handleBidStatusUpdate(bid.id, 'accepted');
+                              } catch (error) {
+                                toast.error(handleApiError(error));
+                              }
+                            }}
                           >
                             Accept
                           </Button>
@@ -844,15 +1772,17 @@ const MarketplaceModule = () => {
                             variant="outlined" 
                             size="small" 
                             color="error"
-                            onClick={() => handleRejectBid(bid.id)}
+                            onClick={async () => {
+                              try {
+                                await handleBidStatusUpdate(bid.id, 'rejected');
+                              } catch (error) {
+                                toast.error(handleApiError(error));
+                              }
+                            }}
                           >
                             Reject
                           </Button>
                         </Box>
-                      ) : (
-                        <Typography variant="caption" color="text.secondary">
-                          {bid.status === 'accepted' ? 'Accepted' : 'Rejected'}
-                        </Typography>
                       )}
                     </TableCell>
                   </TableRow>
@@ -899,12 +1829,30 @@ const MarketplaceModule = () => {
           sx={{
             p: 2,
             backgroundColor: '#091a48',
-            borderRadius: 0
+            borderRadius: 0,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}
         >
           <Typography variant="h6" sx={{ color: '#fff' }}>
             {getHeaderTitle()}
           </Typography>
+          
+          {/* Add Create New Post button to top nav for brand/admin users */}
+          {(currentMode === 'brand' && (isBrand || isAdmin) && currentView !== 'create') && (
+            <Button 
+              variant="contained" 
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/brand/marketplace/new')}
+              sx={{ 
+                bgcolor: '#882AFF',
+                '&:hover': { bgcolor: '#6a1b9a' }
+              }}
+            >
+              Create New Post
+            </Button>
+          )}
         </Paper>
 
         {/* Main Content */}

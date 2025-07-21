@@ -40,6 +40,8 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import FacebookIcon from '../../assets/images/facebook.png';
 import InstaIcon from '../../assets/images/instagram.png';
 import LinkedInIcon from '../../assets/images/linkedin.png';
+import ImageIcon from '@mui/icons-material/Image';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 
 
 const ITEM_HEIGHT = 48;
@@ -52,7 +54,6 @@ const MenuProps = {
     },
   },
 };
-
 
 const CreatePost = () => {
 
