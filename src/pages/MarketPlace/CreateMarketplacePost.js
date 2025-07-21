@@ -35,35 +35,19 @@ import {
 import { toast } from "react-toastify";
 import Layout from "../../components/Layout";
 import MarketplaceAPI, { handleApiError } from "../../services/marketplaceApi";
-import { useAuth } from "../../authContext/AuthContext";
 
 const CreateMarketplacePost = ({ 
   onBack, 
   onPostCreated, 
   initialData = null 
 }) => {
-  const { user } = useAuth();
-  
   // Constants as per specification
   const Categories = ['A', 'B'];
   const TargetAudiences = ['18–24', '24–30', '30–35', 'More than 35'];
   const Types = ['Sponsored Post', 'Product Review', 'Brand Collaboration', 'Event Promotion', 'Giveaway', 'Story Feature'];
 
-  // Get current user name for brand name default
-  const getCurrentUserName = () => {
-    // Try to get user name from localStorage or use role-based default
-    const storedUserName = localStorage.getItem('userName');
-    if (storedUserName) return storedUserName;
-    
-    // Fallback based on user role
-    const role = user?.role || 'Brand';
-    return role === 'Brand' ? 'Your Brand Name' : 
-           role === 'Admin' ? 'Admin Brand' : 
-           'Your Brand Name';
-  };
-
-  // Form states as per specification - brand name now editable with current user default
-  const [brandName, setBrandName] = useState(initialData?.brand || getCurrentUserName());
+  // Form states as per specification
+  const [brandName, setBrandName] = useState(initialData?.brand || "Your Brand Name"); // Auto-filled
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [category, setCategory] = useState(initialData?.category || "");
@@ -379,32 +363,7 @@ const CreateMarketplacePost = ({
   return (
     <Layout>
       <Box>
-        {/* Header with Back Button */}
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          padding: '16px 24px', 
-          bgcolor: '#091a48', 
-          color: 'white',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <IconButton
-            onClick={onBack}
-            sx={{ 
-              color: 'white', 
-              mr: 2,
-              '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.1)'
-              }
-            }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Marketincer-Brand Dashboard
-          </Typography>
-        </Box>
-
+        {/* Header - Updated color to #091a48 */}
         {/* Error Alert */}
         {error && (
           <Alert severity="error" sx={{ m: 2 }} onClose={() => setError('')}>
@@ -435,6 +394,7 @@ const CreateMarketplacePost = ({
                       fullWidth
                       value={brandName}
                       onChange={(e) => setBrandName(e.target.value)}
+                      disabled
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
@@ -596,7 +556,7 @@ const CreateMarketplacePost = ({
 
                   {/* Category and Target Audience */}
                   <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid item xs={4}>
+                    <Grid item xs={6}>
                       <Typography 
                         variant="body1" 
                         sx={{ 
@@ -624,7 +584,7 @@ const CreateMarketplacePost = ({
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={6}>
                       <Typography 
                         variant="body1" 
                         sx={{ 
