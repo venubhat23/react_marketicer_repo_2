@@ -1,74 +1,273 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
+
 import {
-  Box, Typography, Button, TextField, Avatar, Chip, Select, MenuItem, IconButton, 
-  FormControl, Grid, Modal, Paper, Container, InputLabel, CardContent, CardMedia, 
-  Card, Divider, Stack
+  Box, Typography, Button,
+  TextField,
+  Avatar,
+  Chip,
+  Select,
+  MenuItem,
+  IconButton,
+  Card, FormControl,
+  Tab, Tabs, Checkbox,
+  Grid, Modal, Paper,
+  AppBar, Toolbar, Container, InputLabel, ListItemText,
+  CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack,ListItemIcon,
+  CircularProgress, // Add this import
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
-import { PhotoCamera, Videocam, LocationOn, Schedule, LocalOffer, Category, People, Language } from "@mui/icons-material";
-import { toast } from "react-toastify";
+import CloseIcon from '@mui/icons-material/Close';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import SendIcon from '@mui/icons-material/Send';
+import MoreVert from "@mui/icons-material/MoreVert";
+import Repeat from "@mui/icons-material/Repeat";
+import ThumbUp from "@mui/icons-material/ThumbUp";
+import MessageCircle from "@mui/icons-material/Star"; // Placeholder for MessageCircle
 import Editor from "../../components/Editor";
-import MarketplaceAPI, { handleApiError } from "../../services/marketplaceApi";
+import TabComponent from "../../components/TabComponent";
+import InstagramPost from "../../components/InstagramPost"
+import Layout from "../../components/Layout";
+import axios from 'axios';
+import { useMutation } from "@tanstack/react-query";
+import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
+import { toast } from "react-toastify";
+import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/themes/material_green.css";
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import Skeleton from "@mui/material/Skeleton";
+import OutlinedInput from '@mui/material/OutlinedInput';
+import FacebookIcon from '../../assets/images/facebook.png';
+import InstaIcon from '../../assets/images/instagram.png';
+import LinkedInIcon from '../../assets/images/linkedin.png';
+import ImageIcon from '@mui/icons-material/Image';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
 
 const CreateMarketplacePost = ({ 
   onBack, 
   onPostCreated, 
   initialData = null 
 }) => {
-  // Constants as per specification
-  const Categories = ['A', 'B'];
-  const TargetAudiences = ['18–24', '24–30', '30–35', 'More than 35'];
-  const Types = ['Sponsored Post', 'Product Review', 'Brand Collaboration', 'Event Promotion', 'Giveaway', 'Story Feature'];
 
-  // Form states as per specification
-  const [brandName, setBrandName] = useState(initialData?.brand || "Your Brand Name"); // Auto-filled
-  const [title, setTitle] = useState(initialData?.title || "");
-  const [description, setDescription] = useState(initialData?.description || "");
-  const [category, setCategory] = useState(initialData?.category || "");
-  const [targetAudience, setTargetAudience] = useState(initialData?.targetAudience || "");
-  const [budget, setBudget] = useState(initialData?.budget || "");
-  const [location, setLocation] = useState(initialData?.location || "");
-  const [platform, setPlatform] = useState(initialData?.platform || "");
-  const [languages, setLanguages] = useState(initialData?.languages || "");
-  const [deadline, setDeadline] = useState(initialData?.deadline || "");
-  const [tags, setTags] = useState(initialData?.tags || "");
-  
-  // Upload states
-  const [uploadedImageUrl, setUploadedImageUrl] = useState(initialData?.imageUrl || "");
-  const [uploadedVideoUrl, setUploadedVideoUrl] = useState(initialData?.videoUrl || "");
+  const Brands = ['D-Mart', 'V-Mart', 'Blinkit']
+
+  const TabPanel = ({ value, index, children }) => {
+    return (
+      value === index && (
+        <Box sx={{ p: 2 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )
+    );
+  };
+
+  const [postContent, setPostContent] = useState("");
+  const [open, setOpen] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+  //const [openAnother, setOpenAnother] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [posting, setPosting] = useState(false);
-  
-  // File input refs
+  const [loading, setLoading] = useState(false);
+  const [selectedPages, setSelectedPages] = useState([]);
+  const [brandName, setBrandName] = useState("");
   const fileInputRef = useRef(null);
-  const videoInputRef = useRef(null);
+  const [uploadedFileName, setUploadedFileName] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [openDateTimePicker, setOpenDateTimePicker] = useState(false);
+  const [selectedDateTime, setSelectedDateTime] = useState(new Date());
+  //const [createPostMode, setCreatePostMode] = useState("");
+  const [editorLoaded, setEditorLoaded] = useState(false);
+  // const [data, setData] = useState("");
+  const [createPostMode, setCreatePostMode] = useState("");
+  const [pages, setPages] = useState([]);
+  const [selectedOption, setSelectedOption] = useState([])
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [selectUser, setSelectUser] = useState('')
 
-  // File upload handlers
-  const handleImageUpload = () => {
-    fileInputRef.current.click();
+  const [selectedUsers, setSelectedUsers] = useState([])
+  const [selectedChipId, setSelectedChipId] = useState(null);
+
+  console.log('hereree', selectUser)
+
+  // Function to get tab index based on page type
+  const getTabIndexByPageType = (pageType) => {
+    switch(pageType) {
+      case 'instagram':
+        return 0;
+      case 'linkedin':
+        return 1;
+      case 'facebook':
+        return 2;
+      default:
+        return 0;
+    }
   };
 
-  const handleVideoUpload = () => {
-    videoInputRef.current.click();
+  // Function to get the selected user's page type
+  const getSelectedUserPageType = () => {
+    const selectedUser = selectedUsers.find(user => user.social_id === selectedChipId);
+    return selectedUser ? selectedUser.page_type : null;
   };
 
-  const handleFileUpload = async (file, type = 'image') => {
+  // Function to get available tabs based on selected users
+  const getAvailableTabs = () => {
+    if (selectedUsers.length === 0) return ['instagram', 'linkedin', 'facebook'];
+    
+    const uniquePageTypes = [...new Set(selectedUsers.map(user => user.page_type))];
+    return uniquePageTypes;
+  };
+
+  // Function to check if current tab content should be shown
+  const shouldShowTabContent = (tabIndex) => {
+    const availableTabs = getAvailableTabs();
+    const tabTypes = ['instagram', 'linkedin', 'facebook'];
+    const currentTabType = tabTypes[tabIndex];
+    
+    return availableTabs.includes(currentTabType);
+  };
+
+  const handleOptionChange = (event) => {
+    const value = event.target.value;
+    console.log('Selected value:', value);
+    setSelectedOption(typeof value === 'string' ? value.split(',') : value);
+    console.log('Selected inside:', selectedOption);
+
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  const fetchAccountsFromAPI = async () => {
+
+    setLoading(true);
+    const token = localStorage.getItem("token");
+
+    try {
+      // Fetch the accounts from the dummy API
+      const response = await fetch(
+        "https://api.marketincer.com/api/v1/social_pages/connected_pages", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Backticks used here
+          },
+        }
+      );
+
+      const data = await response.json();
+      setPages(data.data.accounts); // Store the fetched accounts in the state
+
+
+    } catch (error) {
+      console.error("Error fetching accounts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAccountsFromAPI();
+  }, []);
+
+  // Update tab when selected chip changes or when first user is selected
+  useEffect(() => {
+    if (selectedUsers.length > 0) {
+      // Auto-switch to the first selected user's page type tab
+      const firstUserPageType = selectedUsers[0].page_type;
+      const newTabIndex = getTabIndexByPageType(firstUserPageType);
+      setTabValue(newTabIndex);
+    }
+  }, [selectedUsers]);
+
+  // Additional effect for chip selection
+  useEffect(() => {
+    const selectedPageType = getSelectedUserPageType();
+    if (selectedPageType) {
+      const newTabIndex = getTabIndexByPageType(selectedPageType);
+      setTabValue(newTabIndex);
+    }
+  }, [selectedChipId, selectedUsers]);
+
+  useEffect(() => {
+    setEditorLoaded(true);
+  }, []);
+
+  const draftModelOpen = async (action) => {
+    if (!uploadedImageUrl || !postContent) {
+      alert("Please make sure all fields are filled out!");
+      return;
+    }
+    setCreatePostMode(action);
+    setOpenDateTimePicker(true);
+
+  };
+
+  const handleBoxClick = () => {
+    fileInputRef.current.click(); //  Triggers the hidden file input
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const droppedFile = event.dataTransfer.files[0];
+    if (droppedFile) {
+      setFile(droppedFile);
+      setUploadedFileName(droppedFile.name);
+      console.log('imgggg', uploadedImageUrl)
+
+      //  Auto-upload the file after drop
+      handleFileUpload(droppedFile);
+    }
+  };
+
+  const handleFileUpload = async (file) => {
     if (!file) return;
+
     setUploading(true);
     try {
-      const response = await MarketplaceAPI.uploadMedia(file, type);
-      
-      if (response.success && response.data.url) {
-        if (type === 'image') {
-          setUploadedImageUrl(response.data.url);
-        } else {
-          setUploadedVideoUrl(response.data.url);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(
+        "https://kitintellect.tech/storage/public/api/upload/aaFacebook",
+        {
+          method: "POST",
+          body: formData,
         }
-        toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded successfully!`);
+      );
+
+      const data = await response.json();
+
+      if (data.url) {
+        setUploadedImageUrl(data.url); //  Store uploaded file URL
+
+        toast.success("File uploaded successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+        });
+      } else {
+        throw new Error("Upload failed");
       }
     } catch (error) {
-      console.error('Upload error:', error);
-      toast.error(handleApiError(error));
+      toast.error("File upload failed!", {
+        position: "top-right",
+        autoClose: 5000,
+      });
+      console.error("Error uploading file:", error);
     } finally {
       setUploading(false);
     }
@@ -77,699 +276,674 @@ const CreateMarketplacePost = ({
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      handleFileUpload(selectedFile, 'image');
-    }
-  };
-
-  const handleVideoChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      handleFileUpload(selectedFile, 'video');
+      setFile(selectedFile);
+      console.log('11111', file)
+      setUploadedFileName(selectedFile.name);
+      //  Auto-upload the file after selection
+      handleFileUpload(selectedFile);
     }
   };
 
   const handlePublish = async () => {
-    if (!title || !description || !category || !targetAudience || !budget || !deadline) {
-      toast.error("Please fill all required fields!");
+    if (!postContent) {
+      alert("Please make sure all fields are filled out!");
       return;
     }
-    
     setPosting(true);
+    const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
     const payloadData = {
-      title,
-      description,
-      category,
-      targetAudience,
-      budget: budget.startsWith('₹') ? budget : `₹${budget}`,
-      location,
-      platform,
-      languages,
-      deadline,
-      tags,
-      image_url: uploadedImageUrl,
-      video_url: uploadedVideoUrl,
-      status: "published",
-      type: "Sponsored Post"
+      social_page_ids: selectedPages,  // Only sending the first selected page for now
+      post: {
+        s3_url: uploadedImageUrl,
+        comments: stripHtmlTags(postContent),
+        brand_name: brandName,
+        status: "publish"
+      },
     };
-    
+    console.log('papapa', payloadData)
+
     try {
-      let response;
+      const token = localStorage.getItem("token");
+      await axios.post("https://api.marketincer.com/api/v1/posts", payloadData, {
+        headers: {
+          Authorization: `Bearer ${token}`, // <-- use backticks here
+        }
+      });
+      alert("Post published successfully!");
+      // Optionally, clear form states
+      setSelectedPages([]);
+      setPostContent("");
+      setUploadedImageUrl("");
+      setPosting(false);
+      setUploadedFileName('');
+      setOpen(false);
       
-      if (initialData?.id) {
-        // Update existing post
-        response = await MarketplaceAPI.updateMarketplacePost(initialData.id, payloadData);
-      } else {
-        // Create new post
-        response = await MarketplaceAPI.createMarketplacePost(payloadData);
+      // Callback to parent component
+      if (onPostCreated) {
+        const newPost = {
+          id: Date.now(),
+          title: postContent.replace(/<[^>]*>/g, '').substring(0, 50) + '...',
+          description: postContent,
+          brand: brandName,
+          imageUrl: uploadedImageUrl,
+          dateCreated: new Date().toISOString().split('T')[0],
+          views: 0,
+          bids_count: 0
+        };
+        onPostCreated(newPost);
       }
       
-              if (response.success) {
-          const newPost = {
-            id: initialData?.id || response.data?.id || Date.now(),
-            ...payloadData,
-            imageUrl: uploadedImageUrl, // Keep both formats for compatibility
-            videoUrl: uploadedVideoUrl,
-            dateCreated: new Date().toISOString().split('T')[0],
-            views: initialData?.views || 0,
-            brand: brandName,
-            bids_count: initialData?.bids_count || 0
-          };
-          
-          toast.success(response.message || (initialData ? "Post updated successfully!" : "Post published successfully!"));
-          
-          // Callback to parent component
-          if (onPostCreated) {
-            onPostCreated(newPost);
-          }
-        } else {
-          throw new Error(response.error?.message || 'Failed to publish post');
-        }
-      
+      window.location.reload();
     } catch (error) {
       console.error("Error publishing post:", error);
-      toast.error(handleApiError(error));
-    } finally {
-      setPosting(false);
+      alert("Failed to publish post");
     }
   };
 
-  return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      position: 'relative'
-    }}>
-      {/* Header */}
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          bgcolor: 'rgba(136, 42, 255, 0.9)', 
-          color: 'white',
-          borderRadius: 0,
-          backdropFilter: 'blur(10px)'
-        }}
-      >
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          padding: '16px 24px'
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton 
-              onClick={onBack}
-              sx={{ color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+  const draftHandler = async () => {
+
+    if ( !uploadedImageUrl || !postContent) {
+      alert("Please make sure all fields are filled out!");
+      return;
+    }
+    setPosting(true);
+    const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
+    const payloadData = {
+      social_page_ids: selectedPages,  // Only sending the first selected page for now
+      post: {
+        s3_url: uploadedImageUrl,
+        comments: stripHtmlTags(postContent),  // Use the postContent for comments as well
+        brand_name: brandName,
+        status: createPostMode,
+        scheduled_at: selectedDateTime
+      },
+    };
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post("https://api.marketincer.com/api/v1/posts/schedule", payloadData, {
+        headers: {
+          Authorization: `Bearer ${token}`, // <-- use backticks here
+        }
+      });
+      alert(`Post ${createPostMode} successfully!`);
+      // Optionally, clear form states
+      setSelectedPages([]);
+      setPostContent("");
+      setUploadedImageUrl("");
+      setPosting(false);
+      setOpenDateTimePicker(false);
+      setUploadedFileName('');
+      setOpen(false);
+      window.location.reload();
+    } catch (error) {
+      console.error(`Error ${createPostMode} post:`, error);
+      alert(`Failed to ${createPostMode} post`);
+    }
+  };
+
+
+  const mutation = useMutation({
+    mutationFn: (payloadData) => {
+      const token = localStorage.getItem("token"); // Retrieve token from local storage (or state)
+
+      return axios.post(
+        "https://api.marketincer.com/api/v1/posts",
+        payloadData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // <-- use backticks here
+          },
+        }
+      );
+    },
+    onSuccess: (response) => {
+      console.log(response);
+      toast.success(response?.data?.message, {
+        position: "top-right",
+        autoClose: 5000,
+      });
+      setOpen(false);
+      setPostContent("");
+    },
+    onError: (error) => {
+      toast.error("Failed to Create Post", {
+        position: "top-right",
+        autoClose: 5000,
+      });
+      console.error("Post creation failed", error);
+    },
+  });
+
+
+  const handleAvatarClick = (pageId) => {
+    console.log("Page ID clicked:", pageId, selectedPages);
+    setSelectedPages((selectedPages) =>
+      selectedPages.includes(pageId)
+        ? selectedPages.filter((id) => id !== pageId) // Deselect if already selected
+        : [...selectedPages, pageId] // Select if not selected
+    );
+
+  };
+
+
+  const handleUsersChange = (event) => {
+    let selectedIds = event.target.value;
+    // Normalize to array of numbers
+    selectedIds = Array.isArray(selectedIds)
+      ? selectedIds.map(Number)
+      : [Number(selectedIds)];
+
+    const selectedUserObjects = pages.filter((user) =>
+      selectedIds.includes(user.id)
+    );
+
+    const socialId = selectedUserObjects.map(user => user.social_id);
+
+    setSelectedUsers(selectedUserObjects);
+    handleAvatarClick(socialId)
+
+  };
+
+  // LinkedIn Preview Component
+  const LinkedinPreview = () => {
+    const interactionButtons = [
+      { icon: <FavoriteBorderIcon />  },
+      { icon: <ChatBubbleOutlineIcon /> },
+      // { icon: <Repeat />, text: "Repost" },
+      { icon: <SendIcon /> },
+    ];
+
+    return (
+        <Card
+          sx={{ borderRadius: 2, padding: '10px' }}
+        >
+          <CardContent sx={{ p: 0 }}>
+            
+            {/* Post Image */}
+            {uploadedImageUrl ? (
+              <Avatar 
+              src={uploadedImageUrl} 
+              alt="LinkedIn post image" 
+              sx={{ width: 300, height: 350, display: 'block', margin: 'auto',borderRadius:'inherit' }} />
+            ) : (
+              <Skeleton animation="wave" variant="circular" width={300} height={350} sx={{ display: 'block', margin: 'auto', borderRadius:'inherit' }} />
+            )}
+
+            {/* Image Indicators */}
+            <Box
+              display="flex"
+              justifyContent="center"
+              gap={1}
+              mt={-3}
+              mb={1.5}
             >
-              <ArrowLeftIcon />
-            </IconButton>
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              {initialData ? 'Edit Post' : 'Create New Post'}
+              <Box
+                width="10px"
+                height="10px"
+                bgcolor="#882AFF"
+                borderRadius="4px"
+              />
+              <Box
+                width="10px"
+                height="10px"
+                bgcolor="#E7D3FF"
+                borderRadius="4px"
+              />
+            </Box>
+
+            {/* Post Actions */}
+
+            {postContent && (
+              <Box px={2.5} pb={1} mt={3}>
+                <Typography variant="body2" color="#882AFF" sx={{textAlign:'justify'}}>
+                  <span dangerouslySetInnerHTML={{ __html: postContent }} />
+                </Typography>
+              </Box>
+            )}
+
+            <CardActions
+              
+            >
+              {interactionButtons.map((button, index) => (
+                <Stack
+                  key={index}
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  sx={{ cursor: "pointer" }}
+                >
+                  <Box sx={{ "& svg": { width: 20, height: 20 } }}>
+                    {button.icon}
+                  </Box>
+                  <Typography fontWeight="medium">{button.text}</Typography>
+                </Stack>
+              ))}
+            </CardActions>
+          </CardContent>
+        </Card>
+      
+    );
+  };
+
+  // Render preview content based on tab and availability
+  const renderPreviewContent = (tabIndex) => {
+    if (!shouldShowTabContent(tabIndex)) {
+      return (
+        <Box 
+          display="flex" 
+          justifyContent="center" 
+          alignItems="center" 
+          height="200px"
+          // sx={{ 
+          //   backgroundColor: '#f5f5f5', 
+          //   borderRadius: 2,
+          //   border: '1px dashed #ccc' 
+          // }}
+        >
+          <Typography variant="h6" color="text.secondary">
+            There is no preview available
+          </Typography>
+        </Box>
+      );
+    }
+
+    // LinkedIn Preview
+    if (tabIndex === 1) {
+      return <LinkedinPreview />;
+    }
+
+    // Instagram and Facebook Preview (existing logic)
+    return (
+      <Card sx={{ borderRadius: 2, padding: '10px' }}>
+        {!uploadedImageUrl || !postContent ? (
+          <Skeleton animation="wave" variant="circular" width={300} height={350} sx={{ display: 'block', margin: 'auto', borderRadius:'inherit' }} />
+        ) : (
+          <Avatar src={uploadedImageUrl} alt="Uploaded" sx={{ width: 300, height: 350, display: 'block', margin: 'auto',borderRadius:'inherit' }} />
+        )}
+        <CardContent sx={{ p: 0 }}>
+          {uploadedImageUrl && postContent && (
+            <Typography variant="body2" color="text.secondary" sx={{ display: "flex" }}>
+              <span dangerouslySetInnerHTML={{ __html: postContent }} />
+            </Typography>
+          )}
+
+          {/* Platform-specific interaction buttons */}
+          <Box display="flex" alignItems="center" mt={2} gap={3}>
+            {tabIndex === 0 && ( // Instagram
+              <>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <FavoriteBorderIcon fontSize="small" />
+                  {/* <Typography variant="body2">37.8K</Typography> */}
+                </Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <ChatBubbleOutlineIcon fontSize="small" />
+                  {/* <Typography variant="body2">248</Typography> */}
+                </Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <SendIcon fontSize="small" />
+                  {/* <Typography variant="body2">234</Typography> */}
+                </Box>
+              </>
+            )}
+            {tabIndex === 2 && ( // Facebook
+              <>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <FavoriteBorderIcon fontSize="small" />
+                  {/* <Typography variant="body2">Like</Typography> */}
+                </Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <ChatBubbleOutlineIcon fontSize="small" />
+                  {/* <Typography variant="body2">Comment</Typography> */}
+                </Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <SendIcon fontSize="small" />
+                  {/* <Typography variant="body2">Share</Typography> */}
+                </Box>
+              </>
+            )}
+          </Box>
+          {/* Metadata */}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mt={2}
+          >
+            <Typography variant="body2" color="text.secondary">
+              {selectUser?.name || 'Select a user'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Just Now
             </Typography>
           </Box>
-        </Box>
-      </Paper>
 
-      {/* Main Content - 50/50 Split */}
-      <Box sx={{ padding: '24px' }}>
-        <Grid container spacing={3}>
           
-          {/* Left Panel - Form (50%) */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-              height: 'fit-content',
-              minHeight: '500px',
-              maxHeight: '80vh',
-              overflow: 'auto'
-            }}>
-              <CardContent sx={{ p: 4 }}>
-                <Typography variant="h6" sx={{ 
-                  mb: 3, 
-                  color: '#882AFF', 
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1
-                }}>
-                  <Category />
-                  Post Details
+        </CardContent>
+      </Card>
+    );
+  };
+  
+
+  const getPlatformIcon = (postType) => {
+    
+    switch (postType?.toLowerCase()) {
+      case 'instagram':
+        return <img src={InstaIcon} alt="instagram" width='25' height='25'  />
+      case 'facebook':
+        return <img src={FacebookIcon} alt="facebook" width='25' height='25'  />
+      case 'linkedin':
+        return <img src={LinkedInIcon} alt="linkedin" width='25' height='25'  />
+      default:
+        return null;
+    }
+  };
+
+
+  return (
+    <Layout>
+      <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} > 
+        <Paper
+              elevation={0}
+              sx={{
+                display: { xs: 'none', md: 'block' },
+                p: 1,
+                backgroundColor: '#091a48',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 0
+              }}
+            >
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+
+                <Typography variant="h6" sx={{ color: '#fff' }}>
+                  <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="back"
+                    sx={{ mr: 2, color: '#fff' }}
+                    onClick={onBack}
+                  >
+                    <ArrowLeftIcon />
+                  </IconButton>
+                  Create Post
                 </Typography>
-                
-                {/* Brand Name */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                    Brand Name
-                  </Typography>
-                  <TextField
-                    fullWidth
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <IconButton size="large" sx={{ color: '#fff' }}>
+                    <NotificationsIcon />
+                  </IconButton>
+                  <IconButton size="large" sx={{ color: '#fff' }}>
+                    <AccountCircleIcon />
+                  </IconButton>
+                </Box>
+              </Box>
+        </Paper>
+      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'20px'}}>
+        <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
+          <Grid size={{ xs: 12, sm: 8, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%' }}>
+              {/* Dropdowns */}
+              <Box display="flex" gap={2} mb={2} >
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Brand</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="Brand"
+                    size="small"
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
-                    disabled
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        bgcolor: '#f8f9fa',
-                      }
-                    }}
-                  />
-                </Box>
-                
-                {/* Title */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                    Title *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter an engaging post title"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        bgcolor: '#f8f9fa',
-                        '&:hover fieldset': { borderColor: '#882AFF' },
-                        '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                      }
-                    }}
-                  />
-                </Box>
-                
-                {/* Description */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                    Description *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={4}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe your campaign requirements in detail..."
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        bgcolor: '#f8f9fa',
-                        '&:hover fieldset': { borderColor: '#882AFF' },
-                        '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                      }
-                    }}
-                  />
-                </Box>
-                
-                {/* Media Upload */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
-                    Media Upload
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <Box
-                        onClick={handleImageUpload}
-                        sx={{
-                          border: '2px dashed #882AFF',
-                          borderRadius: 3,
-                          p: 3,
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          transition: 'all 0.3s ease',
-                          '&:hover': { 
-                            bgcolor: '#f3e5f5',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 4px 16px rgba(136, 42, 255, 0.2)'
-                          },
-                          minHeight: '120px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <PhotoCamera sx={{ fontSize: 40, color: '#882AFF', mb: 1 }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Upload Image</Typography>
-                        {uploadedImageUrl && (
-                          <Avatar src={uploadedImageUrl} sx={{ width: 50, height: 50, mt: 1 }} />
-                        )}
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box
-                        onClick={handleVideoUpload}
-                        sx={{
-                          border: '2px dashed #882AFF',
-                          borderRadius: 3,
-                          p: 3,
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          transition: 'all 0.3s ease',
-                          '&:hover': { 
-                            bgcolor: '#f3e5f5',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 4px 16px rgba(136, 42, 255, 0.2)'
-                          },
-                          minHeight: '120px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <Videocam sx={{ fontSize: 40, color: '#882AFF', mb: 1 }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Upload Video</Typography>
-                        {uploadedVideoUrl && (
-                          <Typography variant="caption" sx={{ color: '#4caf50', mt: 1, fontWeight: 600 }}>
-                            ✓ Video uploaded
-                          </Typography>
-                        )}
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-                
-                {/* Category and Target Audience */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Category *
-                    </Typography>
-                    <FormControl fullWidth>
-                      <Select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        sx={{
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#882AFF' },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#882AFF' },
-                        }}
-                      >
-                        {Categories.map((cat) => (
-                          <MenuItem key={cat} value={cat}>Category {cat}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Target Audience *
-                    </Typography>
-                    <FormControl fullWidth>
-                      <Select
-                        value={targetAudience}
-                        onChange={(e) => setTargetAudience(e.target.value)}
-                        sx={{
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#882AFF' },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#882AFF' },
-                        }}
-                      >
-                        {TargetAudiences.map((audience) => (
-                          <MenuItem key={audience} value={audience}>{audience}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
-                
-                {/* Budget and Location */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Budget (₹) *
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      value={budget}
-                      onChange={(e) => setBudget(e.target.value)}
-                      placeholder="10,000"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Location
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      placeholder="Mumbai, India"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-                
-                {/* Platform and Languages */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Platform
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      value={platform}
-                      onChange={(e) => setPlatform(e.target.value)}
-                      placeholder="Instagram, YouTube"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Languages
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      value={languages}
-                      onChange={(e) => setLanguages(e.target.value)}
-                      placeholder="Hindi, English"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-                
-                {/* Deadline and Tags */}
-                <Grid container spacing={2} sx={{ mb: 4 }}>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Deadline *
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      type="date"
-                      value={deadline}
-                      onChange={(e) => setDeadline(e.target.value)}
-                      InputLabelProps={{ shrink: true }}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Tags
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      value={tags}
-                      onChange={(e) => setTags(e.target.value)}
-                      placeholder="Fashion, Lifestyle, Tech"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-                
-                {/* Hidden file inputs */}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                  accept="image/*"
-                />
-                
-                <input
-                  type="file"
-                  ref={videoInputRef}
-                  onChange={handleVideoChange}
-                  style={{ display: 'none' }}
-                  accept="video/*"
-                />
-                
-                {/* Publish Button */}
-                <Button
-                  variant="contained"
-                  fullWidth
-                  onClick={handlePublish}
-                  disabled={posting || uploading}
-                  sx={{ 
-                    py: 2,
-                    borderRadius: 3,
-                    background: 'linear-gradient(135deg, #882AFF 0%, #6a1b9a 100%)',
-                    fontSize: '1.1rem',
-                    fontWeight: 700,
-                    textTransform: 'none',
-                    boxShadow: '0 4px 16px rgba(136, 42, 255, 0.3)',
-                    '&:hover': { 
-                      background: 'linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%)',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 20px rgba(136, 42, 255, 0.4)'
-                    },
-                    '&:disabled': {
-                      background: '#f5f5f5',
-                      color: '#999',
-                      transform: 'none',
-                      boxShadow: 'none'
+                    sx={{ height:'40px',mt:'6px', color:'#882AFF'}}
+                  >
+                    {Brands.map((brand) => (
+                      <MenuItem key={brand} value={brand} sx={{color:'#882AFF'}} >{brand}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl fullWidth>
+                  <InputLabel id="multi-user-label">Social Media</InputLabel>
+                  <Select
+                    labelId="multi-user-label"
+                    multiple
+                    size="small"
+                    value={selectedUsers.map((user) => user.id)}
+                    onChange={handleUsersChange}
+                    input={<OutlinedInput label="Select Users" />}
+                    sx={{ height:'40px',mt:'6px', color:'#882AFF'}}
+                    renderValue={(selected) => 
+                      selectedUsers.map(user => user.name).join(', ')
                     }
-                  }}
-                >
-                  {posting ? 'Publishing...' : (initialData ? 'Update Post' : 'Publish Post')}
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-          
-          {/* Right Panel - Live Preview (50%) */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-              height: 'fit-content',
-              minHeight: '500px',
-              maxHeight: '80vh',
-              overflow: 'auto',
-              background: 'linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%)'
-            }}>
-                              <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                <Typography variant="h6" sx={{ 
-                  mb: 3, 
-                  color: '#882AFF', 
-                  fontWeight: 700,
-                  textAlign: 'center',
-                  fontSize: '1.5rem'
-                }}>
-                  Live Preview
-                </Typography>
-                
-                {/* Preview Card */}
-                <Card sx={{ 
-                  borderRadius: 3, 
-                  boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-                  mb: 2,
-                  background: 'white',
-                  border: '1px solid #e1e7ff'
-                }}>
-                  {/* Image Preview */}
-                  {uploadedImageUrl ? (
-                    <CardMedia
-                      component="img"
-                      height="160"
-                      image={uploadedImageUrl}
-                      alt="Preview"
-                      sx={{ borderRadius: '12px 12px 0 0' }}
+                  >
+                    {pages.map((user) => (
+                      <MenuItem key={user.id} value={user.id}>
+                        <ListItemIcon sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
+                          {/* {(user.name)} */}
+                          <Avatar src={user.picture_url} alt={user.name} sx={{ width: '22px', height: '22px' }} />
+                          {getPlatformIcon(user.page_type)}
+                        </ListItemIcon>
+                        
+                        <ListItemText primary={user.name} sx={{color:'#882AFF'}} />
+                        <Checkbox className="custom-checkbox"
+                        sx={{bgcolor:'#cbaef7', width:'10px', height:'10px', color:'#cbaef7'}}
+                          checked={selectedUsers.some((selected) => selected.id === user.id)}
+                        />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+
+              {/* User Chips */}
+
+              <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
+
+                {selectedUsers.map((user) => (
+                  <Chip
+                    className="custom-chip"
+                    key={user.id}
+                    avatar={<>  {getPlatformIcon(user.page_type)}  <Avatar src={user.picture_url} sx={{ width: '22px', height: '22px' }} />  </>}
+                    label={user.name}
+                    onClick={() => {
+                      //handleAvatarClick(user.social_id);
+                      //setSelectedChipId(user.social_id);
+                      setSelectUser(user); // Set the selected user for preview
+                    }}
+                    onDelete={() => { 
+                      setSelectedUsers(prev => prev.filter(u => u.id !== user.id));
+                      if (selectedChipId === user.social_id) {
+                        setSelectedChipId(null);
+                        setSelectUser('');
+                      }
+                    }} 
+                    sx={{
+                      border: selectedChipId === user.social_id ? '2px solid #5ebfa6' : 'none',
+                      backgroundColor: selectedChipId === user.social_id ? '#ddd' : 'default',
+                      boxShadow: selectedChipId === user.social_id ? '0 0 5px rgba(127,86,217,0.6)' : 'none'
+                    }}
                     />
-                  ) : (
-                    <Box sx={{ 
-                      height: 160, 
-                      bgcolor: '#f5f5f5', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      borderRadius: '12px 12px 0 0'
-                    }}>
-                      <PhotoCamera sx={{ fontSize: 40, color: '#ddd' }} />
-                    </Box>
-                  )}
-                  
-                  <CardContent sx={{ p: 2 }}>
-                    {/* Brand Name */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                      <Avatar sx={{ bgcolor: '#882AFF', width: 28, height: 28, mr: 1 }}>
-                        {brandName.charAt(0)}
-                      </Avatar>
-                      <Typography variant="body2" sx={{ color: '#666', fontWeight: 600, fontSize: '0.85rem' }}>
-                        {brandName}
-                      </Typography>
-                    </Box>
                     
-                    {/* Title */}
-                    <Typography variant="h6" sx={{ 
-                      fontWeight: 700, 
-                      mb: 1.5, 
-                      color: '#333',
-                      fontSize: '1.1rem',
-                      lineHeight: 1.3
-                    }}>
-                      {title || 'Your Post Title Will Appear Here'}
-                    </Typography>
-                    
-                    {/* Description */}
-                    <Typography variant="body2" sx={{ 
-                      color: '#666', 
-                      mb: 2,
-                      lineHeight: 1.5,
-                      fontSize: '0.85rem'
-                    }}>
-                      {description ? (description.length > 100 ? description.substring(0, 100) + '...' : description) : 'Your detailed post description will be displayed here...'}
-                    </Typography>
-                    
-                    {/* Budget Badge */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                      <LocalOffer sx={{ color: '#4caf50', mr: 1, fontSize: 18 }} />
-                      <Typography variant="h6" sx={{ 
-                        color: '#4caf50', 
-                        fontWeight: 800,
-                        fontSize: '1.2rem'
-                      }}>
-                        {budget ? `₹${budget}` : '₹0'}
-                      </Typography>
-                    </Box>
-                    
-                    {/* Details Grid */}
-                    <Stack spacing={1}>
-                                              {deadline && (
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Schedule sx={{ color: '#ff9800', mr: 1, fontSize: 16 }} />
-                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                              Deadline: {deadline}
-                            </Typography>
-                          </Box>
-                        )}
-                        
-                        {location && (
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <LocationOn sx={{ color: '#f44336', mr: 1, fontSize: 16 }} />
-                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                              {location}
-                            </Typography>
-                          </Box>
-                        )}
-                        
-                        {targetAudience && (
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <People sx={{ color: '#2196f3', mr: 1, fontSize: 16 }} />
-                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                              Target: {targetAudience}
-                            </Typography>
-                          </Box>
-                        )}
-                        
-                        {platform && (
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Language sx={{ color: '#9c27b0', mr: 1, fontSize: 16 }} />
-                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                              Platform: {platform}
-                            </Typography>
-                          </Box>
-                        )}
-                    </Stack>
-                    
-                    {/* Tags */}
-                    {tags && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="body2" sx={{ color: '#666', mb: 1, fontWeight: 600, fontSize: '0.8rem' }}>
-                          Tags:
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                          {tags.split(',').slice(0, 3).map((tag, index) => (
-                            <Chip 
-                              key={index} 
-                              label={tag.trim()} 
-                              size="small" 
-                              sx={{ 
-                                bgcolor: '#e8f5e8', 
-                                color: '#2e7d32',
-                                fontWeight: 600,
-                                fontSize: '0.7rem',
-                                height: '20px',
-                                '&:hover': { bgcolor: '#c8e6c9' }
-                              }}
-                            />
-                          ))}
-                          {tags.split(',').length > 3 && (
-                            <Typography variant="caption" sx={{ color: '#999', alignSelf: 'center' }}>
-                              +{tags.split(',').length - 3} more
-                            </Typography>
-                          )}
-                        </Box>
+                ))}
+
+                {selectedPages.includes(pages.social_id) && (
+                  <Box
+                    sx={{
+                      background: "white",
+                      width: 20,
+                      height: 20,
+                      alignItems: "center",
+                    }}
+                  >
+                    <CheckCircleOutlineIcon
+                      sx={{
+                        color: "#5ebfa6",
+                        fontSize: 20,
+                        width: 20,
+                        height: 20
+                      }}
+                    />
+                  </Box>
+                )}
+
+              </Box>
+
+              {/* Text Field */}
+              <Editor value={postContent} onChange={setPostContent} />
+
+              <Typography variant="caption" display="block" mb={2}>
+                275 characters left
+              </Typography>
+
+              {/* Uploaded Images */}
+              <Box display="flex" gap={1} mb={2}>
+                {uploadedImageUrl && (
+                  <Box position="relative">
+                    <Avatar
+                      variant="rounded"
+                      src={uploadedImageUrl}
+                      sx={{ width: 80, height: 80 }}
+                    />
+                    <IconButton
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bgcolor: 'white',
+                      }}
+                      onClick={() => {
+                        setUploadedImageUrl("");
+                        setUploadedFileName("");
+                        setFile(null);
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                )}
+
+              </Box>
+
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                flexDirection="column"
+                sx={{
+                  //width: "100%",
+                  padding: "16px",
+                  border: "1px solid #f0f0f0",
+                  borderRadius: "8px",
+                  backgroundColor: "#fff",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  my: 2,
+                  margin: "10px",
+                  marginLeft: "0px",
+                  boxShadow: '0px 2px 1px -1px rgb(247 247 247 / 12%), 0px 1px 1px 0px rgb(247 247 247 / 12%), 0px 1px 3px 0px rgb(247 247 247 / 12%)'
+                }}
+                onClick={handleBoxClick}
+                onDrop={handleDrop} // ✅ Handles dropped files
+                onDragOver={(e) => e.preventDefault()} // ✅ Prevents default drag behavior
+              >
+
+
+                <Typography variant="body1" sx={{ color: "#000", }}>
+                  +  Upload Media
+                </Typography>
+
+                {uploadedFileName && (
+                  <Typography variant="body2" sx={{
+                    color: "#444", mt: 1, whiteSpace: "nowrap", // ✅ Ensures text does not wrap
+                    overflow: "hidden", // ✅ Hides overflow text
+                    textOverflow: "ellipsis", maxWidth: "400px",
+                  }}>
+                    Selected File: {uploadedFileName}
+                  </Typography>
+                )}
+
+                {uploading && <Typography variant="body2">Uploading...</Typography>}
+              </Box>
+
+                  {/* Hidden File Input */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                  />
+
+                  {/* Buttons */}
+                  <Box display="flex" gap={2}>
+                                    <Button variant="outlined" sx={{ display: 'none' }} >Save as Draft</Button>
+                {/* <Button variant="contained">Schedule Post</Button> */}
+                    <Button
+                      variant="contained"
+                      sx={{
+                        margin: "0.09375rem 1px",
+                        display: 'none',
+                      }}
+                      onClick={() => draftModelOpen("schedule")}
+                    >
+                      Schedule Post
+                    </Button>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={handlePublish}
+                    disabled={posting || uploading} // Disable when posting or uploading
+                    sx={{ 
+                      mt: 2, 
+                      '&:disabled': {
+                        bgcolor: '#9575cd', // Lighter purple when disabled
+                        color: '#fff'
+                      }
+                    }}
+                  >
+                    {posting ? (
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <CircularProgress size={20} sx={{ color: '#fff' }} />
+                        Publishing...
                       </Box>
+                    ) : (
+                      'Publish Now'
                     )}
-                  </CardContent>
-                </Card>
-                
-                {/* Additional Preview Info */}
-                <Box sx={{ 
-                  p: 2, 
-                  bgcolor: 'rgba(136, 42, 255, 0.05)', 
-                  borderRadius: 2,
-                  border: '1px solid rgba(136, 42, 255, 0.1)'
-                }}>
-                  <Typography variant="body2" sx={{ 
-                    color: '#882AFF', 
-                    fontWeight: 600,
-                    textAlign: 'center',
-                    mb: 0.5,
-                    fontSize: '0.85rem'
-                  }}>
-                    💡 Preview Tips
-                  </Typography>
-                  <Typography variant="body2" sx={{ 
-                    color: '#666', 
-                    textAlign: 'center',
-                    fontSize: '0.75rem',
-                    lineHeight: 1.4
-                  }}>
-                    This is how your post will appear to influencers. Make sure all details are accurate!
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
+                  </Button>
+          </Grid>
+
+          <Grid  size={{ xs: 12, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height:'100%' }}>
+          <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
+                  <Tab label="Instagram" />
+                  <Tab label="Linkedin" />
+                  <Tab label="Facebook" />
+                </Tabs>
+
+                <TabPanel value={tabValue} index={0}>
+                  <Grid item xs={12} md={12} lg={12}>
+                    {renderPreviewContent(0)}
+                  </Grid>
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
+                  <Grid item xs={12} md={12} lg={12}>
+                    {renderPreviewContent(1)}
+                  </Grid>
+                </TabPanel>
+                <TabPanel value={tabValue} index={2}>
+                  <Grid item xs={12} md={12} lg={12}>
+                    {renderPreviewContent(2)}
+                  </Grid>
+                </TabPanel>
           </Grid>
         </Grid>
+          
       </Box>
-    </Box>
+          
+      </Box>
+    </Layout>
   );
 };
 
