@@ -1,13 +1,39 @@
 import React, { useState, useRef } from "react";
 import {
-  Box, Typography, Button, TextField, Avatar, Chip, Select, MenuItem, IconButton, 
-  FormControl, Grid, Modal, Paper, Container, InputLabel, CardContent, CardMedia, 
-  Card, Divider, Stack
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
+  Alert,
+  CircularProgress,
+  Avatar,
+  Chip,
+  Select,
+  MenuItem,
+  FormControl,
+  CardMedia,
+  Stack,
 } from "@mui/material";
-import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
-import { PhotoCamera, Videocam, LocationOn, Schedule, LocalOffer, Category, People, Language } from "@mui/icons-material";
+import {
+  ArrowBack as ArrowBackIcon,
+  Notifications as NotificationsIcon,
+  AccountCircle as AccountCircleIcon,
+  PhotoCamera,
+  Videocam,
+  LocationOn,
+  Schedule,
+  LocalOffer,
+  Category,
+  People,
+  Language,
+} from "@mui/icons-material";
 import { toast } from "react-toastify";
-import Editor from "../../components/Editor";
+import Layout from "../../components/Layout";
 import MarketplaceAPI, { handleApiError } from "../../services/marketplaceApi";
 
 const CreateMarketplacePost = ({ 
@@ -38,6 +64,7 @@ const CreateMarketplacePost = ({
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState(initialData?.videoUrl || "");
   const [uploading, setUploading] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [error, setError] = useState('');
   
   // File input refs
   const fileInputRef = useRef(null);
@@ -88,13 +115,20 @@ const CreateMarketplacePost = ({
     }
   };
 
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    }
+  };
+
   const handlePublish = async () => {
     if (!title || !description || !category || !targetAudience || !budget || !deadline) {
-      toast.error("Please fill all required fields!");
+      setError("Please fill all required fields!");
       return;
     }
     
     setPosting(true);
+    setError('');
     const payloadData = {
       title,
       description,
@@ -123,653 +157,671 @@ const CreateMarketplacePost = ({
         response = await MarketplaceAPI.createMarketplacePost(payloadData);
       }
       
-              if (response.success) {
-          const newPost = {
-            id: initialData?.id || response.data?.id || Date.now(),
-            ...payloadData,
-            imageUrl: uploadedImageUrl, // Keep both formats for compatibility
-            videoUrl: uploadedVideoUrl,
-            dateCreated: new Date().toISOString().split('T')[0],
-            views: initialData?.views || 0,
-            brand: brandName,
-            bids_count: initialData?.bids_count || 0
-          };
-          
-          toast.success(response.message || (initialData ? "Post updated successfully!" : "Post published successfully!"));
-          
-          // Callback to parent component
-          if (onPostCreated) {
-            onPostCreated(newPost);
-          }
-        } else {
-          throw new Error(response.error?.message || 'Failed to publish post');
+      if (response.success) {
+        const newPost = {
+          id: initialData?.id || response.data?.id || Date.now(),
+          ...payloadData,
+          imageUrl: uploadedImageUrl, // Keep both formats for compatibility
+          videoUrl: uploadedVideoUrl,
+          dateCreated: new Date().toISOString().split('T')[0],
+          views: initialData?.views || 0,
+          brand: brandName,
+          bids_count: initialData?.bids_count || 0
+        };
+        
+        toast.success(response.message || (initialData ? "Post updated successfully!" : "Post published successfully!"));
+        
+        // Callback to parent component
+        if (onPostCreated) {
+          onPostCreated(newPost);
         }
+      } else {
+        throw new Error(response.error?.message || 'Failed to publish post');
+      }
       
-    } catch (error) {
-      console.error("Error publishing post:", error);
-      toast.error(handleApiError(error));
+    } catch (err) {
+      setError(`Error publishing post: ${err.message}`);
+      console.error("Error publishing post:", err);
     } finally {
       setPosting(false);
     }
   };
 
-  return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      position: 'relative'
-    }}>
-      {/* Header */}
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          bgcolor: 'rgba(136, 42, 255, 0.9)', 
-          color: 'white',
-          borderRadius: 0,
-          backdropFilter: 'blur(10px)'
-        }}
-      >
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          padding: '16px 24px'
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton 
-              onClick={onBack}
-              sx={{ color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
-            >
-              <ArrowLeftIcon />
-            </IconButton>
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              {initialData ? 'Edit Post' : 'Create New Post'}
+  const renderRightPanel = () => {
+    return (
+      <Box>
+        <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+          Live Preview
+        </Typography>
+        
+        {/* Preview Card */}
+        <Paper
+          sx={{
+            p: 3,
+            bgcolor: '#ffffff',
+            borderRadius: 2,
+            border: '1px solid #e0e0e0',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            mb: 2,
+          }}
+        >
+          {/* Image Preview */}
+          {uploadedImageUrl ? (
+            <CardMedia
+              component="img"
+              height="160"
+              image={uploadedImageUrl}
+              alt="Preview"
+              sx={{ borderRadius: 2, mb: 2 }}
+            />
+          ) : (
+            <Box sx={{ 
+              height: 160, 
+              bgcolor: '#f5f5f5', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              borderRadius: 2,
+              mb: 2
+            }}>
+              <PhotoCamera sx={{ fontSize: 40, color: '#ddd' }} />
+            </Box>
+          )}
+          
+          {/* Brand Name */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Avatar sx={{ bgcolor: '#2196f3', width: 32, height: 32, mr: 1 }}>
+              {brandName.charAt(0)}
+            </Avatar>
+            <Typography variant="body2" sx={{ color: '#666', fontWeight: 600 }}>
+              {brandName}
             </Typography>
           </Box>
-        </Box>
-      </Paper>
+          
+          {/* Title */}
+          <Typography variant="h6" sx={{ 
+            fontWeight: 700, 
+            mb: 2, 
+            color: '#333',
+            lineHeight: 1.3
+          }}>
+            {title || 'Your Post Title Will Appear Here'}
+          </Typography>
+          
+          {/* Description */}
+          <Typography variant="body2" sx={{ 
+            color: '#666', 
+            mb: 2,
+            lineHeight: 1.6
+          }}>
+            {description ? (description.length > 150 ? description.substring(0, 150) + '...' : description) : 'Your detailed post description will be displayed here...'}
+          </Typography>
+          
+          {/* Budget Badge */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <LocalOffer sx={{ color: '#4caf50', mr: 1, fontSize: 20 }} />
+            <Typography variant="h6" sx={{ 
+              color: '#4caf50', 
+              fontWeight: 700
+            }}>
+              {budget ? `₹${budget}` : '₹0'}
+            </Typography>
+          </Box>
+          
+          {/* Details */}
+          <Stack spacing={1} sx={{ mb: 2 }}>
+            {deadline && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Schedule sx={{ color: '#ff9800', mr: 1, fontSize: 18 }} />
+                <Typography variant="body2" sx={{ color: '#666' }}>
+                  Deadline: {deadline}
+                </Typography>
+              </Box>
+            )}
+            
+            {location && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <LocationOn sx={{ color: '#f44336', mr: 1, fontSize: 18 }} />
+                <Typography variant="body2" sx={{ color: '#666' }}>
+                  {location}
+                </Typography>
+              </Box>
+            )}
+            
+            {targetAudience && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <People sx={{ color: '#2196f3', mr: 1, fontSize: 18 }} />
+                <Typography variant="body2" sx={{ color: '#666' }}>
+                  Target: {targetAudience}
+                </Typography>
+              </Box>
+            )}
+            
+            {platform && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Language sx={{ color: '#9c27b0', mr: 1, fontSize: 18 }} />
+                <Typography variant="body2" sx={{ color: '#666' }}>
+                  Platform: {platform}
+                </Typography>
+              </Box>
+            )}
+          </Stack>
+          
+          {/* Tags */}
+          {tags && (
+            <Box>
+              <Typography variant="body2" sx={{ color: '#666', mb: 1, fontWeight: 600 }}>
+                Tags:
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {tags.split(',').slice(0, 3).map((tag, index) => (
+                  <Chip 
+                    key={index} 
+                    label={tag.trim()} 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: '#e8f5e8', 
+                      color: '#2e7d32',
+                      fontWeight: 600
+                    }}
+                  />
+                ))}
+                {tags.split(',').length > 3 && (
+                  <Typography variant="caption" sx={{ color: '#999', alignSelf: 'center' }}>
+                    +{tags.split(',').length - 3} more
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          )}
+        </Paper>
 
-      {/* Main Content - 50/50 Split */}
-      <Box sx={{ padding: '24px' }}>
-        <Grid container spacing={3}>
-          
-          {/* Left Panel - Form (50%) */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-              height: 'fit-content',
-              minHeight: '500px',
-              maxHeight: '80vh',
-              overflow: 'auto'
-            }}>
-              <CardContent sx={{ p: 4 }}>
-                <Typography variant="h6" sx={{ 
-                  mb: 3, 
-                  color: '#882AFF', 
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1
-                }}>
-                  <Category />
-                  Post Details
-                </Typography>
-                
-                {/* Brand Name */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                    Brand Name
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    value={brandName}
-                    onChange={(e) => setBrandName(e.target.value)}
-                    disabled
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        bgcolor: '#f8f9fa',
-                      }
-                    }}
-                  />
-                </Box>
-                
-                {/* Title */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                    Title *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter an engaging post title"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        bgcolor: '#f8f9fa',
-                        '&:hover fieldset': { borderColor: '#882AFF' },
-                        '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                      }
-                    }}
-                  />
-                </Box>
-                
-                {/* Description */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                    Description *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={4}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe your campaign requirements in detail..."
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        bgcolor: '#f8f9fa',
-                        '&:hover fieldset': { borderColor: '#882AFF' },
-                        '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                      }
-                    }}
-                  />
-                </Box>
-                
-                {/* Media Upload */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
-                    Media Upload
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <Box
-                        onClick={handleImageUpload}
-                        sx={{
-                          border: '2px dashed #882AFF',
-                          borderRadius: 3,
-                          p: 3,
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          transition: 'all 0.3s ease',
-                          '&:hover': { 
-                            bgcolor: '#f3e5f5',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 4px 16px rgba(136, 42, 255, 0.2)'
+        <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
+          <Button
+            variant="contained"
+            onClick={handlePublish}
+            disabled={posting || uploading}
+            sx={{
+              bgcolor: '#2196f3',
+              textTransform: 'none',
+              px: 4,
+              py: 1,
+              borderRadius: 2,
+              fontWeight: 600,
+              '&:hover': {
+                bgcolor: '#1976d2',
+              },
+            }}
+          >
+            {posting ? <CircularProgress size={20} /> : (initialData ? 'Update Post' : 'Publish Post')}
+          </Button>
+        </Box>
+      </Box>
+    );
+  };
+
+  return (
+    <Layout>
+      <Box>
+        {/* Header - Updated color to #091a48 */}
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ m: 2 }} onClose={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Main Content */}
+        <Box sx={{ padding: '24px' }}>
+          <Grid container spacing={3}>
+            {/* Left Panel - Post Details Form */}
+            <Grid item xs={12} md={6}>
+              <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+                <CardContent sx={{ p: 4 }}>
+                  {/* Brand Name Field */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        mb: 1, 
+                        color: '#333', 
+                        fontWeight: 500 
+                      }}
+                    >
+                      Brand Name
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      value={brandName}
+                      onChange={(e) => setBrandName(e.target.value)}
+                      disabled
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          bgcolor: '#f8f9fa',
+                          '&:hover fieldset': {
+                            borderColor: '#2196f3',
                           },
-                          minHeight: '120px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <PhotoCamera sx={{ fontSize: 40, color: '#882AFF', mb: 1 }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Upload Image</Typography>
-                        {uploadedImageUrl && (
-                          <Avatar src={uploadedImageUrl} sx={{ width: 50, height: 50, mt: 1 }} />
-                        )}
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box
-                        onClick={handleVideoUpload}
-                        sx={{
-                          border: '2px dashed #882AFF',
-                          borderRadius: 3,
-                          p: 3,
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          transition: 'all 0.3s ease',
-                          '&:hover': { 
-                            bgcolor: '#f3e5f5',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 4px 16px rgba(136, 42, 255, 0.2)'
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#2196f3',
                           },
-                          minHeight: '120px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <Videocam sx={{ fontSize: 40, color: '#882AFF', mb: 1 }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Upload Video</Typography>
-                        {uploadedVideoUrl && (
-                          <Typography variant="caption" sx={{ color: '#4caf50', mt: 1, fontWeight: 600 }}>
-                            ✓ Video uploaded
-                          </Typography>
-                        )}
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-                
-                {/* Category and Target Audience */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Category *
-                    </Typography>
-                    <FormControl fullWidth>
-                      <Select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        sx={{
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#882AFF' },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#882AFF' },
-                        }}
-                      >
-                        {Categories.map((cat) => (
-                          <MenuItem key={cat} value={cat}>Category {cat}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Target Audience *
-                    </Typography>
-                    <FormControl fullWidth>
-                      <Select
-                        value={targetAudience}
-                        onChange={(e) => setTargetAudience(e.target.value)}
-                        sx={{
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#882AFF' },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#882AFF' },
-                        }}
-                      >
-                        {TargetAudiences.map((audience) => (
-                          <MenuItem key={audience} value={audience}>{audience}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
-                
-                {/* Budget and Location */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Budget (₹) *
+                        },
+                      }}
+                    />
+                  </Box>
+
+                  {/* Title Field */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        mb: 1, 
+                        color: '#333', 
+                        fontWeight: 500 
+                      }}
+                    >
+                      Post Title *
                     </Typography>
                     <TextField
                       fullWidth
-                      value={budget}
-                      onChange={(e) => setBudget(e.target.value)}
-                      placeholder="10,000"
+                      placeholder="Enter an engaging post title"
+                      variant="outlined"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
                           bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
+                          '&:hover fieldset': {
+                            borderColor: '#2196f3',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#2196f3',
+                          },
+                        },
                       }}
                     />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Location
+                  </Box>
+
+                  {/* Description Field */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        mb: 1, 
+                        color: '#333', 
+                        fontWeight: 500 
+                      }}
+                    >
+                      Description *
                     </Typography>
                     <TextField
                       fullWidth
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      placeholder="Mumbai, India"
+                      multiline
+                      rows={4}
+                      placeholder="Describe your campaign requirements in detail..."
+                      variant="outlined"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
                           bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
+                          '&:hover fieldset': {
+                            borderColor: '#2196f3',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#2196f3',
+                          },
+                        },
                       }}
                     />
-                  </Grid>
-                </Grid>
-                
-                {/* Platform and Languages */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Platform
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      value={platform}
-                      onChange={(e) => setPlatform(e.target.value)}
-                      placeholder="Instagram, YouTube"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
+                  </Box>
+
+                  {/* Media Upload */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        mb: 2, 
+                        color: '#333', 
+                        fontWeight: 500 
                       }}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Languages
+                    >
+                      Media Upload
                     </Typography>
-                    <TextField
-                      fullWidth
-                      value={languages}
-                      onChange={(e) => setLanguages(e.target.value)}
-                      placeholder="Hindi, English"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-                
-                {/* Deadline and Tags */}
-                <Grid container spacing={2} sx={{ mb: 4 }}>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Deadline *
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      type="date"
-                      value={deadline}
-                      onChange={(e) => setDeadline(e.target.value)}
-                      InputLabelProps={{ shrink: true }}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1" sx={{ mb: 1, color: '#333', fontWeight: 600 }}>
-                      Tags
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      value={tags}
-                      onChange={(e) => setTags(e.target.value)}
-                      placeholder="Fashion, Lifestyle, Tech"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f8f9fa',
-                          '&:hover fieldset': { borderColor: '#882AFF' },
-                          '&.Mui-focused fieldset': { borderColor: '#882AFF' },
-                        }
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-                
-                {/* Hidden file inputs */}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                  accept="image/*"
-                />
-                
-                <input
-                  type="file"
-                  ref={videoInputRef}
-                  onChange={handleVideoChange}
-                  style={{ display: 'none' }}
-                  accept="video/*"
-                />
-                
-                {/* Publish Button */}
-                <Button
-                  variant="contained"
-                  fullWidth
-                  onClick={handlePublish}
-                  disabled={posting || uploading}
-                  sx={{ 
-                    py: 2,
-                    borderRadius: 3,
-                    background: 'linear-gradient(135deg, #882AFF 0%, #6a1b9a 100%)',
-                    fontSize: '1.1rem',
-                    fontWeight: 700,
-                    textTransform: 'none',
-                    boxShadow: '0 4px 16px rgba(136, 42, 255, 0.3)',
-                    '&:hover': { 
-                      background: 'linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%)',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 20px rgba(136, 42, 255, 0.4)'
-                    },
-                    '&:disabled': {
-                      background: '#f5f5f5',
-                      color: '#999',
-                      transform: 'none',
-                      boxShadow: 'none'
-                    }
-                  }}
-                >
-                  {posting ? 'Publishing...' : (initialData ? 'Update Post' : 'Publish Post')}
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-          
-          {/* Right Panel - Live Preview (50%) */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-              height: 'fit-content',
-              minHeight: '500px',
-              maxHeight: '80vh',
-              overflow: 'auto',
-              background: 'linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%)'
-            }}>
-                              <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                <Typography variant="h6" sx={{ 
-                  mb: 3, 
-                  color: '#882AFF', 
-                  fontWeight: 700,
-                  textAlign: 'center',
-                  fontSize: '1.5rem'
-                }}>
-                  Live Preview
-                </Typography>
-                
-                {/* Preview Card */}
-                <Card sx={{ 
-                  borderRadius: 3, 
-                  boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-                  mb: 2,
-                  background: 'white',
-                  border: '1px solid #e1e7ff'
-                }}>
-                  {/* Image Preview */}
-                  {uploadedImageUrl ? (
-                    <CardMedia
-                      component="img"
-                      height="160"
-                      image={uploadedImageUrl}
-                      alt="Preview"
-                      sx={{ borderRadius: '12px 12px 0 0' }}
-                    />
-                  ) : (
-                    <Box sx={{ 
-                      height: 160, 
-                      bgcolor: '#f5f5f5', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      borderRadius: '12px 12px 0 0'
-                    }}>
-                      <PhotoCamera sx={{ fontSize: 40, color: '#ddd' }} />
-                    </Box>
-                  )}
-                  
-                  <CardContent sx={{ p: 2 }}>
-                    {/* Brand Name */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                      <Avatar sx={{ bgcolor: '#882AFF', width: 28, height: 28, mr: 1 }}>
-                        {brandName.charAt(0)}
-                      </Avatar>
-                      <Typography variant="body2" sx={{ color: '#666', fontWeight: 600, fontSize: '0.85rem' }}>
-                        {brandName}
-                      </Typography>
-                    </Box>
-                    
-                    {/* Title */}
-                    <Typography variant="h6" sx={{ 
-                      fontWeight: 700, 
-                      mb: 1.5, 
-                      color: '#333',
-                      fontSize: '1.1rem',
-                      lineHeight: 1.3
-                    }}>
-                      {title || 'Your Post Title Will Appear Here'}
-                    </Typography>
-                    
-                    {/* Description */}
-                    <Typography variant="body2" sx={{ 
-                      color: '#666', 
-                      mb: 2,
-                      lineHeight: 1.5,
-                      fontSize: '0.85rem'
-                    }}>
-                      {description ? (description.length > 100 ? description.substring(0, 100) + '...' : description) : 'Your detailed post description will be displayed here...'}
-                    </Typography>
-                    
-                    {/* Budget Badge */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                      <LocalOffer sx={{ color: '#4caf50', mr: 1, fontSize: 18 }} />
-                      <Typography variant="h6" sx={{ 
-                        color: '#4caf50', 
-                        fontWeight: 800,
-                        fontSize: '1.2rem'
-                      }}>
-                        {budget ? `₹${budget}` : '₹0'}
-                      </Typography>
-                    </Box>
-                    
-                    {/* Details Grid */}
-                    <Stack spacing={1}>
-                                              {deadline && (
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Schedule sx={{ color: '#ff9800', mr: 1, fontSize: 16 }} />
-                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                              Deadline: {deadline}
-                            </Typography>
-                          </Box>
-                        )}
-                        
-                        {location && (
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <LocationOn sx={{ color: '#f44336', mr: 1, fontSize: 16 }} />
-                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                              {location}
-                            </Typography>
-                          </Box>
-                        )}
-                        
-                        {targetAudience && (
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <People sx={{ color: '#2196f3', mr: 1, fontSize: 16 }} />
-                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                              Target: {targetAudience}
-                            </Typography>
-                          </Box>
-                        )}
-                        
-                        {platform && (
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Language sx={{ color: '#9c27b0', mr: 1, fontSize: 16 }} />
-                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                              Platform: {platform}
-                            </Typography>
-                          </Box>
-                        )}
-                    </Stack>
-                    
-                    {/* Tags */}
-                    {tags && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="body2" sx={{ color: '#666', mb: 1, fontWeight: 600, fontSize: '0.8rem' }}>
-                          Tags:
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                          {tags.split(',').slice(0, 3).map((tag, index) => (
-                            <Chip 
-                              key={index} 
-                              label={tag.trim()} 
-                              size="small" 
-                              sx={{ 
-                                bgcolor: '#e8f5e8', 
-                                color: '#2e7d32',
-                                fontWeight: 600,
-                                fontSize: '0.7rem',
-                                height: '20px',
-                                '&:hover': { bgcolor: '#c8e6c9' }
-                              }}
-                            />
-                          ))}
-                          {tags.split(',').length > 3 && (
-                            <Typography variant="caption" sx={{ color: '#999', alignSelf: 'center' }}>
-                              +{tags.split(',').length - 3} more
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Box
+                          onClick={handleImageUpload}
+                          sx={{
+                            border: '2px dashed #2196f3',
+                            borderRadius: 2,
+                            p: 3,
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            bgcolor: '#f8f9fa',
+                            transition: 'all 0.3s ease',
+                            '&:hover': { 
+                              bgcolor: '#e3f2fd',
+                              borderColor: '#1976d2'
+                            },
+                            minHeight: '120px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <PhotoCamera sx={{ fontSize: 32, color: '#2196f3', mb: 1 }} />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>Upload Image</Typography>
+                          {uploadedImageUrl && (
+                            <Avatar src={uploadedImageUrl} sx={{ width: 40, height: 40, mt: 1 }} />
+                          )}
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box
+                          onClick={handleVideoUpload}
+                          sx={{
+                            border: '2px dashed #2196f3',
+                            borderRadius: 2,
+                            p: 3,
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            bgcolor: '#f8f9fa',
+                            transition: 'all 0.3s ease',
+                            '&:hover': { 
+                              bgcolor: '#e3f2fd',
+                              borderColor: '#1976d2'
+                            },
+                            minHeight: '120px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Videocam sx={{ fontSize: 32, color: '#2196f3', mb: 1 }} />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>Upload Video</Typography>
+                          {uploadedVideoUrl && (
+                            <Typography variant="caption" sx={{ color: '#4caf50', mt: 1, fontWeight: 600 }}>
+                              ✓ Video uploaded
                             </Typography>
                           )}
                         </Box>
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-                
-                {/* Additional Preview Info */}
-                <Box sx={{ 
-                  p: 2, 
-                  bgcolor: 'rgba(136, 42, 255, 0.05)', 
-                  borderRadius: 2,
-                  border: '1px solid rgba(136, 42, 255, 0.1)'
-                }}>
-                  <Typography variant="body2" sx={{ 
-                    color: '#882AFF', 
-                    fontWeight: 600,
-                    textAlign: 'center',
-                    mb: 0.5,
-                    fontSize: '0.85rem'
-                  }}>
-                    💡 Preview Tips
-                  </Typography>
-                  <Typography variant="body2" sx={{ 
-                    color: '#666', 
-                    textAlign: 'center',
-                    fontSize: '0.75rem',
-                    lineHeight: 1.4
-                  }}>
-                    This is how your post will appear to influencers. Make sure all details are accurate!
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  {/* Category and Target Audience */}
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={6}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          mb: 1, 
+                          color: '#333', 
+                          fontWeight: 500 
+                        }}
+                      >
+                        Category *
+                      </Typography>
+                      <FormControl fullWidth>
+                        <Select
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          sx={{
+                            borderRadius: 2,
+                            bgcolor: '#f8f9fa',
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' },
+                          }}
+                        >
+                          {Categories.map((cat) => (
+                            <MenuItem key={cat} value={cat}>Category {cat}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          mb: 1, 
+                          color: '#333', 
+                          fontWeight: 500 
+                        }}
+                      >
+                        Target Audience *
+                      </Typography>
+                      <FormControl fullWidth>
+                        <Select
+                          value={targetAudience}
+                          onChange={(e) => setTargetAudience(e.target.value)}
+                          sx={{
+                            borderRadius: 2,
+                            bgcolor: '#f8f9fa',
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' },
+                          }}
+                        >
+                          {TargetAudiences.map((audience) => (
+                            <MenuItem key={audience} value={audience}>{audience}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+
+                  {/* Budget and Location */}
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={6}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          mb: 1, 
+                          color: '#333', 
+                          fontWeight: 500 
+                        }}
+                      >
+                        Budget (₹) *
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        value={budget}
+                        onChange={(e) => setBudget(e.target.value)}
+                        placeholder="10,000"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            bgcolor: '#f8f9fa',
+                            '&:hover fieldset': { borderColor: '#2196f3' },
+                            '&.Mui-focused fieldset': { borderColor: '#2196f3' },
+                          }
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          mb: 1, 
+                          color: '#333', 
+                          fontWeight: 500 
+                        }}
+                      >
+                        Location
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="Mumbai, India"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            bgcolor: '#f8f9fa',
+                            '&:hover fieldset': { borderColor: '#2196f3' },
+                            '&.Mui-focused fieldset': { borderColor: '#2196f3' },
+                          }
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+
+                  {/* Platform and Languages */}
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={6}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          mb: 1, 
+                          color: '#333', 
+                          fontWeight: 500 
+                        }}
+                      >
+                        Platform
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        value={platform}
+                        onChange={(e) => setPlatform(e.target.value)}
+                        placeholder="Instagram, YouTube"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            bgcolor: '#f8f9fa',
+                            '&:hover fieldset': { borderColor: '#2196f3' },
+                            '&.Mui-focused fieldset': { borderColor: '#2196f3' },
+                          }
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          mb: 1, 
+                          color: '#333', 
+                          fontWeight: 500 
+                        }}
+                      >
+                        Languages
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        value={languages}
+                        onChange={(e) => setLanguages(e.target.value)}
+                        placeholder="Hindi, English"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            bgcolor: '#f8f9fa',
+                            '&:hover fieldset': { borderColor: '#2196f3' },
+                            '&.Mui-focused fieldset': { borderColor: '#2196f3' },
+                          }
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+
+                  {/* Deadline and Tags */}
+                  <Grid container spacing={2} sx={{ mb: 4 }}>
+                    <Grid item xs={6}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          mb: 1, 
+                          color: '#333', 
+                          fontWeight: 500 
+                        }}
+                      >
+                        Deadline *
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        type="date"
+                        value={deadline}
+                        onChange={(e) => setDeadline(e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            bgcolor: '#f8f9fa',
+                            '&:hover fieldset': { borderColor: '#2196f3' },
+                            '&.Mui-focused fieldset': { borderColor: '#2196f3' },
+                          }
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          mb: 1, 
+                          color: '#333', 
+                          fontWeight: 500 
+                        }}
+                      >
+                        Tags
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        value={tags}
+                        onChange={(e) => setTags(e.target.value)}
+                        placeholder="Fashion, Lifestyle, Tech"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            bgcolor: '#f8f9fa',
+                            '&:hover fieldset': { borderColor: '#2196f3' },
+                            '&.Mui-focused fieldset': { borderColor: '#2196f3' },
+                          }
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+
+                  {/* Hidden file inputs */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                    accept="image/*"
+                  />
+                  
+                  <input
+                    type="file"
+                    ref={videoInputRef}
+                    onChange={handleVideoChange}
+                    style={{ display: 'none' }}
+                    accept="video/*"
+                  />
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Right Panel - Live Preview */}
+            <Grid item xs={12} md={6}>
+              <Card 
+                sx={{ 
+                  borderRadius: 3, 
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                  height: 'fit-content',
+                  minHeight: '500px'
+                }}
+              >
+                <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                  {renderRightPanel()}
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </Box>
-    </Box>
+    </Layout>
   );
 };
 
