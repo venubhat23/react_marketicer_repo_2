@@ -29,7 +29,6 @@ import MyBidsView from "./MyBidsView";
 import { useAuth } from "../../authContext/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import MarketplaceAPI, { handleApiError } from "../../services/marketplaceApi";
-import { bidsApi } from "../../utils/marketplaceApi";
 import Sidebar from '../../components/Sidebar'
 
 const MarketplaceModule = () => {
@@ -566,7 +565,7 @@ const MarketplaceModule = () => {
 
   const handleAcceptBid = async (bidId) => {
     try {
-      const response = await bidsApi.acceptBid(bidId);
+      const response = await MarketplaceAPI.acceptBid(bidId);
       
       if (response.data && response.data.status === 'success') {
         toast.success("Bid accepted successfully!");
@@ -586,7 +585,7 @@ const MarketplaceModule = () => {
 
   const handleRejectBid = async (bidId) => {
     try {
-      const response = await bidsApi.rejectBid(bidId);
+      const response = await MarketplaceAPI.rejectBid(bidId);
       
       if (response.data && response.data.status === 'success') {
         toast.success("Bid rejected successfully!");
