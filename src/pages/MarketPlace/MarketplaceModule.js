@@ -60,17 +60,27 @@ const MarketplaceModule = () => {
   const [currentMode, setCurrentMode] = useState(getCurrentMode());
   
   // Updated constants as per API specification
-  const Categories = ['A', 'B'];
+  const Categories = ['Fashion', 'Technology', 'Food', 'Travel', 'Lifestyle', 'Beauty', 'Fitness', 'Gaming'];
   const TargetAudiences = ['18–24', '24–30', '30–35', 'More than 35'];
   const Types = ['Sponsored Post', 'Product Review', 'Brand Collaboration', 'Event Promotion', 'Giveaway', 'Story Feature'];
-  const Statuses = ['published', 'draft', 'archived']; // Updated as per API spec
+  const Statuses = ['published', 'draft', 'archived'];
+  const SortOptions = [
+    { value: 'created_at', label: 'Latest' },
+    { value: 'deadline', label: 'Deadline' },
+    { value: 'budget', label: 'Budget' },
+    { value: 'views', label: 'Views' }
+  ];
 
   // Search and Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [targetAudienceFilter, setTargetAudienceFilter] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+  const [budgetMinFilter, setBudgetMinFilter] = useState('');
+  const [budgetMaxFilter, setBudgetMaxFilter] = useState('');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [showFilters, setShowFilters] = useState(false);
 
   // Listing states
@@ -79,6 +89,7 @@ const MarketplaceModule = () => {
   const [bids, setBids] = useState([]);
   const [bidAmount, setBidAmount] = useState("");
   const [bidMessage, setBidMessage] = useState("");
+  const [portfolioLinks, setPortfolioLinks] = useState(['']);
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
   const [bidsViewOpen, setBidsViewOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -105,7 +116,7 @@ const MarketplaceModule = () => {
     }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery, statusFilter, typeFilter, categoryFilter, targetAudienceFilter]);
+  }, [searchQuery, statusFilter, typeFilter, categoryFilter, locationFilter, budgetMinFilter, budgetMaxFilter, sortBy, sortOrder]);
 
   useEffect(() => {
     // Update view when route changes
@@ -153,57 +164,36 @@ const MarketplaceModule = () => {
     setPostsLoading(true);
     try {
       let response;
+      const params = {
+        page: currentPage,
+        limit: currentMode === 'influencer' ? 12 : 10,
+        category: categoryFilter,
+        location: locationFilter,
+        budget_min: budgetMinFilter,
+        budget_max: budgetMaxFilter,
+        sort_by: sortBy,
+        order: sortOrder
+      };
       
       if (currentMode === 'influencer') {
         // Load marketplace feed for influencers
         if (searchQuery) {
-          // Use search endpoint for influencers
-          response = await MarketplaceAPI.searchMarketplacePosts({
-            q: searchQuery,
-            category: categoryFilter,
-            target_audience: targetAudienceFilter,
-            page: currentPage,
-            per_page: 10
-          });
-        } else {
-          // Use regular feed endpoint
-          response = await MarketplaceAPI.getMarketplaceFeed({
-            category: categoryFilter,
-            target_audience: targetAudienceFilter,
-            page: currentPage,
-            per_page: 10
-          });
+          params.q = searchQuery;
         }
+        response = await MarketplaceAPI.searchMarketplacePosts(params);
       } else {
         // Load brand posts for brands/admins
-        response = await MarketplaceAPI.getMyMarketplacePosts();
+        params.status = statusFilter;
+        response = await MarketplaceAPI.getMyMarketplacePosts(params);
         
-        // Apply client-side filtering for brand posts since the API doesn't support search for brand posts
-        if (response.success && response.data) {
-          let filteredPosts = response.data;
-          
-          if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            filteredPosts = filteredPosts.filter(post => 
-              post.title?.toLowerCase().includes(query) ||
-              post.description?.toLowerCase().includes(query) ||
-              post.brand_name?.toLowerCase().includes(query)
-            );
-          }
-          
-          if (statusFilter) {
-            filteredPosts = filteredPosts.filter(post => post.status === statusFilter);
-          }
-          
-          if (categoryFilter) {
-            filteredPosts = filteredPosts.filter(post => post.category === categoryFilter);
-          }
-          
-          if (targetAudienceFilter) {
-            filteredPosts = filteredPosts.filter(post => post.target_audience === targetAudienceFilter);
-          }
-          
-          response.data = filteredPosts;
+        // Apply client-side search filtering for brand posts if needed
+        if (response.success && response.data && searchQuery) {
+          const query = searchQuery.toLowerCase();
+          response.data = response.data.filter(post => 
+            post.title?.toLowerCase().includes(query) ||
+            post.description?.toLowerCase().includes(query) ||
+            post.brand_name?.toLowerCase().includes(query)
+          );
         }
       }
       
@@ -213,31 +203,30 @@ const MarketplaceModule = () => {
           id: post.id,
           title: post.title,
           description: post.description,
-          brand: post.brand_name || 'Unknown Brand',
-          brand_name: post.brand_name,
-          budget: typeof post.budget === 'number' ? `₹${post.budget.toLocaleString()}` : post.budget,
+          type: post.type || 'Sponsored Post',
+          brand: post.brand?.name || post.brand_name || 'Unknown Brand',
+          brand_name: post.brand?.name || post.brand_name,
+          budget: typeof post.budget === 'string' && post.budget.includes('₹') ? post.budget : `₹${post.budget || 0}`,
           deadline: post.deadline,
           location: post.location,
-          platform: post.platform,
-          languages: post.languages,
           category: post.category,
-          targetAudience: post.target_audience,
-          target_audience: post.target_audience,
-          tags: post.tags,
-          imageUrl: post.media_url,
-          media_url: post.media_url,
-          media_type: post.media_type,
+          gender_target: post.gender_target,
+          requirements: post.requirements,
+          imageUrl: post.image_url,
+          videoUrl: post.video_url,
+          image_url: post.image_url,
+          video_url: post.video_url,
           status: post.status,
-          views: post.views_count || 0,
-          views_count: post.views_count || 0,
+          views: post.views || 0,
+          views_count: post.views || 0,
           bids_count: post.bids_count || 0,
           dateCreated: post.created_at ? new Date(post.created_at).toLocaleDateString() : '',
           created_at: post.created_at,
           updated_at: post.updated_at,
-          user_has_bid: post.user_has_bid || false,
-          user_bid: post.user_bid,
-          // Legacy fields for backward compatibility
-          type: 'Sponsored Post'
+          has_user_bid: post.has_user_bid || false,
+          user_bid_amount: post.user_bid_amount,
+          brand_avatar: post.brand?.avatar,
+          brand_verified: post.brand?.verified
         }));
         
         setMarketplacePosts(transformedPosts);
@@ -245,8 +234,8 @@ const MarketplaceModule = () => {
         // Update pagination if available
         if (response.pagination) {
           setCurrentPage(response.pagination.current_page || 1);
-          setTotalPages(Math.ceil((response.pagination.total_count || 0) / (response.pagination.per_page || 10)));
-          setTotalCount(response.pagination.total_count || 0);
+          setTotalPages(response.pagination.total_pages || 1);
+          setTotalCount(response.pagination.total_items || 0);
         }
       } else {
         throw new Error(response.error?.message || 'Failed to load posts');
@@ -434,7 +423,8 @@ const MarketplaceModule = () => {
       setLoading(true);
       const bidData = {
         amount: bidAmount,
-        message: bidMessage || `Bid submitted for ${selectedPost.title}`
+        message: bidMessage || `Bid submitted for ${selectedPost.title}`,
+        portfolio_links: portfolioLinks.filter(link => link.trim() !== '')
       };
       
       const response = await MarketplaceAPI.createBid(selectedPost.id, bidData);
@@ -443,6 +433,7 @@ const MarketplaceModule = () => {
         toast.success(response.message || "Bid submitted successfully!");
         setBidAmount("");
         setBidMessage("");
+        setPortfolioLinks(['']);
         setBidDialogOpen(false);
         
         // Track post view when bidding
