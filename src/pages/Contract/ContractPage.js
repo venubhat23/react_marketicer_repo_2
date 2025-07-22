@@ -35,6 +35,7 @@ import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import Layout from "../../components/Layout";
 import { useNavigate } from "react-router-dom";
 import AIContractGenerator from './AIContractGenerator';
+import Sidebar from '../../components/Sidebar'
 
 const ContractPage = () => {
   const [viewMode, setViewMode] = useState('list');
@@ -363,21 +364,21 @@ const ContractPage = () => {
   const renderTableHeaders = () => {
     if (showTemplates) {
       return (
-        <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Template Name</TableCell>
-          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Type</TableCell>
-          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Date Created</TableCell>
-          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Actions</TableCell>
+        <TableRow sx={{ bgcolor: '#B1C6FF', padding:'0 20px' }}>
+          <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Template Name</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Type</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Date Created</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Actions</TableCell>
         </TableRow>
       );
     } else {
       return (
-        <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Contract Name</TableCell>
-          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Type</TableCell>
-          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Status</TableCell>
-          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Date Created</TableCell>
-          <TableCell sx={{ fontWeight: 600, color: '#333' }}>Actions</TableCell>
+        <TableRow sx={{ bgcolor: '#B1C6FF', padding:'0 20px'}}>
+          <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Contract Name</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Type</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Status</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Date Created</TableCell>
+          <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Actions</TableCell>
         </TableRow>
       );
     }
@@ -454,14 +455,12 @@ const ContractPage = () => {
                   onClick={() => handleItemAction('create-from-template', item.id, item)}
                   sx={{ 
                     bgcolor: 'white',
-                    color: '#333',
                     textTransform: 'none',
                     px: 2,
                     py: 0.5,
                     borderRadius: 1,
                     fontSize: '0.75rem',
                     fontWeight: 600,
-                    border: '1px solid #e0e0e0',
                     '&:hover': { 
                       bgcolor: '#f5f5f5',
                       borderColor: '#ccc'
@@ -514,9 +513,12 @@ const ContractPage = () => {
   }
 
   return (
-    <Layout>
-      <Box sx={{ flexGrow: 1, bgcolor: '#f8f9fa', minHeight: '100vh' }}>
-        {/* Header with updated background color */}
+    
+      <Box sx={{ flexGrow: 1, minHeight: '100vh' }}>
+        <Grid container>
+          <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
+            <Grid size={{ md: 11 }}>
+              {/* Header with updated background color */}
         <Paper
           elevation={0}
           sx={{
@@ -577,12 +579,11 @@ const ContractPage = () => {
           {/* Controls Bar */}
           <Box
             sx={{
-              bgcolor: '#e3f2fd',
+              bgcolor: '#B1C6FF',
               padding: '16px 24px',
               display: 'flex',
               alignItems: 'center',
-              gap: 3,
-              borderBottom: '1px solid #e0e0e0'
+              gap: 5,
             }}
           >
             {/* Search */}
@@ -600,7 +601,7 @@ const ContractPage = () => {
                 ),
               }}
               sx={{ 
-                minWidth: 280,
+                minWidth: 350,borderRadius: '50px',
                 '& .MuiOutlinedInput-root': {
                   bgcolor: 'white',
                   borderRadius: 2,
@@ -740,8 +741,9 @@ const ContractPage = () => {
               </Box>
             )}
           </Box>
+            </Grid>
+          </Grid>
         </Box>
-      </Layout>
     );
   };
 

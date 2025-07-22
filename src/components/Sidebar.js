@@ -72,12 +72,12 @@ const Sidebar = () => {
         {
           link: '/brand/marketplace',
           icon: <BusinessIcon fontSize="medium" />,
-          label: 'Marketplace-Brand'
+          label: 'Market-Brand'
         },
         {
           link: '/influencer/marketplace',
           icon: <PersonIcon fontSize="medium" />,
-          label: 'Marketplace-Influencer'
+          label: 'Market-Influencer'
         }
       );
     } else if (role === 'Brand' || role === 'brand') {
@@ -85,21 +85,21 @@ const Sidebar = () => {
       options.push({
         link: '/brand/marketplace',
         icon: <BusinessIcon fontSize="medium" />,
-        label: 'Marketplace-Brand'
+        label: 'Market-Brand'
       });
     } else if (role === 'Influencer' || role === 'influencer') {
       // Influencer sees only influencer option
       options.push({
         link: '/influencer/marketplace',
         icon: <PersonIcon fontSize="medium" />,
-        label: 'Marketplace-Influencer'
+        label: 'Market-Influencer'
       });
     } else {
       // Fallback - if no role or unknown role, show influencer option
       options.push({
         link: '/influencer/marketplace',
         icon: <PersonIcon fontSize="medium" />,
-        label: 'Marketplace-Influencer'
+        label: 'Market-Influencer'
       });
     }
 
@@ -154,7 +154,7 @@ const Sidebar = () => {
           </ListItem>
 
           <ListItem disablePadding >
-            <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
+            <ListItemButton sx={{ justifyContent: 'center' }}>
               <Link to="/discover">
               <Box
                 sx={{
@@ -213,7 +213,7 @@ const Sidebar = () => {
               <Link to={option.link}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                   {option.icon}
-                  <Typography variant="body2" sx={{ fontSize: '10px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                  <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap', textAlign: 'center' }}>
                     {option.label}
                   </Typography>
                 </Box>

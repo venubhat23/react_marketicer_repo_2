@@ -25,9 +25,12 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Editor from "../../components/Editor";
 import Layout from "../../components/Layout";
 import CreateMarketplacePost from "./CreateMarketplacePost";
+import MyBidsView from "./MyBidsView";
 import { useAuth } from "../../authContext/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import MarketplaceAPI, { handleApiError } from "../../services/marketplaceApi";
+import { bidsApi } from "../../utils/marketplaceApi";
+import Sidebar from '../../components/Sidebar'
 
 const MarketplaceModule = () => {
   const { user } = useAuth();
@@ -561,27 +564,66 @@ const MarketplaceModule = () => {
     return searchQuery || statusFilter || typeFilter || categoryFilter || targetAudienceFilter;
   };
 
+  const handleAcceptBid = async (bidId) => {
+    try {
+      const response = await bidsApi.acceptBid(bidId);
+      
+      if (response.data && response.data.status === 'success') {
+        toast.success("Bid accepted successfully!");
+        // Reload bids to show updated status
+        if (selectedPost) {
+          handleViewBids(selectedPost);
+        }
+      } else {
+        throw new Error(response.data?.message || 'Failed to accept bid');
+      }
+    } catch (error) {
+      console.error("Error accepting bid:", error);
+      const errorMessage = error.response?.data?.message || error.message || "Failed to accept bid";
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleRejectBid = async (bidId) => {
+    try {
+      const response = await bidsApi.rejectBid(bidId);
+      
+      if (response.data && response.data.status === 'success') {
+        toast.success("Bid rejected successfully!");
+        // Reload bids to show updated status
+        if (selectedPost) {
+          handleViewBids(selectedPost);
+        }
+      } else {
+        throw new Error(response.data?.message || 'Failed to reject bid');
+      }
+    } catch (error) {
+      console.error("Error rejecting bid:", error);
+      const errorMessage = error.response?.data?.message || error.message || "Failed to reject bid";
+      toast.error(errorMessage);
+    }
+  };
+
   // Brand Listing View
   const BrandListingView = () => {
     const filteredPosts = getFilteredPosts;
 
     return (
-      <Box sx={{ padding: '20px' }}>
+      <Box>
         {/* Search and Filter Section */}
         <Paper 
           elevation={2} 
           sx={{ 
-            p: 3, 
-            mb: 3, 
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%)',
-            border: '1px solid #e1e7ff'
+            p: 2, 
+            mb: 2, 
+            borderRadius: 0,
+            background: '#B1C6FF',
+            boxShadow:'none'
           }}
         >
           {/* Search Bar */}
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
             <TextField
-              fullWidth
               placeholder="Search by title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -597,7 +639,8 @@ const MarketplaceModule = () => {
                   </IconButton>
                 ),
                 sx: {
-                  borderRadius: 2,
+                  borderRadius: 50,
+                  width:'350px',
                   backgroundColor: 'white',
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor: '#e1e7ff',
@@ -616,7 +659,7 @@ const MarketplaceModule = () => {
               startIcon={<FilterListIcon />}
               onClick={() => setShowFilters(!showFilters)}
               sx={{
-                minWidth: '140px',
+                minWidth: '150px',
                 borderRadius: 2,
                 bgcolor: showFilters ? '#882AFF' : 'transparent',
                 borderColor: '#882AFF',
@@ -728,7 +771,7 @@ const MarketplaceModule = () => {
           )}
 
           {/* Results Summary */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
             <Typography variant="body2" color="text.secondary">
               Showing {filteredPosts.length} of {marketplacePosts.length} posts
               {hasActiveFilters() && (
@@ -743,32 +786,37 @@ const MarketplaceModule = () => {
         </Paper>
 
         {/* Table */}
-        <TableContainer 
-          component={Paper} 
-          sx={{ 
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-            borderRadius: 3,
-            overflow: 'hidden'
-          }}
-        >
+        <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, padding:'20px'}}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 2, sm: 4, md: 12 }}>
+              <Box>
+              <TableContainer 
+                component={Paper} 
+                sx={{ 
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                
+                  overflow: 'hidden'
+                }}
+              >
           <Table>
             <TableHead>
               <TableRow sx={{ 
-                bgcolor: 'linear-gradient(135deg, #882AFF 0%, #6a1b9a 100%)',
+                bgcolor: '#B1C6FF',
                 '& .MuiTableCell-root': {
                   color: 'white',
                   fontWeight: 'bold',
-                  fontSize: '0.95rem'
+                  fontSize: '0.95rem',
+                  padding:'0 20px'
                 }
               }}>
-                <TableCell sx={{ bgcolor: '#882AFF' }}>Title</TableCell>
-                <TableCell sx={{ bgcolor: '#882AFF' }}>Type</TableCell>
-                <TableCell sx={{ bgcolor: '#882AFF' }}>Status</TableCell>
-                <TableCell sx={{ bgcolor: '#882AFF' }}>Date Created</TableCell>
-                <TableCell sx={{ bgcolor: '#882AFF' }}>Deadline</TableCell>
-                <TableCell sx={{ bgcolor: '#882AFF' }}>Budget</TableCell>
-                <TableCell sx={{ bgcolor: '#882AFF' }}>Bids</TableCell>
-                <TableCell sx={{ bgcolor: '#882AFF' }}>Actions</TableCell>
+                <TableCell>Title</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Date Created</TableCell>
+                <TableCell>Deadline</TableCell>
+                <TableCell>Budget</TableCell>
+                <TableCell>Bids</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -902,6 +950,11 @@ const MarketplaceModule = () => {
             </TableBody>
           </Table>
         </TableContainer>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+        
       </Box>
     );
   };
@@ -912,20 +965,11 @@ const MarketplaceModule = () => {
     
     return (
       <Box sx={{ 
-        maxWidth: '1200px', 
+       // maxWidth: '1200px', 
         margin: '0 auto', 
         padding: '20px',
         minHeight: '100vh',
-        backgroundColor: '#f8f9fa'
       }}>
-        <Typography variant="h4" sx={{ 
-          color: '#882AFF', 
-          fontWeight: 'bold', 
-          mb: 3,
-          textAlign: 'center'
-        }}>
-          {influencerView === 'feed' ? 'Marketplace Feed' : 'My Bids'}
-        </Typography>
         
         {/* View Toggle Switch */}
         <Box sx={{ 
@@ -1008,25 +1052,8 @@ const MarketplaceModule = () => {
             </Box>
         
         {/* Feed Container */}
-        <Box sx={{ 
-          maxHeight: 'calc(100vh - 200px)', 
-          overflowY: 'auto',
-          paddingRight: '8px',
-          '&::-webkit-scrollbar': {
-            width: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: '#f1f1f1',
-            borderRadius: '4px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: '#882AFF',
-            borderRadius: '4px',
-          },
-          '&::-webkit-scrollbar-thumb:hover': {
-            background: '#6a1b9a',
-          },
-        }}>
+        <Box >
+        <Grid size={{ md: 6 }}>
           {postsLoading ? (
             // Loading skeleton cards
             [...Array(3)].map((_, index) => (
@@ -1265,6 +1292,7 @@ const MarketplaceModule = () => {
                         console.error('Error tracking post view:', error);
                       }
                     }}
+                    disabled={post.user_has_bid}
                     sx={{ 
                       flex: 1,
                       bgcolor: '#882AFF',
@@ -1278,7 +1306,7 @@ const MarketplaceModule = () => {
                       transition: 'all 0.2s ease'
                     }}
                   >
-                    Bid Now
+                    {post.user_has_bid ? 'Bid Placed' : 'Bid Now'}
                   </Button>
                 </Box>
               </Box>
@@ -1354,7 +1382,10 @@ const MarketplaceModule = () => {
                 Showing {((currentPage - 1) * 10) + 1}-{Math.min(currentPage * 10, totalCount)} of {totalCount} opportunities
               </Typography>
             </Box>
-          </Box>
+          
+          
+            </Grid>
+            </Box>
           </>
         )}
 
@@ -1645,8 +1676,15 @@ const MarketplaceModule = () => {
 
   // Bids View Dialog
   const BidsViewDialog = () => (
-    <Dialog open={bidsViewOpen} onClose={() => setBidsViewOpen(false)} maxWidth="md" fullWidth>
-      <DialogTitle>Bids for: {selectedPost?.title}</DialogTitle>
+    <Dialog open={bidsViewOpen} onClose={() => setBidsViewOpen(false)} maxWidth="lg" fullWidth>
+      <DialogTitle>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6">Bids for: {selectedPost?.title}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Budget: ₹{selectedPost?.budget?.toLocaleString()}
+          </Typography>
+        </Box>
+      </DialogTitle>
       <DialogContent>
         {bidsLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
@@ -1659,8 +1697,10 @@ const MarketplaceModule = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Influencer Name</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Influencer</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Bid Amount</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Message</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
@@ -1761,9 +1801,12 @@ const MarketplaceModule = () => {
   };
 
   return (
-    <Layout>
+   
       <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
-        {/* Header */}
+        <Grid container>
+          <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
+            <Grid size={{ md: 11 }}>
+              {/* Header */}
         <Paper
           elevation={0}
           sx={{
@@ -1778,7 +1821,7 @@ const MarketplaceModule = () => {
           <Typography variant="h6" sx={{ color: '#fff' }}>
             {getHeaderTitle()}
           </Typography>
-          
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           {/* Add Create New Post button to top nav for brand/admin users */}
           {(currentMode === 'brand' && (isBrand || isAdmin) && currentView !== 'create') && (
             <Button 
@@ -1792,7 +1835,16 @@ const MarketplaceModule = () => {
             >
               Create New Post
             </Button>
+            
           )}
+         
+          <IconButton size="large" sx={{ color: 'white' }}>
+            <NotificationsIcon />
+          </IconButton>
+          <IconButton size="large" sx={{ color: 'white' }}>
+            <AccountCircleIcon />
+          </IconButton>
+          </Box>
         </Paper>
 
         {/* Main Content */}
@@ -1819,8 +1871,11 @@ const MarketplaceModule = () => {
         {/* Dialogs */}
         <BidDialog />
         <BidsViewDialog />
+            </Grid>
+        </Grid>
+        
       </Box>
-    </Layout>
+   
   );
 };
 
