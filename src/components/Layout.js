@@ -44,11 +44,11 @@ const Layout = ({ children }) => {
         sx={{
           flexGrow: 1,
           marginLeft: `${sidebarWidth}px`,
-          transition: 'margin-left 0.3s ease-in-out',
+          //transition: 'margin-left 0.3s ease-in-out',
           minHeight: '100vh',
           width: `calc(100vw - ${sidebarWidth}px)`,
           overflow: 'auto',
-          bgcolor: '#f5f5f5'
+          //bgcolor: '#f5f5f5'
         }}
       >
         {children}

@@ -23,6 +23,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from "../../components/Layout";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import Sidebar from '../../components/Sidebar'
 
 const AIContractGenerator = ({ onBack = null }) => {
   const navigate = useNavigate();
@@ -711,9 +712,11 @@ const AIContractGenerator = ({ onBack = null }) => {
   };
 
   return (
-    <Layout>
-      <Box sx={{ flexGrow: 1, bgcolor: '#f8f9fa', minHeight: '100vh' }}>
-        {/* Header - Updated color to #091a48 */}
+      <Box sx={{ flexGrow: 1, minHeight: '100vh' }}>
+        <Grid container>
+           <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
+            <Grid size={{ md: 11 }}>
+              {/* Header - Updated color to #091a48 */}
         <Paper
           elevation={0}
           sx={{
@@ -771,7 +774,7 @@ const AIContractGenerator = ({ onBack = null }) => {
               {/* Left Panel - Contract Details Form */}
               <Grid size={{ md: 6 }}>
                 <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
-                  <CardContent sx={{ p: 4 }}>
+                  <CardContent sx={{ p: 4, minHeight:'445px' }}>
                     {/* Template Info (if creating from template) */}
                     {isCreateFromTemplate && templateData && (
                       <Box sx={{ mb: 3, p: 2, bgcolor: '#e8f5e8', borderRadius: 2 }}>
@@ -794,7 +797,7 @@ const AIContractGenerator = ({ onBack = null }) => {
                         sx={{ 
                           mb: 1, 
                           color: '#333', 
-                          fontWeight: 500 
+                          //fontWeight: 500 
                         }}
                       >
                         Contract Name
@@ -826,8 +829,7 @@ const AIContractGenerator = ({ onBack = null }) => {
                         variant="body1" 
                         sx={{ 
                           mb: 1, 
-                          color: '#333', 
-                          fontWeight: 500 
+                          color: '#333',  
                         }}
                       >
                         Description
@@ -904,8 +906,10 @@ const AIContractGenerator = ({ onBack = null }) => {
               </Grid>
             </Grid>
           </Box>
+            </Grid>
+        </Grid>
+        
         </Box>
-      </Layout>
     );
   };
 

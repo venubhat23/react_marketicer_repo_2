@@ -35,6 +35,7 @@ import {
 import { toast } from "react-toastify";
 import Layout from "../../components/Layout";
 import MarketplaceAPI, { handleApiError } from "../../services/marketplaceApi";
+import Sidebar from '../../components/Sidebar'
 
 const CreateMarketplacePost = ({ 
   onBack, 
@@ -47,7 +48,7 @@ const CreateMarketplacePost = ({
   const Types = ['Sponsored Post', 'Product Review', 'Brand Collaboration', 'Event Promotion', 'Giveaway', 'Story Feature'];
 
   // Form states as per specification
-  const [brandName, setBrandName] = useState(initialData?.brand || "Your Brand Name"); // Auto-filled
+  const [brandName, setBrandName] = useState(initialData?.brand || " "); // Auto-filled
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [category, setCategory] = useState(initialData?.category || "");
@@ -200,9 +201,9 @@ const CreateMarketplacePost = ({
   const renderRightPanel = () => {
     return (
       <Box>
-        <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+        {/* <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
           Live Preview
-        </Typography>
+        </Typography> */}
         
         {/* Preview Card */}
         <Paper
@@ -212,14 +213,14 @@ const CreateMarketplacePost = ({
             borderRadius: 2,
             border: '1px solid #e0e0e0',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            mb: 2,
+            mb: 1,
           }}
         >
           {/* Image Preview */}
           {uploadedImageUrl ? (
             <CardMedia
               component="img"
-              height="160"
+              //height="160"
               image={uploadedImageUrl}
               alt="Preview"
               sx={{ borderRadius: 2, mb: 2 }}
@@ -232,14 +233,14 @@ const CreateMarketplacePost = ({
               alignItems: 'center', 
               justifyContent: 'center',
               borderRadius: 2,
-              mb: 2
+              mb: 1
             }}>
               <PhotoCamera sx={{ fontSize: 40, color: '#ddd' }} />
             </Box>
           )}
           
           {/* Brand Name */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Avatar sx={{ bgcolor: '#2196f3', width: 32, height: 32, mr: 1 }}>
               {brandName.charAt(0)}
             </Avatar>
@@ -251,9 +252,9 @@ const CreateMarketplacePost = ({
           {/* Title */}
           <Typography variant="h6" sx={{ 
             fontWeight: 700, 
-            mb: 2, 
+            mb: 1, 
             color: '#333',
-            lineHeight: 1.3
+            
           }}>
             {title || 'Your Post Title Will Appear Here'}
           </Typography>
@@ -261,14 +262,14 @@ const CreateMarketplacePost = ({
           {/* Description */}
           <Typography variant="body2" sx={{ 
             color: '#666', 
-            mb: 2,
-            lineHeight: 1.6
+            mb: 1,
+            
           }}>
             {description ? (description.length > 150 ? description.substring(0, 150) + '...' : description) : 'Your detailed post description will be displayed here...'}
           </Typography>
           
           {/* Budget Badge */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <LocalOffer sx={{ color: '#4caf50', mr: 1, fontSize: 20 }} />
             <Typography variant="h6" sx={{ 
               color: '#4caf50', 
@@ -279,7 +280,7 @@ const CreateMarketplacePost = ({
           </Box>
           
           {/* Details */}
-          <Stack spacing={1} sx={{ mb: 2 }}>
+          <Stack spacing={1} sx={{ mb: 1 }}>
             {deadline && (
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Schedule sx={{ color: '#ff9800', mr: 1, fontSize: 18 }} />
@@ -371,9 +372,11 @@ const CreateMarketplacePost = ({
   };
 
   return (
-    <Layout>
       <Box>
-        {/* Header - Updated color to #091a48 */}
+      <Grid container>
+        {/* <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid> */}
+        <Grid size={{ md: 12 }}>
+           {/* Header - Updated color to #091a48 */}
         {/* Error Alert */}
         {error && (
           <Alert severity="error" sx={{ m: 2 }} onClose={() => setError('')}>
@@ -385,26 +388,26 @@ const CreateMarketplacePost = ({
         <Box sx={{ padding: '24px' }}>
           <Grid container spacing={3}>
             {/* Left Panel - Post Details Form */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs:12, sm:6, md: 8 }}>
               <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
                 <CardContent sx={{ p: 4 }}>
                   {/* Brand Name Field */}
-                  <Box sx={{ mb: 3 }}>
+                  <Box sx={{ mb: 1 }}>
                     <Typography 
                       variant="body1" 
                       sx={{ 
                         mb: 1, 
                         color: '#333', 
-                        fontWeight: 500 
                       }}
                     >
                       Brand Name
                     </Typography>
                     <TextField
                       fullWidth
+                      placeholder="Brand Name"
                       value={brandName}
                       onChange={(e) => setBrandName(e.target.value)}
-                      disabled
+                      //disabled
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
@@ -421,13 +424,13 @@ const CreateMarketplacePost = ({
                   </Box>
 
                   {/* Title Field */}
-                  <Box sx={{ mb: 3 }}>
+                  <Box sx={{ mb: 1 }}>
                     <Typography 
                       variant="body1" 
                       sx={{ 
                         mb: 1, 
                         color: '#333', 
-                        fontWeight: 500 
+                         
                       }}
                     >
                       Post Title *
@@ -454,13 +457,13 @@ const CreateMarketplacePost = ({
                   </Box>
 
                   {/* Description Field */}
-                  <Box sx={{ mb: 3 }}>
+                  <Box sx={{ mb: 1 }}>
                     <Typography 
                       variant="body1" 
                       sx={{ 
                         mb: 1, 
                         color: '#333', 
-                        fontWeight: 500 
+                         
                       }}
                     >
                       Description *
@@ -489,19 +492,18 @@ const CreateMarketplacePost = ({
                   </Box>
 
                   {/* Media Upload */}
-                  <Box sx={{ mb: 3 }}>
+                  <Box sx={{ mb: 1 }}>
                     <Typography 
                       variant="body1" 
                       sx={{ 
                         mb: 2, 
                         color: '#333', 
-                        fontWeight: 500 
                       }}
                     >
                       Media Upload
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid size={{ xs:12, sm:6, md: 6 }}>
                         <Box
                           onClick={handleImageUpload}
                           sx={{
@@ -530,7 +532,7 @@ const CreateMarketplacePost = ({
                           )}
                         </Box>
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid size={{ xs:12, sm:6, md: 6 }}>
                         <Box
                           onClick={handleVideoUpload}
                           sx={{
@@ -566,13 +568,13 @@ const CreateMarketplacePost = ({
 
                   {/* Category and Target Audience */}
                   <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid item xs={6}>
+                    <Grid size={{ xs:12, sm:6, md: 4 }}>
                       <Typography 
                         variant="body1" 
                         sx={{ 
                           mb: 1, 
                           color: '#333', 
-                          fontWeight: 500 
+                          
                         }}
                       >
                         Category *
@@ -594,13 +596,13 @@ const CreateMarketplacePost = ({
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid size={{ xs:12, sm:6, md: 4 }}>
                       <Typography 
                         variant="body1" 
                         sx={{ 
                           mb: 1, 
                           color: '#333', 
-                          fontWeight: 500 
+                         
                         }}
                       >
                         Target Audience *
@@ -622,17 +624,13 @@ const CreateMarketplacePost = ({
                         </Select>
                       </FormControl>
                     </Grid>
-                  </Grid>
-
-                  {/* Budget and Location */}
-                  <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid item xs={6}>
+                    <Grid size={{ xs:12, sm:6, md: 4 }}>
                       <Typography 
                         variant="body1" 
                         sx={{ 
                           mb: 1, 
                           color: '#333', 
-                          fontWeight: 500 
+                          
                         }}
                       >
                         Budget (₹) *
@@ -652,13 +650,18 @@ const CreateMarketplacePost = ({
                         }}
                       />
                     </Grid>
-                    <Grid item xs={6}>
+                  </Grid>
+
+                  {/* Budget and Location */}
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    
+                    <Grid size={{ xs:12, sm:6, md: 4 }}>
                       <Typography 
                         variant="body1" 
                         sx={{ 
                           mb: 1, 
                           color: '#333', 
-                          fontWeight: 500 
+                          
                         }}
                       >
                         Location
@@ -678,17 +681,13 @@ const CreateMarketplacePost = ({
                         }}
                       />
                     </Grid>
-                  </Grid>
-
-                  {/* Platform and Languages */}
-                  <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid item xs={6}>
+                    <Grid size={{ xs:12, sm:6, md: 4 }}>
                       <Typography 
                         variant="body1" 
                         sx={{ 
                           mb: 1, 
                           color: '#333', 
-                          fontWeight: 500 
+                          
                         }}
                       >
                         Platform
@@ -708,13 +707,13 @@ const CreateMarketplacePost = ({
                         }}
                       />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid size={{ xs:12, sm:6, md: 4 }}>
                       <Typography 
                         variant="body1" 
                         sx={{ 
                           mb: 1, 
                           color: '#333', 
-                          fontWeight: 500 
+                          
                         }}
                       >
                         Languages
@@ -738,13 +737,13 @@ const CreateMarketplacePost = ({
 
                   {/* Deadline and Tags */}
                   <Grid container spacing={2} sx={{ mb: 4 }}>
-                    <Grid item xs={6}>
+                    <Grid size={{ xs:12, sm:6, md: 4 }}>
                       <Typography 
                         variant="body1" 
                         sx={{ 
                           mb: 1, 
                           color: '#333', 
-                          fontWeight: 500 
+                         
                         }}
                       >
                         Deadline *
@@ -765,13 +764,13 @@ const CreateMarketplacePost = ({
                         }}
                       />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid size={{ xs:12, sm:6, md: 4 }}>
                       <Typography 
                         variant="body1" 
                         sx={{ 
                           mb: 1, 
                           color: '#333', 
-                          fontWeight: 500 
+                          
                         }}
                       >
                         Tags
@@ -814,7 +813,7 @@ const CreateMarketplacePost = ({
             </Grid>
 
             {/* Right Panel - Live Preview */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs:12, sm:6, md: 4 }}>
               <Card 
                 sx={{ 
                   borderRadius: 3, 
@@ -830,8 +829,10 @@ const CreateMarketplacePost = ({
             </Grid>
           </Grid>
         </Box>
+        </Grid>
+      </Grid>
+       
       </Box>
-    </Layout>
   );
 };
 

@@ -19,6 +19,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ShareIcon from '@mui/icons-material/Share';
 import LinkIcon from '@mui/icons-material/Link';
 import Layout from '../../components/Layout';
+import Sidebar from '../../components/Sidebar';
 import axios from 'axios';
 
 const InstagramAnalytics = () => {
@@ -650,9 +651,11 @@ const InstagramAnalytics = () => {
   }
 
   return (
-    <Layout>
       <Box sx={{ flexGrow: 1 }}>
-        {/* Header */}
+        <Grid container>
+          <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
+          <Grid size={{ md: 11 }}>
+            {/* Header */}
         <Paper
           elevation={0}
           sx={{
@@ -742,7 +745,6 @@ const InstagramAnalytics = () => {
           flexDirection: 'column',
           gap: 3, 
           p: 3, 
-          backgroundColor: '#f8f9fa',
           minHeight: 'calc(100vh - 120px)'
         }}>
           {/* Profile and Analytics Row */}
@@ -943,8 +945,12 @@ const InstagramAnalytics = () => {
             </Box>
           </Box>
         </Box>
+          </Grid>
+        </Grid>
+
+        
       </Box>
-    </Layout>
+    
   );
 };
 

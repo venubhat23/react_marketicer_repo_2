@@ -43,7 +43,6 @@ import CloseIcon from "@mui/icons-material/Close";
 // } from '@mui/icons-material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
-
 import Sidebar from '../components/Sidebar'
 
 
@@ -205,12 +204,12 @@ const Discover = () => {
               </Box>
         </Paper>
         <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                gap: 2, // spacing between items
-                alignItems: 'center',bgcolor: '#B1C6FF',padding: '15px',
-              }}>
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 2, // spacing between items
+            alignItems: 'center',bgcolor: '#B1C6FF',padding: '15px',
+          }}>
                     
                 <TextField size="small" variant="outlined" placeholder="Search" />
               

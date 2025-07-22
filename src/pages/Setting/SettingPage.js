@@ -57,6 +57,7 @@ import {
   useUpdateCompanyDetails, 
   useChangePassword 
 } from '../../hooks/useSettings';
+import Sidebar from '../../components/Sidebar'
 
 
 const ITEM_HEIGHT = 48;
@@ -259,9 +260,12 @@ const SettingPage = () => {
   }
 
   return (
-    <Layout>
+    
       <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} > 
-        <Paper
+      <Grid container>
+          <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
+          <Grid size={{ md: 11 }}>
+          <Paper
               elevation={0}
               sx={{
                 display: { xs: 'none', md: 'block' },
@@ -317,11 +321,11 @@ const SettingPage = () => {
             '.MuiTab-root': {
               justifyContent: 'flex-start',
               alignItems: 'center',
-              px: 3,
-              py: 2,
+              //px: 3,
+              //py: 2,
               textTransform: 'none',
-              fontWeight: 500,
-              color: '#fff',
+              //fontWeight: 500,
+              color: '#f5f5f5',
               width:'250px',
               backgroundColor:'#1B357C'
             },
@@ -555,7 +559,7 @@ const SettingPage = () => {
           <Box p={3} maxWidth="600px" mx="auto">
           <form onSubmit={handlePasswordSubmit}>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 2, sm: 6, md: 6 }} >
             <TextField
               label="Current Password"
               type="password"
@@ -568,7 +572,7 @@ const SettingPage = () => {
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid size={{ xs: 2, sm: 6, md: 6 }}>
             <TextField
               label="New Password"
               type="password"
@@ -581,7 +585,7 @@ const SettingPage = () => {
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid size={{ xs: 2, sm: 6, md: 6 }}>
             <TextField
               label="Confirm New Password"
               type="password"
@@ -645,9 +649,12 @@ const SettingPage = () => {
         </Grid>
           
       </Box>
+          </Grid>
+      </Grid>
+       
           
       </Box>
-    </Layout>
+    
   );
 };
 

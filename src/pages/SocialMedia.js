@@ -34,7 +34,7 @@ import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as 
 import SocialConnect from './SocialConnect';
 import SocialDisConnect from './SocialDisConnect';
 import Layout from '../components/Layout';
-import Navbar from '../components/Navbar';
+import Sidebar from '../components/Sidebar';
 import axios from "axios";
 
 const style = {
@@ -192,9 +192,12 @@ const SocialMedia =()=>{
   }, []);
 
   return (
-    <Layout>
+    
       <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100vh' }}>
-          <Paper
+        <Grid container>
+          <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
+            <Grid size={{ md: 11 }}>
+            <Paper
             elevation={0}
             sx={{
               display: { xs: 'none', md: 'block' },
@@ -566,8 +569,11 @@ const SocialMedia =()=>{
             </Stack>
           </Paper>
         </Box>
+            </Grid>
+          </Grid>
+        
+         
       </Box>
-    </Layout>
   )
 }
 

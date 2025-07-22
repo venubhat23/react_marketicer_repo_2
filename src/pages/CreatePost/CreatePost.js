@@ -42,7 +42,7 @@ import InstaIcon from '../../assets/images/instagram.png';
 import LinkedInIcon from '../../assets/images/linkedin.png';
 import ImageIcon from '@mui/icons-material/Image';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-
+import Sidebar from '../../components/Sidebar' 
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -621,9 +621,12 @@ const CreatePost = () => {
 
 
   return (
-    <Layout>
+
       <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} > 
-        <Paper
+      <Grid container>
+      <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
+      <Grid size={{ md: 11 }}>
+      <Paper
               elevation={0}
               sx={{
                 display: { xs: 'none', md: 'block' },
@@ -661,7 +664,7 @@ const CreatePost = () => {
                 </Box>
               </Box>
         </Paper>
-      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'20px'}}>
+        <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'20px'}}>
         <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
           <Grid size={{ xs: 12, sm: 8, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%' }}>
               {/* Dropdowns */}
@@ -920,9 +923,12 @@ const CreatePost = () => {
         </Grid>
           
       </Box>
-          
+      </Grid>
+        
+      
+    </Grid>
       </Box>
-    </Layout>
+  
   );
 };
 

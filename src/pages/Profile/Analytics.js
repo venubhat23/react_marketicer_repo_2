@@ -27,6 +27,7 @@ import {
   Notifications as NotificationsIcon,
   AccountCircle as AccountCircleIcon,
 } from '@mui/icons-material';
+import Sidebar from '../../components/Sidebar' 
 import axios from 'axios';
 
 const Analytics = () => {
@@ -278,8 +279,11 @@ if (showNoAnalyticsModal) {
   );
 }
   return (
-    <Layout>
+    // <Layout>
       <Box sx={{ flexGrow: 1 }} >
+        <Grid container>
+          <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
+          <Grid size={{ md: 11 }}>
           <Paper
             elevation={0}
             sx={{
@@ -492,8 +496,11 @@ if (showNoAnalyticsModal) {
 
             </Grid>
           </Box>
+          </Grid>
+        </Grid>
+          
       </Box>
-    </Layout>
+    // </Layout>
   )
 }
 
