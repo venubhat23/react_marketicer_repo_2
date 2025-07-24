@@ -24,6 +24,7 @@ import MarketplaceModule from './pages/MarketPlace/MarketplaceModule';
 import MarketplacePostDetail from './pages/MarketPlace/MarketplacePostDetail';
 import MarketplaceStatistics from './pages/MarketPlace/MarketplaceStatistics';
 import SettingPage from './pages/Setting/SettingPage';
+import LinkPage from './pages/Link/LinkPage';
 
 // Component that renders routes based on user role
 const AppRoutes = () => {
@@ -203,6 +204,12 @@ const AppRoutes = () => {
       <Route path="/settingPage" element={
         <ProtectedRoute>
           <SettingPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/link" element={
+        <ProtectedRoute>
+          <LinkPage />
         </ProtectedRoute>
       } />
       
