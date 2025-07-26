@@ -14,6 +14,11 @@ import {
   AppBar, Toolbar, Container, InputLabel, ListItemText,
   CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack,ListItemIcon,
   CircularProgress, // Add this import
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from '@mui/icons-material/Close';
@@ -24,6 +29,7 @@ import MoreVert from "@mui/icons-material/MoreVert";
 import Repeat from "@mui/icons-material/Repeat";
 import ThumbUp from "@mui/icons-material/ThumbUp";
 import MessageCircle from "@mui/icons-material/Star"; // Placeholder for MessageCircle
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'; // AI icon
 import Editor from "../../components/Editor";
 import TabComponent from "../../components/TabComponent";
 import InstagramPost from "../../components/InstagramPost"
@@ -32,6 +38,7 @@ import axios from 'axios';
 import { useMutation } from "@tanstack/react-query";
 import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
 import { toast } from "react-toastify";
+import { generateAIPost } from "../../services/postsApi";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/material_green.css";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -96,6 +103,14 @@ const CreatePost = () => {
 
   const [selectedUsers, setSelectedUsers] = useState([])
   const [selectedChipId, setSelectedChipId] = useState(null);
+
+  // AI Generation states
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiTone, setAiTone] = useState('professional');
+  const [aiPlatform, setAiPlatform] = useState('instagram');
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   console.log('hereree', selectUser)
 
@@ -619,6 +634,213 @@ const CreatePost = () => {
     }
   };
 
+  // AI Generation function
+  const handleGenerateWithAI = async () => {
+    if (!aiPrompt.trim()) {
+      setAiError('Please enter a prompt for AI generation');
+      return;
+    }
+
+    try {
+      setAiGenerating(true);
+      setAiError('');
+      
+      const generatedContent = await generateAIPost(aiPrompt, aiTone, aiPlatform);
+      setPostContent(generatedContent);
+      
+      setAiModalOpen(false);
+      setAiPrompt('');
+      
+      toast.success("Post generated successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      
+    } catch (err) {
+      setAiError(`Error generating post: ${err.message}`);
+      console.error('Error generating post:', err);
+      
+      toast.error("Failed to generate post", {
+        position: "top-right",
+        autoClose: 5000,
+      });
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  // AI Modal Component
+  const AIGenerationModal = () => (
+    <Dialog 
+      open={aiModalOpen} 
+      onClose={() => setAiModalOpen(false)}
+      maxWidth="md"
+      fullWidth
+    >
+      <DialogTitle sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 1,
+        bgcolor: '#882AFF',
+        color: 'white'
+      }}>
+        <AutoAwesomeIcon />
+        Generate with AI
+        <IconButton
+          aria-label="close"
+          onClick={() => setAiModalOpen(false)}
+          sx={{ 
+            position: 'absolute', 
+            right: 8, 
+            top: 8,
+            color: 'white'
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      
+      <DialogContent sx={{ p: 3 }}>
+        {aiError && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setAiError('')}>
+            {aiError}
+          </Alert>
+        )}
+        
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="body1" sx={{ mb: 1, fontWeight: 500 }}>
+            What would you like to post about?
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            placeholder="Describe your post idea... (e.g., 'A motivational post about achieving goals for entrepreneurs')"
+            variant="outlined"
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                '&:hover fieldset': {
+                  borderColor: '#882AFF',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#882AFF',
+                },
+              },
+            }}
+          />
+          
+          {/* Example prompts */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="caption" sx={{ color: '#666', mb: 1, display: 'block' }}>
+              Quick examples:
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              {[
+                'A motivational Monday post for entrepreneurs',
+                'Tips for social media marketing',
+                'Behind the scenes of our team',
+                'Product launch announcement'
+              ].map((example, index) => (
+                <Chip
+                  key={index}
+                  label={example}
+                  size="small"
+                  onClick={() => setAiPrompt(example)}
+                  sx={{
+                    cursor: 'pointer',
+                    bgcolor: '#f5f5f5',
+                    '&:hover': {
+                      bgcolor: '#e0e0e0',
+                    },
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+        </Box>
+
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <Typography variant="body1" sx={{ mb: 1, fontWeight: 500 }}>
+              Tone
+            </Typography>
+            <Select
+              fullWidth
+              value={aiTone}
+              onChange={(e) => setAiTone(e.target.value)}
+              size="small"
+              sx={{ 
+                borderRadius: 2,
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#882AFF',
+                }
+              }}
+            >
+              <MenuItem value="professional">Professional</MenuItem>
+              <MenuItem value="casual">Casual</MenuItem>
+              <MenuItem value="friendly">Friendly</MenuItem>
+              <MenuItem value="motivational">Motivational</MenuItem>
+              <MenuItem value="humorous">Humorous</MenuItem>
+              <MenuItem value="informative">Informative</MenuItem>
+            </Select>
+          </Grid>
+          
+          <Grid item xs={12} sm={6}>
+            <Typography variant="body1" sx={{ mb: 1, fontWeight: 500 }}>
+              Platform
+            </Typography>
+            <Select
+              fullWidth
+              value={aiPlatform}
+              onChange={(e) => setAiPlatform(e.target.value)}
+              size="small"
+              sx={{ 
+                borderRadius: 2,
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#882AFF',
+                }
+              }}
+            >
+              <MenuItem value="instagram">Instagram</MenuItem>
+              <MenuItem value="facebook">Facebook</MenuItem>
+              <MenuItem value="linkedin">LinkedIn</MenuItem>
+              <MenuItem value="twitter">Twitter</MenuItem>
+            </Select>
+          </Grid>
+        </Grid>
+      </DialogContent>
+      
+      <DialogActions sx={{ p: 3, pt: 0 }}>
+        <Button 
+          onClick={() => setAiModalOpen(false)}
+          sx={{ color: '#666' }}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleGenerateWithAI}
+          disabled={aiGenerating || !aiPrompt.trim()}
+          sx={{
+            bgcolor: '#882AFF',
+            '&:hover': {
+              bgcolor: '#7B1FA2',
+            },
+            '&:disabled': {
+              bgcolor: '#ccc',
+            }
+          }}
+          startIcon={aiGenerating ? <CircularProgress size={20} /> : <AutoAwesomeIcon />}
+        >
+          {aiGenerating ? 'Generating...' : 'Generate Post'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
 
   return (
 
@@ -774,6 +996,32 @@ const CreatePost = () => {
 
               {/* Text Field */}
               <Editor value={postContent} onChange={setPostContent} />
+              
+              {/* Generate with AI Button - positioned below editor */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2, mt: 1 }}>
+                <Button
+                  variant="contained"
+                  onClick={() => setAiModalOpen(true)}
+                  sx={{
+                    bgcolor: '#882AFF',
+                    color: 'white',
+                    textTransform: 'none',
+                    fontSize: '14px',
+                    px: 3,
+                    py: 1,
+                    borderRadius: '25px',
+                    boxShadow: '0 4px 12px rgba(136, 42, 255, 0.3)',
+                    '&:hover': {
+                      bgcolor: '#7B1FA2',
+                      boxShadow: '0 6px 16px rgba(136, 42, 255, 0.4)',
+                    },
+                    transition: 'all 0.3s ease',
+                  }}
+                  startIcon={<AutoAwesomeIcon />}
+                >
+                  Generate with AI
+                </Button>
+              </Box>
 
               <Typography variant="caption" display="block" mb={2}>
                 275 characters left
@@ -928,6 +1176,9 @@ const CreatePost = () => {
       
     </Grid>
       </Box>
+
+      {/* AI Generation Modal */}
+      <AIGenerationModal />
   
   );
 };
