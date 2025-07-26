@@ -195,22 +195,6 @@ const LinkPage = () => {
     <Layout>
       <Container maxWidth="xl" sx={{ py: 4 }}>
         {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" component="h1" sx={{ 
-            fontWeight: 'bold', 
-            color: '#1a1a1a',
-            mb: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2
-          }}>
-            <LinkIcon sx={{ fontSize: 40, color: '#1976d2' }} />
-            URL Shortener
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Create short URLs and track their performance with detailed analytics
-          </Typography>
-        </Box>
 
         {/* URL Generator Section */}
         <Card sx={{ mb: 4, boxShadow: 3 }}>
