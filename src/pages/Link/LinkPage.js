@@ -38,7 +38,9 @@ import {
   TrendingUp as TrendingUpIcon,
   Visibility as VisibilityIcon,
   Add as AddIcon,
-  Close as CloseIcon
+  Close as CloseIcon,
+  Notifications as NotificationsIcon,
+  AccountCircle as AccountCircleIcon
 } from '@mui/icons-material';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../authContext/AuthContext';
@@ -193,389 +195,414 @@ const LinkPage = () => {
 
   return (
     <Layout>
-      <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
         {/* Header */}
-
-        {/* URL Generator Section */}
-        <Card sx={{ mb: 4, boxShadow: 3 }}>
-          <CardContent sx={{ p: 4 }}>
-            <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: '#1976d2' }}>
-              🔗 Create Short URL
-            </Typography>
-            
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Enter your destination URL"
-                  placeholder="https://example.com/your-long-url"
-                  value={longUrl}
-                  onChange={(e) => setLongUrl(e.target.value)}
-                  variant="outlined"
-                  size="large"
-                  sx={{ mb: 2 }}
-                  InputProps={{
-                    startAdornment: <LinkIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                  }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Title (Optional)"
-                  placeholder="Enter a title for your link"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  variant="outlined"
-                />
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Description (Optional)"
-                  placeholder="Enter a description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  variant="outlined"
-                />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={handleGenerateShortUrl}
-                  disabled={loading}
-                  startIcon={loading ? <CircularProgress size={20} /> : <AddIcon />}
-                  sx={{
-                    py: 1.5,
-                    px: 4,
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
-                    background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
-                    '&:hover': {
-                      background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
-                    }
-                  }}
-                >
-                  {loading ? 'Generating...' : 'Generate Short URL'}
-                </Button>
-              </Grid>
-            </Grid>
-
-            {/* Generated URL Display */}
-            {generatedUrl && (
-              <Box sx={{ mt: 4, p: 3, bgcolor: '#f0f7ff', borderRadius: 2, border: '2px solid #e3f2fd' }}>
-                <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 'bold' }}>
-                  ✅ Short URL Generated Successfully!
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                  <TextField
-                    value={generatedUrl.short_url}
-                    variant="outlined"
-                    size="small"
-                    sx={{ flexGrow: 1, minWidth: 300 }}
-                    InputProps={{
-                      readOnly: true,
-                      style: { fontWeight: 'bold', color: '#1976d2' }
-                    }}
-                  />
-                  <Button
-                    variant="contained"
-                    startIcon={<CopyIcon />}
-                    onClick={() => handleCopyUrl(generatedUrl.short_url)}
-                    sx={{ whiteSpace: 'nowrap' }}
-                  >
-                    Copy URL
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<LaunchIcon />}
-                    onClick={() => window.open(generatedUrl.short_url, '_blank')}
-                    sx={{ whiteSpace: 'nowrap' }}
-                  >
-                    Open
-                  </Button>
-                </Box>
-              </Box>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* URLs Table Section */}
-        <Card sx={{ boxShadow: 3 }}>
-          <CardContent sx={{ p: 0 }}>
-            <Box sx={{ p: 3, pb: 2 }}>
-              <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
-                📊 Your Short URLs
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Manage and track all your shortened URLs
-              </Typography>
-            </Box>
-            
-            <Divider />
-            
-            {loadingUrls ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                <CircularProgress size={50} />
-              </Box>
-            ) : urls.length === 0 ? (
-              <Box sx={{ textAlign: 'center', py: 8 }}>
-                <LinkIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-                <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-                  No URLs Created Yet
-                </Typography>
-                <Typography variant="body2" color="text.disabled">
-                  Create your first short URL using the form above
-                </Typography>
-              </Box>
-            ) : (
-              <TableContainer>
-                <Table>
-                  <TableHead sx={{ bgcolor: '#f8f9fa' }}>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Original URL</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Short URL</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Title</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Clicks</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Created</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {urls.map((url) => (
-                      <TableRow key={url.id} hover>
-                        <TableCell>
-                          <Tooltip title={url.long_url}>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
-                                maxWidth: 200, 
-                                overflow: 'hidden', 
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {url.long_url}
-                            </Typography>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
-                                color: '#1976d2', 
-                                fontWeight: 'bold',
-                                maxWidth: 150,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {url.short_url}
-                            </Typography>
-                            <IconButton 
-                              size="small" 
-                              onClick={() => handleCopyUrl(url.short_url)}
-                              sx={{ p: 0.5 }}
-                            >
-                              <CopyIcon fontSize="small" />
-                            </IconButton>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {url.title || 'Untitled'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ textAlign: 'center' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                            <VisibilityIcon fontSize="small" color="primary" />
-                            <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                              {url.clicks || 0}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {formatDate(url.created_at)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={url.active ? 'Active' : 'Inactive'}
-                            color={url.active ? 'success' : 'default'}
-                            size="small"
-                            variant="outlined"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-                            <Tooltip title="Open URL">
-                              <IconButton 
-                                size="small" 
-                                onClick={() => window.open(url.short_url, '_blank')}
-                                color="primary"
-                              >
-                                <LaunchIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Analytics">
-                              <IconButton 
-                                size="small" 
-                                onClick={() => handleShowAnalytics(url)}
-                                color="success"
-                              >
-                                <AnalyticsIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="QR Code">
-                              <IconButton 
-                                size="small" 
-                                onClick={() => handleShowQR(url)}
-                                color="secondary"
-                              >
-                                <QrCodeIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Edit">
-                              <IconButton 
-                                size="small" 
-                                onClick={() => handleEditUrl(url)}
-                                color="info"
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Delete">
-                              <IconButton 
-                                size="small" 
-                                onClick={() => handleDeleteUrl(url.id)}
-                                color="error"
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Edit Dialog */}
-        <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, url: null })} maxWidth="sm" fullWidth>
-          <DialogTitle>Edit Short URL</DialogTitle>
-          <DialogContent>
-            <TextField
-              fullWidth
-              label="Title"
-              value={editDialog.url?.title || ''}
-              onChange={(e) => setEditDialog({
-                ...editDialog,
-                url: { ...editDialog.url, title: e.target.value }
-              })}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              value={editDialog.url?.description || ''}
-              onChange={(e) => setEditDialog({
-                ...editDialog,
-                url: { ...editDialog.url, description: e.target.value }
-              })}
-              margin="normal"
-              multiline
-              rows={3}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setEditDialog({ open: false, url: null })}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateUrl} variant="contained">
-              Update
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Analytics Dialog */}
-        <Dialog 
-          open={analyticsDialog.open} 
-          onClose={() => setAnalyticsDialog({ open: false, url: null })} 
-          maxWidth="lg" 
-          fullWidth
-          PaperProps={{ sx: { height: '90vh' } }}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            backgroundColor: '#091a48',
+            borderRadius: 0,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
         >
-          <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6">URL Analytics</Typography>
-            <IconButton onClick={() => setAnalyticsDialog({ open: false, url: null })}>
-              <CloseIcon />
+          <Typography variant="h6" sx={{ color: '#fff' }}>
+            URL Shortener Dashboard
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <IconButton size="large" sx={{ color: 'white' }}>
+              <NotificationsIcon />
             </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ p: 0, overflow: 'auto' }}>
-            {analyticsDialog.url && (
-              <LinkAnalytics 
-                url={analyticsDialog.url} 
-                onClose={() => setAnalyticsDialog({ open: false, url: null })}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
+            <IconButton size="large" sx={{ color: 'white' }}>
+              <AccountCircleIcon />
+            </IconButton>
+          </Box>
+        </Paper>
 
-        {/* QR Code Dialog */}
-        <Dialog open={qrDialog.open} onClose={() => setQrDialog({ open: false, url: null })} maxWidth="sm" fullWidth>
-          <DialogTitle>QR Code</DialogTitle>
-          <DialogContent sx={{ textAlign: 'center', py: 3 }}>
-            {qrDialog.url && (
-              <>
-                <img
-                  src={generateQRCodeUrl(qrDialog.url.short_url, '300x300')}
-                  alt="QR Code"
-                  style={{ maxWidth: '100%', height: 'auto', marginBottom: 16 }}
-                />
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Scan this QR code to access: {qrDialog.url.short_url}
-                </Typography>
-                <Button
-                  variant="outlined"
-                  startIcon={<CopyIcon />}
-                  onClick={() => handleCopyUrl(qrDialog.url.short_url)}
-                >
-                  Copy URL
-                </Button>
-              </>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setQrDialog({ open: false, url: null })}>
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+              {/* URL Generator Section */}
+              <Card sx={{ mb: 4, boxShadow: 3 }}>
+                <CardContent sx={{ p: 4 }}>
+                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: '#1976d2' }}>
+                    🔗 Create Short URL
+                  </Typography>
+                  
+                  <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Enter your destination URL"
+                        placeholder="https://example.com/your-long-url"
+                        value={longUrl}
+                        onChange={(e) => setLongUrl(e.target.value)}
+                        variant="outlined"
+                        size="large"
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                          startAdornment: <LinkIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                        }}
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Title (Optional)"
+                        placeholder="Enter a title for your link"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        variant="outlined"
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Description (Optional)"
+                        placeholder="Enter a description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        variant="outlined"
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12}>
+                      <Button
+                        variant="contained"
+                        size="large"
+                        onClick={handleGenerateShortUrl}
+                        disabled={loading}
+                        startIcon={loading ? <CircularProgress size={20} /> : <AddIcon />}
+                        sx={{
+                          py: 1.5,
+                          px: 4,
+                          fontSize: '1.1rem',
+                          fontWeight: 'bold',
+                          background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+                          '&:hover': {
+                            background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
+                          }
+                        }}
+                      >
+                        {loading ? 'Generating...' : 'Generate Short URL'}
+                      </Button>
+                    </Grid>
+                  </Grid>
 
-        {/* Snackbar for notifications */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={4000}
-          onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        >
-          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </Container>
+                  {/* Generated URL Display */}
+                  {generatedUrl && (
+                    <Box sx={{ mt: 4, p: 3, bgcolor: '#f0f7ff', borderRadius: 2, border: '2px solid #e3f2fd' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 'bold' }}>
+                        ✅ Short URL Generated Successfully!
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                        <TextField
+                          value={generatedUrl.short_url}
+                          variant="outlined"
+                          size="small"
+                          sx={{ flexGrow: 1, minWidth: 300 }}
+                          InputProps={{
+                            readOnly: true,
+                            style: { fontWeight: 'bold', color: '#1976d2' }
+                          }}
+                        />
+                        <Button
+                          variant="contained"
+                          startIcon={<CopyIcon />}
+                          onClick={() => handleCopyUrl(generatedUrl.short_url)}
+                          sx={{ whiteSpace: 'nowrap' }}
+                        >
+                          Copy URL
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          startIcon={<LaunchIcon />}
+                          onClick={() => window.open(generatedUrl.short_url, '_blank')}
+                          sx={{ whiteSpace: 'nowrap' }}
+                        >
+                          Open
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* URLs Table Section */}
+              <Card sx={{ boxShadow: 3 }}>
+                <CardContent sx={{ p: 0 }}>
+                  <Box sx={{ p: 3, pb: 2 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
+                      📊 Your Short URLs
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Manage and track all your shortened URLs
+                    </Typography>
+                  </Box>
+                  
+                  <Divider />
+                  
+                  {loadingUrls ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                      <CircularProgress size={50} />
+                    </Box>
+                  ) : urls.length === 0 ? (
+                    <Box sx={{ textAlign: 'center', py: 8 }}>
+                      <LinkIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+                      <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                        No URLs Created Yet
+                      </Typography>
+                      <Typography variant="body2" color="text.disabled">
+                        Create your first short URL using the form above
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <TableContainer>
+                      <Table>
+                        <TableHead sx={{ bgcolor: '#f8f9fa' }}>
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Original URL</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Short URL</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Title</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Clicks</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Created</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Actions</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {urls.map((url) => (
+                            <TableRow key={url.id} hover>
+                              <TableCell>
+                                <Tooltip title={url.long_url}>
+                                  <Typography 
+                                    variant="body2" 
+                                    sx={{ 
+                                      maxWidth: 200, 
+                                      overflow: 'hidden', 
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {url.long_url}
+                                  </Typography>
+                                </Tooltip>
+                              </TableCell>
+                              <TableCell>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Typography 
+                                    variant="body2" 
+                                    sx={{ 
+                                      color: '#1976d2', 
+                                      fontWeight: 'bold',
+                                      maxWidth: 150,
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {url.short_url}
+                                  </Typography>
+                                  <IconButton 
+                                    size="small" 
+                                    onClick={() => handleCopyUrl(url.short_url)}
+                                    sx={{ p: 0.5 }}
+                                  >
+                                    <CopyIcon fontSize="small" />
+                                  </IconButton>
+                                </Box>
+                              </TableCell>
+                              <TableCell>
+                                <Typography variant="body2">
+                                  {url.title || 'Untitled'}
+                                </Typography>
+                              </TableCell>
+                              <TableCell sx={{ textAlign: 'center' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                                  <VisibilityIcon fontSize="small" color="primary" />
+                                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+                                    {url.clicks || 0}
+                                  </Typography>
+                                </Box>
+                              </TableCell>
+                              <TableCell>
+                                <Typography variant="body2" color="text.secondary">
+                                  {formatDate(url.created_at)}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={url.active ? 'Active' : 'Inactive'}
+                                  color={url.active ? 'success' : 'default'}
+                                  size="small"
+                                  variant="outlined"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                                  <Tooltip title="Open URL">
+                                    <IconButton 
+                                      size="small" 
+                                      onClick={() => window.open(url.short_url, '_blank')}
+                                      color="primary"
+                                    >
+                                      <LaunchIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Analytics">
+                                    <IconButton 
+                                      size="small" 
+                                      onClick={() => handleShowAnalytics(url)}
+                                      color="success"
+                                    >
+                                      <AnalyticsIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="QR Code">
+                                    <IconButton 
+                                      size="small" 
+                                      onClick={() => handleShowQR(url)}
+                                      color="secondary"
+                                    >
+                                      <QrCodeIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Edit">
+                                    <IconButton 
+                                      size="small" 
+                                      onClick={() => handleEditUrl(url)}
+                                      color="info"
+                                    >
+                                      <EditIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Delete">
+                                    <IconButton 
+                                      size="small" 
+                                      onClick={() => handleDeleteUrl(url.id)}
+                                      color="error"
+                                    >
+                                      <DeleteIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                </Box>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Edit Dialog */}
+              <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, url: null })} maxWidth="sm" fullWidth>
+                <DialogTitle>Edit Short URL</DialogTitle>
+                <DialogContent>
+                  <TextField
+                    fullWidth
+                    label="Title"
+                    value={editDialog.url?.title || ''}
+                    onChange={(e) => setEditDialog({
+                      ...editDialog,
+                      url: { ...editDialog.url, title: e.target.value }
+                    })}
+                    margin="normal"
+                  />
+                  <TextField
+                    fullWidth
+                    label="Description"
+                    value={editDialog.url?.description || ''}
+                    onChange={(e) => setEditDialog({
+                      ...editDialog,
+                      url: { ...editDialog.url, description: e.target.value }
+                    })}
+                    margin="normal"
+                    multiline
+                    rows={3}
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setEditDialog({ open: false, url: null })}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleUpdateUrl} variant="contained">
+                    Update
+                  </Button>
+                </DialogActions>
+              </Dialog>
+
+              {/* Analytics Dialog */}
+              <Dialog 
+                open={analyticsDialog.open} 
+                onClose={() => setAnalyticsDialog({ open: false, url: null })} 
+                maxWidth="lg" 
+                fullWidth
+                PaperProps={{ sx: { height: '90vh' } }}
+              >
+                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="h6">URL Analytics</Typography>
+                  <IconButton onClick={() => setAnalyticsDialog({ open: false, url: null })}>
+                    <CloseIcon />
+                  </IconButton>
+                </DialogTitle>
+                <DialogContent sx={{ p: 0, overflow: 'auto' }}>
+                  {analyticsDialog.url && (
+                    <LinkAnalytics 
+                      url={analyticsDialog.url} 
+                      onClose={() => setAnalyticsDialog({ open: false, url: null })}
+                    />
+                  )}
+                </DialogContent>
+              </Dialog>
+
+              {/* QR Code Dialog */}
+              <Dialog open={qrDialog.open} onClose={() => setQrDialog({ open: false, url: null })} maxWidth="sm" fullWidth>
+                <DialogTitle>QR Code</DialogTitle>
+                <DialogContent sx={{ textAlign: 'center', py: 3 }}>
+                  {qrDialog.url && (
+                    <>
+                      <img
+                        src={generateQRCodeUrl(qrDialog.url.short_url, '300x300')}
+                        alt="QR Code"
+                        style={{ maxWidth: '100%', height: 'auto', marginBottom: 16 }}
+                      />
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        Scan this QR code to access: {qrDialog.url.short_url}
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        startIcon={<CopyIcon />}
+                        onClick={() => handleCopyUrl(qrDialog.url.short_url)}
+                      >
+                        Copy URL
+                      </Button>
+                    </>
+                  )}
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setQrDialog({ open: false, url: null })}>
+                    Close
+                  </Button>
+                </DialogActions>
+              </Dialog>
+
+              {/* Snackbar for notifications */}
+              <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              >
+                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+                  {snackbar.message}
+                </Alert>
+              </Snackbar>
+        </Container>
+      </Box>
     </Layout>
   );
 };
