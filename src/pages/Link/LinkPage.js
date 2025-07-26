@@ -321,7 +321,7 @@ const LinkPage = () => {
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
-            bit.ly/
+            marketincer.com/
           </Typography>
           <TextField
             fullWidth
@@ -333,7 +333,7 @@ const LinkPage = () => {
           />
         </Box>
         <Typography variant="caption" color="text.secondary">
-          Example: bit.ly/my-product-launch. You can customize the ending (my-product-launch) if you haven't reached your limit.
+          Example: marketincer.com/my-product-launch. You can customize the ending (my-product-launch) if you haven't reached your limit.
         </Typography>
       </Grid>
       
