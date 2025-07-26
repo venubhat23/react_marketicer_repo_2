@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
 import Sidebar from './Sidebar';
-import TopBar from './TopBar';
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -20,21 +19,17 @@ const Layout = ({ children }) => {
   };
 
   const sidebarWidth = sidebarOpen ? 120 : 40;
-  const topBarHeight = 64; // Standard AppBar height
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Top Navigation Bar */}
-      <TopBar />
-
       {/* Sidebar */}
       <Box
         sx={{
           position: 'fixed',
-          top: topBarHeight, // Position below the top bar
+          top: 0,
           left: 0,
           width: sidebarWidth,
-          height: `calc(100vh - ${topBarHeight}px)`, // Adjust height to account for top bar
+          height: '100vh',
           zIndex: 1200,
           transition: 'width 0.3s ease-in-out',
           boxShadow: '2px 0 10px rgba(0,0,0,0.1)',
@@ -49,9 +44,8 @@ const Layout = ({ children }) => {
         sx={{
           flexGrow: 1,
           marginLeft: `${sidebarWidth}px`,
-          marginTop: `${topBarHeight}px`, // Add top margin for the top bar
           //transition: 'margin-left 0.3s ease-in-out',
-          minHeight: `calc(100vh - ${topBarHeight}px)`, // Adjust min height
+          minHeight: '100vh',
           width: `calc(100vw - ${sidebarWidth}px)`,
           overflow: 'auto',
           //bgcolor: '#f5f5f5'
