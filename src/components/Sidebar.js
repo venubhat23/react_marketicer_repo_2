@@ -35,7 +35,6 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import BusinessIcon from '@mui/icons-material/Business';
 import PersonIcon from '@mui/icons-material/Person';
-import LinkIcon from '@mui/icons-material/Link';
 import { Link, useNavigate } from "react-router-dom";
 import LanguageIcon from '@mui/icons-material/Language';
 import { useAuth } from "../authContext/AuthContext";
@@ -207,16 +206,7 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
 
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Link to="/link">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <LinkIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Link</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
+
 
         {/* Dynamic Marketplace Options Based on Role */}
         {marketplaceOptions.map((option, index) => (
