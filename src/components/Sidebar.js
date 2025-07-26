@@ -206,7 +206,16 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
 
-
+        <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/link">
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                <LanguageIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Link</Typography>
+              </Box>
+            </Link>
+          </ListItemButton>
+        </ListItem>
 
         {/* Dynamic Marketplace Options Based on Role */}
         {marketplaceOptions.map((option, index) => (
