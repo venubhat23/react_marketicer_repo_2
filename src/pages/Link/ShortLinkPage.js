@@ -205,59 +205,10 @@ const ShortLinkPage = ({ noLayout = false }) => {
   const content = (
     <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
         {/* Header */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 2,
-            backgroundColor: '#091a48',
-            borderRadius: 0,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
-          <Typography variant="h6" sx={{ color: '#fff' }}>
-            URL Shortener Dashboard
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <IconButton size="large" sx={{ color: 'white' }}>
-              <NotificationsIcon />
-            </IconButton>
-            <IconButton size="large" sx={{ color: 'white' }}>
-              <AccountCircleIcon />
-            </IconButton>
-          </Box>
-        </Paper>
 
         <Container maxWidth="xl" sx={{ py: 4 }}>
           {/* Tab Switcher - moved outside of Card */}
-          <Box sx={{ mb: 3 }}>
-            <Tabs
-              value={0}
-              sx={{
-                bgcolor: '#fff',
-                borderRadius: 1,
-                boxShadow: 1,
-                '& .MuiTab-root': {
-                  textTransform: 'none',
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  minWidth: 120,
-                  color: '#666',
-                  '&.Mui-selected': {
-                    color: '#1976d2',
-                  }
-                },
-                '& .MuiTabs-indicator': {
-                  backgroundColor: '#1976d2',
-                  height: 3,
-                }
-              }}
-            >
-              <Tab label="Short Link" />
-              <Tab label="Link" onClick={handleSwitchToLink} />
-            </Tabs>
-          </Box>
+
 
           {/* URL Generator Section */}
           <Card sx={{ mb: 4, boxShadow: 3 }}>

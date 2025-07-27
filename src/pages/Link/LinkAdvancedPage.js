@@ -175,29 +175,6 @@ const LinkAdvancedPage = () => {
   return (
     <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
       {/* Header */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2,
-          backgroundColor: '#091A48',
-          borderRadius: 0,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}
-      >
-        <Typography variant="h6" sx={{ color: '#fff', fontWeight: 'bold' }}>
-          Marketincer URL Shortener
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <IconButton size="large" sx={{ color: 'white' }}>
-            <NotificationsIcon />
-          </IconButton>
-          <IconButton size="large" sx={{ color: 'white' }}>
-            <AccountCircleIcon />
-          </IconButton>
-        </Box>
-      </Paper>
 
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Card sx={{ mb: 4, boxShadow: 4, borderRadius: 3 }}>
