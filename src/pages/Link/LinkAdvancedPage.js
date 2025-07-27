@@ -173,7 +173,7 @@ const LinkAdvancedPage = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+    <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh' }}>
       {/* Header */}
 
       <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -707,7 +707,7 @@ const LinkAdvancedPage = () => {
                         value={generatedUrl.short_url}
                         variant="outlined"
                         size="small"
-                        sx={{ flexGrow: 1 }}
+                        sx={{ flex: '1 1 auto' }}
                         InputProps={{
                           readOnly: true,
                           style: { fontWeight: 'bold', color: '#882AFF' }
