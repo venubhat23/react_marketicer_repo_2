@@ -181,34 +181,7 @@ const LinkAdvancedPage = () => {
           <CardContent sx={{ p: 4 }}>
             {/* Tab Switcher */}
             <Box sx={{ mb: 4 }}>
-              <Tabs
-                value={activeTab}
-                onChange={(e, newValue) => setActiveTab(newValue)}
-                sx={{
-                  '& .MuiTab-root': {
-                    textTransform: 'none',
-                    fontSize: '1rem',
-                    fontWeight: 'bold',
-                    minWidth: 120,
-                    color: '#666',
-                    '&.Mui-selected': {
-                      color: '#882AFF',
-                    }
-                  },
-                  '& .MuiTabs-indicator': {
-                    backgroundColor: '#882AFF',
-                    height: 3,
-                  }
-                }}
-              >
-                <Tab label="Short Link" />
-                <Tab label="Advanced Link" />
-              </Tabs>
             </Box>
-
-            <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', color: '#091A48' }}>
-              🔗 Create a new link
-            </Typography>
             
             <Grid container spacing={4}>
               {/* Left Column - Form */}
@@ -308,9 +281,6 @@ const LinkAdvancedPage = () => {
                       }}
                     />
                   </Box>
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    You can create 2 more custom back-halves this month.
-                  </Typography>
                 </Box>
 
                 <Divider sx={{ my: 4 }} />
@@ -444,7 +414,6 @@ const LinkAdvancedPage = () => {
                         <Typography variant="h6" sx={{ color: '#091A48', fontWeight: 'bold' }}>
                           UTM parameters
                         </Typography>
-                        <Chip label="Upgrade" size="small" sx={{ bgcolor: '#882AFF', color: 'white' }} />
                       </Box>
                       <Switch
                         checked={enableUTM}

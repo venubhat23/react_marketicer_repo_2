@@ -212,11 +212,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
 
           {/* URL Generator Section */}
           <Card sx={{ mb: 4, boxShadow: 3 }}>
-            <CardContent sx={{ p: 4 }}>
-              <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: '#1976d2' }}>
-                🔗 Create Short URL
-              </Typography>
-              
+            <CardContent sx={{ p: 4 }}>              
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <TextField
