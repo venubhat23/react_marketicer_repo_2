@@ -70,6 +70,7 @@ const LinkAdvancedPage = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [previewDialog, setPreviewDialog] = useState(false);
   const [activeTab, setActiveTab] = useState(1);
+  const [apiError, setApiError] = useState('');
 
   // Color palette for QR codes
   const qrColors = [
@@ -126,33 +127,122 @@ const LinkAdvancedPage = () => {
     }
   };
 
-  // Generate QR Code (mock implementation)
+  // Generate QR Code (mock implementation for preview)
   const generateQRCode = () => {
     const url = getShortUrlPreview();
-    // In a real implementation, you'd use a QR code library like qrcode
-    // For now, we'll show a placeholder
+    // For preview purposes only - actual QR code will come from API
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}&color=${qrColor.replace('#', '')}&bgcolor=FFFFFF`;
   };
 
+  // API call to create short link
+  const createShortLink = async () => {
+    const payload = {
+      destination_url: longUrl.trim(),
+      title: title.trim() || undefined,
+      custom_back_half: customBackHalf.trim() || undefined,
+      enable_utm: enableUTM,
+      enable_qr: enableQR
+    };
+
+    // Add UTM parameters if enabled
+    if (enableUTM) {
+      if (utmSource.trim()) payload.utm_source = utmSource.trim();
+      if (utmMedium.trim()) payload.utm_medium = utmMedium.trim();
+      if (utmCampaign.trim()) payload.utm_campaign = utmCampaign.trim();
+      if (utmTerm.trim()) payload.utm_term = utmTerm.trim();
+      if (utmContent.trim()) payload.utm_content = utmContent.trim();
+    }
+
+    try {
+      const response = await fetch('/api/v1/short_links', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization header if needed
+          // 'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  };
+
   const handleCreateLink = async () => {
+    // Validation
     if (!longUrl.trim()) {
       showSnackbar('Please enter a destination URL', 'warning');
       return;
     }
 
+    // Basic URL validation
+    try {
+      new URL(longUrl);
+    } catch (error) {
+      showSnackbar('Please enter a valid URL (including http:// or https://)', 'error');
+      return;
+    }
+
+    // Custom back-half validation
+    if (customBackHalf.trim()) {
+      const backHalf = customBackHalf.trim();
+      if (backHalf.length < 3 || backHalf.length > 50) {
+        showSnackbar('Custom back-half must be between 3-50 characters', 'error');
+        return;
+      }
+      
+      // Check for valid characters (alphanumeric, hyphens, underscores)
+      if (!/^[a-zA-Z0-9_-]+$/.test(backHalf)) {
+        showSnackbar('Custom back-half can only contain letters, numbers, hyphens, and underscores', 'error');
+        return;
+      }
+    }
+
     setLoading(true);
+    setApiError('');
     
-    // Simulate API call
-    setTimeout(() => {
-      const finalUrl = generatePreviewUrl();
+    try {
+      const result = await createShortLink();
+      
       setGeneratedUrl({
-        short_url: getShortUrlPreview(),
-        long_url: finalUrl,
-        qr_code: enableQR ? generateQRCode() : null
+        short_url: result.short_link,
+        long_url: result.final_url || result.original_url,
+        original_url: result.original_url,
+        qr_code: result.qr_code_url || null,
+        title: result.title,
+        utm_params: result.utm_params,
+        created_at: result.created_at
       });
-      setLoading(false);
+      
       showSnackbar('Link created successfully!', 'success');
-    }, 2000);
+    } catch (error) {
+      let errorMessage = 'Failed to create link. Please try again.';
+      
+      // Handle specific error cases
+      if (error.message.includes('already taken')) {
+        errorMessage = 'The custom back-half is already taken. Please choose a different one.';
+      } else if (error.message.includes('required')) {
+        errorMessage = 'Destination URL is required.';
+      } else if (error.message.includes('invalid')) {
+        errorMessage = 'Please check your input data and try again.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setApiError(errorMessage);
+      showSnackbar(errorMessage, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCopyUrl = async (url) => {
@@ -183,6 +273,17 @@ const LinkAdvancedPage = () => {
             <Box sx={{ mb: 4 }}>
             </Box>
             
+            {/* API Error Display */}
+            {apiError && (
+              <Alert 
+                severity="error" 
+                sx={{ mb: 3 }}
+                onClose={() => setApiError('')}
+              >
+                {apiError}
+              </Alert>
+            )}
+            
             <Grid container spacing={4}>
               {/* Left Column - Form */}
               <Grid item xs={12} lg={8}>
@@ -197,6 +298,8 @@ const LinkAdvancedPage = () => {
                     value={longUrl}
                     onChange={(e) => setLongUrl(e.target.value)}
                     variant="outlined"
+                    error={!longUrl.trim() && apiError.includes('required')}
+                    helperText={!longUrl.trim() && apiError.includes('required') ? 'Destination URL is required' : ''}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
@@ -268,6 +371,12 @@ const LinkAdvancedPage = () => {
                       value={customBackHalf}
                       onChange={(e) => setCustomBackHalf(e.target.value)}
                       variant="outlined"
+                      error={apiError.includes('already taken') || apiError.includes('characters')}
+                      helperText={
+                        apiError.includes('already taken') ? 'This custom back-half is already taken' :
+                        apiError.includes('characters') ? 'Must be 3-50 characters, letters/numbers/hyphens/underscores only' : 
+                        customBackHalf.length > 0 ? `${customBackHalf.length}/50 characters` : ''
+                      }
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
@@ -737,9 +846,27 @@ const LinkAdvancedPage = () => {
                       </Button>
                     </Box>
                     
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Original URL:</strong> {generatedUrl.long_url}
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      <strong>Original URL:</strong> {generatedUrl.original_url}
                     </Typography>
+                    
+                    {generatedUrl.long_url !== generatedUrl.original_url && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        <strong>Final URL (with UTM):</strong> {generatedUrl.long_url}
+                      </Typography>
+                    )}
+                    
+                    {generatedUrl.title && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        <strong>Title:</strong> {generatedUrl.title}
+                      </Typography>
+                    )}
+                    
+                    {generatedUrl.created_at && (
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Created:</strong> {new Date(generatedUrl.created_at).toLocaleString()}
+                      </Typography>
+                    )}
                   </Grid>
                   
                   {generatedUrl.qr_code && (
@@ -752,11 +879,46 @@ const LinkAdvancedPage = () => {
                           src={generatedUrl.qr_code}
                           alt="Generated QR Code"
                           style={{ width: 100, height: 100 }}
+                          onError={(e) => {
+                            // Fallback to preview QR code if API QR code fails to load
+                            e.target.src = generateQRCode();
+                          }}
                         />
+                        <Box sx={{ mt: 1 }}>
+                          <Button
+                            variant="text"
+                            size="small"
+                            startIcon={<CopyIcon />}
+                            onClick={() => handleCopyUrl(generatedUrl.qr_code)}
+                            sx={{ color: '#882AFF' }}
+                          >
+                            Copy QR URL
+                          </Button>
+                        </Box>
                       </Box>
                     </Grid>
                   )}
                 </Grid>
+                
+                {/* UTM Parameters Display */}
+                {generatedUrl.utm_params && Object.keys(generatedUrl.utm_params).length > 0 && (
+                  <Box sx={{ mt: 3, p: 2, bgcolor: '#fff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
+                      UTM Parameters Applied:
+                    </Typography>
+                    <Grid container spacing={2}>
+                      {Object.entries(generatedUrl.utm_params).map(([key, value]) => (
+                        value && (
+                          <Grid item xs={12} sm={6} key={key}>
+                            <Typography variant="body2">
+                              <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                            </Typography>
+                          </Grid>
+                        )
+                      ))}
+                    </Grid>
+                  </Box>
+                )}
               </Box>
             )}
           </CardContent>
