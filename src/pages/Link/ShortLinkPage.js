@@ -230,35 +230,38 @@ const ShortLinkPage = ({ noLayout = false }) => {
         </Paper>
 
         <Container maxWidth="xl" sx={{ py: 4 }}>
+          {/* Tab Switcher - moved outside of Card */}
+          <Box sx={{ mb: 3 }}>
+            <Tabs
+              value={0}
+              sx={{
+                bgcolor: '#fff',
+                borderRadius: 1,
+                boxShadow: 1,
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  minWidth: 120,
+                  color: '#666',
+                  '&.Mui-selected': {
+                    color: '#1976d2',
+                  }
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#1976d2',
+                  height: 3,
+                }
+              }}
+            >
+              <Tab label="Short Link" />
+              <Tab label="Link" onClick={handleSwitchToLink} />
+            </Tabs>
+          </Box>
+
           {/* URL Generator Section */}
           <Card sx={{ mb: 4, boxShadow: 3 }}>
             <CardContent sx={{ p: 4 }}>
-              {/* Tab Switcher */}
-              <Box sx={{ mb: 3 }}>
-                <Tabs
-                  value={0}
-                  sx={{
-                    '& .MuiTab-root': {
-                      textTransform: 'none',
-                      fontSize: '1rem',
-                      fontWeight: 'bold',
-                      minWidth: 120,
-                      color: '#666',
-                      '&.Mui-selected': {
-                        color: '#1976d2',
-                      }
-                    },
-                    '& .MuiTabs-indicator': {
-                      backgroundColor: '#1976d2',
-                      height: 3,
-                    }
-                  }}
-                >
-                  <Tab label="Short Link" />
-                  <Tab label="Link" onClick={handleSwitchToLink} />
-                </Tabs>
-              </Box>
-
               <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: '#1976d2' }}>
                 🔗 Create Short URL
               </Typography>
