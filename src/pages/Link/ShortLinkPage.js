@@ -78,7 +78,7 @@ const ShortLinkPage = () => {
     if (user?.id) {
       loadUserUrls();
     }
-  }, [user]);
+  }, [user, loadUserUrls]);
 
   const loadUserUrls = async () => {
     try {

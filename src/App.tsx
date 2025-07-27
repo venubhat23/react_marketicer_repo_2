@@ -7,7 +7,7 @@ import Login from './pages/Login';
 import { ThemeProvider } from '@mui/material';
 import theme from './theme';
 import SignUp from './pages/SignUp';
-import {AuthProvider, useAuth} from './authContext/AuthContext'
+import {AuthProvider} from './authContext/AuthContext'
 import ProtectedRoute from './components/ProctedRoute'
 import { getUserRole } from './utils/userUtils';
 
