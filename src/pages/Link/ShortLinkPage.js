@@ -27,7 +27,8 @@ import {
   Container,
   Snackbar,
   Tab,
-  Tabs
+  Tabs,
+  Pagination
 } from '@mui/material';
 import {
   ContentCopy as CopyIcon,
@@ -41,7 +42,8 @@ import {
   Add as AddIcon,
   Close as CloseIcon,
   Notifications as NotificationsIcon,
-  AccountCircle as AccountCircleIcon
+  AccountCircle as AccountCircleIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
@@ -67,6 +69,8 @@ const ShortLinkPage = ({ noLayout = false }) => {
   const [loading, setLoading] = useState(false);
   const [urls, setUrls] = useState([]);
   const [loadingUrls, setLoadingUrls] = useState(true);
+  const [urlStats, setUrlStats] = useState({ total_links: 0, total_clicks: 0 });
+  const [pagination, setPagination] = useState({ page: 1, per_page: 20 });
   const [generatedUrl, setGeneratedUrl] = useState(null);
   const [editDialog, setEditDialog] = useState({ open: false, url: null });
   const [qrDialog, setQrDialog] = useState({ open: false, url: null });
@@ -81,27 +85,47 @@ const ShortLinkPage = ({ noLayout = false }) => {
     setSnackbar(prev => ({ ...prev, open: false }));
   }, []);
 
-  const loadUserUrls = useCallback(async () => {
+  const loadUserUrls = useCallback(async (page = 1) => {
     try {
       setLoadingUrls(true);
-      const response = await getUserUrls(user.id);
-      if (response.success) {
-        setUrls(response.data.urls || []);
+      console.log('Loading URLs for user:', user.id, 'page:', page);
+      const response = await getUserUrls(user.id, page, pagination.per_page);
+      console.log('API Response:', response);
+      
+      if (response.success && response.data) {
+        const { urls = [], total_links = 0, total_clicks = 0, page: currentPage = 1, per_page = 20 } = response.data;
+        
+        setUrls(urls);
+        setUrlStats({
+          total_links,
+          total_clicks
+        });
+        setPagination(prev => ({
+          ...prev,
+          page: currentPage,
+          per_page
+        }));
+        
+        console.log('URLs loaded successfully:', urls.length, 'URLs');
       } else {
-        showSnackbar('Failed to load URLs', 'error');
+        console.error('API Error:', response.message || 'Failed to load URLs');
+        showSnackbar(response.message || 'Failed to load URLs', 'error');
       }
     } catch (error) {
       console.error('Error loading URLs:', error);
-      showSnackbar('Error loading URLs', 'error');
+      showSnackbar('Error loading URLs: ' + (error.message || 'Unknown error'), 'error');
     } finally {
       setLoadingUrls(false);
     }
-  }, [user?.id, showSnackbar]);
+  }, [user?.id, pagination.per_page, showSnackbar]);
 
   // Load user's URLs on component mount
   useEffect(() => {
     if (user?.id) {
+      console.log('User authenticated, loading URLs for user ID:', user.id);
       loadUserUrls();
+    } else {
+      console.log('No user authenticated');
     }
   }, [user, loadUserUrls]);
 
@@ -207,6 +231,13 @@ const ShortLinkPage = ({ noLayout = false }) => {
         {/* Header */}
 
         <Container maxWidth="xl" sx={{ py: 4 }}>
+          {/* Check for authenticated user */}
+          {!user?.id && (
+            <Alert severity="warning" sx={{ mb: 4 }}>
+              Please log in to access URL shortening features.
+            </Alert>
+          )}
+          
           {/* Tab Switcher - moved outside of Card */}
 
 
@@ -314,16 +345,84 @@ const ShortLinkPage = ({ noLayout = false }) => {
             </CardContent>
           </Card>
 
+          {/* Statistics Section */}
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ boxShadow: 2, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                <CardContent sx={{ textAlign: 'center', color: 'white' }}>
+                  <LinkIcon sx={{ fontSize: 48, mb: 1, opacity: 0.9 }} />
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {loadingUrls ? <CircularProgress size={24} sx={{ color: 'white' }} /> : urlStats.total_links}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Total Links
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ boxShadow: 2, background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+                <CardContent sx={{ textAlign: 'center', color: 'white' }}>
+                  <VisibilityIcon sx={{ fontSize: 48, mb: 1, opacity: 0.9 }} />
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {loadingUrls ? <CircularProgress size={24} sx={{ color: 'white' }} /> : urlStats.total_clicks}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Total Clicks
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ boxShadow: 2, background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                <CardContent sx={{ textAlign: 'center', color: 'white' }}>
+                  <AnalyticsIcon sx={{ fontSize: 48, mb: 1, opacity: 0.9 }} />
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {loadingUrls ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 
+                     (urlStats.total_links > 0 ? (urlStats.total_clicks / urlStats.total_links).toFixed(1) : '0.0')}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Avg. Clicks/Link
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={{ boxShadow: 2, background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+                <CardContent sx={{ textAlign: 'center', color: 'white' }}>
+                  <AccountCircleIcon sx={{ fontSize: 48, mb: 1, opacity: 0.9 }} />
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {loadingUrls ? <CircularProgress size={24} sx={{ color: 'white' }} /> : urls.filter(url => url.active).length}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Active Links
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
           {/* URLs Table Section */}
           <Card sx={{ boxShadow: 3 }}>
             <CardContent sx={{ p: 0 }}>
-              <Box sx={{ p: 3, pb: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
-                  📊 Your Short URLs
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Manage and track all your shortened URLs
-                </Typography>
+              <Box sx={{ p: 3, pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box>
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
+                    📊 Your Short URLs
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Manage and track all your shortened URLs ({urlStats.total_links} total links, {urlStats.total_clicks} total clicks)
+                  </Typography>
+                </Box>
+                <Button
+                  variant="outlined"
+                  startIcon={<RefreshIcon />}
+                  onClick={() => loadUserUrls(pagination.page)}
+                  disabled={loadingUrls}
+                  sx={{ whiteSpace: 'nowrap' }}
+                >
+                  Refresh
+                </Button>
               </Box>
               
               <Divider />
@@ -478,6 +577,21 @@ const ShortLinkPage = ({ noLayout = false }) => {
                     </TableBody>
                   </Table>
                 </TableContainer>
+              )}
+              
+              {/* Pagination Controls */}
+              {urls.length > 0 && urlStats.total_links > pagination.per_page && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                  <Pagination
+                    count={Math.ceil(urlStats.total_links / pagination.per_page)}
+                    page={pagination.page}
+                    onChange={(event, page) => loadUserUrls(page)}
+                    color="primary"
+                    size="large"
+                    showFirstButton
+                    showLastButton
+                  />
+                </Box>
               )}
             </CardContent>
           </Card>
