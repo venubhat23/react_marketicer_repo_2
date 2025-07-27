@@ -27,7 +27,13 @@ import {
   Container,
   Snackbar,
   Tab,
-  Tabs
+  Tabs,
+  Pagination,
+  Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import {
   ContentCopy as CopyIcon,
@@ -41,7 +47,8 @@ import {
   Add as AddIcon,
   Close as CloseIcon,
   Notifications as NotificationsIcon,
-  AccountCircle as AccountCircleIcon
+  AccountCircle as AccountCircleIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
@@ -72,6 +79,14 @@ const ShortLinkPage = ({ noLayout = false }) => {
   const [qrDialog, setQrDialog] = useState({ open: false, url: null });
   const [analyticsDialog, setAnalyticsDialog] = useState({ open: false, url: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  
+  // Pagination and filtering states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalLinks, setTotalLinks] = useState(0);
+  const [totalClicks, setTotalClicks] = useState(0);
+  const [perPage, setPerPage] = useState(20);
+  const [refreshing, setRefreshing] = useState(false);
 
   const showSnackbar = useCallback((message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -81,12 +96,26 @@ const ShortLinkPage = ({ noLayout = false }) => {
     setSnackbar(prev => ({ ...prev, open: false }));
   }, []);
 
-  const loadUserUrls = useCallback(async () => {
+  const loadUserUrls = useCallback(async (page = 1, showRefreshing = false) => {
     try {
-      setLoadingUrls(true);
-      const response = await getUserUrls(user.id);
+      if (showRefreshing) {
+        setRefreshing(true);
+      } else {
+        setLoadingUrls(true);
+      }
+      
+      const response = await getUserUrls(user.id, page, perPage);
       if (response.success) {
-        setUrls(response.data.urls || []);
+        const data = response.data;
+        setUrls(data.urls || []);
+        setTotalLinks(data.total_links || 0);
+        setTotalClicks(data.total_clicks || 0);
+        setCurrentPage(data.page || 1);
+        setPerPage(data.per_page || 20);
+        
+        // Calculate total pages
+        const calculatedTotalPages = Math.ceil((data.total_links || 0) / (data.per_page || 20));
+        setTotalPages(calculatedTotalPages);
       } else {
         showSnackbar('Failed to load URLs', 'error');
       }
@@ -95,15 +124,25 @@ const ShortLinkPage = ({ noLayout = false }) => {
       showSnackbar('Error loading URLs', 'error');
     } finally {
       setLoadingUrls(false);
+      setRefreshing(false);
     }
   }, [user?.id, showSnackbar]);
 
   // Load user's URLs on component mount
   useEffect(() => {
     if (user?.id) {
-      loadUserUrls();
+      loadUserUrls(1);
     }
   }, [user, loadUserUrls]);
+
+  const handlePageChange = (event, newPage) => {
+    setCurrentPage(newPage);
+    loadUserUrls(newPage);
+  };
+
+  const handleRefresh = () => {
+    loadUserUrls(currentPage, true);
+  };
 
   const handleSwitchToLink = () => {
     navigate('/link-advanced');
@@ -131,7 +170,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
         setTitle('');
         setDescription('');
         showSnackbar('Short URL generated successfully!', 'success');
-        loadUserUrls(); // Refresh the table
+        loadUserUrls(1); // Refresh the table and go to first page
       } else {
         showSnackbar(response.message || 'Failed to generate short URL', 'error');
       }
@@ -164,7 +203,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
       if (response.success) {
         showSnackbar('URL updated successfully!', 'success');
         setEditDialog({ open: false, url: null });
-        loadUserUrls();
+        loadUserUrls(currentPage, true);
       } else {
         showSnackbar(response.message || 'Failed to update URL', 'error');
       }
@@ -180,7 +219,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
         const response = await deleteShortUrl(urlId);
         if (response.success) {
           showSnackbar('URL deleted successfully!', 'success');
-          loadUserUrls();
+          loadUserUrls(currentPage, true);
         } else {
           showSnackbar(response.message || 'Failed to delete URL', 'error');
         }
@@ -318,12 +357,79 @@ const ShortLinkPage = ({ noLayout = false }) => {
           <Card sx={{ boxShadow: 3 }}>
             <CardContent sx={{ p: 0 }}>
               <Box sx={{ p: 3, pb: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
-                  📊 Your Short URLs
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Manage and track all your shortened URLs
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Box>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
+                      📊 Your Short URLs
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Manage and track all your shortened URLs
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    startIcon={refreshing ? <CircularProgress size={16} /> : <RefreshIcon />}
+                    onClick={handleRefresh}
+                    disabled={refreshing || loadingUrls}
+                    size="small"
+                  >
+                    {refreshing ? 'Refreshing...' : 'Refresh'}
+                  </Button>
+                </Box>
+
+                {/* Statistics Cards */}
+                {!loadingUrls && totalLinks > 0 && (
+                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card sx={{ bgcolor: '#e3f2fd', border: '1px solid #90caf9' }}>
+                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Total Links
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+                            {totalLinks.toLocaleString()}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card sx={{ bgcolor: '#e8f5e8', border: '1px solid #a5d6a7' }}>
+                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Total Clicks
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2e7d32' }}>
+                            {totalClicks.toLocaleString()}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card sx={{ bgcolor: '#fff3e0', border: '1px solid #ffcc02' }}>
+                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Current Page
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#f57c00' }}>
+                            {currentPage} of {totalPages}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card sx={{ bgcolor: '#fce4ec', border: '1px solid #f8bbd9' }}>
+                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Per Page
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#c2185b' }}>
+                            {perPage}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  </Grid>
+                )}
               </Box>
               
               <Divider />
@@ -343,141 +449,164 @@ const ShortLinkPage = ({ noLayout = false }) => {
                   </Typography>
                 </Box>
               ) : (
-                <TableContainer>
-                  <Table>
-                    <TableHead sx={{ bgcolor: '#f8f9fa' }}>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Original URL</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Short URL</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Title</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Clicks</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Created</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Actions</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {urls.map((url) => (
-                        <TableRow key={url.id} hover>
-                          <TableCell>
-                            <Tooltip title={url.long_url}>
-                              <Typography 
-                                variant="body2" 
-                                sx={{ 
-                                  maxWidth: 200, 
-                                  overflow: 'hidden', 
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap'
-                                }}
-                              >
-                                {url.long_url}
-                              </Typography>
-                            </Tooltip>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Typography 
-                                variant="body2" 
-                                sx={{ 
-                                  color: '#1976d2', 
-                                  fontWeight: 'bold',
-                                  maxWidth: 150,
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap'
-                                }}
-                              >
-                                {url.short_url}
-                              </Typography>
-                              <IconButton 
-                                size="small" 
-                                onClick={() => handleCopyUrl(url.short_url)}
-                                sx={{ p: 0.5 }}
-                              >
-                                <CopyIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2">
-                              {url.title || 'Untitled'}
-                            </Typography>
-                          </TableCell>
-                          <TableCell sx={{ textAlign: 'center' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                              <VisibilityIcon fontSize="small" color="primary" />
-                              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                                {url.clicks || 0}
-                              </Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2" color="text.secondary">
-                              {formatDate(url.created_at)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={url.active ? 'Active' : 'Inactive'}
-                              color={url.active ? 'success' : 'default'}
-                              size="small"
-                              variant="outlined"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-                              <Tooltip title="Open URL">
-                                <IconButton 
-                                  size="small" 
-                                  onClick={() => window.open(url.short_url, '_blank')}
-                                  color="primary"
-                                >
-                                  <LaunchIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Analytics">
-                                <IconButton 
-                                  size="small" 
-                                  onClick={() => handleShowAnalytics(url)}
-                                  color="success"
-                                >
-                                  <AnalyticsIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="QR Code">
-                                <IconButton 
-                                  size="small" 
-                                  onClick={() => handleShowQR(url)}
-                                  color="secondary"
-                                >
-                                  <QrCodeIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Edit">
-                                <IconButton 
-                                  size="small" 
-                                  onClick={() => handleEditUrl(url)}
-                                  color="info"
-                                >
-                                  <EditIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Delete">
-                                <IconButton 
-                                  size="small" 
-                                  onClick={() => handleDeleteUrl(url.id)}
-                                  color="error"
-                                >
-                                  <DeleteIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            </Box>
-                          </TableCell>
+                <>
+                  <TableContainer>
+                    <Table>
+                      <TableHead sx={{ bgcolor: '#f8f9fa' }}>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 'bold' }}>Original URL</TableCell>
+                          <TableCell sx={{ fontWeight: 'bold' }}>Short URL</TableCell>
+                          <TableCell sx={{ fontWeight: 'bold' }}>Title</TableCell>
+                          <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Clicks</TableCell>
+                          <TableCell sx={{ fontWeight: 'bold' }}>Created</TableCell>
+                          <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                          <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Actions</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                      </TableHead>
+                      <TableBody>
+                        {urls.map((url) => (
+                          <TableRow key={url.id} hover>
+                            <TableCell>
+                              <Tooltip title={url.long_url}>
+                                <Typography 
+                                  variant="body2" 
+                                  sx={{ 
+                                    maxWidth: 200, 
+                                    overflow: 'hidden', 
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {url.long_url}
+                                </Typography>
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography 
+                                  variant="body2" 
+                                  sx={{ 
+                                    color: '#1976d2', 
+                                    fontWeight: 'bold',
+                                    maxWidth: 150,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {url.short_url}
+                                </Typography>
+                                <IconButton 
+                                  size="small" 
+                                  onClick={() => handleCopyUrl(url.short_url)}
+                                  sx={{ p: 0.5 }}
+                                >
+                                  <CopyIcon fontSize="small" />
+                                </IconButton>
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">
+                                {url.title || 'Untitled'}
+                              </Typography>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: 'center' }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                                <VisibilityIcon fontSize="small" color="primary" />
+                                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+                                  {url.clicks || 0}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2" color="text.secondary">
+                                {formatDate(url.created_at)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={url.active ? 'Active' : 'Inactive'}
+                                color={url.active ? 'success' : 'default'}
+                                size="small"
+                                variant="outlined"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                                <Tooltip title="Open URL">
+                                  <IconButton 
+                                    size="small" 
+                                    onClick={() => window.open(url.short_url, '_blank')}
+                                    color="primary"
+                                  >
+                                    <LaunchIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Analytics">
+                                  <IconButton 
+                                    size="small" 
+                                    onClick={() => handleShowAnalytics(url)}
+                                    color="success"
+                                  >
+                                    <AnalyticsIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="QR Code">
+                                  <IconButton 
+                                    size="small" 
+                                    onClick={() => handleShowQR(url)}
+                                    color="secondary"
+                                  >
+                                    <QrCodeIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Edit">
+                                  <IconButton 
+                                    size="small" 
+                                    onClick={() => handleEditUrl(url)}
+                                    color="info"
+                                  >
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Delete">
+                                  <IconButton 
+                                    size="small" 
+                                    onClick={() => handleDeleteUrl(url.id)}
+                                    color="error"
+                                  >
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 3, pt: 2 }}>
+                      <Stack spacing={2} direction="row" alignItems="center">
+                        <Typography variant="body2" color="text.secondary">
+                          Showing {((currentPage - 1) * perPage) + 1} to {Math.min(currentPage * perPage, totalLinks)} of {totalLinks} entries
+                        </Typography>
+                        <Pagination
+                          count={totalPages}
+                          page={currentPage}
+                          onChange={handlePageChange}
+                          color="primary"
+                          shape="rounded"
+                          showFirstButton
+                          showLastButton
+                          disabled={loadingUrls || refreshing}
+                        />
+                      </Stack>
+                    </Box>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
