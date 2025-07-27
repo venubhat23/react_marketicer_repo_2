@@ -35,11 +35,10 @@ export const createShortUrl = async (longUrl, title = '', description = '') => {
 };
 
 // Get User URLs with pagination
-export const getUserUrls = async (userId, page = 1, perPage = 20) => {
+export const getUserUrls = async (userId, page = 1) => {
   try {
     const response = await AxiosManager.get(`${API_BASE}/users/${userId}/urls`, {
-      page: page,
-      per_page: perPage
+      page: page
     });
     return {
       success: true,
