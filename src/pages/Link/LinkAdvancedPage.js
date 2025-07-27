@@ -34,7 +34,6 @@ import {
 } from '../../services/urlShortenerApi';
 
 const LinkAdvancedPage = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [longUrl, setLongUrl] = useState('');
   const [title, setTitle] = useState('');
