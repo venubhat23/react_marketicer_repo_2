@@ -1,15 +1,32 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Container } from '@mui/material';
+import Layout from '../../components/Layout';
+import TabComponent from '../../components/TabComponent';
+
+// Import the original components
+import ShortLinkPage from './ShortLinkPage';
+import LinkAdvancedPage from './LinkAdvancedPage';
 
 const LinkPage = () => {
-  const navigate = useNavigate();
+  // Create tab configuration for the switcher
+  const tabs = [
+    {
+      label: 'ShortLink',
+      content: <ShortLinkPage noLayout={true} />
+    },
+    {
+      label: 'Link Advanced', 
+      content: <LinkAdvancedPage />
+    }
+  ];
 
-  useEffect(() => {
-    // Redirect to ShortLinkPage by default for backward compatibility
-    navigate('/link', { replace: true });
-  }, [navigate]);
-
-  return null; // This component just redirects
+  return (
+    <Layout>
+      <Container maxWidth="xl" sx={{ py: 3 }}>
+        <TabComponent tabs={tabs} defaultIndex={0} />
+      </Container>
+    </Layout>
+  );
 };
 
 export default LinkPage;

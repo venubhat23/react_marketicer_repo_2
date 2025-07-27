@@ -58,7 +58,7 @@ import {
   generateQRCodeUrl
 } from '../../services/urlShortenerApi';
 
-const ShortLinkPage = () => {
+const ShortLinkPage = ({ noLayout = false }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [longUrl, setLongUrl] = useState('');
@@ -202,9 +202,8 @@ const ShortLinkPage = () => {
 
 
 
-  return (
-    <Layout>
-      <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
+  const content = (
+    <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
         {/* Header */}
         <Paper
           elevation={0}
@@ -638,8 +637,9 @@ const ShortLinkPage = () => {
           </Snackbar>
         </Container>
       </Box>
-    </Layout>
-  );
+    );
+
+  return noLayout ? content : <Layout>{content}</Layout>;
 };
 
 export default ShortLinkPage;
