@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -14,7 +14,20 @@ import {
   Container,
   Snackbar,
   Tab,
-  Tabs
+  Tabs,
+  Switch,
+  FormControlLabel,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Divider,
+  Chip,
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import {
   ContentCopy as CopyIcon,
@@ -22,76 +35,131 @@ import {
   Link as LinkIcon,
   Add as AddIcon,
   Notifications as NotificationsIcon,
-  AccountCircle as AccountCircleIcon
+  AccountCircle as AccountCircleIcon,
+  QrCode as QrCodeIcon,
+  CloudUpload as UploadIcon,
+  Palette as PaletteIcon,
+  Visibility as PreviewIcon,
+  Settings as SettingsIcon
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import { useAuth } from '../../authContext/AuthContext';
-import {
-  createShortUrl,
-  isValidUrl,
-  copyToClipboard
-} from '../../services/urlShortenerApi';
 
 const LinkAdvancedPage = () => {
-  const navigate = useNavigate();
+  // Basic form states
   const [longUrl, setLongUrl] = useState('');
   const [title, setTitle] = useState('');
   const [customBackHalf, setCustomBackHalf] = useState('');
-  const [bitlyPage, setBitlyPage] = useState('');
+  const [domain] = useState('marketincer.com');
+  
+  // QR Code states
+  const [enableQR, setEnableQR] = useState(false);
+  const [qrColor, setQrColor] = useState('#882AFF');
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+  
+  // UTM Parameters states
+  const [enableUTM, setEnableUTM] = useState(false);
+  const [utmSource, setUtmSource] = useState('');
+  const [utmMedium, setUtmMedium] = useState('');
+  const [utmCampaign, setUtmCampaign] = useState('');
+  const [utmTerm, setUtmTerm] = useState('');
+  const [utmContent, setUtmContent] = useState('');
+  
+  // UI states
   const [loading, setLoading] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [previewDialog, setPreviewDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState(1);
 
-  const handleSwitchToShortLink = () => {
-    navigate('/link');
+  // Color palette for QR codes
+  const qrColors = [
+    '#0b0b0b', // Black
+    '#882AFF', // Vivid Violet
+    '#091A48', // Navy Blue
+    '#FF4444', // Red
+    '#FF8800', // Orange
+    '#00AA00', // Green
+    '#0088FF', // Blue
+    '#8800FF', // Purple
+    '#FF0088'  // Pink
+  ];
+
+  // Generate preview URL with UTM parameters
+  const generatePreviewUrl = () => {
+    if (!longUrl) return '';
+    
+    let previewUrl = longUrl;
+    const utmParams = [];
+    
+    if (enableUTM) {
+      if (utmSource) utmParams.push(`utm_source=${encodeURIComponent(utmSource)}`);
+      if (utmMedium) utmParams.push(`utm_medium=${encodeURIComponent(utmMedium)}`);
+      if (utmCampaign) utmParams.push(`utm_campaign=${encodeURIComponent(utmCampaign)}`);
+      if (utmTerm) utmParams.push(`utm_term=${encodeURIComponent(utmTerm)}`);
+      if (utmContent) utmParams.push(`utm_content=${encodeURIComponent(utmContent)}`);
+    }
+    
+    if (utmParams.length > 0) {
+      const separator = longUrl.includes('?') ? '&' : '?';
+      previewUrl = `${longUrl}${separator}${utmParams.join('&')}`;
+    }
+    
+    return previewUrl;
+  };
+
+  // Generate short URL preview
+  const getShortUrlPreview = () => {
+    const backHalf = customBackHalf || 'abc123';
+    return `${domain}/${backHalf}`;
+  };
+
+  // Handle logo upload
+  const handleLogoUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Generate QR Code (mock implementation)
+  const generateQRCode = () => {
+    const url = getShortUrlPreview();
+    // In a real implementation, you'd use a QR code library like qrcode
+    // For now, we'll show a placeholder
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}&color=${qrColor.replace('#', '')}&bgcolor=FFFFFF`;
   };
 
   const handleCreateLink = async () => {
-    // Validate input
     if (!longUrl.trim()) {
       showSnackbar('Please enter a destination URL', 'warning');
       return;
     }
 
-    if (!isValidUrl(longUrl)) {
-      showSnackbar('Please enter a valid URL', 'error');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      // For advanced link creation, we can pass additional parameters
-      const response = await createShortUrl(
-        longUrl, 
-        title, 
-        bitlyPage, // Using bitlyPage as description for now
-        customBackHalf // Custom back-half if provided
-      );
-      
-      if (response.success) {
-        setGeneratedUrl(response.data);
-        setLongUrl('');
-        setTitle('');
-        setCustomBackHalf('');
-        setBitlyPage('');
-        showSnackbar('Link created successfully!', 'success');
-      } else {
-        showSnackbar(response.message || 'Failed to create link', 'error');
-      }
-    } catch (error) {
-      console.error('Error creating link:', error);
-      showSnackbar('Error creating link', 'error');
-    } finally {
+    setLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      const finalUrl = generatePreviewUrl();
+      setGeneratedUrl({
+        short_url: getShortUrlPreview(),
+        long_url: finalUrl,
+        qr_code: enableQR ? generateQRCode() : null
+      });
       setLoading(false);
-    }
+      showSnackbar('Link created successfully!', 'success');
+    }, 2000);
   };
 
   const handleCopyUrl = async (url) => {
-    const success = await copyToClipboard(url);
-    if (success) {
+    try {
+      await navigator.clipboard.writeText(url);
       showSnackbar('URL copied to clipboard!', 'success');
-    } else {
+    } catch (error) {
       showSnackbar('Failed to copy URL', 'error');
     }
   };
@@ -105,71 +173,73 @@ const LinkAdvancedPage = () => {
   };
 
   return (
-    <Layout>
-      <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
-        {/* Header */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 2,
-            backgroundColor: '#091a48',
-            borderRadius: 0,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
-          <Typography variant="h6" sx={{ color: '#fff' }}>
-            URL Shortener Dashboard
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <IconButton size="large" sx={{ color: 'white' }}>
-              <NotificationsIcon />
-            </IconButton>
-            <IconButton size="large" sx={{ color: 'white' }}>
-              <AccountCircleIcon />
-            </IconButton>
-          </Box>
-        </Paper>
+    <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+      {/* Header */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          backgroundColor: '#091A48',
+          borderRadius: 0,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
+      >
+        <Typography variant="h6" sx={{ color: '#fff', fontWeight: 'bold' }}>
+          Marketincer URL Shortener
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <IconButton size="large" sx={{ color: 'white' }}>
+            <NotificationsIcon />
+          </IconButton>
+          <IconButton size="large" sx={{ color: 'white' }}>
+            <AccountCircleIcon />
+          </IconButton>
+        </Box>
+      </Paper>
 
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-          {/* URL Generator Section */}
-          <Card sx={{ mb: 4, boxShadow: 3 }}>
-            <CardContent sx={{ p: 4 }}>
-              {/* Tab Switcher */}
-              <Box sx={{ mb: 3 }}>
-                <Tabs
-                  value={1}
-                  sx={{
-                    '& .MuiTab-root': {
-                      textTransform: 'none',
-                      fontSize: '1rem',
-                      fontWeight: 'bold',
-                      minWidth: 120,
-                      color: '#666',
-                      '&.Mui-selected': {
-                        color: '#1976d2',
-                      }
-                    },
-                    '& .MuiTabs-indicator': {
-                      backgroundColor: '#1976d2',
-                      height: 3,
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Card sx={{ mb: 4, boxShadow: 4, borderRadius: 3 }}>
+          <CardContent sx={{ p: 4 }}>
+            {/* Tab Switcher */}
+            <Box sx={{ mb: 4 }}>
+              <Tabs
+                value={activeTab}
+                onChange={(e, newValue) => setActiveTab(newValue)}
+                sx={{
+                  '& .MuiTab-root': {
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                    fontWeight: 'bold',
+                    minWidth: 120,
+                    color: '#666',
+                    '&.Mui-selected': {
+                      color: '#882AFF',
                     }
-                  }}
-                >
-                  <Tab label="Short Link" onClick={handleSwitchToShortLink} />
-                  <Tab label="Link" />
-                </Tabs>
-              </Box>
+                  },
+                  '& .MuiTabs-indicator': {
+                    backgroundColor: '#882AFF',
+                    height: 3,
+                  }
+                }}
+              >
+                <Tab label="Short Link" />
+                <Tab label="Advanced Link" />
+              </Tabs>
+            </Box>
 
-              <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: '#1976d2' }}>
-                🔗 Create Link
-              </Typography>
-              
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Destination*
+            <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', color: '#091A48' }}>
+              🔗 Create a new link
+            </Typography>
+            
+            <Grid container spacing={4}>
+              {/* Left Column - Form */}
+              <Grid item xs={12} lg={8}>
+                {/* Destination */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 1, color: '#091A48', fontWeight: 'bold' }}>
+                    Destination
                   </Typography>
                   <TextField
                     fullWidth
@@ -177,19 +247,26 @@ const LinkAdvancedPage = () => {
                     value={longUrl}
                     onChange={(e) => setLongUrl(e.target.value)}
                     variant="outlined"
-                    size="large"
-                    sx={{ mb: 2 }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        '&:hover fieldset': {
+                          borderColor: '#882AFF',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#882AFF',
+                        }
+                      }
+                    }}
                     InputProps={{
-                      startAdornment: <LinkIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                      startAdornment: <LinkIcon sx={{ mr: 1, color: '#882AFF' }} />
                     }}
                   />
-                  <Typography variant="caption" color="text.secondary">
-                    This is the long URL you want to shorten, like https://example.com/my-long-url
-                  </Typography>
-                </Grid>
-                
-                <Grid item xs={12}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                </Box>
+
+                {/* Title */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 1, color: '#091A48', fontWeight: 'bold' }}>
                     Title (optional)
                   </Typography>
                   <TextField
@@ -198,55 +275,337 @@ const LinkAdvancedPage = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     variant="outlined"
-                    sx={{ mb: 1 }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        '&:hover fieldset': {
+                          borderColor: '#882AFF',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#882AFF',
+                        }
+                      }
+                    }}
                   />
-                  <Typography variant="caption" color="text.secondary">
-                    A name you can assign to the link internally (not shown to users)
+                </Box>
+
+                {/* Short Link */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 1, color: '#091A48', fontWeight: 'bold' }}>
+                    Short link
                   </Typography>
-                </Grid>
-                
-                <Grid item xs={12}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Short link (marketincer domain + optional custom back-half)
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
-                      marketincer.com/
-                    </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FormControl sx={{ minWidth: 200 }}>
+                      <InputLabel>Domain</InputLabel>
+                      <Select
+                        value={domain}
+                        label="Domain"
+                        disabled
+                        sx={{
+                          borderRadius: 2,
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#882AFF',
+                          }
+                        }}
+                      >
+                        <MenuItem value="marketincer.com">marketincer.com</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <Typography variant="h6" sx={{ mx: 1 }}>/</Typography>
                     <TextField
                       fullWidth
-                      placeholder="my-product-launch"
+                      placeholder="custom-back-half (optional)"
                       value={customBackHalf}
                       onChange={(e) => setCustomBackHalf(e.target.value)}
                       variant="outlined"
-                      size="small"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: '#882AFF',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#882AFF',
+                          }
+                        }
+                      }}
                     />
                   </Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Example: bit.ly/my-product-launch. You can customize the ending (my-product-launch) if you haven't reached your limit.
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    You can create 2 more custom back-halves this month.
                   </Typography>
-                </Grid>
-                
-                <Grid item xs={12}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Marketincer Page
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    placeholder="Enter Marketincer page information"
-                    value={bitlyPage}
-                    onChange={(e) => setBitlyPage(e.target.value)}
+                </Box>
+
+                <Divider sx={{ my: 4 }} />
+
+                {/* Ways to Share Section */}
+                <Typography variant="h5" sx={{ mb: 3, color: '#091A48', fontWeight: 'bold' }}>
+                  Ways to share
+                </Typography>
+
+                {/* QR Code Section */}
+                <Card sx={{ mb: 3, bgcolor: '#f8f9ff', border: '1px solid #e0e7ff' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <QrCodeIcon sx={{ color: '#882AFF' }} />
+                        <Typography variant="h6" sx={{ color: '#091A48', fontWeight: 'bold' }}>
+                          QR Code
+                        </Typography>
+                      </Box>
+                      <Switch
+                        checked={enableQR}
+                        onChange={(e) => setEnableQR(e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#882AFF',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#882AFF',
+                          },
+                        }}
+                      />
+                    </Box>
+
+                    {enableQR && (
+                      <Grid container spacing={3}>
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                            Code color
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
+                            {qrColors.map((color) => (
+                              <IconButton
+                                key={color}
+                                onClick={() => setQrColor(color)}
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  bgcolor: color,
+                                  border: qrColor === color ? '3px solid #882AFF' : '2px solid #ccc',
+                                  '&:hover': {
+                                    transform: 'scale(1.1)',
+                                  }
+                                }}
+                              />
+                            ))}
+                          </Box>
+
+                          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                            Logo
+                          </Typography>
+                          <Button
+                            variant="outlined"
+                            component="label"
+                            startIcon={<UploadIcon />}
+                            sx={{
+                              borderColor: '#882AFF',
+                              color: '#882AFF',
+                              '&:hover': {
+                                borderColor: '#091A48',
+                                bgcolor: 'rgba(136, 42, 255, 0.04)',
+                              }
+                            }}
+                          >
+                            Choose logo
+                            <input
+                              type="file"
+                              hidden
+                              accept="image/*"
+                              onChange={handleLogoUpload}
+                            />
+                          </Button>
+                          {logoPreview && (
+                            <Box sx={{ mt: 2 }}>
+                              <img
+                                src={logoPreview}
+                                alt="Logo preview"
+                                style={{ width: 60, height: 60, objectFit: 'contain', border: '1px solid #ccc', borderRadius: 4 }}
+                              />
+                            </Box>
+                          )}
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                            Preview
+                          </Typography>
+                          <Box sx={{ 
+                            p: 2, 
+                            bgcolor: 'white', 
+                            borderRadius: 2, 
+                            border: '1px solid #e0e0e0',
+                            display: 'flex',
+                            justifyContent: 'center'
+                          }}>
+                            <img
+                              src={generateQRCode()}
+                              alt="QR Code Preview"
+                              style={{ width: 150, height: 150 }}
+                            />
+                          </Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            More customizations are available after creating
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Divider sx={{ my: 4 }} />
+
+                {/* UTM Parameters Section */}
+                <Typography variant="h5" sx={{ mb: 3, color: '#091A48', fontWeight: 'bold' }}>
+                  Advanced features
+                </Typography>
+
+                <Card sx={{ mb: 3, bgcolor: '#f8fff8', border: '1px solid #e0ffe0' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <SettingsIcon sx={{ color: '#882AFF' }} />
+                        <Typography variant="h6" sx={{ color: '#091A48', fontWeight: 'bold' }}>
+                          UTM parameters
+                        </Typography>
+                        <Chip label="Upgrade" size="small" sx={{ bgcolor: '#882AFF', color: 'white' }} />
+                      </Box>
+                      <Switch
+                        checked={enableUTM}
+                        onChange={(e) => setEnableUTM(e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#882AFF',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#882AFF',
+                          },
+                        }}
+                      />
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                      Add UTMs to track web traffic in analytics tools
+                    </Typography>
+
+                    {enableUTM && (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <TextField
+                          fullWidth
+                          label="Source"
+                          placeholder="e.g., google, newsletter"
+                          value={utmSource}
+                          onChange={(e) => setUtmSource(e.target.value)}
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#882AFF',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#882AFF',
+                              }
+                            }
+                          }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="Medium"
+                          placeholder="e.g., cpc, email"
+                          value={utmMedium}
+                          onChange={(e) => setUtmMedium(e.target.value)}
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#882AFF',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#882AFF',
+                              }
+                            }
+                          }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="Campaign"
+                          placeholder="e.g., spring_sale"
+                          value={utmCampaign}
+                          onChange={(e) => setUtmCampaign(e.target.value)}
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#882AFF',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#882AFF',
+                              }
+                            }
+                          }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="Term"
+                          placeholder="e.g., running+shoes"
+                          value={utmTerm}
+                          onChange={(e) => setUtmTerm(e.target.value)}
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#882AFF',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#882AFF',
+                              }
+                            }
+                          }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="Content"
+                          placeholder="e.g., logolink, textlink"
+                          value={utmContent}
+                          onChange={(e) => setUtmContent(e.target.value)}
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#882AFF',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#882AFF',
+                              }
+                            }
+                          }}
+                        />
+                      </Box>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Action Buttons */}
+                <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
+                  <Button
                     variant="outlined"
-                    multiline
-                    rows={3}
-                    sx={{ mb: 1 }}
-                  />
-                  <Typography variant="caption" color="text.secondary">
-                    A landing page Marketincer can generate that holds multiple links—useful for things like social media bios.
-                  </Typography>
-                </Grid>
-                
-                <Grid item xs={12}>
+                    size="large"
+                    sx={{
+                      py: 1.5,
+                      px: 4,
+                      borderColor: '#882AFF',
+                      color: '#882AFF',
+                      '&:hover': {
+                        borderColor: '#091A48',
+                        bgcolor: 'rgba(136, 42, 255, 0.04)',
+                      }
+                    }}
+                  >
+                    Cancel
+                  </Button>
                   <Button
                     variant="contained"
                     size="large"
@@ -258,129 +617,218 @@ const LinkAdvancedPage = () => {
                       px: 4,
                       fontSize: '1.1rem',
                       fontWeight: 'bold',
-                      background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+                      background: 'linear-gradient(45deg, #882AFF 30%, #091A48 90%)',
                       '&:hover': {
-                        background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
+                        background: 'linear-gradient(45deg, #7a26e6 30%, #082040 90%)',
                       }
                     }}
                   >
-                    {loading ? 'Creating...' : 'Create Link'}
+                    {loading ? 'Creating your link...' : 'Create your link'}
                   </Button>
-                </Grid>
-              </Grid>
-
-              {/* Generated URL Display */}
-              {generatedUrl && (
-                <Box sx={{ mt: 4, p: 3, bgcolor: '#f0f7ff', borderRadius: 2, border: '2px solid #e3f2fd' }}>
-                  <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 'bold' }}>
-                    ✅ Link Created Successfully!
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                    <TextField
-                      value={generatedUrl.short_url}
-                      variant="outlined"
-                      size="small"
-                      sx={{ flexGrow: 1, minWidth: 300 }}
-                      InputProps={{
-                        readOnly: true,
-                        style: { fontWeight: 'bold', color: '#1976d2' }
-                      }}
-                    />
-                    <Button
-                      variant="contained"
-                      startIcon={<CopyIcon />}
-                      onClick={() => handleCopyUrl(generatedUrl.short_url)}
-                      sx={{ whiteSpace: 'nowrap' }}
-                    >
-                      Copy URL
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<LaunchIcon />}
-                      onClick={() => window.open(generatedUrl.short_url, '_blank')}
-                      sx={{ whiteSpace: 'nowrap' }}
-                    >
-                      Open
-                    </Button>
-                  </Box>
-                  
-                  {/* Additional Information */}
-                  <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 1 }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      <strong>Original URL:</strong> {generatedUrl.long_url || longUrl}
-                    </Typography>
-                    {title && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        <strong>Title:</strong> {title}
-                      </Typography>
-                    )}
-                    {customBackHalf && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        <strong>Custom Back-half:</strong> {customBackHalf}
-                      </Typography>
-                    )}
-                    {bitlyPage && (
-                      <Typography variant="body2" color="text.secondary">
-                        <strong>Marketincer Page:</strong> {bitlyPage}
-                      </Typography>
-                    )}
-                  </Box>
                 </Box>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Info Card */}
-          <Card sx={{ boxShadow: 3 }}>
-            <CardContent sx={{ p: 4 }}>
-              <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 'bold' }}>
-                ℹ️ Advanced Link Features
-              </Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Box sx={{ p: 2, bgcolor: '#f8f9fa', borderRadius: 1 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                      Custom Back-half
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Personalize your short links with meaningful endings that are easy to remember and share.
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Box sx={{ p: 2, bgcolor: '#f8f9fa', borderRadius: 1 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                      Marketincer Page
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Create landing pages that can hold multiple links, perfect for social media bios and campaigns.
-                    </Typography>
-                  </Box>
-                </Grid>
               </Grid>
-              
-              <Box sx={{ mt: 3, p: 2, bgcolor: '#e3f2fd', borderRadius: 1, borderLeft: '4px solid #1976d2' }}>
-                <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
-                  💡 <strong>Tip:</strong> Use the "Short Link" tab for quick URL shortening, or stay here for advanced customization options.
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
 
-          {/* Snackbar for notifications */}
-          <Snackbar
-            open={snackbar.open}
-            autoHideDuration={4000}
-            onClose={handleCloseSnackbar}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          >
-            <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-              {snackbar.message}
-            </Alert>
-          </Snackbar>
-        </Container>
-      </Box>
-    </Layout>
+              {/* Right Column - Preview */}
+              <Grid item xs={12} lg={4}>
+                <Card sx={{ position: 'sticky', top: 20, boxShadow: 3 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#091A48', fontWeight: 'bold' }}>
+                      Preview
+                    </Typography>
+                    
+                    {/* Short URL Preview */}
+                    <Box sx={{ mb: 3, p: 2, bgcolor: '#f8f9ff', borderRadius: 2 }}>
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                        Short URL:
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#882AFF' }}>
+                        {getShortUrlPreview()}
+                      </Typography>
+                    </Box>
+
+                    {/* UTM Tags Preview */}
+                    {enableUTM && (
+                      <Box sx={{ mb: 3, p: 2, bgcolor: '#f8fff8', borderRadius: 2 }}>
+                        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+                          UTM Tags:
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                          {utmSource && (
+                            <Typography variant="body2" sx={{ color: '#091A48', fontSize: '0.85rem' }}>
+                              <strong>Source:</strong> {utmSource}
+                            </Typography>
+                          )}
+                          {utmMedium && (
+                            <Typography variant="body2" sx={{ color: '#091A48', fontSize: '0.85rem' }}>
+                              <strong>Medium:</strong> {utmMedium}
+                            </Typography>
+                          )}
+                          {utmCampaign && (
+                            <Typography variant="body2" sx={{ color: '#091A48', fontSize: '0.85rem' }}>
+                              <strong>Campaign:</strong> {utmCampaign}
+                            </Typography>
+                          )}
+                          {utmTerm && (
+                            <Typography variant="body2" sx={{ color: '#091A48', fontSize: '0.85rem' }}>
+                              <strong>Term:</strong> {utmTerm}
+                            </Typography>
+                          )}
+                          {utmContent && (
+                            <Typography variant="body2" sx={{ color: '#091A48', fontSize: '0.85rem' }}>
+                              <strong>Content:</strong> {utmContent}
+                            </Typography>
+                          )}
+                          
+                          {(utmSource || utmMedium || utmCampaign || utmTerm || utmContent) && (
+                            <Box sx={{ mt: 2, p: 1, bgcolor: '#fff', borderRadius: 1, border: '1px solid #e0e0e0' }}>
+                              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                                Final URL with UTM:
+                              </Typography>
+                              <Typography 
+                                variant="body2" 
+                                sx={{ 
+                                  wordBreak: 'break-all', 
+                                  color: '#091A48',
+                                  fontSize: '0.75rem',
+                                  lineHeight: 1.3
+                                }}
+                              >
+                                {generatePreviewUrl()}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      </Box>
+                    )}
+
+                    {/* QR Code Preview */}
+                    {enableQR && (
+                      <Box sx={{ mb: 3, p: 2, bgcolor: '#fff', borderRadius: 2, border: '1px solid #e0e0e0', textAlign: 'center' }}>
+                        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+                          QR Code Preview:
+                        </Typography>
+                        <img
+                          src={generateQRCode()}
+                          alt="QR Code Preview"
+                          style={{ width: 120, height: 120 }}
+                        />
+                      </Box>
+                    )}
+
+                    {/* Features Summary */}
+                    <Box sx={{ mt: 3 }}>
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+                        Enabled Features:
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <Chip 
+                          label="Short Link" 
+                          size="small" 
+                          sx={{ bgcolor: '#e3f2fd', color: '#1976d2' }}
+                        />
+                        {enableQR && (
+                          <Chip 
+                            label="QR Code" 
+                            size="small" 
+                            sx={{ bgcolor: '#f3e5f5', color: '#882AFF' }}
+                          />
+                        )}
+                        {enableUTM && (
+                          <Chip 
+                            label="UTM Parameters" 
+                            size="small" 
+                            sx={{ bgcolor: '#e8f5e8', color: '#4caf50' }}
+                          />
+                        )}
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
+            {/* Generated URL Display */}
+            {generatedUrl && (
+              <Box sx={{ mt: 4, p: 4, bgcolor: '#f0f7ff', borderRadius: 3, border: '2px solid #e3f2fd' }}>
+                <Typography variant="h5" sx={{ mb: 3, color: '#882AFF', fontWeight: 'bold' }}>
+                  ✅ Link Created Successfully!
+                </Typography>
+                
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={8}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                      <TextField
+                        value={generatedUrl.short_url}
+                        variant="outlined"
+                        size="small"
+                        sx={{ flexGrow: 1 }}
+                        InputProps={{
+                          readOnly: true,
+                          style: { fontWeight: 'bold', color: '#882AFF' }
+                        }}
+                      />
+                      <Button
+                        variant="contained"
+                        startIcon={<CopyIcon />}
+                        onClick={() => handleCopyUrl(generatedUrl.short_url)}
+                        sx={{ 
+                          bgcolor: '#882AFF',
+                          '&:hover': { bgcolor: '#7a26e6' }
+                        }}
+                      >
+                        Copy
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        startIcon={<LaunchIcon />}
+                        onClick={() => window.open(generatedUrl.short_url, '_blank')}
+                        sx={{ 
+                          borderColor: '#882AFF',
+                          color: '#882AFF'
+                        }}
+                      >
+                        Open
+                      </Button>
+                    </Box>
+                    
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Original URL:</strong> {generatedUrl.long_url}
+                    </Typography>
+                  </Grid>
+                  
+                  {generatedUrl.qr_code && (
+                    <Grid item xs={12} md={4}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                          QR Code
+                        </Typography>
+                        <img
+                          src={generatedUrl.qr_code}
+                          alt="Generated QR Code"
+                          style={{ width: 100, height: 100 }}
+                        />
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Container>
+    </Box>
   );
 };
 
