@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -73,14 +73,15 @@ const ShortLinkPage = () => {
   const [analyticsDialog, setAnalyticsDialog] = useState({ open: false, url: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  // Load user's URLs on component mount
-  useEffect(() => {
-    if (user?.id) {
-      loadUserUrls();
-    }
-  }, [user, loadUserUrls]);
+  const showSnackbar = useCallback((message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  }, []);
 
-  const loadUserUrls = async () => {
+  const handleCloseSnackbar = useCallback(() => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  }, []);
+
+  const loadUserUrls = useCallback(async () => {
     try {
       setLoadingUrls(true);
       const response = await getUserUrls(user.id);
@@ -95,7 +96,14 @@ const ShortLinkPage = () => {
     } finally {
       setLoadingUrls(false);
     }
-  };
+  }, [user?.id, showSnackbar]);
+
+  // Load user's URLs on component mount
+  useEffect(() => {
+    if (user?.id) {
+      loadUserUrls();
+    }
+  }, [user, loadUserUrls]);
 
   const handleSwitchToLink = () => {
     navigate('/link-advanced');
@@ -191,13 +199,8 @@ const ShortLinkPage = () => {
     setAnalyticsDialog({ open: true, url });
   };
 
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  };
 
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
+
 
   return (
     <Layout>
