@@ -64,7 +64,6 @@ import {
   formatDate,
   generateQRCodeUrl
 } from '../../services/urlShortenerApi';
-import AxiosManager from '../../utils/api';
 
 const ShortLinkPage = ({ noLayout = false }) => {
   const { user } = useAuth();
@@ -80,10 +79,6 @@ const ShortLinkPage = ({ noLayout = false }) => {
   const [qrDialog, setQrDialog] = useState({ open: false, url: null });
   const [analyticsDialog, setAnalyticsDialog] = useState({ open: false, url: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  
-  // User profile state
-  const [userProfile, setUserProfile] = useState(null);
-  const [loadingProfile, setLoadingProfile] = useState(true);
   
   // Pagination and filtering states
   const [currentPage, setCurrentPage] = useState(1);
@@ -101,36 +96,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
     setSnackbar(prev => ({ ...prev, open: false }));
   }, []);
 
-  // Fetch user profile to get user ID
-  const fetchUserProfile = useCallback(async () => {
-    if (!user?.token) {
-      setLoadingProfile(false);
-      return;
-    }
-
-    try {
-      setLoadingProfile(true);
-      const response = await AxiosManager.get('/api/v1/user/profile');
-      if (response.data) {
-        setUserProfile(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      // If profile fetch fails, we'll show an error but continue
-      showSnackbar('Unable to load user profile', 'warning');
-    } finally {
-      setLoadingProfile(false);
-    }
-  }, [user?.token, showSnackbar]);
-
-  // Load user URLs with proper user ID handling
   const loadUserUrls = useCallback(async (page = 1, showRefreshing = false) => {
-    // Don't make API call if we don't have user profile yet
-    if (!userProfile?.id) {
-      setLoadingUrls(false);
-      return;
-    }
-
     try {
       if (showRefreshing) {
         setRefreshing(true);
@@ -138,7 +104,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
         setLoadingUrls(true);
       }
       
-      const response = await getUserUrls(userProfile.id, page, perPage);
+      const response = await getUserUrls(user.id, page, perPage);
       if (response.success) {
         const data = response.data;
         setUrls(data.urls || []);
@@ -160,21 +126,14 @@ const ShortLinkPage = ({ noLayout = false }) => {
       setLoadingUrls(false);
       setRefreshing(false);
     }
-  }, [userProfile?.id, perPage, showSnackbar]);
+  }, [user?.id, showSnackbar]);
 
-  // Fetch user profile on component mount when user is available
+  // Load user's URLs on component mount
   useEffect(() => {
-    if (user?.token && !userProfile && !loadingProfile) {
-      fetchUserProfile();
-    }
-  }, [user?.token, userProfile, loadingProfile, fetchUserProfile]);
-
-  // Load user's URLs when user profile is available
-  useEffect(() => {
-    if (userProfile?.id && !loadingUrls) {
+    if (user?.id) {
       loadUserUrls(1);
     }
-  }, [userProfile?.id, loadUserUrls]);
+  }, [user, loadUserUrls]);
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
@@ -182,9 +141,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
   };
 
   const handleRefresh = () => {
-    if (userProfile?.id) {
-      loadUserUrls(currentPage, true);
-    }
+    loadUserUrls(currentPage, true);
   };
 
   const handleSwitchToLink = () => {
@@ -213,10 +170,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
         setTitle('');
         setDescription('');
         showSnackbar('Short URL generated successfully!', 'success');
-        // Refresh the table and go to first page only if user profile is available
-        if (userProfile?.id) {
-          loadUserUrls(1);
-        }
+        loadUserUrls(1); // Refresh the table and go to first page
       } else {
         showSnackbar(response.message || 'Failed to generate short URL', 'error');
       }
@@ -249,9 +203,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
       if (response.success) {
         showSnackbar('URL updated successfully!', 'success');
         setEditDialog({ open: false, url: null });
-        if (userProfile?.id) {
-          loadUserUrls(currentPage, true);
-        }
+        loadUserUrls(currentPage, true);
       } else {
         showSnackbar(response.message || 'Failed to update URL', 'error');
       }
@@ -267,9 +219,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
         const response = await deleteShortUrl(urlId);
         if (response.success) {
           showSnackbar('URL deleted successfully!', 'success');
-          if (userProfile?.id) {
-            loadUserUrls(currentPage, true);
-          }
+          loadUserUrls(currentPage, true);
         } else {
           showSnackbar(response.message || 'Failed to delete URL', 'error');
         }
@@ -420,7 +370,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                     variant="outlined"
                     startIcon={refreshing ? <CircularProgress size={16} /> : <RefreshIcon />}
                     onClick={handleRefresh}
-                    disabled={refreshing || loadingUrls || !userProfile?.id}
+                    disabled={refreshing || loadingUrls}
                     size="small"
                   >
                     {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -428,7 +378,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                 </Box>
 
                 {/* Statistics Cards */}
-                {!loadingProfile && userProfile?.id && !loadingUrls && totalLinks > 0 && (
+                {!loadingUrls && totalLinks > 0 && (
                   <Grid container spacing={2} sx={{ mb: 2 }}>
                     <Grid item xs={12} sm={6} md={3}>
                       <Card sx={{ bgcolor: '#e3f2fd', border: '1px solid #90caf9' }}>
@@ -484,37 +434,9 @@ const ShortLinkPage = ({ noLayout = false }) => {
               
               <Divider />
               
-              {loadingProfile ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 8 }}>
+              {loadingUrls ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
                   <CircularProgress size={50} />
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                    Loading user profile...
-                  </Typography>
-                </Box>
-              ) : !userProfile?.id ? (
-                <Box sx={{ textAlign: 'center', py: 8 }}>
-                  <AccountCircleIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-                  <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-                    Unable to Load User Profile
-                  </Typography>
-                  <Typography variant="body2" color="text.disabled" sx={{ mb: 2 }}>
-                    Please try refreshing the page or logging in again
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    startIcon={<RefreshIcon />}
-                    onClick={fetchUserProfile}
-                    size="small"
-                  >
-                    Retry
-                  </Button>
-                </Box>
-              ) : loadingUrls ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 8 }}>
-                  <CircularProgress size={50} />
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                    Loading your URLs...
-                  </Typography>
                 </Box>
               ) : urls.length === 0 ? (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
@@ -665,7 +587,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                   </TableContainer>
 
                   {/* Pagination Controls */}
-                  {userProfile?.id && totalPages > 1 && (
+                  {totalPages > 1 && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 3, pt: 2 }}>
                       <Stack spacing={2} direction="row" alignItems="center">
                         <Typography variant="body2" color="text.secondary">

@@ -157,7 +157,7 @@ const LinkAdvancedPage = () => {
     }
 
     try {
-      const response = await AxiosManager.post('/api/v1/shorten', payload);
+      const response = await AxiosManager.post('/api/v1/short_links', payload);
       return response.data;
     } catch (error) {
       console.error('API Error:', error);
