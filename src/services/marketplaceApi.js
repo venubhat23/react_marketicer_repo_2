@@ -487,15 +487,14 @@ export const uploadMedia = async (file, type = 'image') => {
   try {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('type', type);
     
+    // Use the same endpoint and method as CreatePost (which works)
     const response = await fetch(
       'https://kitintellect.tech/storage/public/api/upload/aaFacebook',
       {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+        // Don't set Content-Type header - let browser set it automatically for FormData
+        // Don't set Authorization header - the upload endpoint doesn't require it
         body: formData,
       }
     );
