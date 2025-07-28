@@ -113,20 +113,20 @@ const ShortLinkPage = ({ noLayout = false }) => {
       const response = await AxiosManager.get('/api/v1/user/profile');
       if (response.data) {
         setUserProfile(response.data);
-        return response.data; // Return the profile data
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      // If profile fetch fails, we'll show an error but continue
       showSnackbar('Unable to load user profile', 'warning');
     } finally {
       setLoadingProfile(false);
     }
-    return null;
   }, [user?.token, showSnackbar]);
 
   // Load user URLs with proper user ID handling
-  const loadUserUrls = useCallback(async (userId, page = 1, showRefreshing = false) => {
-    if (!userId) {
+  const loadUserUrls = useCallback(async (page = 1, showRefreshing = false) => {
+    // Don't make API call if we don't have user profile yet
+    if (!userProfile?.id) {
       setLoadingUrls(false);
       return;
     }
@@ -138,7 +138,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
         setLoadingUrls(true);
       }
       
-      const response = await getUserUrls(userId, page, perPage);
+      const response = await getUserUrls(userProfile.id, page, perPage);
       if (response.success) {
         const data = response.data;
         setUrls(data.urls || []);
@@ -160,36 +160,30 @@ const ShortLinkPage = ({ noLayout = false }) => {
       setLoadingUrls(false);
       setRefreshing(false);
     }
-  }, [perPage, showSnackbar]);
+  }, [userProfile?.id, perPage, showSnackbar]);
 
-  // Initialize data on component mount
+  // Fetch user profile on component mount when user is available
   useEffect(() => {
-    const initializeData = async () => {
-      if (user?.token) {
-        // Fetch profile first, then load URLs
-        const profile = await fetchUserProfile();
-        if (profile?.id) {
-          await loadUserUrls(profile.id, 1);
-        }
-      } else {
-        setLoadingProfile(false);
-        setLoadingUrls(false);
-      }
-    };
+    if (user?.token && !userProfile && !loadingProfile) {
+      fetchUserProfile();
+    }
+  }, [user?.token, userProfile, loadingProfile, fetchUserProfile]);
 
-    initializeData();
-  }, [user?.token]); // Only depend on user.token
+  // Load user's URLs when user profile is available
+  useEffect(() => {
+    if (userProfile?.id && !loadingUrls) {
+      loadUserUrls(1);
+    }
+  }, [userProfile?.id, loadUserUrls]);
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
-    if (userProfile?.id) {
-      loadUserUrls(userProfile.id, newPage);
-    }
+    loadUserUrls(newPage);
   };
 
   const handleRefresh = () => {
     if (userProfile?.id) {
-      loadUserUrls(userProfile.id, currentPage, true);
+      loadUserUrls(currentPage, true);
     }
   };
 
@@ -219,9 +213,9 @@ const ShortLinkPage = ({ noLayout = false }) => {
         setTitle('');
         setDescription('');
         showSnackbar('Short URL generated successfully!', 'success');
-        // Refresh the table and go to first page
+        // Refresh the table and go to first page only if user profile is available
         if (userProfile?.id) {
-          loadUserUrls(userProfile.id, 1);
+          loadUserUrls(1);
         }
       } else {
         showSnackbar(response.message || 'Failed to generate short URL', 'error');
@@ -256,7 +250,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
         showSnackbar('URL updated successfully!', 'success');
         setEditDialog({ open: false, url: null });
         if (userProfile?.id) {
-          loadUserUrls(userProfile.id, currentPage, true);
+          loadUserUrls(currentPage, true);
         }
       } else {
         showSnackbar(response.message || 'Failed to update URL', 'error');
@@ -274,7 +268,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
         if (response.success) {
           showSnackbar('URL deleted successfully!', 'success');
           if (userProfile?.id) {
-            loadUserUrls(userProfile.id, currentPage, true);
+            loadUserUrls(currentPage, true);
           }
         } else {
           showSnackbar(response.message || 'Failed to delete URL', 'error');
@@ -294,12 +288,16 @@ const ShortLinkPage = ({ noLayout = false }) => {
     setAnalyticsDialog({ open: true, url });
   };
 
+
+
+
   const content = (
     <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
         {/* Header */}
 
         <Container maxWidth="xl" sx={{ py: 4 }}>
           {/* Tab Switcher - moved outside of Card */}
+
 
           {/* URL Generator Section */}
           <Card sx={{ mb: 4, boxShadow: 3 }}>
