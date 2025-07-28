@@ -54,8 +54,8 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../authContext/AuthContext';
 import LinkAnalytics from './LinkAnalytics';
+import AxiosManager from '../../utils/api';
 import {
-  createShortUrl,
   getUserUrls,
   deleteShortUrl,
   updateShortUrl,
@@ -162,21 +162,64 @@ const ShortLinkPage = ({ noLayout = false }) => {
 
     try {
       setLoading(true);
-      const response = await createShortUrl(longUrl, title, description);
       
-      if (response.success) {
-        setGeneratedUrl(response.data);
+      // Create payload similar to LinkAdvancedPage
+      const payload = {
+        short_url: {
+          long_url: longUrl.trim(),
+          title: title.trim() || undefined,
+          description: description.trim() || undefined
+        }
+      };
+
+      // Call API using AxiosManager similar to LinkAdvancedPage
+      const response = await AxiosManager.post('/api/v1/short_links', payload);
+      
+      if (response.data) {
+        const data = response.data;
+        setGeneratedUrl({
+          short_url: data.short_url,
+          long_url: data.long_url,
+          title: data.title,
+          description: data.description,
+          id: data.id,
+          created_at: data.created_at
+        });
         setLongUrl('');
         setTitle('');
         setDescription('');
         showSnackbar('Short URL generated successfully!', 'success');
         loadUserUrls(1); // Refresh the table and go to first page
       } else {
-        showSnackbar(response.message || 'Failed to generate short URL', 'error');
+        showSnackbar('Failed to generate short URL', 'error');
       }
     } catch (error) {
       console.error('Error generating short URL:', error);
-      showSnackbar('Error generating short URL', 'error');
+      
+      let errorMessage = 'Failed to generate short URL. Please try again.';
+      
+      // Handle specific error cases based on API response
+      if (error.response && error.response.data) {
+        const apiError = error.response.data;
+        if (apiError.message) {
+          errorMessage = apiError.message;
+        } else if (apiError.error) {
+          errorMessage = apiError.error;
+        }
+        
+        // Handle specific error cases
+        if (errorMessage.includes('already taken') || errorMessage.includes('exists')) {
+          errorMessage = 'The URL or custom back-half is already taken. Please choose a different one.';
+        } else if (errorMessage.includes('required')) {
+          errorMessage = 'Destination URL is required.';
+        } else if (errorMessage.includes('invalid')) {
+          errorMessage = 'Please check your input data and try again.';
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      showSnackbar(errorMessage, 'error');
     } finally {
       setLoading(false);
     }
