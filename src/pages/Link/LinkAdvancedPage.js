@@ -42,6 +42,7 @@ import {
   Visibility as PreviewIcon,
   Settings as SettingsIcon
 } from '@mui/icons-material';
+import AxiosManager from '../../utils/api';
 
 const LinkAdvancedPage = () => {
   // Basic form states
@@ -137,40 +138,27 @@ const LinkAdvancedPage = () => {
   // API call to create short link
   const createShortLink = async () => {
     const payload = {
-      destination_url: longUrl.trim(),
-      title: title.trim() || undefined,
-      custom_back_half: customBackHalf.trim() || undefined,
-      enable_utm: enableUTM,
-      enable_qr: enableQR
+      short_url: {
+        long_url: longUrl.trim(),
+        title: title.trim() || undefined,
+        custom_back_half: customBackHalf.trim() || undefined,
+        enable_utm: enableUTM,
+        enable_qr: enableQR
+      }
     };
 
     // Add UTM parameters if enabled
     if (enableUTM) {
-      if (utmSource.trim()) payload.utm_source = utmSource.trim();
-      if (utmMedium.trim()) payload.utm_medium = utmMedium.trim();
-      if (utmCampaign.trim()) payload.utm_campaign = utmCampaign.trim();
-      if (utmTerm.trim()) payload.utm_term = utmTerm.trim();
-      if (utmContent.trim()) payload.utm_content = utmContent.trim();
+      if (utmSource.trim()) payload.short_url.utm_source = utmSource.trim();
+      if (utmMedium.trim()) payload.short_url.utm_medium = utmMedium.trim();
+      if (utmCampaign.trim()) payload.short_url.utm_campaign = utmCampaign.trim();
+      if (utmTerm.trim()) payload.short_url.utm_term = utmTerm.trim();
+      if (utmContent.trim()) payload.short_url.utm_content = utmContent.trim();
     }
 
     try {
-      const response = await fetch('/api/v1/short_links', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authorization header if needed
-          // 'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
-      }
-
-      return data;
+      const response = await AxiosManager.post('/api/v1/shorten', payload);
+      return response.data;
     } catch (error) {
       console.error('API Error:', error);
       throw error;
@@ -214,9 +202,9 @@ const LinkAdvancedPage = () => {
       const result = await createShortLink();
       
       setGeneratedUrl({
-        short_url: result.short_link,
-        long_url: result.final_url || result.original_url,
-        original_url: result.original_url,
+        short_url: result.short_url,
+        long_url: result.long_url,
+        original_url: result.long_url,
         qr_code: result.qr_code_url || null,
         title: result.title,
         utm_params: result.utm_params,
@@ -227,13 +215,23 @@ const LinkAdvancedPage = () => {
     } catch (error) {
       let errorMessage = 'Failed to create link. Please try again.';
       
-      // Handle specific error cases
-      if (error.message.includes('already taken')) {
-        errorMessage = 'The custom back-half is already taken. Please choose a different one.';
-      } else if (error.message.includes('required')) {
-        errorMessage = 'Destination URL is required.';
-      } else if (error.message.includes('invalid')) {
-        errorMessage = 'Please check your input data and try again.';
+      // Handle specific error cases based on API response
+      if (error.response && error.response.data) {
+        const apiError = error.response.data;
+        if (apiError.message) {
+          errorMessage = apiError.message;
+        } else if (apiError.error) {
+          errorMessage = apiError.error;
+        }
+        
+        // Handle specific error cases
+        if (errorMessage.includes('already taken') || errorMessage.includes('exists')) {
+          errorMessage = 'The custom back-half is already taken. Please choose a different one.';
+        } else if (errorMessage.includes('required')) {
+          errorMessage = 'Destination URL is required.';
+        } else if (errorMessage.includes('invalid')) {
+          errorMessage = 'Please check your input data and try again.';
+        }
       } else if (error.message) {
         errorMessage = error.message;
       }
