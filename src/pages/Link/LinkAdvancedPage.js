@@ -261,15 +261,12 @@ const LinkAdvancedPage = () => {
   };
 
   return (
-    <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+    <Box sx={{ minHeight: '100vh' }}>
       {/* Header */}
 
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Card sx={{ mb: 4, boxShadow: 4, borderRadius: 3 }}>
-          <CardContent sx={{ p: 4 }}>
+        <Card sx={{ mb: 4, boxShadow: 4, borderRadius: 1 }}>
+          <CardContent sx={{ p: 2 }}>
             {/* Tab Switcher */}
-            <Box sx={{ mb: 4 }}>
-            </Box>
             
             {/* API Error Display */}
             {apiError && (
@@ -284,10 +281,10 @@ const LinkAdvancedPage = () => {
             
             <Grid container spacing={4}>
               {/* Left Column - Form */}
-              <Grid item xs={12} lg={8}>
+              <Grid size={{ xs: 12, sm: 12, md: 8 }}>
                 {/* Destination */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ mb: 1, color: '#091A48', fontWeight: 'bold' }}>
+                  <Typography variant="body2" sx={{ mb: 1, color: '#882AFF' }}>
                     Destination
                   </Typography>
                   <TextField
@@ -317,7 +314,7 @@ const LinkAdvancedPage = () => {
 
                 {/* Title */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ mb: 1, color: '#091A48', fontWeight: 'bold' }}>
+                  <Typography variant="body2" sx={{ mb: 1, color: '#882AFF' }}>
                     Title (optional)
                   </Typography>
                   <TextField
@@ -342,7 +339,7 @@ const LinkAdvancedPage = () => {
 
                 {/* Short Link */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ mb: 1, color: '#091A48', fontWeight: 'bold' }}>
+                  <Typography variant="body2" sx={{ mb: 1, color: '#882AFF'}}>
                     Short link
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -362,7 +359,7 @@ const LinkAdvancedPage = () => {
                         <MenuItem value="marketincer.com">marketincer.com</MenuItem>
                       </Select>
                     </FormControl>
-                    <Typography variant="h6" sx={{ mx: 1 }}>/</Typography>
+                    <Typography variant="body2" sx={{ mx: 1 }}>/</Typography>
                     <TextField
                       fullWidth
                       placeholder="custom-back-half (optional)"
@@ -390,20 +387,20 @@ const LinkAdvancedPage = () => {
                   </Box>
                 </Box>
 
-                <Divider sx={{ my: 4 }} />
+                <Divider sx={{ my: 1 }} />
 
                 {/* Ways to Share Section */}
-                <Typography variant="h5" sx={{ mb: 3, color: '#091A48', fontWeight: 'bold' }}>
+                <Typography variant="body2" sx={{ mb: 1, color: '#882AFF' }}>
                   Ways to share
                 </Typography>
 
                 {/* QR Code Section */}
-                <Card sx={{ mb: 3, bgcolor: '#f8f9ff', border: '1px solid #e0e7ff' }}>
+                <Card sx={{ mb: 2, bgcolor: '#f6edf8', border: '1px solid #f6edf8' }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <QrCodeIcon sx={{ color: '#882AFF' }} />
-                        <Typography variant="h6" sx={{ color: '#091A48', fontWeight: 'bold' }}>
+                        <Typography variant="body2" sx={{ color: '#882AFF' }}>
                           QR Code
                         </Typography>
                       </Box>
@@ -423,11 +420,11 @@ const LinkAdvancedPage = () => {
 
                     {enableQR && (
                       <Grid container spacing={3}>
-                        <Grid item xs={12} md={6}>
-                          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                          <Typography variant="body2" sx={{ mb: 1, }}>
                             Code color
                           </Typography>
-                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
+                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1}}>
                             {qrColors.map((color) => (
                               <IconButton
                                 key={color}
@@ -445,7 +442,7 @@ const LinkAdvancedPage = () => {
                             ))}
                           </Box>
 
-                          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                          <Typography variant="body2" sx={{ mb: 2, fontWeight: 'bold' }}>
                             Logo
                           </Typography>
                           <Button
@@ -456,7 +453,7 @@ const LinkAdvancedPage = () => {
                               borderColor: '#882AFF',
                               color: '#882AFF',
                               '&:hover': {
-                                borderColor: '#091A48',
+                                borderColor: '#882AFF',
                                 bgcolor: 'rgba(136, 42, 255, 0.04)',
                               }
                             }}
@@ -479,8 +476,8 @@ const LinkAdvancedPage = () => {
                             </Box>
                           )}
                         </Grid>
-                        <Grid item xs={12} md={6}>
-                          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                          <Typography variant="body2" sx={{ mb: 2, fontWeight: 'bold' }}>
                             Preview
                           </Typography>
                           <Box sx={{ 
@@ -506,19 +503,19 @@ const LinkAdvancedPage = () => {
                   </CardContent>
                 </Card>
 
-                <Divider sx={{ my: 4 }} />
+                <Divider sx={{ my: 2}} />
 
                 {/* UTM Parameters Section */}
-                <Typography variant="h5" sx={{ mb: 3, color: '#091A48', fontWeight: 'bold' }}>
+                <Typography variant="body2" sx={{ mb: 2, color: '#882AFF' }}>
                   Advanced features
                 </Typography>
 
-                <Card sx={{ mb: 3, bgcolor: '#f8fff8', border: '1px solid #e0ffe0' }}>
+                <Card sx={{ mb: 2, bgcolor: '#f8fff8', border: '1px solid #e0ffe0' }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <SettingsIcon sx={{ color: '#882AFF' }} />
-                        <Typography variant="h6" sx={{ color: '#091A48', fontWeight: 'bold' }}>
+                        <Typography variant="body2" sx={{ color: '#091A48', fontWeight: 'bold' }}>
                           UTM parameters
                         </Typography>
                       </Box>
@@ -645,10 +642,10 @@ const LinkAdvancedPage = () => {
                 <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
                   <Button
                     variant="outlined"
-                    size="large"
+                    size="small"
                     sx={{
                       py: 1.5,
-                      px: 4,
+                      px: 2,
                       borderColor: '#882AFF',
                       color: '#882AFF',
                       '&:hover': {
@@ -661,18 +658,16 @@ const LinkAdvancedPage = () => {
                   </Button>
                   <Button
                     variant="contained"
-                    size="large"
+                    size="small"
                     onClick={handleCreateLink}
                     disabled={loading}
                     startIcon={loading ? <CircularProgress size={20} /> : <AddIcon />}
                     sx={{
                       py: 1.5,
-                      px: 4,
-                      fontSize: '1.1rem',
-                      fontWeight: 'bold',
-                      background: 'linear-gradient(45deg, #882AFF 30%, #091A48 90%)',
+                      px: 2,
+                      background: '#882AFF',
                       '&:hover': {
-                        background: 'linear-gradient(45deg, #7a26e6 30%, #082040 90%)',
+                        boxShadow: '0px 2px 4px -1px rgba(0,0,0,0.2),0px 4px 5px 0px rgba(0,0,0,0.14),0px 1px 10px 0px rgba(0,0,0,0.12)',
                       }
                     }}
                   >
@@ -682,19 +677,19 @@ const LinkAdvancedPage = () => {
               </Grid>
 
               {/* Right Column - Preview */}
-              <Grid item xs={12} lg={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card sx={{ position: 'sticky', top: 20, boxShadow: 3 }}>
                   <CardContent>
-                    <Typography variant="h6" sx={{ mb: 2, color: '#091A48', fontWeight: 'bold' }}>
+                    <Typography variant="body2" sx={{ mb: 2, color: '#882AFF' }}>
                       Preview
                     </Typography>
                     
                     {/* Short URL Preview */}
-                    <Box sx={{ mb: 3, p: 2, bgcolor: '#f8f9ff', borderRadius: 2 }}>
+                    <Box sx={{ mb: 3, p: 2, bgcolor: '#f6edf8', borderRadius: 2 }}>
                       <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                         Short URL:
                       </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#882AFF' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#882AFF' }}>
                         {getShortUrlPreview()}
                       </Typography>
                     </Box>
@@ -757,7 +752,7 @@ const LinkAdvancedPage = () => {
                     {/* QR Code Preview */}
                     {enableQR && (
                       <Box sx={{ mb: 3, p: 2, bgcolor: '#fff', borderRadius: 2, border: '1px solid #e0e0e0', textAlign: 'center' }}>
-                        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                           QR Code Preview:
                         </Typography>
                         <img
@@ -770,7 +765,7 @@ const LinkAdvancedPage = () => {
 
                     {/* Features Summary */}
                     <Box sx={{ mt: 3 }}>
-                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                         Enabled Features:
                       </Typography>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -803,7 +798,7 @@ const LinkAdvancedPage = () => {
             {/* Generated URL Display */}
             {generatedUrl && (
               <Box sx={{ mt: 4, p: 4, bgcolor: '#f0f7ff', borderRadius: 3, border: '2px solid #e3f2fd' }}>
-                <Typography variant="h5" sx={{ mb: 3, color: '#882AFF', fontWeight: 'bold' }}>
+                <Typography variant="body2" sx={{ mb: 3, color: '#882AFF', fontWeight: 'bold' }}>
                   ✅ Link Created Successfully!
                 </Typography>
                 
@@ -870,7 +865,7 @@ const LinkAdvancedPage = () => {
                   {generatedUrl.qr_code && (
                     <Grid item xs={12} md={4}>
                       <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
                           QR Code
                         </Typography>
                         <img
@@ -901,7 +896,7 @@ const LinkAdvancedPage = () => {
                 {/* UTM Parameters Display */}
                 {generatedUrl.utm_params && Object.keys(generatedUrl.utm_params).length > 0 && (
                   <Box sx={{ mt: 3, p: 2, bgcolor: '#fff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    <Typography variant="body2" sx={{ mb: 2, fontWeight: 'bold' }}>
                       UTM Parameters Applied:
                     </Typography>
                     <Grid container spacing={2}>
@@ -933,7 +928,7 @@ const LinkAdvancedPage = () => {
             {snackbar.message}
           </Alert>
         </Snackbar>
-      </Container>
+      
     </Box>
   );
 };

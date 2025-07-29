@@ -3,7 +3,7 @@ import {
   Box, Typography, Button, TextField, Avatar, Chip, Select, MenuItem, IconButton, Card, FormControl,
   Tab, Tabs, Checkbox, Grid, Modal, Paper, AppBar, Toolbar, Container, InputLabel, ListItemText,
   CardContent, Autocomplete, CardActions, CardMedia, Divider, Stack, ListItemIcon, CircularProgress,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Badge, Dialog, DialogTitle, DialogContent, DialogActions
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Badge, Dialog, DialogTitle, DialogContent, DialogActions,InputAdornment
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from '@mui/icons-material/Close';
@@ -87,6 +87,7 @@ const MarketplaceModule = () => {
   const [loading, setLoading] = useState(false);
   const [postsLoading, setPostsLoading] = useState(false);
   const [bidsLoading, setBidsLoading] = useState(false);
+  const [searchFeedQuery, setSearchFeedQuery] = useState('');
   
   // Influencer view toggle states
   const [influencerView, setInfluencerView] = useState('feed'); // 'feed' or 'bids'
@@ -99,6 +100,11 @@ const MarketplaceModule = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const inputRef = useRef(null); // create reference to TextField
+
+  // useEffect(() => {
+  //   inputRef.current?.focus();
+  // }, []);
 
   // Debounced search effect
   useEffect(() => {
@@ -632,37 +638,46 @@ const MarketplaceModule = () => {
         >
           {/* Search Bar */}
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-            <TextField
-              placeholder="Search by title..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: <SearchIcon sx={{ color: '#882AFF', mr: 1 }} />,
-                endAdornment: searchQuery && (
-                  <IconButton 
-                    size="small" 
+          <TextField
+            inputRef={inputRef}
+            placeholder="Search by title..."
+            value={searchQuery}
+            autoFocus
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: '#882AFF' }} />
+                </InputAdornment>
+              ),
+              endAdornment: searchQuery && (
+                <InputAdornment position="end">
+                  <IconButton
+                    size="small"
                     onClick={() => setSearchQuery('')}
                     sx={{ color: '#666' }}
                   >
                     <ClearIcon fontSize="small" />
                   </IconButton>
-                ),
-                sx: {
-                  borderRadius: 50,
-                  width:'350px',
-                  backgroundColor: 'white',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#e1e7ff',
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#882AFF',
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#882AFF',
-                  }
-                }
-              }}
-            />
+                </InputAdornment>
+              ),
+              sx: {
+                borderRadius: 50,
+                width: '350px',
+                backgroundColor: 'white',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e1e7ff',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#882AFF',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#882AFF',
+                },
+              },
+            }}
+          />
+          
             <Button
               variant={showFilters ? "contained" : "outlined"}
               startIcon={<FilterListIcon />}
@@ -695,7 +710,7 @@ const MarketplaceModule = () => {
               borderRadius: 2,
               border: '1px solid #e1e7ff'
             }}>
-              <FormControl size="small" sx={{ minWidth: 120 }}>
+              <FormControl size="small" sx={{ minWidth: 260 }}>
                 <InputLabel>Status</InputLabel>
                 <Select
                   value={statusFilter}
@@ -712,7 +727,7 @@ const MarketplaceModule = () => {
                 </Select>
               </FormControl>
 
-              <FormControl size="small" sx={{ minWidth: 140 }}>
+              <FormControl size="small" sx={{ minWidth: 260 }}>
                 <InputLabel>Type</InputLabel>
                 <Select
                   value={typeFilter}
@@ -729,7 +744,7 @@ const MarketplaceModule = () => {
                 </Select>
               </FormControl>
 
-              <FormControl size="small" sx={{ minWidth: 120 }}>
+              <FormControl size="small" sx={{ minWidth: 260 }}>
                 <InputLabel>Category</InputLabel>
                 <Select
                   value={categoryFilter}
@@ -746,7 +761,7 @@ const MarketplaceModule = () => {
                 </Select>
               </FormControl>
 
-              <FormControl size="small" sx={{ minWidth: 140 }}>
+              <FormControl size="small" sx={{ minWidth: 260 }}>
                 <InputLabel>Target Audience</InputLabel>
                 <Select
                   value={targetAudienceFilter}
@@ -815,7 +830,7 @@ const MarketplaceModule = () => {
                   color: 'white',
                   fontWeight: 'bold',
                   fontSize: '0.95rem',
-                  padding:'0 20px'
+                  padding:'10px 10px'
                 }
               }}>
                 <TableCell>Title</TableCell>
@@ -1031,6 +1046,7 @@ const MarketplaceModule = () => {
                 fullWidth
                 placeholder="Search opportunities..."
                 value={searchQuery}
+                autoFocus
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
                   startAdornment: <SearchIcon sx={{ color: '#882AFF', mr: 1 }} />,
@@ -1435,7 +1451,7 @@ const MarketplaceModule = () => {
             ) : (
               <Grid container spacing={3}>
                 {myBids.map((bid) => (
-                  <Grid item xs={12} md={6} lg={4} key={bid.id}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }} key={bid.id}>
                     <Card sx={{
                       height: '100%',
                       borderRadius: 3,
@@ -1446,9 +1462,9 @@ const MarketplaceModule = () => {
                         boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
                       }
                     }}>
-                      <CardContent sx={{ p: 3 }}>
+                      <CardContent sx={{ p: 2 }}>
                         {/* Bid Status Badge */}
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                           <Chip
                             label={bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
                             size="small"
@@ -1466,18 +1482,20 @@ const MarketplaceModule = () => {
                           </Typography>
                         </Box>
 
-                        {/* Post Title */}
-                        <Typography variant="h6" sx={{ 
-                          fontWeight: 'bold', 
-                          mb: 1,
-                          color: '#333',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
-                        }}>
-                          {bid.postTitle}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          {/* Post Title */}
+                          <Typography variant="h6" sx={{ 
+                            fontWeight: 'bold', 
+                            mb: 1,
+                            color: '#333',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden'
+                          }}>
+                          {bid.postTitle} 
                         </Typography>
+                        </Box>
 
                         {/* Brand */}
                         <Typography variant="body2" sx={{ 
@@ -1488,19 +1506,87 @@ const MarketplaceModule = () => {
                           by {bid.brand}
                         </Typography>
 
-                        {/* Description */}
-                        <Typography variant="body2" color="text.secondary" sx={{ 
-                          mb: 2,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
+                        <Box sx={{
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center',
+                          //bgcolor: '#f8f9fa',
+                          //p: 2,
+                          borderRadius: 2,
+                          mb: 1
+                          }}>
+
+                          <Box sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center',
+                          bgcolor: '#f8f9fa',
+                          p: 1,
+                          borderRadius: 2,
+                          //mb: 1,
+                          width:'50%'
                         }}>
-                          {bid.description}
-                        </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Your Bid:
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            color: '#882AFF', 
+                            fontWeight: 'bold' 
+                          }}>
+                            ₹{bid.amount.toLocaleString()}
+                          </Typography>
+                        </Box>
+                          
+                          {/* <LocationOnIcon sx={{ color: '#666', fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" color="text.secondary">
+                            Deadline: {bid.deadline}
+                          </Typography> */}
+
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            //fullWidth
+                            sx={{
+                              
+                              borderColor: '#882AFF',
+                              color: '#882AFF',
+                              '&:hover': {
+                                borderColor: '#6a1b9a',
+                                bgcolor: '#f3e5f5'
+                              }
+                            }}
+                            onClick={() => {
+                              // Navigate to post details or open message dialog
+                              toast.info('View post details functionality coming soon!');
+                            }}
+                          >
+                            View Post
+                          </Button>
+                          {bid.status === 'accepted' && (
+                            <Button
+                              variant="contained"
+                              size="small"
+                              //fullWidth
+                              sx={{
+                                bgcolor: '#4caf50',
+                                '&:hover': { bgcolor: '#388e3c' }
+                              }}
+                              onClick={() => {
+                                toast.info('Start project functionality coming soon!');
+                              }}
+                            >
+                              Start Project
+                            </Button>
+                          )}
+
+                        </Box>
+                        
+                        
+
+                       
 
                         {/* Bid Amount */}
-                        <Box sx={{ 
+                        {/* <Box sx={{ 
                           display: 'flex', 
                           justifyContent: 'space-between', 
                           alignItems: 'center',
@@ -1518,7 +1604,7 @@ const MarketplaceModule = () => {
                           }}>
                             ₹{bid.amount.toLocaleString()}
                           </Typography>
-                        </Box>
+                        </Box> */}
 
                         {/* Deadline */}
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -1529,7 +1615,7 @@ const MarketplaceModule = () => {
                         </Box>
 
                         {/* Action Buttons */}
-                        <Box sx={{ display: 'flex', gap: 1 }}>
+                        {/* <Box sx={{ display: 'flex', gap: 1 }}>
                           <Button
                             variant="outlined"
                             size="small"
@@ -1565,7 +1651,7 @@ const MarketplaceModule = () => {
                               Start Project
                             </Button>
                           )}
-                        </Box>
+                        </Box> */}
                       </CardContent>
                     </Card>
                   </Grid>
@@ -1685,7 +1771,7 @@ const MarketplaceModule = () => {
 
   // Bids View Dialog
   const BidsViewDialog = () => (
-    <Dialog open={bidsViewOpen} onClose={() => setBidsViewOpen(false)} maxWidth="lg" fullWidth>
+    <Dialog open={bidsViewOpen} onClose={() => setBidsViewOpen(false)} Width="lg" fullWidth>
       <DialogTitle>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">Bids for: {selectedPost?.title}</Typography>

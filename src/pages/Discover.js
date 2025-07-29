@@ -1,102 +1,101 @@
 import React, {useState } from 'react';
 import {
-  Box,
-  AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
-  Divider,
   Avatar,
-  Paper,
-  Grid,
-  Container,
-  Card,
-  CardContent,
-  CssBaseline,
-  ThemeProvider,
-  createTheme,
-  
-  MenuItem,FromControl,TextField,
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Table,
+  TableBody,
+  TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
-  styled,Button,
-  Select,Popover,FormControl,InputLabel,selectedFilters,
+  Typography,MenuItem,
+  Paper, Grid,Select,IconButton, FormControl, TextField, InputAdornment
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import { YouTube, Instagram, Facebook, WhatsApp } from '@mui/icons-material';
 import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
 import CloseIcon from "@mui/icons-material/Close";
-// import {
-//   Dashboard as DashboardIcon,
-//   Analytics as AnalyticsIcon,
-//   Campaign as CampaignIcon,
-//   People as PeopleIcon,
-//   Settings as SettingsIcon,
-//   Logout as LogoutIcon,
-//   TrendingUp as TrendingUpIcon,
-//   AttachMoney as AttachMoneyIcon,
-//   Group as GroupIcon,
-//   Assessment as AssessmentIcon,
-//   Close as CloseIcon
-  
-// } from '@mui/icons-material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import Sidebar from '../components/Sidebar'
 
 
 // Create theme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1a1a2e',
-    },
-    secondary: {
-      main: '#16213e',
-    },
-    background: {
-      default: '#f5f5f5',
-    },
+// const theme = createTheme({
+//   palette: {
+//     primary: {
+//       main: '#1a1a2e',
+//     },
+//     secondary: {
+//       main: '#16213e',
+//     },
+//     background: {
+//       default: '#f5f5f5',
+//     },
+//   },
+// });
+
+const influencerData = [
+  {
+    name: 'Olivia Rhye',
+    username: '@olivia',
+    tag: 'Fitness',
+    followers: '46.8K',
+    email: 'olivia@untitledui.com',
+    avatar: 'https://i.pravatar.cc/300?img=1',
+    platforms: ['TikTok', 'YouTube', 'Instagram'],
   },
-});
-
-const stats = [
-  { label: 'Total posts', value: '238', change: '+5.6%' },
-  { label: 'Followers gained', value: '12.6K', change: '+1.2%' },
-  { label: 'Views', value: '43.8K', change: '-1.6%' },
-  { label: 'Engagement', value: '6.8%', change: '+5.6%' }
+  {
+    name: 'Phoenix Baker',
+    username: '@phoenix',
+    tag: 'Beauty',
+    followers: '45.8K',
+    email: 'phoenix@untitledui.com',
+    avatar: 'https://i.pravatar.cc/300?img=2',
+    platforms: ['Instagram', 'YouTube'],
+  },
 ];
 
-const chartCards = [
-  { label: 'Followers growth', change: '+21%', type: 'bar' },
-  { label: 'Followers', change: '+21%', type: 'bar' },
-  { label: 'Engagement Rate', change: '+21%', type: 'line' }
-];
-
-const topPosts = [
-  { name: 'David', engagement: '27.8K', views: '3.1K', clicks: 286 },
-  { name: 'Sarah', engagement: '21.0K', views: '1.1K', clicks: 191 },
-  { name: 'Mike', engagement: '17.8K', views: '4.1K', clicks: 126 },
-  { name: 'Thomas', engagement: '37.4K', views: '7.8K', clicks: 582 },
-  { name: 'Klaus', engagement: '26.9K', views: '3.1K', clicks: 286 }
-];
-
-const data = [
-  { name: 'A', value: 10 },
-  { name: 'B', value: 25 },
-  { name: 'C', value: 15 },
-  { name: 'D', value: 30 },
-];
-
-
-
+const getPlatformIcons = (platforms) => {
+  return platforms.map((platform, idx) => {
+    switch (platform) {
+      case 'YouTube':
+        return <YouTube key={idx} sx={{ color: 'red', mr: 0.5 }} />;
+      case 'Instagram':
+        return <Instagram key={idx} sx={{ color: '#E1306C', mr: 0.5 }} />;
+      case 'Facebook':
+        return <Facebook key={idx} sx={{ color: '#1877F2', mr: 0.5 }} />;
+      case 'WhatsApp':
+        return <WhatsApp key={idx} sx={{ color: '#25D366', mr: 0.5 }} />;
+      default:
+        return null;
+    }
+  });
+};
 
 const Discover = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [filterType, setFilterType] = useState("");
+  const [open, setOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [value, setValue] = useState('');
+
+  const handleOpen = (row) => {
+    setSelectedRow(row);
+    setOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setOpen(false);
+    setSelectedRow(null);
+  };
 
   const handleSelectChange = (event) => {
     debugger
@@ -211,19 +210,34 @@ const Discover = () => {
             alignItems: 'center',bgcolor: '#B1C6FF',padding: '15px',
           }}>
                     
-                <TextField size="small" variant="outlined" placeholder="Search" />
+                <TextField
+                  placeholder="Search..."
+                  variant="outlined"
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
               
-                <FormControl fullWidth>
+              <FormControl fullWidth>
                   <Select
                     labelId="filter-label"
                     value={filterType}
                     //label="Filter"
                     onChange={handleSelectChange}
+                    displayEmpty
+                    renderValue={(selected) =>
+                    selected !== '' ? selected : <Typography color="#882AFF">Filter </Typography>
+                    }
                   >
                     <Grid container>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={3} className='filterSection'>
                       {Object.entries(allFilters).map(([section, items]) => (
-                        <Grid size xs={4} key={section}>
+                        <Grid size xs={4} key={section} sx={{ padding:'20px', boxShadow: '1px 1px 1px 1px rgb(0 0 0 / 10%)'}}>
                           <Typography variant="subtitle2">{section}</Typography>
                           {items.map((item) => (
                             <Typography
@@ -232,6 +246,7 @@ const Discover = () => {
                               sx={{
                                 mt: 1,
                                 cursor: "pointer",
+                               
                                 // color: isSelected(item) ? "primary.main" : "text.primary",
                                 // fontWeight: isSelected(item) ? "bold" : "normal"
                               }}
@@ -255,6 +270,26 @@ const Discover = () => {
                     </Box>
                   </Grid>
                  
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth>
+                <Select
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  displayEmpty
+                  renderValue={(selected) =>
+                    selected !== '' ? selected : <Typography color="#882AFF">Sort by</Typography>
+                  }
+                  sx={{
+                    backgroundColor: '#fff',
+                    borderRadius: 1,
+                    
+                  }}
+                >
+                  <MenuItem value="Option 1">All</MenuItem>
+                  <MenuItem value="Option 2">Option 2</MenuItem>
+                  <MenuItem value="Option 3">Option 3</MenuItem>
                 </Select>
               </FormControl>
 
@@ -297,36 +332,73 @@ const Discover = () => {
                   <Grid size={{ xs: 2, sm: 4, md: 12 }}>
                   <Box mt={4}>
                     <Typography variant="h6" gutterBottom>1887 Influencer Found</Typography>
-                    <Table width="100%" sx={{
-                          borderRadius: 5,
-                          bgcolor:'#fff',
-                          boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",}}>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell><b>Name</b></TableCell>
-                          <TableCell align='center'><b>Engagement</b></TableCell>
-                          <TableCell align='center'><b>Views</b></TableCell>
-                          <TableCell align='center'><b>Clicks</b></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {topPosts.map((post, index) => (
-                          <TableRow key={index}>
-                            <TableCell >
-                              <Grid container alignItems="center" spacing={1}>
-                                <Grid item>
-                                  <Avatar src={`https://via.placeholder.com/40?text=${post.name[0]}`} />
-                                </Grid>
-                                <Grid item>{post.name}</Grid>
-                              </Grid>
-                            </TableCell>
-                            <TableCell align='center'>{post.engagement}</TableCell>
-                            <TableCell align='center'>{post.views}</TableCell>
-                            <TableCell align='center'>{post.clicks}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                    <>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: '#f3f4f6' }}>
+              <TableCell>Name</TableCell>
+              <TableCell>Tags</TableCell>
+              <TableCell>Followers</TableCell>
+              <TableCell>Email address</TableCell>
+              <TableCell>Platform</TableCell>
+              <TableCell>Analytics</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {influencerData.map((row, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <Box display="flex" alignItems="center" sx={{ cursor: 'pointer' }} onClick={() => handleOpen(row)}>
+                    <Avatar src={row.avatar} sx={{ mr: 1 }} />
+                    <Box>
+                      <Typography variant="body1">{row.name}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {row.username}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </TableCell>
+                <TableCell>{row.tag}</TableCell>
+                <TableCell>{row.followers}</TableCell>
+                <TableCell>{row.email}</TableCell>
+                <TableCell>
+                  <Box display="flex">{getPlatformIcons(row.platforms)}</Box>
+                </TableCell>
+                <TableCell>
+                  <Button variant="text" size="small">View full analytics</Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Modal Dialog */}
+      <Dialog open={open} onClose={handleModalClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Influencer Details</DialogTitle>
+        <DialogContent dividers>
+          {selectedRow && (
+            <>
+              <Box display="flex" alignItems="center" mb={2}>
+                <Avatar src={selectedRow.avatar} sx={{ width: 56, height: 56, mr: 2 }} />
+                <Box>
+                  <Typography variant="h6">{selectedRow.name}</Typography>
+                  <Typography color="text.secondary">{selectedRow.username}</Typography>
+                </Box>
+              </Box>
+              <Typography><strong>Tag:</strong> {selectedRow.tag}</Typography>
+              <Typography><strong>Followers:</strong> {selectedRow.followers}</Typography>
+              <Typography><strong>Email:</strong> {selectedRow.email}</Typography>
+              <Typography><strong>Platforms:</strong> {getPlatformIcons(selectedRow.platforms)}</Typography>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleModalClose} color="primary">Close</Button>
+        </DialogActions>
+      </Dialog>
+    </>
                   </Box>
                   </Grid>
                 </Grid>

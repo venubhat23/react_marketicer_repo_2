@@ -288,15 +288,14 @@ const ShortLinkPage = ({ noLayout = false }) => {
     <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
         {/* Header */}
 
-        <Container maxWidth="xl" sx={{ py: 4 }}>
+       
           {/* Tab Switcher - moved outside of Card */}
-
 
           {/* URL Generator Section */}
           <Card sx={{ mb: 4, boxShadow: 3 }}>
             <CardContent sx={{ p: 4 }}>              
               <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
                     fullWidth
                     label="Enter your destination URL"
@@ -312,7 +311,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                   />
                 </Grid>
                 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
                     fullWidth
                     label="Title (Optional)"
@@ -323,7 +322,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                   />
                 </Grid>
                 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
                     fullWidth
                     label="Description (Optional)"
@@ -334,7 +333,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                   />
                 </Grid>
                 
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Button
                     variant="contained"
                     size="large"
@@ -343,12 +342,10 @@ const ShortLinkPage = ({ noLayout = false }) => {
                     startIcon={loading ? <CircularProgress size={20} /> : <AddIcon />}
                     sx={{
                       py: 1.5,
-                      px: 4,
-                      fontSize: '1.1rem',
-                      fontWeight: 'bold',
-                      background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+                      px:2,
+                      background: '#882AFF',
                       '&:hover': {
-                        background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
+                        boxShadow: '0px 2px 4px -1px rgba(0,0,0,0.2),0px 4px 5px 0px rgba(0,0,0,0.14),0px 1px 10px 0px rgba(0,0,0,0.12)',
                       }
                     }}
                   >
@@ -400,9 +397,9 @@ const ShortLinkPage = ({ noLayout = false }) => {
           <Card sx={{ boxShadow: 3 }}>
             <CardContent sx={{ p: 0 }}>
               <Box sx={{ p: 3, pb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
+                    <Typography variant="h6" sx={{color: '#882AFF', mb: 1 }}>
                       📊 Your Short URLs
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -757,7 +754,6 @@ const ShortLinkPage = ({ noLayout = false }) => {
               {snackbar.message}
             </Alert>
           </Snackbar>
-        </Container>
       </Box>
     );
 
