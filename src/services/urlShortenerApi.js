@@ -1,4 +1,13 @@
 import AxiosManager from '../utils/api';
+import { 
+  USE_MOCK_DATA, 
+  mockGetUrlAnalytics, 
+  mockGetUnifiedAnalytics,
+  mockGetAnalyticsSummary,
+  mockExportAnalytics,
+  mockGetUrlPreview,
+  mockGetUrlInfo
+} from './mockUrlData';
 
 /**
  * URL Shortener API Service
@@ -131,6 +140,44 @@ export const getUrlAnalytics = async (shortCode) => {
     };
   } catch (error) {
     console.error('Error fetching URL analytics:', error);
+    return handleApiResponse(error);
+  }
+};
+
+// Get Unified Analytics - All analytics data in one API call
+export const getUnifiedAnalytics = async (shortCode) => {
+  if (USE_MOCK_DATA) {
+    return await mockGetUnifiedAnalytics(shortCode);
+  }
+  
+  try {
+    // Fetch all analytics data concurrently
+    const [
+      basicAnalytics,
+      geographicAnalytics,
+      technologyAnalytics,
+      conversionAnalytics,
+      realTimeAnalytics
+    ] = await Promise.all([
+      AxiosManager.get(`${API_BASE}/analytics/${shortCode}`),
+      AxiosManager.get(`${API_BASE}/analytics/${shortCode}/geographic`),
+      AxiosManager.get(`${API_BASE}/analytics/${shortCode}/technology`),
+      AxiosManager.get(`${API_BASE}/analytics/${shortCode}/conversions`),
+      AxiosManager.get(`${API_BASE}/analytics/${shortCode}/realtime`)
+    ]);
+
+    return {
+      success: true,
+      data: {
+        basic: basicAnalytics.data,
+        geographic: geographicAnalytics.data,
+        technology: technologyAnalytics.data,
+        conversions: conversionAnalytics.data,
+        realtime: realTimeAnalytics.data
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching unified analytics:', error);
     return handleApiResponse(error);
   }
 };
@@ -437,6 +484,7 @@ export default {
   // Dashboard & Analytics
   getUserDashboard,
   getUrlAnalytics,
+  getUnifiedAnalytics,
   getAnalyticsSummary,
   exportAnalytics,
   getAnalyticsByDateRange,
