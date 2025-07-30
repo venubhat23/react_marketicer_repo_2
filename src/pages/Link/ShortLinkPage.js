@@ -53,7 +53,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../authContext/AuthContext';
-import LinkAnalytics from './LinkAnalytics';
+import IndividualLinkAnalytics from './IndividualLinkAnalytics';
 import AxiosManager from '../../utils/api';
 import {
   getUserUrls,
@@ -126,7 +126,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
       setLoadingUrls(false);
       setRefreshing(false);
     }
-  }, [user?.id, showSnackbar]);
+  }, [user?.id, showSnackbar, perPage]);
 
   // Load user's URLs on component mount
   useEffect(() => {
@@ -692,9 +692,10 @@ const ShortLinkPage = ({ noLayout = false }) => {
           <Dialog 
             open={analyticsDialog.open} 
             onClose={() => setAnalyticsDialog({ open: false, url: null })} 
-            maxWidth="lg" 
+            maxWidth="xl" 
             fullWidth
-            PaperProps={{ sx: { height: '90vh' } }}
+            fullScreen
+            PaperProps={{ sx: { height: '100vh' } }}
           >
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="h6">URL Analytics</Typography>
@@ -704,7 +705,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
             </DialogTitle>
             <DialogContent sx={{ p: 0, overflow: 'auto' }}>
               {analyticsDialog.url && (
-                <LinkAnalytics 
+                <IndividualLinkAnalytics 
                   url={analyticsDialog.url} 
                   onClose={() => setAnalyticsDialog({ open: false, url: null })}
                 />
