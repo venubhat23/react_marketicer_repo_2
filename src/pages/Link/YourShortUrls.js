@@ -40,7 +40,7 @@ import {
   Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../authContext/AuthContext';
-import LinkAnalytics from './LinkAnalytics';
+import IndividualLinkAnalytics from './IndividualLinkAnalytics';
 import {
   getUserUrls,
   deleteShortUrl,
@@ -53,7 +53,7 @@ import {
 const YourShortUrls = () => {
   const { user } = useAuth();
   const [urls, setUrls] = useState([]);
-  const [loadingUrls, setLoadingUrls] = useState(true);
+  const [loadingUrls, setLoadingUrls] = useState(false);
   const [editDialog, setEditDialog] = useState({ open: false, url: null });
   const [qrDialog, setQrDialog] = useState({ open: false, url: null });
   const [analyticsDialog, setAnalyticsDialog] = useState({ open: false, url: null });
@@ -198,7 +198,7 @@ const YourShortUrls = () => {
                 variant="outlined"
                 startIcon={refreshing ? <CircularProgress size={16} /> : <RefreshIcon />}
                 onClick={handleRefresh}
-                disabled={refreshing || loadingUrls}
+                disabled={refreshing}
                 size="small"
               >
                 {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -480,9 +480,10 @@ const YourShortUrls = () => {
       <Dialog 
         open={analyticsDialog.open} 
         onClose={() => setAnalyticsDialog({ open: false, url: null })} 
-        maxWidth="lg" 
+        maxWidth="xl" 
         fullWidth
-        PaperProps={{ sx: { height: '90vh' } }}
+        fullScreen
+        PaperProps={{ sx: { height: '100vh' } }}
       >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">URL Analytics</Typography>
@@ -492,7 +493,7 @@ const YourShortUrls = () => {
         </DialogTitle>
         <DialogContent sx={{ p: 0, overflow: 'auto' }}>
           {analyticsDialog.url && (
-            <LinkAnalytics 
+            <IndividualLinkAnalytics 
               url={analyticsDialog.url} 
               onClose={() => setAnalyticsDialog({ open: false, url: null })}
             />
