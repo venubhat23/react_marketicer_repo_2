@@ -178,8 +178,8 @@ const ShortLinkPage = ({ noLayout = false }) => {
       if (response.data) {
         const data = response.data;
         setGeneratedUrl({
-          short_url: data.short_url,
-          long_url: data.long_url,
+          short_url: data.short_link,
+          long_url: data.final_url,
           title: data.title,
           description: data.description,
           id: data.id,
