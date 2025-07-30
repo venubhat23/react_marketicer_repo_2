@@ -18,15 +18,10 @@ import Sidebar from '../../components/Sidebar';
 // Import the original components
 import ShortLinkPage from './ShortLinkPage';
 import LinkAdvancedPage from './LinkAdvancedPage';
-import YourShortUrls from './YourShortUrls';
 
 const LinkPage = () => {
   // Create tab configuration for the switcher
   const tabs = [
-    {
-      label: 'Your Short URLs',
-      content: <YourShortUrls />
-    },
     {
       label: 'ShortLink',
       content: <ShortLinkPage noLayout={true} />
