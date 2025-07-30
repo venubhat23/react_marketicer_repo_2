@@ -202,9 +202,9 @@ const LinkAdvancedPage = () => {
       const result = await createShortLink();
       
       setGeneratedUrl({
-        short_url: result.short_url,
-        long_url: result.long_url,
-        original_url: result.long_url,
+        short_link: result.short_link,
+        long_url: result.final_url,
+        original_url: result.original_url,
         qr_code: result.qr_code_url || null,
         title: result.title,
         utm_params: result.utm_params,
@@ -818,7 +818,7 @@ const LinkAdvancedPage = () => {
                       <Button
                         variant="contained"
                         startIcon={<CopyIcon />}
-                        onClick={() => handleCopyUrl(generatedUrl.short_url)}
+                        onClick={() => handleCopyUrl(generatedUrl.short_link)}
                         sx={{ 
                           bgcolor: '#882AFF',
                           '&:hover': { bgcolor: '#7a26e6' }
@@ -829,7 +829,7 @@ const LinkAdvancedPage = () => {
                       <Button
                         variant="outlined"
                         startIcon={<LaunchIcon />}
-                        onClick={() => window.open(generatedUrl.short_url, '_blank')}
+                        onClick={() => window.open(generatedUrl.short_link, '_blank')}
                         sx={{ 
                           borderColor: '#882AFF',
                           color: '#882AFF'
