@@ -333,6 +333,74 @@ export const mockGetUrlAnalytics = async (shortCode) => {
   };
 };
 
+// Mock Unified Analytics - All analytics data in one call
+export const mockGetUnifiedAnalytics = async (shortCode) => {
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  const url = mockUrls.find(u => u.short_code === shortCode);
+  if (!url) {
+    return {
+      success: false,
+      error: 'URL not found'
+    };
+  }
+
+  const analytics = generateMockAnalytics(shortCode, url.clicks);
+  
+  return {
+    success: true,
+    data: {
+      basic: {
+        url: {
+          id: url.id,
+          title: url.title,
+          original_url: url.original_url,
+          short_url: url.short_url,
+          short_code: shortCode,
+          created_at: url.created_at,
+          clicks: url.clicks,
+          status: url.status
+        },
+        ...analytics,
+        total_clicks: url.clicks,
+        today_clicks: Math.max(...Object.values(analytics.clicks_by_day)),
+        week_clicks: Object.values(analytics.clicks_by_day).slice(-7).reduce((a, b) => a + b, 0)
+      },
+      geographic: {
+        countries: analytics.countries,
+        cities: analytics.cities
+      },
+      technology: {
+        devices: analytics.devices,
+        browsers: analytics.browsers,
+        operating_systems: analytics.operating_systems || {
+          'Windows': Math.floor(url.clicks * 0.45),
+          'macOS': Math.floor(url.clicks * 0.25),
+          'iOS': Math.floor(url.clicks * 0.15),
+          'Android': Math.floor(url.clicks * 0.10),
+          'Linux': Math.floor(url.clicks * 0.05)
+        }
+      },
+      conversions: {
+        conversion_rate: (Math.random() * 15 + 5).toFixed(2), // 5-20%
+        total_conversions: Math.floor(url.clicks * 0.12),
+        conversion_sources: {
+          'Direct': Math.floor(url.clicks * 0.04),
+          'Social Media': Math.floor(url.clicks * 0.03),
+          'Email': Math.floor(url.clicks * 0.03),
+          'Search': Math.floor(url.clicks * 0.02)
+        }
+      },
+      realtime: {
+        active_users: Math.floor(Math.random() * 50 + 10),
+        clicks_last_hour: Math.floor(Math.random() * 20 + 5),
+        clicks_last_24h: Math.floor(url.clicks * 0.1),
+        peak_hour: `${Math.floor(Math.random() * 12 + 1)}:00 ${Math.random() > 0.5 ? 'PM' : 'AM'}`
+      }
+    }
+  };
+};
+
 export const mockGetAnalyticsSummary = async () => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 800));
@@ -491,6 +559,7 @@ export default {
   mockGetUrlDetails,
   mockGetUserDashboard,
   mockGetUrlAnalytics,
+  mockGetUnifiedAnalytics,
   mockGetAnalyticsSummary,
   mockExportAnalytics,
   mockGetUrlPreview,

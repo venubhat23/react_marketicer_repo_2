@@ -53,7 +53,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../authContext/AuthContext';
-import IndividualLinkAnalytics from './IndividualLinkAnalytics';
+import AnalyticsModal from './AnalyticsModal';
 import AxiosManager from '../../utils/api';
 import {
   getUserUrls,
@@ -688,30 +688,12 @@ const ShortLinkPage = ({ noLayout = false }) => {
             </DialogActions>
           </Dialog>
 
-          {/* Analytics Dialog */}
-          <Dialog 
-            open={analyticsDialog.open} 
-            onClose={() => setAnalyticsDialog({ open: false, url: null })} 
-            maxWidth="xl" 
-            fullWidth
-            fullScreen
-            PaperProps={{ sx: { height: '100vh' } }}
-          >
-            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h6">URL Analytics</Typography>
-              <IconButton onClick={() => setAnalyticsDialog({ open: false, url: null })}>
-                <CloseIcon />
-              </IconButton>
-            </DialogTitle>
-            <DialogContent sx={{ p: 0, overflow: 'auto' }}>
-              {analyticsDialog.url && (
-                <IndividualLinkAnalytics 
-                  url={analyticsDialog.url} 
-                  onClose={() => setAnalyticsDialog({ open: false, url: null })}
-                />
-              )}
-            </DialogContent>
-          </Dialog>
+          {/* Analytics Modal */}
+          <AnalyticsModal
+            open={analyticsDialog.open}
+            onClose={() => setAnalyticsDialog({ open: false, url: null })}
+            url={analyticsDialog.url}
+          />
 
           {/* QR Code Dialog */}
           <Dialog open={qrDialog.open} onClose={() => setQrDialog({ open: false, url: null })} maxWidth="sm" fullWidth>
