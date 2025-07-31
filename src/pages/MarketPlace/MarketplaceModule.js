@@ -629,29 +629,32 @@ const MarketplaceModule = () => {
         <Paper 
           elevation={2} 
           sx={{ 
-            p: 2, 
-            mb: 2, 
+            p: 1, 
+            //mb: 2, 
             borderRadius: 0,
             background: '#B1C6FF',
             boxShadow:'none'
           }}
         >
           {/* Search Bar */}
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center'}}>
           <TextField
             inputRef={inputRef}
             placeholder="Search by title..."
             value={searchQuery}
             autoFocus
+            size="small"
             onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{
+              height:'40',
+              padding:'0px 0px',
               startAdornment: (
                 <InputAdornment position="start">
                   <SearchIcon sx={{ color: '#882AFF' }} />
                 </InputAdornment>
               ),
               endAdornment: searchQuery && (
-                <InputAdornment position="end">
+                <InputAdornment position="start">
                   <IconButton
                     size="small"
                     onClick={() => setSearchQuery('')}
@@ -662,7 +665,7 @@ const MarketplaceModule = () => {
                 </InputAdornment>
               ),
               sx: {
-                borderRadius: 50,
+                borderRadius: 30,
                 width: '350px',
                 backgroundColor: 'white',
                 '& .MuiOutlinedInput-notchedOutline': {
@@ -705,10 +708,11 @@ const MarketplaceModule = () => {
               flexWrap: 'wrap', 
               gap: 2, 
               alignItems: 'center',
-              p: 2,
+              p: 1,
               backgroundColor: 'white',
               borderRadius: 2,
-              border: '1px solid #e1e7ff'
+              border: '1px solid #e1e7ff',
+              mt:1,
             }}>
               <FormControl size="small" sx={{ minWidth: 260 }}>
                 <InputLabel>Status</InputLabel>
@@ -795,9 +799,9 @@ const MarketplaceModule = () => {
           )}
 
           {/* Results Summary */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <Typography variant="body2" color="text.secondary">
-              Showing {filteredPosts.length} of {marketplacePosts.length} posts
+              {/* Showing {filteredPosts.length} of {marketplacePosts.length} posts */}
               {hasActiveFilters() && (
                 <Chip 
                   label="Filtered" 
@@ -818,7 +822,6 @@ const MarketplaceModule = () => {
                 component={Paper} 
                 sx={{ 
                   boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                
                   overflow: 'hidden'
                 }}
               >
@@ -989,33 +992,26 @@ const MarketplaceModule = () => {
     
     return (
       <Box sx={{ 
-       // maxWidth: '1200px', 
-        margin: '0 auto', 
         padding: '20px',
-        minHeight: '100vh',
       }}>
         
         {/* View Toggle Switch */}
         <Box sx={{ 
           display: 'flex', 
-          justifyContent: 'center', 
-          mb: 3 
+          justifyContent: 'left', 
+          mb: 2 
         }}>
           <Tabs
             value={influencerView}
             onChange={(e, newValue) => setInfluencerView(newValue)}
             sx={{
               backgroundColor: 'white',
-              borderRadius: 3,
-              minHeight: '48px',
               '& .MuiTabs-indicator': {
                 backgroundColor: '#882AFF',
-                height: '3px',
-                borderRadius: '3px 3px 0 0'
+                height: '2px',
               },
               '& .MuiTab-root': {
                 minWidth: '120px',
-                fontWeight: 'bold',
                 color: '#666',
                 '&.Mui-selected': {
                   color: '#882AFF'
@@ -1047,6 +1043,7 @@ const MarketplaceModule = () => {
                 placeholder="Search opportunities..."
                 value={searchQuery}
                 autoFocus
+                size="small" 
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
                   startAdornment: <SearchIcon sx={{ color: '#882AFF', mr: 1 }} />,
@@ -1054,13 +1051,14 @@ const MarketplaceModule = () => {
                     <IconButton 
                       size="small" 
                       onClick={() => setSearchQuery('')}
-                      sx={{ color: '#666' }}
+                      sx={{ color: '#666', ml:1 }}
                     >
                       <ClearIcon fontSize="small" />
                     </IconButton>
                   ),
                   sx: {
-                    borderRadius: 3,
+                    borderRadius: 50,
+                    padding:'0px !important',
                     backgroundColor: 'white',
                     '& .MuiOutlinedInput-notchedOutline': {
                       borderColor: '#e1e7ff',
@@ -1078,7 +1076,7 @@ const MarketplaceModule = () => {
         
         {/* Feed Container */}
         <Box >
-        <Grid size={{ md: 6 }}>
+        <Grid size={{ md: 8 }} sx={{margin:'auto'}}>
           {postsLoading ? (
             // Loading skeleton cards
             [...Array(3)].map((_, index) => (
@@ -1207,7 +1205,7 @@ const MarketplaceModule = () => {
                   
                   <Typography variant="body2" color="text.secondary" sx={{ 
                     mb: 2,
-                    lineHeight: 1.6,
+                    
                     fontSize: '14px'
                   }}>
                     {post.description}
@@ -1321,7 +1319,6 @@ const MarketplaceModule = () => {
                     sx={{ 
                       flex: 1,
                       bgcolor: '#882AFF',
-                      fontWeight: 'bold',
                       borderRadius: 2,
                       py: 1,
                       '&:hover': { 
@@ -1905,7 +1902,7 @@ const MarketplaceModule = () => {
         <Paper
           elevation={0}
           sx={{
-            p: 2,
+            p: 1,
             backgroundColor: '#091a48',
             borderRadius: 0,
             display: 'flex',
@@ -1914,8 +1911,17 @@ const MarketplaceModule = () => {
           }}
         >
           <Typography variant="h6" sx={{ color: '#fff' }}>
-            {getHeaderTitle()}
-          </Typography>
+                  <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="back"
+                    sx={{ mr: 2, color: '#fff' }}
+                  >
+                    <ArrowLeftIcon />
+                  </IconButton>
+                  {getHeaderTitle()}
+                </Typography>
+          
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           {/* Add Create New Post button to top nav for brand/admin users */}
           {(currentMode === 'brand' && (isBrand || isAdmin) && currentView !== 'create') && (

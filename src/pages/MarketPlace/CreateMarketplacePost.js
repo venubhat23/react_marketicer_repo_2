@@ -406,6 +406,7 @@ const CreateMarketplacePost = ({
                       fullWidth
                       placeholder="Brand Name"
                       value={brandName}
+                      size='small'
                       onChange={(e) => setBrandName(e.target.value)}
                       //disabled
                       sx={{
@@ -440,6 +441,7 @@ const CreateMarketplacePost = ({
                       placeholder="Enter an engaging post title"
                       variant="outlined"
                       value={title}
+                      size='small'
                       onChange={(e) => setTitle(e.target.value)}
                       sx={{
                         '& .MuiOutlinedInput-root': {
@@ -471,6 +473,7 @@ const CreateMarketplacePost = ({
                     <TextField
                       fullWidth
                       multiline
+                      size='small'
                       rows={4}
                       placeholder="Describe your campaign requirements in detail..."
                       variant="outlined"
@@ -582,6 +585,8 @@ const CreateMarketplacePost = ({
                       <FormControl fullWidth>
                         <Select
                           value={category}
+                          size='small'
+                         
                           onChange={(e) => setCategory(e.target.value)}
                           sx={{
                             borderRadius: 2,
@@ -610,6 +615,7 @@ const CreateMarketplacePost = ({
                       <FormControl fullWidth>
                         <Select
                           value={targetAudience}
+                          size='small'
                           onChange={(e) => setTargetAudience(e.target.value)}
                           sx={{
                             borderRadius: 2,
@@ -638,6 +644,7 @@ const CreateMarketplacePost = ({
                       <TextField
                         fullWidth
                         value={budget}
+                        size='small'
                         onChange={(e) => setBudget(e.target.value)}
                         placeholder="10,000"
                         sx={{
@@ -669,6 +676,7 @@ const CreateMarketplacePost = ({
                       <TextField
                         fullWidth
                         value={location}
+                        size='small'
                         onChange={(e) => setLocation(e.target.value)}
                         placeholder="Mumbai, India"
                         sx={{
@@ -694,6 +702,7 @@ const CreateMarketplacePost = ({
                       </Typography>
                       <TextField
                         fullWidth
+                        size='small'
                         value={platform}
                         onChange={(e) => setPlatform(e.target.value)}
                         placeholder="Instagram, YouTube"
@@ -720,6 +729,7 @@ const CreateMarketplacePost = ({
                       </Typography>
                       <TextField
                         fullWidth
+                        size='small'
                         value={languages}
                         onChange={(e) => setLanguages(e.target.value)}
                         placeholder="Hindi, English"
@@ -751,6 +761,7 @@ const CreateMarketplacePost = ({
                       <TextField
                         fullWidth
                         type="date"
+                        size='small'
                         value={deadline}
                         onChange={(e) => setDeadline(e.target.value)}
                         InputLabelProps={{ shrink: true }}
@@ -777,6 +788,7 @@ const CreateMarketplacePost = ({
                       </Typography>
                       <TextField
                         fullWidth
+                        size='small'
                         value={tags}
                         onChange={(e) => setTags(e.target.value)}
                         placeholder="Fashion, Lifestyle, Tech"

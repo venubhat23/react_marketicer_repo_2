@@ -56,7 +56,7 @@ const theme = createTheme({
         },
         input: {
           color: '#882AFF', // Text color
-          padding: '12px',
+          //padding: '12px',
         },
       },
     },
@@ -96,6 +96,7 @@ const theme = createTheme({
           backgroundColor: '#882AFF', // Purple background
           color: '#ffffff', // White text
           fontWeight: 600,
+          lineHeight: 1,
           '&:hover': {
             backgroundColor: '#882AFF', // Keep same background on hover
             color: '#ffffff', // Keep white text on hover

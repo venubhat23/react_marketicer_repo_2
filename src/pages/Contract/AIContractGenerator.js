@@ -495,9 +495,8 @@ const AIContractGenerator = ({ onBack = null }) => {
                   },
                 },
                 '& .MuiInputBase-input': {
-                  fontSize: '14px',
-                  lineHeight: '1.5',
-                  fontFamily: 'monospace',
+                  //fontSize: '14px',
+                  
                 },
               }}
             />
@@ -536,7 +535,6 @@ const AIContractGenerator = ({ onBack = null }) => {
             <Box
               sx={{
                 textAlign: 'left',
-                lineHeight: 1.6,
                 fontSize: '14px',
                 color: '#333',
                 '& strong': {
@@ -697,7 +695,7 @@ const AIContractGenerator = ({ onBack = null }) => {
             color: '#999', 
             maxWidth: 300,
             textAlign: 'center',
-            lineHeight: 1.6
+            //lineHeight: 1.6
           }}
         >
           {isEditMode 
@@ -806,6 +804,7 @@ const AIContractGenerator = ({ onBack = null }) => {
                         fullWidth
                         placeholder="Enter contract name"
                         variant="outlined"
+                        size='small'
                         value={formData.contractName}
                         onChange={(e) => handleInputChange('contractName', e.target.value)}
                         sx={{
@@ -840,6 +839,7 @@ const AIContractGenerator = ({ onBack = null }) => {
                         rows={4}
                         placeholder="Describe what this contract should cover..."
                         variant="outlined"
+                        size='small'
                         value={formData.description}
                         onChange={(e) => handleInputChange('description', e.target.value)}
                         sx={{

@@ -60,16 +60,7 @@ import {
 import Sidebar from '../../components/Sidebar'
 
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
+
 
 const tabData = [
     { label: 'Personal Information' },
@@ -94,7 +85,7 @@ const tabData = [
       <Box
         role="tabpanel"
         hidden={value !== index}
-        sx={{ flexGrow: 1, p: 3, minHeight: '300px' }}
+        sx={{ flexGrow: 1, p: 3, minHeight: '300px', }}
       >
         {value === index && (
           <Typography variant="body1" color="text.primary">
@@ -305,313 +296,327 @@ const SettingPage = () => {
         </Paper>
       <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'10px'}}>
         <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
-          <Grid size={{ xs: 6, sm: 12, md:12 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%' }}>
+          <Grid size={{ xs: 6, sm: 12, md:12 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)'}}>
             
-            <Box display="flex" sx={{ minHeight: '100vh' }}>
-      {/* Sidebar Tabs */}
-      <Paper elevation={3} >
-        <Tabs
-          orientation="vertical"
-          value={selectedTab}
-          onChange={(e, newValue) => setSelectedTab(newValue)}
-          aria-label="Settings Tabs"
-          variant="scrollable"
-          sx={{
-            //height: '100%',
-            '.MuiTab-root': {
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-              //px: 3,
-              //py: 2,
-              textTransform: 'none',
-              //fontWeight: 500,
-              color: '#f5f5f5',
-              width:'250px',
-              backgroundColor:'#1B357C'
-            },
-            '.Mui-selected': {
-              backgroundColor: '#f5f5f5',
-              color: 'primary.main',
-            },
-          }}
-        >
-          {tabData.map((tab, index) => (
-            <Tab
-              key={index}
-              label={tab.label}
-            />
-          ))}
-        </Tabs>
-      </Paper>
+            <Box display="flex" >
+              {/* Sidebar Tabs */}
+      
+              <Tabs
+                orientation="vertical"
+                value={selectedTab}
+                onChange={(e, newValue) => setSelectedTab(newValue)}
+                aria-label="Settings Tabs"
+                variant="scrollable"
+                sx={{
+                    width: '250px', // Ensures the Tabs container has fixed width
+                  '.MuiTab-root': {
+                    width: '100%', // Ensures each Tab fills the Tabs container
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    textTransform: 'none',
+                    color: '#f5f5f5',
+                    backgroundColor: '#1B357C',
+                  },
+                  '.Mui-selected': {
+                    backgroundColor: '#f5f5f5',
+                    color: 'primary.main',
+                    width: '100%'
+                  },
+                }}
+              >
+                {tabData.map((tab, index) => (
+                  <Tab
+                    key={index}
+                    label={tab.label}
+                  />
+                ))}
+              </Tabs>
+
+      
 
       {/* Right Panel */}
       <Box flexGrow={1} p={3}>
         <Typography variant="h6" gutterBottom>
           {tabData[selectedTab].label}
         </Typography>
-        <Divider sx={{ mb: 2 }} />
 
         <TabPanel value={selectedTab} index={0}>
-          <Box p={3} >
+          <Box maxWidth="600px">
 
-        <Grid container spacing={2} alignItems="center">
-            {/* Avatar */}
-            <Grid size={{ xs: 2, sm: 4, md: 4 }} >
-            <Avatar
-                alt="Profile"
-                src={personalFormData.avatar_url || "https://randomuser.me/api/portraits/women/65.jpg"}
-                sx={{ width: 80, height: 80 }}
-            />
-            </Grid>
+            <Grid container spacing={2} alignItems="center">
+                {/* Avatar */}
+                <Grid size={{ xs: 2, sm: 4, md: 4 }} >
+                <Avatar
+                    alt="Profile"
+                    src={personalFormData.avatar_url || "https://randomuser.me/api/portraits/women/65.jpg"}
+                    sx={{ width: 80, height: 80 }}
+                />
+                </Grid>
 
-            {/* First Name */}
-            <Grid size={{ xs: 2, sm: 4, md: 4 }} >
-            <TextField
-                label="First Name"
-                name="first_name"
-                value={personalFormData.first_name}
-                onChange={handlePersonalChange}
-                fullWidth
-                disabled={!personalEditMode}
-            />
-            </Grid>
+                {/* First Name */}
+                <Grid size={{ xs: 2, sm: 4, md: 4 }} >
+                <TextField
+                    label="First Name"
+                    name="first_name"
+                    value={personalFormData.first_name}
+                    onChange={handlePersonalChange}
+                    fullWidth
+                    size="small"
+                    disabled={!personalEditMode}
+                />
+                </Grid>
 
-            {/* Last Name */}
-            <Grid size={{ xs: 2, sm: 4, md: 4 }} >
-            <TextField
-                label="Last Name"
-                name="last_name"
-                value={personalFormData.last_name}
-                onChange={handlePersonalChange}
-                fullWidth
-                disabled={!personalEditMode}
-            />
-            </Grid>
+                {/* Last Name */}
+                <Grid size={{ xs: 2, sm: 4, md: 4 }} >
+                <TextField
+                    label="Last Name"
+                    name="last_name"
+                    value={personalFormData.last_name}
+                    onChange={handlePersonalChange}
+                    fullWidth
+                    size="small"
+                    disabled={!personalEditMode}
+                />
+                </Grid>
 
-            {/* Email */}
-            <Grid size={{ xs: 2, sm: 4, md: 4 }} >
-            <TextField
-                label="Email"
-                name="email"
-                value={personalFormData.email}
-                onChange={handlePersonalChange}
-                fullWidth
-                disabled={!personalEditMode}
-            />
-            </Grid>
+                {/* Email */}
+                <Grid size={{ xs: 2, sm: 4, md: 4 }} >
+                <TextField
+                    label="Email"
+                    name="email"
+                    value={personalFormData.email}
+                    onChange={handlePersonalChange}
+                    fullWidth
+                    size="small"
+                    disabled={!personalEditMode}
+                />
+                </Grid>
 
-            {/* Phone */}
-            <Grid size={{ xs: 2, sm: 4, md: 4 }} >
-            <TextField
-                label="Phone Number"
-                name="phone_number"
-                value={personalFormData.phone_number}
-                onChange={handlePersonalChange}
-                fullWidth
-                disabled={!personalEditMode}
-                placeholder="+1 (555) 000-0000"
-            />
-            </Grid>
+                {/* Phone */}
+                <Grid size={{ xs: 2, sm: 4, md: 4 }} >
+                <TextField
+                    label="Phone Number"
+                    name="phone_number"
+                    value={personalFormData.phone_number}
+                    onChange={handlePersonalChange}
+                    fullWidth
+                    size="small"
+                    disabled={!personalEditMode}
+                    placeholder="+1 (555) 000-0000"
+                />
+                </Grid>
 
-            {/* Avatar URL */}
-            <Grid size={{ xs: 2, sm: 4, md: 4 }} >
-            <TextField
-                label="Avatar URL"
-                name="avatar_url"
-                value={personalFormData.avatar_url}
-                onChange={handlePersonalChange}
-                fullWidth
-                disabled={!personalEditMode}
-                placeholder="https://example.com/avatar.jpg"
-            />
-            </Grid>
+                {/* Avatar URL */}
+                <Grid size={{ xs: 2, sm: 4, md: 4 }} >
+                <TextField
+                    label="Avatar URL"
+                    name="avatar_url"
+                    value={personalFormData.avatar_url}
+                    onChange={handlePersonalChange}
+                    fullWidth
+                    size="small"
+                    disabled={!personalEditMode}
+                    placeholder="https://example.com/avatar.jpg"
+                />
+                </Grid>
 
-            {/* Bio */}
-            <Grid size={{ xs: 2, sm: 12, md: 12 }} >
-            <TextField
-                label="Bio"
-                name="bio"
-                value={personalFormData.bio}
-                onChange={handlePersonalChange}
-                fullWidth
-                multiline
-                minRows={4}
-                disabled={!personalEditMode}
-            />
-            </Grid>
+                {/* Bio */}
+                <Grid size={{ xs: 2, sm: 12, md: 12 }} >
+                <TextField
+                    label="Bio"
+                    name="bio"
+                    value={personalFormData.bio}
+                    onChange={handlePersonalChange}
+                    fullWidth
+                    size="small"
+                    multiline
+                    minRows={4}
+                    disabled={!personalEditMode}
+                />
+                </Grid>
 
-            {/* Buttons */}
-            <Grid item xs={12} textAlign="right">
-            {!personalEditMode ? (
-                <Button variant="outlined" onClick={() => setPersonalEditMode(true)}>
-                Edit
-                </Button>
-            ) : (
-                <Button 
-                  variant="contained" 
-                  onClick={handlePersonalSave}
-                  disabled={updatePersonalInfo.isPending}
-                >
-                  {updatePersonalInfo.isPending ? 'Saving...' : 'Save Changes'}
-                </Button>
-            )}
+                {/* Buttons */}
+                <Grid item xs={12} textAlign="right">
+                {!personalEditMode ? (
+                    <Button variant="outlined" onClick={() => setPersonalEditMode(true)}>
+                    Edit
+                    </Button>
+                ) : (
+                    <Button 
+                      variant="contained" 
+                      onClick={handlePersonalSave}
+                      disabled={updatePersonalInfo.isPending}
+                    >
+                      {updatePersonalInfo.isPending ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                )}
+                </Grid>
             </Grid>
-        </Grid>
-        </Box>
+          </Box>
         </TabPanel>
         <TabPanel value={selectedTab} index={1}>
-        <Box p={3} maxWidth="800px" mx="auto">
-    
+          <Box maxWidth="600px" >
+      
 
-        <Grid container spacing={2}>
-            <Grid size={{ xs: 2, sm: 6, md: 6 }}>
-            <TextField
-                label="Company Name"
-                name="company_name"
-                value={companyFormData.company_name}
-                onChange={handleCompanyChange}
-                fullWidth
-                disabled={!companyEditMode}
-            />
-            </Grid>
+          <Grid container spacing={2}>
+              <Grid size={{ xs: 2, sm: 6, md: 6 }}>
+              <TextField
+                  label="Company Name"
+                  name="company_name"
+                  value={companyFormData.company_name}
+                  onChange={handleCompanyChange}
+                  fullWidth
+                  size="small"
+                  disabled={!companyEditMode}
+              />
+              </Grid>
 
-            <Grid size={{ xs: 2, sm: 6, md: 6 }} >
-            <TextField
-                label="GST Name"
-                name="gst_name"
-                value={companyFormData.gst_name}
-                onChange={handleCompanyChange}
-                fullWidth
-                disabled={!companyEditMode}
-                placeholder="Enter your GST Name"
-            />
-            </Grid>
+              <Grid size={{ xs: 2, sm: 6, md: 6 }} >
+              <TextField
+                  label="GST Name"
+                  name="gst_name"
+                  value={companyFormData.gst_name}
+                  onChange={handleCompanyChange}
+                  fullWidth
+                  size="small"
+                  disabled={!companyEditMode}
+                  placeholder="Enter your GST Name"
+              />
+              </Grid>
 
-            <Grid size={{ xs: 2, sm: 6, md: 6 }} >
-            <TextField
-                label="GST Number"
-                name="gst_number"
-                value={companyFormData.gst_number}
-                onChange={handleCompanyChange}
-                fullWidth
-                disabled={!companyEditMode}
-                placeholder="XXX XXXX XXXX"
-            />
-            </Grid>
+              <Grid size={{ xs: 2, sm: 6, md: 6 }} >
+              <TextField
+                  label="GST Number"
+                  name="gst_number"
+                  value={companyFormData.gst_number}
+                  onChange={handleCompanyChange}
+                  fullWidth
+                  size="small"
+                  disabled={!companyEditMode}
+                  placeholder="XXX XXXX XXXX"
+              />
+              </Grid>
 
-            <Grid size={{ xs: 2, sm: 6, md: 6 }} >
-            <TextField
-                label="Company Phone"
-                name="company_phone"
-                value={companyFormData.company_phone}
-                onChange={handleCompanyChange}
-                fullWidth
-                disabled={!companyEditMode}
-                placeholder="+1 (555) 000-0000"
-            />
-            </Grid>
+              <Grid size={{ xs: 2, sm: 6, md: 6 }} >
+              <TextField
+                  label="Company Phone"
+                  name="company_phone"
+                  value={companyFormData.company_phone}
+                  onChange={handleCompanyChange}
+                  fullWidth
+                  size="small"
+                  disabled={!companyEditMode}
+                  placeholder="+1 (555) 000-0000"
+              />
+              </Grid>
 
-            <Grid size={{ xs: 2, sm: 12, md: 12 }} >
-            <TextField
-                label="Company Address"
-                name="company_address"
-                value={companyFormData.company_address}
-                onChange={handleCompanyChange}
-                fullWidth
-                disabled={!companyEditMode}
-                placeholder="Enter your Address"
-                multiline
-                minRows={3}
-            />
-            </Grid>
+              <Grid size={{ xs: 2, sm: 12, md: 12 }} >
+              <TextField
+                  label="Company Address"
+                  name="company_address"
+                  value={companyFormData.company_address}
+                  onChange={handleCompanyChange}
+                  fullWidth
+                  size="small"
+                  disabled={!companyEditMode}
+                  placeholder="Enter your Address"
+                  multiline
+                  minRows={3}
+              />
+              </Grid>
 
-            <Grid size={{ xs: 2, sm: 6, md: 6 }} >
-            <TextField
-                label="Website"
-                name="company_website"
-                value={companyFormData.company_website}
-                onChange={handleCompanyChange}
-                fullWidth
-                disabled={!companyEditMode}
-                placeholder="https://www.example.com"
-            />
-            </Grid>
+              <Grid size={{ xs: 2, sm: 6, md: 6 }} >
+              <TextField
+                  label="Website"
+                  name="company_website"
+                  value={companyFormData.company_website}
+                  onChange={handleCompanyChange}
+                  fullWidth
+                  size="small"
+                  disabled={!companyEditMode}
+                  placeholder="https://www.example.com"
+              />
+              </Grid>
 
-            <Grid item xs={12} textAlign="right">
-            {!companyEditMode ? (
-                <Button variant="outlined" onClick={() => setCompanyEditMode(true)}>
-                Edit
-                </Button>
-            ) : (
-                <Button 
-                  variant="contained" 
-                  onClick={handleCompanySave}
-                  disabled={updateCompanyDetails.isPending}
-                >
-                  {updateCompanyDetails.isPending ? 'Saving...' : 'Save Changes'}
-                </Button>
-            )}
-            </Grid>
-      </Grid>
-    </Box>
+              <Grid item xs={12} textAlign="right">
+              {!companyEditMode ? (
+                  <Button variant="outlined" onClick={() => setCompanyEditMode(true)}>
+                  Edit
+                  </Button>
+              ) : (
+                  <Button 
+                    variant="contained" 
+                    onClick={handleCompanySave}
+                    disabled={updateCompanyDetails.isPending}
+                  >
+                    {updateCompanyDetails.isPending ? 'Saving...' : 'Save Changes'}
+                  </Button>
+              )}
+              </Grid>
+        </Grid>
+          </Box>
         </TabPanel>
         <TabPanel value={selectedTab} index={2}>
-          <Box p={3} maxWidth="600px" mx="auto">
+          <Box maxWidth="600px">
           <form onSubmit={handlePasswordSubmit}>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 2, sm: 6, md: 6 }} >
-            <TextField
-              label="Current Password"
-              type="password"
-              name="current_password"
-              value={passwordFormData.current_password}
-              onChange={handlePasswordChange}
-              fullWidth
-              placeholder="Enter current password"
-              required
-            />
-          </Grid>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 2, sm: 6, md: 6 }} >
+                <TextField
+                  label="Current Password"
+                  type="password"
+                  name="current_password"
+                  value={passwordFormData.current_password}
+                  onChange={handlePasswordChange}
+                  fullWidth
+                  size="small"
+                  placeholder="Enter current password"
+                  required
+                />
+              </Grid>
 
-          <Grid size={{ xs: 2, sm: 6, md: 6 }}>
-            <TextField
-              label="New Password"
-              type="password"
-              name="new_password"
-              value={passwordFormData.new_password}
-              onChange={handlePasswordChange}
-              fullWidth
-              placeholder="Enter new password"
-              required
-            />
-          </Grid>
+              <Grid size={{ xs: 2, sm: 6, md: 6 }}>
+                <TextField
+                  label="New Password"
+                  type="password"
+                  name="new_password"
+                  value={passwordFormData.new_password}
+                  onChange={handlePasswordChange}
+                  fullWidth
+                  size="small"
+                  placeholder="Enter new password"
+                  required
+                />
+              </Grid>
 
-          <Grid size={{ xs: 2, sm: 6, md: 6 }}>
-            <TextField
-              label="Confirm New Password"
-              type="password"
-              name="confirm_password"
-              value={passwordFormData.confirm_password}
-              onChange={handlePasswordChange}
-              fullWidth
-              placeholder="Confirm new password"
-              required
-            />
-          </Grid>
+              <Grid size={{ xs: 2, sm: 6, md: 6 }}>
+                <TextField
+                  label="Confirm New Password"
+                  type="password"
+                  name="confirm_password"
+                  value={passwordFormData.confirm_password}
+                  onChange={handlePasswordChange}
+                  fullWidth
+                  size="small"
+                  placeholder="Confirm new password"
+                  required
+                />
+              </Grid>
 
-          <Grid item xs={12}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="secondary"
-              fullWidth
-              disabled={changePassword.isPending}
-              sx={{ backgroundColor: '#7E22CE' }} // Purple color as in image
-            >
-              {changePassword.isPending ? 'Updating...' : 'Update Password'}
-            </Button>
-          </Grid>
-        </Grid>
-      </form>
+              <Grid item xs={12}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="secondary"
+                  fullWidth
+                  size="small"
+                  disabled={changePassword.isPending}
+                  sx={{ backgroundColor: '#7E22CE' }} // Purple color as in image
+                >
+                  {changePassword.isPending ? 'Updating...' : 'Update Password'}
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
           </Box>
         </TabPanel>
         <TabPanel value={selectedTab} index={3}>
@@ -631,24 +636,9 @@ const SettingPage = () => {
         </TabPanel>
       </Box>
     </Box>
-
-              {/* User Chips */}
-
-              <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
-
-                
-
-              </Box>
-
-              
-
-        
-
-                
-          </Grid>
-        </Grid>
-          
-      </Box>
+  </Grid>
+  </Grid>      
+</Box>
           </Grid>
       </Grid>
        

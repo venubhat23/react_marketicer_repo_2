@@ -287,13 +287,11 @@ const ShortLinkPage = ({ noLayout = false }) => {
   const content = (
     <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
         {/* Header */}
-
-       
           {/* Tab Switcher - moved outside of Card */}
 
           {/* URL Generator Section */}
           <Card sx={{ mb: 4, boxShadow: 3 }}>
-            <CardContent sx={{ p: 4 }}>              
+            <CardContent sx={{ p: 2}}>              
               <Grid container spacing={3}>
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
@@ -303,8 +301,8 @@ const ShortLinkPage = ({ noLayout = false }) => {
                     value={longUrl}
                     onChange={(e) => setLongUrl(e.target.value)}
                     variant="outlined"
-                    size="large"
-                    sx={{ mb: 2 }}
+                    size="small"
+                    //sx={{ mb: 2 }}
                     InputProps={{
                       startAdornment: <LinkIcon sx={{ mr: 1, color: 'text.secondary' }} />
                     }}
@@ -316,6 +314,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                     fullWidth
                     label="Title (Optional)"
                     placeholder="Enter a title for your link"
+                    size='small'
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     variant="outlined"
@@ -327,6 +326,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                     fullWidth
                     label="Description (Optional)"
                     placeholder="Enter a description"
+                    size='small'
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     variant="outlined"
@@ -336,7 +336,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <Button
                     variant="contained"
-                    size="large"
+                    size="small"
                     onClick={handleGenerateShortUrl}
                     disabled={loading}
                     startIcon={loading ? <CircularProgress size={20} /> : <AddIcon />}

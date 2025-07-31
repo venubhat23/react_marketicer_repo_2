@@ -456,11 +456,11 @@ const ContractPage = () => {
                   sx={{ 
                     bgcolor: 'white',
                     textTransform: 'none',
-                    px: 2,
-                    py: 0.5,
+                    //px: 2,
+                    //py: 0.5,
+                    
                     borderRadius: 1,
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
+                    
                     '&:hover': { 
                       bgcolor: '#f5f5f5',
                       borderColor: '#ccc'
@@ -522,7 +522,7 @@ const ContractPage = () => {
         <Paper
           elevation={0}
           sx={{
-            p: 2,
+            p: 1,
             backgroundColor: '#091a48', // Updated header background color
             borderRadius: 0,
             color: 'white'
@@ -533,19 +533,17 @@ const ContractPage = () => {
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <IconButton
-                  edge="start"
-                  color="inherit"
-                  aria-label="back"
-                  sx={{ mr: 1 }}
-                >
-                  <ArrowLeftIcon />
-                </IconButton>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+             <Typography variant="h6" sx={{ color: '#fff' }}>
+                  <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="back"
+                    sx={{ mr: 2, color: '#fff' }}
+                  >
+                    <ArrowLeftIcon />
+                  </IconButton>
                   Contract
-                </Typography>
-              </Box>
+             </Typography>
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 <Button
                   variant="contained"
@@ -555,6 +553,7 @@ const ContractPage = () => {
                     px: 3,
                     py: 1,
                     borderRadius: 2,
+                    lineHeight:0,
                   }}
                 >
                   Create Contract
@@ -580,7 +579,7 @@ const ContractPage = () => {
           <Box
             sx={{
               bgcolor: '#B1C6FF',
-              padding: '16px 24px',
+              padding: '8px 10px',
               display: 'flex',
               alignItems: 'center',
               gap: 5,
@@ -604,7 +603,7 @@ const ContractPage = () => {
                 minWidth: 350,borderRadius: '50px',
                 '& .MuiOutlinedInput-root': {
                   bgcolor: 'white',
-                  borderRadius: 2,
+                  borderRadius: 10,
                 }
               }}
             />

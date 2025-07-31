@@ -14,6 +14,7 @@ import {
 import Layout from '../../components/Layout';
 import TabComponent from '../../components/TabComponent';
 import Sidebar from '../../components/Sidebar';
+import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 
 // Import the original components
 import ShortLinkPage from './ShortLinkPage';
@@ -48,7 +49,7 @@ const LinkPage = () => {
           <Paper
             elevation={0}
             sx={{
-              p: 2,
+              p: 1,
               backgroundColor: '#091a48',
               borderRadius: 0,
               display: 'flex',
@@ -57,8 +58,16 @@ const LinkPage = () => {
             }}
           >
             <Typography variant="h6" sx={{ color: '#fff' }}>
-              {getHeaderTitle()}
-            </Typography>
+                  <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="back"
+                    sx={{ mr: 2, color: '#fff' }}
+                  >
+                    <ArrowLeftIcon />
+                  </IconButton>
+                  {getHeaderTitle()}
+             </Typography>
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <IconButton size="large" sx={{ color: 'white' }}>
                 <NotificationsIcon />

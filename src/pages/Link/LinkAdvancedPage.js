@@ -281,7 +281,7 @@ const LinkAdvancedPage = () => {
             
             <Grid container spacing={4}>
               {/* Left Column - Form */}
-              <Grid size={{ xs: 12, sm: 12, md: 8 }}>
+              <Grid size={{ xs: 12, sm: 12, md: 7 }}>
                 {/* Destination */}
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="body2" sx={{ mb: 1, color: '#882AFF' }}>
@@ -293,6 +293,7 @@ const LinkAdvancedPage = () => {
                     value={longUrl}
                     onChange={(e) => setLongUrl(e.target.value)}
                     variant="outlined"
+                    size='small'
                     error={!longUrl.trim() && apiError.includes('required')}
                     helperText={!longUrl.trim() && apiError.includes('required') ? 'Destination URL is required' : ''}
                     sx={{
@@ -323,6 +324,7 @@ const LinkAdvancedPage = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     variant="outlined"
+                    size='small'
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
@@ -349,6 +351,7 @@ const LinkAdvancedPage = () => {
                         value={domain}
                         label="Domain"
                         disabled
+                        size='small'
                         sx={{
                           borderRadius: 2,
                           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
@@ -366,6 +369,7 @@ const LinkAdvancedPage = () => {
                       value={customBackHalf}
                       onChange={(e) => setCustomBackHalf(e.target.value)}
                       variant="outlined"
+                      size="small"
                       error={apiError.includes('already taken') || apiError.includes('characters')}
                       helperText={
                         apiError.includes('already taken') ? 'This custom back-half is already taken' :
@@ -388,122 +392,6 @@ const LinkAdvancedPage = () => {
                 </Box>
 
                 <Divider sx={{ my: 1 }} />
-
-                {/* Ways to Share Section */}
-                <Typography variant="body2" sx={{ mb: 1, color: '#882AFF' }}>
-                  Ways to share
-                </Typography>
-
-                {/* QR Code Section */}
-                <Card sx={{ mb: 2, bgcolor: '#f6edf8', border: '1px solid #f6edf8' }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <QrCodeIcon sx={{ color: '#882AFF' }} />
-                        <Typography variant="body2" sx={{ color: '#882AFF' }}>
-                          QR Code
-                        </Typography>
-                      </Box>
-                      <Switch
-                        checked={enableQR}
-                        onChange={(e) => setEnableQR(e.target.checked)}
-                        sx={{
-                          '& .MuiSwitch-switchBase.Mui-checked': {
-                            color: '#882AFF',
-                          },
-                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                            backgroundColor: '#882AFF',
-                          },
-                        }}
-                      />
-                    </Box>
-
-                    {enableQR && (
-                      <Grid container spacing={3}>
-                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                          <Typography variant="body2" sx={{ mb: 1, }}>
-                            Code color
-                          </Typography>
-                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1}}>
-                            {qrColors.map((color) => (
-                              <IconButton
-                                key={color}
-                                onClick={() => setQrColor(color)}
-                                sx={{
-                                  width: 40,
-                                  height: 40,
-                                  bgcolor: color,
-                                  border: qrColor === color ? '3px solid #882AFF' : '2px solid #ccc',
-                                  '&:hover': {
-                                    transform: 'scale(1.1)',
-                                  }
-                                }}
-                              />
-                            ))}
-                          </Box>
-
-                          <Typography variant="body2" sx={{ mb: 2, fontWeight: 'bold' }}>
-                            Logo
-                          </Typography>
-                          <Button
-                            variant="outlined"
-                            component="label"
-                            startIcon={<UploadIcon />}
-                            sx={{
-                              borderColor: '#882AFF',
-                              color: '#882AFF',
-                              '&:hover': {
-                                borderColor: '#882AFF',
-                                bgcolor: 'rgba(136, 42, 255, 0.04)',
-                              }
-                            }}
-                          >
-                            Choose logo
-                            <input
-                              type="file"
-                              hidden
-                              accept="image/*"
-                              onChange={handleLogoUpload}
-                            />
-                          </Button>
-                          {logoPreview && (
-                            <Box sx={{ mt: 2 }}>
-                              <img
-                                src={logoPreview}
-                                alt="Logo preview"
-                                style={{ width: 60, height: 60, objectFit: 'contain', border: '1px solid #ccc', borderRadius: 4 }}
-                              />
-                            </Box>
-                          )}
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                          <Typography variant="body2" sx={{ mb: 2, fontWeight: 'bold' }}>
-                            Preview
-                          </Typography>
-                          <Box sx={{ 
-                            p: 2, 
-                            bgcolor: 'white', 
-                            borderRadius: 2, 
-                            border: '1px solid #e0e0e0',
-                            display: 'flex',
-                            justifyContent: 'center'
-                          }}>
-                            <img
-                              src={generateQRCode()}
-                              alt="QR Code Preview"
-                              style={{ width: 150, height: 150 }}
-                            />
-                          </Box>
-                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                            More customizations are available after creating
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Divider sx={{ my: 2}} />
 
                 {/* UTM Parameters Section */}
                 <Typography variant="body2" sx={{ mb: 2, color: '#882AFF' }}>
@@ -638,6 +526,124 @@ const LinkAdvancedPage = () => {
                   </CardContent>
                 </Card>
 
+                <Divider sx={{ my: 2}} />
+
+                {/* Ways to Share Section */}
+                <Typography variant="body2" sx={{ mb: 1, color: '#882AFF' }}>
+                  Ways to share
+                </Typography>
+
+                {/* QR Code Section */}
+                <Card sx={{ mb: 2, bgcolor: '#f6edf8', border: '1px solid #f6edf8' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <QrCodeIcon sx={{ color: '#882AFF' }} />
+                        <Typography variant="body2" sx={{ color: '#882AFF' }}>
+                          QR Code
+                        </Typography>
+                      </Box>
+                      <Switch
+                        checked={enableQR}
+                        onChange={(e) => setEnableQR(e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#882AFF',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#882AFF',
+                          },
+                        }}
+                      />
+                    </Box>
+
+                    {enableQR && (
+                      <Grid container spacing={3}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                          <Typography variant="body2" sx={{ mb: 1, }}>
+                            Code color
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1}}>
+                            {qrColors.map((color) => (
+                              <IconButton
+                                key={color}
+                                onClick={() => setQrColor(color)}
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  bgcolor: color,
+                                  border: qrColor === color ? '3px solid #882AFF' : '2px solid #ccc',
+                                  '&:hover': {
+                                    transform: 'scale(1.1)',
+                                  }
+                                }}
+                              />
+                            ))}
+                          </Box>
+
+                          <Typography variant="body2" sx={{ mb: 2, fontWeight: 'bold' }}>
+                            Logo
+                          </Typography>
+                          <Button
+                            variant="outlined"
+                            component="label"
+                            startIcon={<UploadIcon />}
+                            sx={{
+                              borderColor: '#882AFF',
+                              color: '#882AFF',
+                              '&:hover': {
+                                borderColor: '#882AFF',
+                                bgcolor: 'rgba(136, 42, 255, 0.04)',
+                              }
+                            }}
+                          >
+                            Choose logo
+                            <input
+                              type="file"
+                              hidden
+                              accept="image/*"
+                              onChange={handleLogoUpload}
+                            />
+                          </Button>
+                          {logoPreview && (
+                            <Box sx={{ mt: 2 }}>
+                              <img
+                                src={logoPreview}
+                                alt="Logo preview"
+                                style={{ width: 60, height: 60, objectFit: 'contain', border: '1px solid #ccc', borderRadius: 4 }}
+                              />
+                            </Box>
+                          )}
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                          <Typography variant="body2" sx={{ mb: 2, fontWeight: 'bold' }}>
+                            Preview
+                          </Typography>
+                          <Box sx={{ 
+                            p: 2, 
+                            bgcolor: 'white', 
+                            borderRadius: 2, 
+                            border: '1px solid #e0e0e0',
+                            display: 'flex',
+                            justifyContent: 'center'
+                          }}>
+                            <img
+                              src={generateQRCode()}
+                              alt="QR Code Preview"
+                              style={{ width: 150, height: 150 }}
+                            />
+                          </Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            More customizations are available after creating
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    )}
+                  </CardContent>
+                </Card>
+
+                
+
                 {/* Action Buttons */}
                 <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
                   <Button
@@ -677,7 +683,7 @@ const LinkAdvancedPage = () => {
               </Grid>
 
               {/* Right Column - Preview */}
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 5 }}>
                 <Card sx={{ position: 'sticky', top: 20, boxShadow: 3 }}>
                   <CardContent>
                     <Typography variant="body2" sx={{ mb: 2, color: '#882AFF' }}>
