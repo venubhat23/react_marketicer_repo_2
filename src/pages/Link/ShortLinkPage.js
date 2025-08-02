@@ -79,6 +79,18 @@ const ShortLinkPage = ({ noLayout = false }) => {
   const [qrDialog, setQrDialog] = useState({ open: false, url: null });
   const [analyticsDialog, setAnalyticsDialog] = useState({ open: false, url: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAnalyticOpenModal = (rowData) => {
+    //setSelectedData(rowData);
+    setIsModalOpen(true);
+  };
+
+  const handleAnalyticCloseModal = () => {
+    //setSelectedData(null);
+    setIsModalOpen(false);
+  };
   
   // Pagination and filtering states
   const [currentPage, setCurrentPage] = useState(1);
@@ -105,6 +117,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
       }
       
       const response = await getUserUrls(user.id, page, perPage);
+      debugger
       if (response.success) {
         const data = response.data;
         setUrls(data.urls || []);
@@ -585,7 +598,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                                 <Tooltip title="Analytics">
                                   <IconButton 
                                     size="small" 
-                                    onClick={() => handleShowAnalytics(url)}
+                                    onClick={() => handleAnalyticOpenModal(url)}
                                     color="success"
                                   >
                                     <AnalyticsIcon fontSize="small" />
@@ -649,6 +662,12 @@ const ShortLinkPage = ({ noLayout = false }) => {
                 </>
               )}
             </CardContent>
+
+            <AnalyticsModal 
+              open={isModalOpen} 
+              onClose={handleAnalyticCloseModal} 
+              //data={selectedData} 
+            />
           </Card>
 
           {/* Edit Dialog */}

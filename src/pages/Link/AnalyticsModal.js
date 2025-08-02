@@ -1,686 +1,183 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Chip,
+// components/ViewModal.jsx
+import React from 'react';
+import { Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions, 
   Button,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  LinearProgress,
-  Tabs,
-  Tab,
-  Divider,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Alert,
-  Snackbar,
-  CircularProgress,
-  useTheme,
-  useMediaQuery
-} from '@mui/material';
-import {
-  Close as CloseIcon,
-  ContentCopy as CopyIcon,
-  Launch as LaunchIcon,
-  TrendingUp as TrendingUpIcon,
-  GetApp as DownloadIcon,
-  Public as PublicIcon,
-  Computer as ComputerIcon,
-  Smartphone as SmartphoneIcon,
-  Tablet as TabletIcon,
-  Language as LanguageIcon,
-  Devices as DevicesIcon,
-  Timeline as TimelineIcon,
-  Assessment as AssessmentIcon,
-  LocationOn as LocationIcon,
-  Refresh as RefreshIcon
-} from '@mui/icons-material';
-import { 
-  getUnifiedAnalytics, 
-  copyToClipboard,
-  formatDate,
-  formatNumber,
-  calculatePercentage,
-  exportAnalytics
-} from '../../services/urlShortenerApi';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+  Typography, 
+  Box, 
+  Grid,Card, CardContent, LinearProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Select, MenuItem } from '@mui/material';
+  import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 
-// Color palette
-const COLORS = {
-  primary: '#882AFF',
-  secondary: '#091A48',
-  success: '#4caf50',
-  warning: '#ff9800',
-  error: '#f44336',
-  info: '#2196f3'
-};
 
-const CHART_COLORS = ['#882AFF', '#091A48', '#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0', '#ff5722'];
+const lineData = [
+  { date: '07/23', clicks: 30 },
+  { date: '07/24', clicks: 10 },
+  { date: '07/25', clicks: 25 },
+  { date: '07/26', clicks: 15 },
+  { date: '07/27', clicks: 35 },
+  { date: '07/28', clicks: 20 },
+  { date: '07/29', clicks: 40 },
+];
 
-const AnalyticsModal = ({ open, onClose, url }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
-  const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(0);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+const pieData = [
+  { name: 'Desktop', value: 146 },
+  { name: 'E-Reader', value: 101 },
+  { name: 'Tablet', value: 70 },
+  { name: 'Mobile', value: 50 },
+  { name: 'Unknown', value: 14 },
+];
 
-  useEffect(() => {
-    if (open && url?.short_code) {
-      loadAnalytics();
-    }
-  }, [open, url]);
+const barData = [
+  { name: 'LinkedIn', clicks: 30 },
+  { name: 'Facebook', clicks: 50 },
+  { name: 'Google', clicks: 40 },
+  { name: 'Twitter', clicks: 35 },
+  { name: 'Bitly', clicks: 25 },
+  { name: 'Direct', clicks: 45 },
+];
 
-  const loadAnalytics = async () => {
-    try {
-      setLoading(true);
-      const response = await getUnifiedAnalytics(url.short_code);
-      if (response.success) {
-        setAnalytics(response.data);
-      } else {
-        showSnackbar('Failed to load analytics data', 'error');
-      }
-    } catch (error) {
-      console.error('Error loading analytics:', error);
-      showSnackbar('Error loading analytics data', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
+const tableData = [
+  { country: 'United States', clicks: 205, percent: 57.7 },
+  { country: 'Japan', clicks: 6, percent: 1.7 },
+  { country: 'Mexico', clicks: 19, percent: 5.4 },
+  { country: 'Russian Federation', clicks: 5, percent: 1.4 },
+  { country: 'India', clicks: 27, percent: 7.6 },
+];
 
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  };
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-  const handleCopyUrl = (url) => {
-    copyToClipboard(url);
-    showSnackbar('URL copied to clipboard!');
-  };
-
-  const handleExport = async () => {
-    try {
-      await exportAnalytics(url.short_code, 'csv');
-      showSnackbar('Analytics exported successfully!');
-    } catch (error) {
-      showSnackbar('Failed to export analytics', 'error');
-    }
-  };
-
-  const renderOverviewTab = () => {
-    if (!analytics?.basic) return null;
-
-    const { basic } = analytics;
-    const clicksData = Object.entries(basic.clicks_by_day || {}).map(([date, clicks]) => ({
-      date: new Date(date).toLocaleDateString(),
-      clicks: clicks
-    })).slice(-7);
-
-    return (
-      <Grid container spacing={3}>
-        {/* Key Metrics */}
-        <Grid item xs={12}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
-              <Card sx={{ background: 'linear-gradient(135deg, #882AFF 0%, #6A1B9A 100%)', color: 'white' }}>
-                <CardContent>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Box>
-                      <Typography variant="h4" fontWeight="bold">
-                        {formatNumber(basic.total_clicks)}
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Total Clicks
-                      </Typography>
-                    </Box>
-                    <TrendingUpIcon sx={{ fontSize: 40, opacity: 0.8 }} />
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Card sx={{ background: 'linear-gradient(135deg, #091A48 0%, #1A237E 100%)', color: 'white' }}>
-                <CardContent>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Box>
-                      <Typography variant="h4" fontWeight="bold">
-                        {formatNumber(basic.today_clicks)}
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Today's Clicks
-                      </Typography>
-                    </Box>
-                    <TimelineIcon sx={{ fontSize: 40, opacity: 0.8 }} />
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Card sx={{ background: 'linear-gradient(135deg, #4caf50 0%, #388E3C 100%)', color: 'white' }}>
-                <CardContent>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Box>
-                      <Typography variant="h4" fontWeight="bold">
-                        {formatNumber(basic.week_clicks)}
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        This Week
-                      </Typography>
-                    </Box>
-                    <AssessmentIcon sx={{ fontSize: 40, opacity: 0.8 }} />
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Grid>
-
-        {/* URL Info */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>URL Information</Typography>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">Short URL</Typography>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Typography variant="body1" sx={{ wordBreak: 'break-all' }}>
-                    {basic.url?.short_url}
-                  </Typography>
-                  <IconButton size="small" onClick={() => handleCopyUrl(basic.url?.short_url)}>
-                    <CopyIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton size="small" onClick={() => window.open(basic.url?.short_url, '_blank')}>
-                    <LaunchIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">Original URL</Typography>
-                <Typography variant="body1" sx={{ wordBreak: 'break-all' }}>
-                  {basic.url?.original_url}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="body2" color="text.secondary">Created</Typography>
-                <Typography variant="body1">
-                  {formatDate(basic.url?.created_at)}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Clicks Over Time */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Clicks Over Time (Last 7 Days)</Typography>
-              <Box sx={{ height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={clicksData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <RechartsTooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="clicks" stroke={COLORS.primary} strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Device Breakdown */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Device Breakdown</Typography>
-              {Object.entries(basic.devices || {}).map(([device, count]) => (
-                <Box key={device} sx={{ mb: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      {device === 'Mobile' && <SmartphoneIcon color="primary" />}
-                      {device === 'Desktop' && <ComputerIcon color="primary" />}
-                      {device === 'Tablet' && <TabletIcon color="primary" />}
-                      <Typography variant="body2">{device}</Typography>
-                    </Box>
-                    <Typography variant="body2" fontWeight="bold">
-                      {count} ({calculatePercentage(count, basic.total_clicks)}%)
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={calculatePercentage(count, basic.total_clicks)}
-                    sx={{ height: 8, borderRadius: 4 }}
-                  />
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Browser Breakdown */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Browser Breakdown</Typography>
-              {Object.entries(basic.browsers || {}).map(([browser, count]) => (
-                <Box key={browser} sx={{ mb: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Typography variant="body2">{browser}</Typography>
-                    <Typography variant="body2" fontWeight="bold">
-                      {count} ({calculatePercentage(count, basic.total_clicks)}%)
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={calculatePercentage(count, basic.total_clicks)}
-                    sx={{ height: 8, borderRadius: 4 }}
-                  />
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    );
-  };
-
-  const renderGeographicTab = () => {
-    if (!analytics?.geographic) return null;
-
-    const { geographic } = analytics;
-
-    return (
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Clicks by Country</Typography>
-              {Object.entries(geographic.countries || {}).map(([country, count]) => (
-                <Box key={country} sx={{ mb: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <LocationIcon color="primary" fontSize="small" />
-                      <Typography variant="body2">{country}</Typography>
-                    </Box>
-                    <Typography variant="body2" fontWeight="bold">
-                      {count}
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={calculatePercentage(count, analytics.basic.total_clicks)}
-                    sx={{ height: 8, borderRadius: 4 }}
-                  />
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Clicks by City</Typography>
-              {Object.entries(geographic.cities || {}).map(([city, count]) => (
-                <Box key={city} sx={{ mb: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Typography variant="body2">{city}</Typography>
-                    <Typography variant="body2" fontWeight="bold">
-                      {count}
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={calculatePercentage(count, analytics.basic.total_clicks)}
-                    sx={{ height: 8, borderRadius: 4 }}
-                  />
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    );
-  };
-
-  const renderTechnologyTab = () => {
-    if (!analytics?.technology) return null;
-
-    const { technology } = analytics;
-
-    return (
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Devices</Typography>
-              {Object.entries(technology.devices || {}).map(([device, count]) => (
-                <Box key={device} sx={{ mb: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <DevicesIcon color="primary" fontSize="small" />
-                      <Typography variant="body2">{device}</Typography>
-                    </Box>
-                    <Typography variant="body2" fontWeight="bold">
-                      {count}
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={calculatePercentage(count, analytics.basic.total_clicks)}
-                    sx={{ height: 8, borderRadius: 4 }}
-                  />
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Browsers</Typography>
-              {Object.entries(technology.browsers || {}).map(([browser, count]) => (
-                <Box key={browser} sx={{ mb: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Typography variant="body2">{browser}</Typography>
-                    <Typography variant="body2" fontWeight="bold">
-                      {count}
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={calculatePercentage(count, analytics.basic.total_clicks)}
-                    sx={{ height: 8, borderRadius: 4 }}
-                  />
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Operating Systems</Typography>
-              {Object.entries(technology.operating_systems || {}).map(([os, count]) => (
-                <Box key={os} sx={{ mb: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Typography variant="body2">{os}</Typography>
-                    <Typography variant="body2" fontWeight="bold">
-                      {count}
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={calculatePercentage(count, analytics.basic.total_clicks)}
-                    sx={{ height: 8, borderRadius: 4 }}
-                  />
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    );
-  };
-
-  const renderConversionsTab = () => {
-    if (!analytics?.conversions) return null;
-
-    const { conversions } = analytics;
-
-    return (
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Conversion Metrics</Typography>
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="h3" color="primary" fontWeight="bold">
-                  {conversions.conversion_rate}%
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Conversion Rate
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="h4" fontWeight="bold">
-                  {formatNumber(conversions.total_conversions)}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Total Conversions
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Conversion Sources</Typography>
-              {Object.entries(conversions.conversion_sources || {}).map(([source, count]) => (
-                <Box key={source} sx={{ mb: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Typography variant="body2">{source}</Typography>
-                    <Typography variant="body2" fontWeight="bold">
-                      {count}
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={calculatePercentage(count, conversions.total_conversions)}
-                    sx={{ height: 8, borderRadius: 4 }}
-                  />
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    );
-  };
-
-  const renderRealtimeTab = () => {
-    if (!analytics?.realtime) return null;
-
-    const { realtime } = analytics;
-
-    return (
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={3}>
-              <Card sx={{ background: 'linear-gradient(135deg, #4caf50 0%, #388E3C 100%)', color: 'white' }}>
-                <CardContent>
-                  <Typography variant="h4" fontWeight="bold">
-                    {realtime.active_users}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Active Users
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Card sx={{ background: 'linear-gradient(135deg, #ff9800 0%, #F57C00 100%)', color: 'white' }}>
-                <CardContent>
-                  <Typography variant="h4" fontWeight="bold">
-                    {realtime.clicks_last_hour}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Last Hour
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Card sx={{ background: 'linear-gradient(135deg, #2196f3 0%, #1976D2 100%)', color: 'white' }}>
-                <CardContent>
-                  <Typography variant="h4" fontWeight="bold">
-                    {realtime.clicks_last_24h}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Last 24 Hours
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Card sx={{ background: 'linear-gradient(135deg, #9c27b0 0%, #7B1FA2 100%)', color: 'white' }}>
-                <CardContent>
-                  <Typography variant="body1" fontWeight="bold">
-                    {realtime.peak_hour}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Peak Hour
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-    );
-  };
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 0:
-        return renderOverviewTab();
-      case 1:
-        return renderGeographicTab();
-      case 2:
-        return renderTechnologyTab();
-      case 3:
-        return renderConversionsTab();
-      case 4:
-        return renderRealtimeTab();
-      default:
-        return renderOverviewTab();
-    }
-  };
-
+const AnalyticsModal = ({ open, onClose }) => {
   return (
-    <>
-      <Dialog 
-        open={open} 
-        onClose={onClose} 
-        maxWidth="lg" 
-        fullWidth 
-        fullScreen={isMobile}
-        PaperProps={{
-          sx: {
-            minHeight: '80vh',
-            maxHeight: '90vh'
-          }
-        }}
-      >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          borderBottom: 1,
-          borderColor: 'divider'
-        }}>
-          <Box>
-            <Typography variant="h6">Link Analytics</Typography>
-            {url && (
-              <Typography variant="body2" color="text.secondary">
-                {url.title || url.short_url}
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogTitle>Analytics </DialogTitle>
+      <DialogContent dividers sx={{bgcolor:'#f6edf8'}}>
+      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'20px'}}>
+        <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
+          <Grid size={{ xs: 12, sm: 8, md: 6 }} spacing={2} sx={{ padding:'10px', height:'100%' }}>
+            <Grid className='analyticModal' item xs={12} md={4} >
+            <Card sx={{borderRadius:'20px'}}>
+              <CardContent className="analyticCard">
+                <Typography variant="subtitle2">Top Performing Date</Typography>
+                <Typography variant="h6" mt={2}>July 10, 2025</Typography>
+                <Typography variant="body2">45 Clicks + Scans</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          <Grid className='analyticModal' item xs={12} md={4} >
+          <Card sx={{borderRadius:'20px'}}>
+            <CardContent>
+              <Typography variant="subtitle2">Clicks + Scans by Device</Typography>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={lineData}>
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="clicks" stroke="#1976d2" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+              <Typography align="center" mt={1}>Total: 381</Typography>
+            </CardContent>
+          </Card>
+          </Grid>
+
+        <Grid className='analyticModal' item xs={12} md={4} >
+          <Card sx={{borderRadius:'20px'}}>
+            <CardContent>
+              <Typography variant="subtitle2">Top Performing Location</Typography>
+              <Typography variant="h6" mt={2}>USA & UK</Typography>
+              <Typography variant="body2">205 Clicks + Scans</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+          
+          </Grid>
+
+          
+          <Grid size={{ xs: 12, sm: 8, md: 6 }} spacing={2} sx={{ padding:'10px', height:'100%' }}>
+          <Grid className='analyticModal' item xs={12} md={4} >
+          <Card sx={{borderRadius:'20px'}}>
+            <CardContent>
+              <Typography variant="subtitle2">Clicks + Scans by Device</Typography>
+              <ResponsiveContainer width="100%" height={150}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={50}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <Typography align="center" mt={1}>Total: 381</Typography>
+            </CardContent>
+          </Card>
+          </Grid>
+
+          <Grid className='analyticModal' item xs={12} md={4}>
+          <Card sx={{borderRadius:'20px'}}>
+            <CardContent>
+              <Typography variant="subtitle2">Clicks + Scans by Referrer</Typography>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={barData}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="clicks" fill="#1976d2" barSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Table */}
+        <Grid item xs={4}>
+          <Card sx={{borderRadius:'20px'}}>
+            <CardContent>
+              <Typography variant="subtitle2" gutterBottom>
+                Clicks + Scans by Location
               </Typography>
-            )}
-          </Box>
-          <Box display="flex" gap={1}>
-            <Button
-              startIcon={<RefreshIcon />}
-              onClick={loadAnalytics}
-              disabled={loading}
-              size="small"
-            >
-              Refresh
-            </Button>
-            <Button
-              startIcon={<DownloadIcon />}
-              onClick={handleExport}
-              disabled={loading}
-              size="small"
-            >
-              Export
-            </Button>
-            <IconButton onClick={onClose}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </DialogTitle>
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Country</TableCell>
+                      <TableCell align="right">Clicks + Scans</TableCell>
+                      <TableCell align="right">%</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {tableData.map((row) => (
+                      <TableRow key={row.country}>
+                        <TableCell>{row.country}</TableCell>
+                        <TableCell align="right">{row.clicks}</TableCell>
+                        <TableCell align="right">{row.percent}%</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+      
 
-        <DialogContent sx={{ p: 0 }}>
-          {loading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-              <CircularProgress size={60} />
-            </Box>
-          ) : analytics ? (
-            <>
-              <Tabs 
-                value={activeTab} 
-                onChange={(e, newValue) => setActiveTab(newValue)}
-                variant={isMobile ? "scrollable" : "standard"}
-                scrollButtons="auto"
-                sx={{ borderBottom: 1, borderColor: 'divider' }}
-              >
-                <Tab label="Overview" />
-                <Tab label="Geographic" />
-                <Tab label="Technology" />
-                <Tab label="Conversions" />
-                <Tab label="Real-time" />
-              </Tabs>
-              
-              <Box sx={{ p: 3 }}>
-                {renderTabContent()}
-              </Box>
-            </>
-          ) : (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-              <Alert severity="error">Failed to load analytics data</Alert>
-            </Box>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert 
-          onClose={() => setSnackbar({ ...snackbar, open: false })} 
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </>
+          </Grid>
+        </Grid>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} variant="contained" color="primary">Close</Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
