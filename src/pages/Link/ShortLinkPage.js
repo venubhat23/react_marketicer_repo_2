@@ -66,7 +66,7 @@ import {
 } from '../../services/urlShortenerApi';
 
 const ShortLinkPage = ({ noLayout = false }) => {
-  const { user } = useAuth();
+  const { user, fetchUserProfile } = useAuth();
   const navigate = useNavigate();
   const [longUrl, setLongUrl] = useState('');
   const [title, setTitle] = useState('');
@@ -116,8 +116,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
         setLoadingUrls(true);
       }
       
-      const response = await getUserUrls(user.id, page, perPage);
-      debugger
+      const response = await getUserUrls(user?.id, page, perPage);
       if (response.success) {
         const data = response.data;
         setUrls(data.urls || []);
@@ -145,8 +144,14 @@ const ShortLinkPage = ({ noLayout = false }) => {
   useEffect(() => {
     if (user?.id) {
       loadUserUrls(1);
+    } else if (user && !user.id && fetchUserProfile) {
+      // If user exists but no ID, try to fetch profile
+      fetchUserProfile().then(() => {
+        // After fetching profile, the user object should be updated with ID
+        // The effect will run again due to user dependency
+      });
     }
-  }, [user, loadUserUrls]);
+  }, [user, loadUserUrls, fetchUserProfile]);
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
