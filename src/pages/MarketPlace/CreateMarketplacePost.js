@@ -35,7 +35,8 @@ import {
 import { toast } from "react-toastify";
 import Layout from "../../components/Layout";
 import MarketplaceAPI, { handleApiError } from "../../services/marketplaceApi";
-import Sidebar from '../../components/Sidebar'
+import Sidebar from '../../components/Sidebar';
+import SearchableDropdown from '../../components/SearchableDropdown';
 
 const CreateMarketplacePost = ({ 
   onBack, 
@@ -572,63 +573,26 @@ const CreateMarketplacePost = ({
                   {/* Category and Target Audience */}
                   <Grid container spacing={2} sx={{ mb: 3 }}>
                     <Grid size={{ xs:12, sm:6, md: 4 }}>
-                      <Typography 
-                        variant="body1" 
-                        sx={{ 
-                          mb: 1, 
-                          color: '#333', 
-                          
-                        }}
-                      >
-                        Category *
-                      </Typography>
-                      <FormControl fullWidth>
-                        <Select
-                          value={category}
-                          size='small'
-                         
-                          onChange={(e) => setCategory(e.target.value)}
-                          sx={{
-                            borderRadius: 2,
-                            bgcolor: '#f8f9fa',
-                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' },
-                          }}
-                        >
-                          {Categories.map((cat) => (
-                            <MenuItem key={cat} value={cat}>Category {cat}</MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <SearchableDropdown
+                        options={Categories.map(cat => ({ name: `Category ${cat}`, value: cat }))}
+                        value={category ? { name: `Category ${category}`, value: category } : null}
+                        onChange={(event, newValue) => setCategory(newValue?.value || '')}
+                        label="Category *"
+                        placeholder="Select category..."
+                        required
+                        getOptionLabel={(option) => option?.name || option}
+                      />
                     </Grid>
                     <Grid size={{ xs:12, sm:6, md: 4 }}>
-                      <Typography 
-                        variant="body1" 
-                        sx={{ 
-                          mb: 1, 
-                          color: '#333', 
-                         
-                        }}
-                      >
-                        Target Audience *
-                      </Typography>
-                      <FormControl fullWidth>
-                        <Select
-                          value={targetAudience}
-                          size='small'
-                          onChange={(e) => setTargetAudience(e.target.value)}
-                          sx={{
-                            borderRadius: 2,
-                            bgcolor: '#f8f9fa',
-                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2196f3' },
-                          }}
-                        >
-                          {TargetAudiences.map((audience) => (
-                            <MenuItem key={audience} value={audience}>{audience}</MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <SearchableDropdown
+                        options={TargetAudiences.map(audience => ({ name: audience, value: audience }))}
+                        value={targetAudience ? { name: targetAudience, value: targetAudience } : null}
+                        onChange={(event, newValue) => setTargetAudience(newValue?.value || '')}
+                        label="Target Audience *"
+                        placeholder="Select target audience..."
+                        required
+                        getOptionLabel={(option) => option?.name || option}
+                      />
                     </Grid>
                     <Grid size={{ xs:12, sm:6, md: 4 }}>
                       <Typography 

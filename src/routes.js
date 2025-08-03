@@ -22,6 +22,7 @@ import PrivacyPolicy from "@/layouts/privacyPolicy";
 import TermsAndConditions from "@/layouts/TermsAndConditions";
 import Home from "@/layouts/home";
 import PurchaseOrders from "@/layouts/purchaseOrder"
+import DeliveryAssignment from "@/layouts/deliveryAssignment"
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -137,6 +138,15 @@ const routes = [
     // component: <Analytics />,
     component: <ProtectedRoute element={<PurchaseOrders />} />, // Protected
     roles: ["brand", "admin"]
+  },
+  {
+    type: "collapse",
+    name: "Delivery Assignment",
+    key: "delivery_assignment",
+    icon: <Icon fontSize="small">assignment</Icon>,
+    route: "/delivery-assignment",
+    component: <ProtectedRoute element={<DeliveryAssignment />} />, // Protected
+    roles: ["admin", "brand"]
   },
   {
     type: "collapse",

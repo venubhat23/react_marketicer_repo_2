@@ -11,6 +11,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormGroup from '@mui/material/FormGroup';
 import { toast } from "react-toastify";
+import SearchableDropdown from '../components/SearchableDropdown';
 //import { Controller, useForm } from "react-hook-form";
 
 
@@ -281,37 +282,27 @@ const SignUp = () => {
           </select>
         </FormControl> */}
 
-        <Typography 
-         variant="h6" 
-         fontWeight="400"
-         align="left" 
-         className="form_header">
-          Select Role 
-         </Typography> 
-        <FormControl fullWidth>
-          {/* <InputLabel id="select_label">Select Role</InputLabel> */}
-          <Select
-            labelId="select_label"
-            size="small"
-            name="role"
-            //margin="normal"
-            value={formData.role}
-            error={!!errors.role}
-            helperText={errors.role}
-            onChange={handleChange}
-            //input={<OutlinedInput label="Select Role" />}
-            sx={{bgcolor:'#fff', mb:'10px'}}
-          >
-            {roles.map((role) => (
-              <MenuItem key={role} value={role}>
-                <ListItemText primary={role} />
-              </MenuItem>
-            ))}
-          </Select>
-          {errors.role && (
-            <Typography color="error" variant="caption">{errors.role}</Typography>
-          )}
-        </FormControl>
+        <SearchableDropdown
+          options={roles.map(role => ({ name: role, value: role }))}
+          value={formData.role ? { name: formData.role, value: formData.role } : null}
+          onChange={(event, newValue) => {
+            const syntheticEvent = {
+              target: {
+                name: 'role',
+                value: newValue?.value || ''
+              }
+            };
+            handleChange(syntheticEvent);
+          }}
+          label="Select Role"
+          placeholder="Choose your role..."
+          required
+          getOptionLabel={(option) => option?.name || option}
+          sx={{ bgcolor: '#fff', mb: '10px' }}
+        />
+        {errors.role && (
+          <Typography color="error" variant="caption">{errors.role}</Typography>
+        )}
 
         <label style={{color:'#fff', textAlign:'left'}}>
             <input
