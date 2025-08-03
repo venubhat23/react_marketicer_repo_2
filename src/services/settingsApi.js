@@ -6,6 +6,9 @@ const SETTINGS_ENDPOINTS = {
   UPDATE_PERSONAL_INFO: '/api/v1/settings/personal_information',
   UPDATE_COMPANY_DETAILS: '/api/v1/settings/company_details',
   CHANGE_PASSWORD: '/api/v1/settings/change_password',
+  GET_TIMEZONES: '/api/v1/settings/timezones',
+  UPDATE_TIMEZONE: '/api/v1/settings/timezone',
+  DELETE_ACCOUNT: '/api/v1/settings/delete_account',
 };
 
 // Validation helpers
@@ -66,6 +69,26 @@ const validatePasswordData = (passwordData) => {
   
   if (passwordData.new_password !== passwordData.confirm_password) {
     errors.push("Password confirmation doesn't match");
+  }
+  
+  return errors;
+};
+
+const validateTimezone = (timezone) => {
+  const errors = [];
+  
+  if (!timezone?.trim()) {
+    errors.push('Timezone is required');
+  }
+  
+  return errors;
+};
+
+const validateDeleteAccount = (password) => {
+  const errors = [];
+  
+  if (!password?.trim()) {
+    errors.push('Password is required to delete account');
   }
   
   return errors;
@@ -140,6 +163,57 @@ export const settingsApi = {
       return response.data;
     } catch (error) {
       console.error('Error changing password:', error);
+      throw error.response?.data || error;
+    }
+  },
+
+  // Get available timezones
+  getTimezones: async () => {
+    try {
+      const response = await AxiosManager.get(SETTINGS_ENDPOINTS.GET_TIMEZONES);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching timezones:', error);
+      throw error.response?.data || error;
+    }
+  },
+
+  // Update user timezone
+  updateTimezone: async (timezone) => {
+    // Client-side validation
+    const validationErrors = validateTimezone(timezone);
+    if (validationErrors.length > 0) {
+      throw { message: 'Validation failed', errors: validationErrors };
+    }
+
+    try {
+      const response = await AxiosManager.patch(
+        SETTINGS_ENDPOINTS.UPDATE_TIMEZONE,
+        { timezone }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error updating timezone:', error);
+      throw error.response?.data || error;
+    }
+  },
+
+  // Delete user account
+  deleteAccount: async (password) => {
+    // Client-side validation
+    const validationErrors = validateDeleteAccount(password);
+    if (validationErrors.length > 0) {
+      throw { message: 'Validation failed', errors: validationErrors };
+    }
+
+    try {
+      const response = await AxiosManager.delete(
+        SETTINGS_ENDPOINTS.DELETE_ACCOUNT,
+        { data: { password } }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting account:', error);
       throw error.response?.data || error;
     }
   },
