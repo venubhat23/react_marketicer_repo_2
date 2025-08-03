@@ -96,8 +96,88 @@ const CreatePost = () => {
 
   const [selectedUsers, setSelectedUsers] = useState([])
   const [selectedChipId, setSelectedChipId] = useState(null);
+  const [generatingContent, setGeneratingContent] = useState(false);
 
   console.log('hereree', selectUser)
+
+  // Generate with AI function
+  const handleGenerateWithAI = async () => {
+    setGeneratingContent(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "https://api.marketincer.com/api/v1/generate-content", // Replace with your actual endpoint
+        {
+          description: "generate note on social media"
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+      
+      // Insert the generated content into the editor
+      const generatedContent = response.data.content || response.data.message || response.data;
+      setPostContent(generatedContent);
+      
+      toast.success("Content generated successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } catch (error) {
+      console.error("Error generating content:", error);
+      
+      // For demo purposes, use the sample response you provided
+      const sampleResponse = `Here's a well-structured note on social media:
+---
+### Note on Social Media
+Definition:
+Social media refers to digital platforms and applications that enable users to create, share, and interact with content, ideas, and information in virtual communities and networks.
+---
+Popular Platforms:
+* Facebook: For social networking and community building.
+* Instagram: For photo and video sharing.
+* Twitter (X): For microblogging and real-time updates.
+* LinkedIn: For professional networking.
+* YouTube: For video sharing and streaming.
+* WhatsApp & Telegram: For messaging and group communication.
+---
+Importance of Social Media:
+1. Communication: Provides instant and global connectivity.
+2. Information Sharing: Acts as a major source of news and knowledge.
+3. Marketing & Branding: Businesses use social media for advertising and customer engagement.
+4. Education & Awareness: Helps spread awareness about social, political, and environmental issues.
+5. Entertainment: Offers a wide variety of content such as memes, videos, music, and more.
+---
+Positive Impacts:
+* Strengthens relationships and communities.
+* Promotes small businesses and entrepreneurship.
+* Provides a platform for self-expression and creativity.
+* Encourages social and cultural exchange.
+---
+Negative Impacts:
+* Cyberbullying and online harassment.
+* Spread of misinformation and fake news.
+* Addiction leading to reduced productivity.
+* Privacy concerns and data breaches.
+---
+Conclusion:
+Social media is a powerful tool that can connect, educate, and entertain. However, responsible usage is essential to avoid its negative effects and ensure a safe online environment.
+---
+Would you like me to create this as a short handwritten-style note (suitable for study/revision) or as a detailed infographic-style note?`;
+      
+      setPostContent(sampleResponse);
+      
+      toast.info("Using sample content for demo", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } finally {
+      setGeneratingContent(false);
+    }
+  };
 
   // Function to get tab index based on page type
   const getTabIndexByPageType = (pageType) => {
@@ -772,8 +852,67 @@ const CreatePost = () => {
 
               </Box>
 
-              {/* Text Field */}
-              <Editor value={postContent} onChange={setPostContent} />
+              {/* Text Field with Generate AI Button */}
+<Box sx={{ 
+  position: 'relative', 
+  mb: 2
+}}>
+  {/* Generate with AI Button */}
+  <Button
+    variant="contained"
+    onClick={handleGenerateWithAI}
+    disabled={generatingContent}
+    sx={{
+      position: 'absolute',
+      top: -45,
+      right: 0,
+      zIndex: 10,
+      backgroundColor: '#7f56d9',
+      color: 'white',
+      borderRadius: '8px',
+      textTransform: 'none',
+      fontSize: '14px',
+      fontWeight: 500,
+      padding: '8px 16px',
+      minWidth: 'auto',
+  marginTop: '49px',
+  marginRight: '500px',
+      '&:hover': {
+        backgroundColor: '#6941c6',
+      },
+      '&:disabled': {
+        backgroundColor: '#9575cd',
+        color: '#fff'
+      }
+    }}
+    startIcon={
+      generatingContent ? (
+        <CircularProgress size={16} sx={{ color: '#fff' }} />
+      ) : (
+        <Box
+          sx={{
+            width: 20,
+            height: 20,
+            backgroundColor: '#fff',
+            borderRadius: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            color: '#7f56d9'
+          }}
+        >
+          M
+        </Box>
+      )
+    }
+  >
+    {generatingContent ? 'Generating...' : 'Generate with AI'}
+  </Button>
+  
+  <Editor value={postContent} onChange={setPostContent} />
+</Box>
 
               <Typography variant="caption" display="block" mb={2}>
                 275 characters left
