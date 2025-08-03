@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -99,6 +99,13 @@ const ShortLinkPage = ({ noLayout = false }) => {
   const [totalClicks, setTotalClicks] = useState(0);
   const [perPage, setPerPage] = useState(20);
   const [refreshing, setRefreshing] = useState(false);
+  const hasLoadedInitialData = useRef(false);
+  const perPageRef = useRef(20);
+
+  // Keep perPageRef in sync with perPage state
+  useEffect(() => {
+    perPageRef.current = perPage;
+  }, [perPage]);
 
   const showSnackbar = useCallback((message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -116,17 +123,16 @@ const ShortLinkPage = ({ noLayout = false }) => {
         setLoadingUrls(true);
       }
       
-      const response = await getUserUrls(user?.id, page, perPage);
+      const response = await getUserUrls(user?.id, page, perPageRef.current);
       if (response.success) {
         const data = response.data;
         setUrls(data.urls || []);
         setTotalLinks(data.total_links || 0);
         setTotalClicks(data.total_clicks || 0);
         setCurrentPage(data.page || 1);
-        setPerPage(data.per_page || 20);
         
-        // Calculate total pages
-        const calculatedTotalPages = Math.ceil((data.total_links || 0) / (data.per_page || 20));
+        // Calculate total pages using the current perPage value
+        const calculatedTotalPages = Math.ceil((data.total_links || 0) / perPageRef.current);
         setTotalPages(calculatedTotalPages);
       } else {
         showSnackbar('Failed to load URLs', 'error');
@@ -138,20 +144,30 @@ const ShortLinkPage = ({ noLayout = false }) => {
       setLoadingUrls(false);
       setRefreshing(false);
     }
-  }, [user?.id, showSnackbar, perPage]);
+  }, [user?.id, showSnackbar]);
 
   // Load user's URLs on component mount
   useEffect(() => {
-    if (user?.id) {
+    // Reset flag when user changes (for logout/login scenarios)
+    if (!user?.id) {
+      hasLoadedInitialData.current = false;
+    }
+    
+    if (user?.id && !hasLoadedInitialData.current) {
+      hasLoadedInitialData.current = true;
       loadUserUrls(1);
-    } else if (user && !user.id && fetchUserProfile) {
+    } else if (user && !user.id && fetchUserProfile && !hasLoadedInitialData.current) {
       // If user exists but no ID, try to fetch profile
       fetchUserProfile().then(() => {
         // After fetching profile, the user object should be updated with ID
         // The effect will run again due to user dependency
+        if (user?.id) {
+          hasLoadedInitialData.current = true;
+          loadUserUrls(1);
+        }
       });
     }
-  }, [user, loadUserUrls, fetchUserProfile]);
+  }, [user, fetchUserProfile]);
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
