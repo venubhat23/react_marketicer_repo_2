@@ -898,12 +898,18 @@ Would you like me to create this as a short handwritten-style note (suitable for
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            color: '#7f56d9'
+            overflow: 'hidden'
           }}
         >
-          M
+          <img 
+            src="/marketincer.jpg" 
+            alt="Marketincer Logo" 
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain'
+            }}
+          />
         </Box>
       )
     }
