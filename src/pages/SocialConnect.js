@@ -433,17 +433,28 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                             </Box>
                         </>
                     ) : (
-                        <Box sx={{ width: "100%", display: "flex", gap: 7, mb: 2, justifyContent: "center" }}>
-                            {["profile", "pages"].map((type) => (
+                        <Box sx={{ width: "100%", display: "flex", gap: 4, mb: 2, justifyContent: "center" }}>
+                            {[
+                                { 
+                                    type: "profile", 
+                                    label: "Profile",
+                                    icon: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" // User profile icon
+                                },
+                                { 
+                                    type: "pages", 
+                                    label: "Pages",
+                                    icon: "https://cdn-icons-png.flaticon.com/512/2965/2965879.png" // Pages/document icon
+                                }
+                            ].map((item) => (
                                 <Box
-                                    key={type}
+                                    key={item.type}
                                     sx={{
                                         padding: "20px 30px",
-                                        border: linkedinType === type ? "2px solid #0077b5" : "1px solid #e0e0e0",
+                                        border: linkedinType === item.type ? "2px solid #0077b5" : "1px solid #e0e0e0",
                                         borderRadius: "16px",
                                         cursor: "pointer",
                                         transition: "all 0.2s ease",
-                                        backgroundColor: linkedinType === type ? "#f0f8ff" : "white",
+                                        backgroundColor: linkedinType === item.type ? "#f0f8ff" : "white",
                                         textAlign: "center",
                                         position: "relative",
                                         "&:hover": {
@@ -454,24 +465,34 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                                         }
                                     }}
                                     onClick={() => {
-                                        setLinkedinType(type);
-                                        localStorage.setItem("linkedin_type", type);
+                                        setLinkedinType(item.type);
+                                        localStorage.setItem("linkedin_type", item.type);
                                     }}
                                 >
                                     <Box
                                         sx={{
-                                            width: 50,
-                                            height: 50,
-                                            borderRadius: "50%",
-                                            backgroundColor: "#f5f5f5",
+                                            width: 60,
+                                            height: 60,
+                                            borderRadius: "8px",
+                                            backgroundColor: "#f8f9fa",
                                             margin: "0 auto 16px auto",
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
-                                            backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 4px, #ddd 4px, #ddd 8px)",
-                                            opacity: 0.6
+                                            border: "1px solid #e9ecef",
+                                            overflow: "hidden"
                                         }}
-                                    />
+                                    >
+                                        <img 
+                                            src={item.icon} 
+                                            alt={item.label}
+                                            style={{
+                                                width: "40px",
+                                                height: "40px",
+                                                objectFit: "contain"
+                                            }}
+                                        />
+                                    </Box>
                                     <Typography
                                         sx={{
                                             fontSize: "16px",
@@ -480,9 +501,9 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                                             textTransform: "capitalize"
                                         }}
                                     >
-                                        {type}
+                                        {item.label}
                                     </Typography>
-                                    {linkedinType === type && (
+                                    {linkedinType === item.type && (
                                         <CheckCircleIcon 
                                             sx={{ 
                                                 position: "absolute",
