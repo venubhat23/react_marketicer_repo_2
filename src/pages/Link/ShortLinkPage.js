@@ -48,12 +48,10 @@ import {
   Close as CloseIcon,
   Notifications as NotificationsIcon,
   AccountCircle as AccountCircleIcon,
-  Refresh as RefreshIcon,
-  ArrowBack as ArrowBackIcon
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
-import Sidebar from '../../components/Sidebar';
 import { useAuth } from '../../authContext/AuthContext';
 import AnalyticsModal from './AnalyticsModal';
 import AxiosManager from '../../utils/api';
@@ -244,8 +242,6 @@ const ShortLinkPage = ({ noLayout = false }) => {
     const success = await copyToClipboard(url);
     if (success) {
       showSnackbar('URL copied to clipboard!', 'success');
-      // Refresh the table when a short URL is clicked/copied
-      loadUserUrls(currentPage, true);
     } else {
       showSnackbar('Failed to copy URL', 'error');
     }
@@ -302,7 +298,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
 
 
   const content = (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
         {/* Header */}
           {/* Tab Switcher - moved outside of Card */}
 
@@ -542,20 +538,13 @@ const ShortLinkPage = ({ noLayout = false }) => {
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Typography 
                                   variant="body2" 
-                                  onClick={() => {
-                                    handleCopyUrl(url.short_url);
-                                  }}
                                   sx={{ 
                                     color: '#1976d2', 
                                     fontWeight: 'bold',
                                     maxWidth: 150,
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                      textDecoration: 'underline'
-                                    }
+                                    whiteSpace: 'nowrap'
                                   }}
                                 >
                                   {url.short_url}
@@ -767,59 +756,10 @@ const ShortLinkPage = ({ noLayout = false }) => {
               {snackbar.message}
             </Alert>
           </Snackbar>
-      </Container>
-    );
-
-  // When used as standalone page, wrap with full layout
-  if (!noLayout) {
-    return (
-      <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
-        <Grid container>
-          <Grid size={{ md: 1 }} className="side_section">
-            <Sidebar/>
-          </Grid>
-          <Grid size={{ md: 11 }}>
-            {/* Header */}
-            <Paper
-              elevation={0}
-              sx={{
-                p: 1,
-                backgroundColor: '#091a48',
-                borderRadius: 0,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-            >
-              <Typography variant="h6" sx={{ color: '#fff' }}>
-                <IconButton
-                  edge="start"
-                  color="inherit"
-                  aria-label="back"
-                  sx={{ mr: 2, color: '#fff' }}
-                  onClick={() => navigate(-1)}
-                >
-                  <ArrowBackIcon />
-                </IconButton>
-                Short Link Management
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <IconButton size="large" sx={{ color: 'white' }}>
-                  <NotificationsIcon />
-                </IconButton>
-                <IconButton size="large" sx={{ color: 'white' }}>
-                  <AccountCircleIcon />
-                </IconButton>
-              </Box>
-            </Paper>
-            {content}
-          </Grid>
-        </Grid>
       </Box>
     );
-  }
 
-  return content;
+  return noLayout ? content : <Layout>{content}</Layout>;
 };
 
 export default ShortLinkPage;
