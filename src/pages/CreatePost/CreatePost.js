@@ -97,86 +97,352 @@ const CreatePost = () => {
   const [selectedUsers, setSelectedUsers] = useState([])
   const [selectedChipId, setSelectedChipId] = useState(null);
   const [generatingContent, setGeneratingContent] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [showAiPrompt, setShowAiPrompt] = useState(false);
+  const [lastGenerationParams, setLastGenerationParams] = useState(null);
+
+  // API Configuration
+  const API_CONFIG = {
+    baseURL: "https://api.marketincer.com/api/v1",
+    timeout: 30000,
+    retryAttempts: 2,
+    retryDelay: 1000
+  };
 
   console.log('hereree', selectUser)
 
-  // Generate with AI function
-  const handleGenerateWithAI = async () => {
+  // Utility function for making API calls with retry logic
+  const makeApiCall = async (url, payload, headers, retryCount = 0) => {
+    try {
+      const response = await axios.post(url, payload, {
+        headers,
+        timeout: API_CONFIG.timeout
+      });
+      return response;
+    } catch (error) {
+      if (retryCount < API_CONFIG.retryAttempts && 
+          (error.code === 'ECONNABORTED' || error.response?.status >= 500)) {
+        console.log(`API call failed, retrying... (${retryCount + 1}/${API_CONFIG.retryAttempts})`);
+        await new Promise(resolve => setTimeout(resolve, API_CONFIG.retryDelay * (retryCount + 1)));
+        return makeApiCall(url, payload, headers, retryCount + 1);
+      }
+      throw error;
+    }
+  };
+
+  // Utility function to validate request payload
+  const validateRequestPayload = (payload) => {
+    if (!payload.description || payload.description.trim().length === 0) {
+      throw new Error("Description is required for content generation");
+    }
+    if (payload.description.length > 1000) {
+      throw new Error("Description is too long (max 1000 characters)");
+    }
+    return true;
+  };
+
+  // Utility function to detect content preferences
+  const getContentPreferences = () => {
+    const platform = ['instagram', 'linkedin', 'facebook'][tabValue] || 'general';
+    
+    const preferences = {
+      instagram: {
+        tone: 'casual',
+        hashtags: true,
+        emojis: true,
+        length: 'medium',
+        style: 'engaging'
+      },
+      linkedin: {
+        tone: 'professional',
+        hashtags: false,
+        emojis: false,
+        length: 'long',
+        style: 'informative'
+      },
+      facebook: {
+        tone: 'friendly',
+        hashtags: true,
+        emojis: true,
+        length: 'medium',
+        style: 'conversational'
+      },
+      general: {
+        tone: 'professional',
+        hashtags: false,
+        emojis: false,
+        length: 'medium',
+        style: 'balanced'
+      }
+    };
+
+    return preferences[platform];
+  };
+
+  // Generate with AI function - Enhanced with dynamic API integration
+  const handleGenerateWithAI = async (customDescription = null) => {
     setGeneratingContent(true);
+    
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post(
-        "https://api.marketincer.com/api/v1/generate-content", // Replace with your actual endpoint
+      
+      // Validate token
+      if (!token) {
+        throw new Error("Authentication token not found. Please log in again.");
+      }
+
+      // Generate dynamic description based on context
+      const generateDynamicDescription = () => {
+        // Priority: custom description > AI prompt > auto-generated
+        if (customDescription) return customDescription;
+        if (aiPrompt.trim()) return aiPrompt.trim();
+        
+        // Determine platform based on selected tab
+        const platformMap = {
+          0: 'instagram',
+          1: 'linkedin', 
+          2: 'facebook'
+        };
+        const currentPlatform = platformMap[tabValue] || 'social media';
+        
+        // Generate contextual description
+        let description = `Generate engaging ${currentPlatform} post content`;
+        
+        // Add brand context if available
+        if (brandName) {
+          description += ` for ${brandName}`;
+        }
+        
+        // Add content type context if image is uploaded
+        if (uploadedImageUrl) {
+          description += ` with visual content`;
+        }
+        
+        // Add selected pages context
+        if (selectedPages.length > 0) {
+          const pageNames = selectedPages.map(page => page.name || page).join(', ');
+          description += ` targeting ${pageNames}`;
+        }
+        
+        return description;
+      };
+
+      // Get platform-specific preferences
+      const preferences = getContentPreferences();
+      
+      // Prepare request payload with dynamic parameters
+      const requestPayload = {
+        description: generateDynamicDescription(),
+        platform: ['instagram', 'linkedin', 'facebook'][tabValue] || 'general',
+        tone: preferences.tone,
+        length: preferences.length,
+        style: preferences.style,
+        hashtags: preferences.hashtags,
+        emojis: preferences.emojis,
+        brand_name: brandName || null,
+        has_media: !!uploadedImageUrl,
+        media_type: uploadedImageUrl ? (uploadedImageUrl.includes('.mp4') ? 'video' : 'image') : null,
+        target_audience: selectedPages.length > 0 ? selectedPages.map(p => p.name || p) : null,
+        user_preferences: {
+          custom_prompt: !!aiPrompt.trim(),
+          selected_users: selectedUsers.length,
+          brand_context: !!brandName
+        }
+      };
+
+      // Validate the payload
+      validateRequestPayload(requestPayload);
+
+      console.log('AI Content Generation Request:', requestPayload);
+
+      // Store parameters for potential regeneration
+      setLastGenerationParams({
+        ...requestPayload,
+        timestamp: new Date().toISOString()
+      });
+
+      const response = await makeApiCall(
+        `${API_CONFIG.baseURL}/generate-content`,
+        requestPayload,
         {
-          description: "generate note on social media"
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         }
       );
       
-      // Insert the generated content into the editor
-      const generatedContent = response.data.content || response.data.message || response.data;
+      // Enhanced response handling
+      let generatedContent = '';
+      
+      if (response.data) {
+        // Handle different response formats
+        generatedContent = response.data.content || 
+                          response.data.message || 
+                          response.data.text ||
+                          response.data.generated_text ||
+                          (typeof response.data === 'string' ? response.data : '');
+        
+        // Log usage information if available
+        if (response.data.usage) {
+          console.log('AI Usage Stats:', response.data.usage);
+        }
+      }
+      
+      if (!generatedContent) {
+        throw new Error("No content received from AI service");
+      }
+      
+      // Set the generated content
       setPostContent(generatedContent);
       
-      toast.success("Content generated successfully!", {
+      // Success notification with platform context and stats
+      const platform = ['Instagram', 'LinkedIn', 'Facebook'][tabValue] || 'Social Media';
+      const contentLength = generatedContent.length;
+      const hasHashtags = generatedContent.includes('#');
+      const hasEmojis = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u.test(generatedContent);
+      
+      let successMessage = `${platform} content generated successfully!`;
+      if (response.data.usage?.tokens_used) {
+        successMessage += ` (${response.data.usage.tokens_used} tokens used)`;
+      }
+      
+      toast.success(successMessage, {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 4000,
       });
+
+      // Optional: Log content analytics
+      console.log('Generated Content Analytics:', {
+        platform,
+        length: contentLength,
+        hasHashtags,
+        hasEmojis,
+        wordCount: generatedContent.split(' ').length,
+        customPromptUsed: !!aiPrompt.trim()
+      });
+      
     } catch (error) {
       console.error("Error generating content:", error);
       
-      // For demo purposes, use the sample response you provided
-      const sampleResponse = `Here's a well-structured note on social media:
----
-### Note on Social Media
-Definition:
-Social media refers to digital platforms and applications that enable users to create, share, and interact with content, ideas, and information in virtual communities and networks.
----
-Popular Platforms:
-* Facebook: For social networking and community building.
-* Instagram: For photo and video sharing.
-* Twitter (X): For microblogging and real-time updates.
-* LinkedIn: For professional networking.
-* YouTube: For video sharing and streaming.
-* WhatsApp & Telegram: For messaging and group communication.
----
-Importance of Social Media:
-1. Communication: Provides instant and global connectivity.
-2. Information Sharing: Acts as a major source of news and knowledge.
-3. Marketing & Branding: Businesses use social media for advertising and customer engagement.
-4. Education & Awareness: Helps spread awareness about social, political, and environmental issues.
-5. Entertainment: Offers a wide variety of content such as memes, videos, music, and more.
----
-Positive Impacts:
-* Strengthens relationships and communities.
-* Promotes small businesses and entrepreneurship.
-* Provides a platform for self-expression and creativity.
-* Encourages social and cultural exchange.
----
-Negative Impacts:
-* Cyberbullying and online harassment.
-* Spread of misinformation and fake news.
-* Addiction leading to reduced productivity.
-* Privacy concerns and data breaches.
----
-Conclusion:
-Social media is a powerful tool that can connect, educate, and entertain. However, responsible usage is essential to avoid its negative effects and ensure a safe online environment.
----
-Would you like me to create this as a short handwritten-style note (suitable for study/revision) or as a detailed infographic-style note?`;
+      // Enhanced error handling
+      let errorMessage = "Failed to generate content";
+      let shouldUseFallback = true;
       
-      setPostContent(sampleResponse);
+      if (error.response) {
+        // Server responded with error
+        const status = error.response.status;
+        const errorData = error.response.data;
+        
+        switch (status) {
+          case 401:
+            errorMessage = "Authentication failed. Please log in again.";
+            shouldUseFallback = false;
+            // Could redirect to login here
+            break;
+          case 429:
+            errorMessage = "Rate limit exceeded. Please try again later.";
+            const retryAfter = errorData.retry_after || 60;
+            setTimeout(() => {
+              toast.info(`You can try generating content again now.`, {
+                position: "top-right",
+                autoClose: 3000,
+              });
+            }, retryAfter * 1000);
+            break;
+          case 400:
+            errorMessage = errorData.message || "Invalid request parameters";
+            break;
+          case 500:
+            errorMessage = "AI service temporarily unavailable";
+            break;
+          default:
+            errorMessage = errorData.message || `Server error (${status})`;
+        }
+      } else if (error.request) {
+        // Network error
+        errorMessage = "Network error. Please check your connection.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
       
-      toast.info("Using sample content for demo", {
+      toast.error(errorMessage, {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 5000,
       });
+      
+      // Use fallback content only for certain error types
+      if (shouldUseFallback && error.response?.status !== 401) {
+        const platform = ['Instagram', 'LinkedIn', 'Facebook'][tabValue] || 'Social Media';
+        const fallbackContent = generateFallbackContent(platform, brandName);
+        setPostContent(fallbackContent);
+        
+        toast.info("Using sample content while AI service is unavailable", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+      
     } finally {
       setGeneratingContent(false);
     }
+  };
+
+  // Helper function to generate platform-specific fallback content
+  const generateFallbackContent = (platform, brand) => {
+    const brandText = brand ? ` for ${brand}` : '';
+    
+    const fallbackTemplates = {
+      Instagram: `🚀 Elevate your Instagram presence${brandText}! ✨
+
+Here are 5 proven strategies to boost engagement:
+
+1️⃣ Share authentic behind-the-scenes content
+2️⃣ Use trending hashtags strategically  
+3️⃣ Engage with your community daily
+4️⃣ Post consistently at optimal times
+5️⃣ Create visually stunning content
+
+What's your favorite Instagram growth tip? Drop it in the comments! 👇
+
+#InstagramGrowth #SocialMediaTips #ContentCreation #DigitalMarketing #Engagement`,
+
+      LinkedIn: `🎯 Professional Growth Insights${brandText}
+
+In today's competitive landscape, building a strong professional presence is crucial for career advancement.
+
+Key strategies for LinkedIn success:
+
+• Share valuable industry insights regularly
+• Engage meaningfully with your network
+• Showcase your expertise through articles
+• Build authentic professional relationships
+• Stay updated with industry trends
+
+Remember: Consistency and authenticity are the foundations of professional success.
+
+What professional development tip has made the biggest impact on your career?
+
+#ProfessionalDevelopment #LinkedIn #CareerGrowth #Networking #Leadership`,
+
+      Facebook: `🌟 Building Community${brandText} 🌟
+
+Social media is all about bringing people together and creating meaningful connections! 
+
+Here's how to build an engaged community:
+
+✅ Share content that resonates with your audience
+✅ Respond to comments and messages promptly  
+✅ Create polls and ask questions to spark conversation
+✅ Share user-generated content to show appreciation
+✅ Be authentic and show your brand's personality
+
+The best communities are built on trust, value, and genuine interaction! 💙
+
+What makes you feel most connected to a brand online? Let us know in the comments!
+
+#CommunityBuilding #SocialMedia #Engagement #BrandConnection #Facebook`
+    };
+    
+    return fallbackTemplates[platform] || fallbackTemplates.Instagram;
   };
 
   // Function to get tab index based on page type
@@ -852,70 +1118,147 @@ Would you like me to create this as a short handwritten-style note (suitable for
 
               </Box>
 
+              {/* AI Content Generation Section */}
+              <Box sx={{ mb: 2 }}>
+                {/* AI Prompt Toggle */}
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={() => setShowAiPrompt(!showAiPrompt)}
+                    sx={{
+                      color: '#7f56d9',
+                      textTransform: 'none',
+                      fontSize: '12px',
+                      padding: '2px 8px',
+                      minWidth: 'auto'
+                    }}
+                  >
+                    {showAiPrompt ? 'Hide' : 'Customize'} AI Prompt
+                  </Button>
+                </Box>
+
+                {/* AI Prompt Input Field */}
+                {showAiPrompt && (
+                  <Box sx={{ mb: 2 }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      placeholder="Describe what kind of content you want to generate..."
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      multiline
+                      rows={2}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
+                      Example: "Create a motivational post about productivity tips for remote workers"
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+
               {/* Text Field with Generate AI Button */}
 <Box sx={{ 
   position: 'relative', 
   mb: 2
 }}>
-  {/* Generate with AI Button */}
-  <Button
-    variant="contained"
-    onClick={handleGenerateWithAI}
-    disabled={generatingContent}
-    sx={{
-      position: 'absolute',
-      top: -45,
-      right: 0,
-      zIndex: 10,
-      backgroundColor: '#7f56d9',
-      color: 'white',
-      borderRadius: '8px',
-      textTransform: 'none',
-      fontSize: '14px',
-      fontWeight: 500,
-      padding: '8px 16px',
-      minWidth: 'auto',
-  marginTop: '49px',
-  marginRight: '500px',
-      '&:hover': {
-        backgroundColor: '#6941c6',
-      },
-      '&:disabled': {
-        backgroundColor: '#9575cd',
-        color: '#fff'
-      }
-    }}
-    startIcon={
-      generatingContent ? (
-        <CircularProgress size={16} sx={{ color: '#fff' }} />
-      ) : (
-        <Box
-          sx={{
-            width: 20,
-            height: 20,
-            backgroundColor: '#fff',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden'
-          }}
-        >
-          <img 
-            src="/marketincer.jpg" 
-            alt="Marketincer Logo" 
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain'
+  {/* AI Generation Buttons */}
+  <Box sx={{
+    position: 'absolute',
+    top: -45,
+    right: 0,
+    zIndex: 10,
+    display: 'flex',
+    gap: 1,
+    marginTop: '49px',
+    marginRight: '500px',
+  }}>
+    {/* Generate with AI Button */}
+    <Button
+      variant="contained"
+      onClick={() => handleGenerateWithAI()}
+      disabled={generatingContent}
+      sx={{
+        backgroundColor: '#7f56d9',
+        color: 'white',
+        borderRadius: '8px',
+        textTransform: 'none',
+        fontSize: '14px',
+        fontWeight: 500,
+        padding: '8px 16px',
+        minWidth: 'auto',
+        '&:hover': {
+          backgroundColor: '#6941c6',
+        },
+        '&:disabled': {
+          backgroundColor: '#9575cd',
+          color: '#fff'
+        }
+      }}
+      startIcon={
+        generatingContent ? (
+          <CircularProgress size={16} sx={{ color: '#fff' }} />
+        ) : (
+          <Box
+            sx={{
+              width: 20,
+              height: 20,
+              backgroundColor: '#fff',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden'
             }}
-          />
-        </Box>
-      )
-    }
-  >
-    {generatingContent ? 'Generating...' : 'Generate with AI'}
-  </Button>
+          >
+            <img 
+              src="/marketincer.jpg" 
+              alt="Marketincer Logo" 
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain'
+              }}
+            />
+          </Box>
+        )
+      }
+    >
+      {generatingContent ? 'Generating...' : 'Generate with AI'}
+    </Button>
+
+    {/* Regenerate Button - Only show if we have previous generation params and content exists */}
+    {lastGenerationParams && postContent && !generatingContent && (
+      <Button
+        variant="outlined"
+        onClick={() => handleGenerateWithAI(lastGenerationParams.description)}
+        disabled={generatingContent}
+        size="small"
+        sx={{
+          borderColor: '#7f56d9',
+          color: '#7f56d9',
+          borderRadius: '8px',
+          textTransform: 'none',
+          fontSize: '12px',
+          padding: '6px 12px',
+          minWidth: 'auto',
+          '&:hover': {
+            borderColor: '#6941c6',
+            color: '#6941c6',
+            backgroundColor: 'rgba(127, 86, 217, 0.04)'
+          }
+        }}
+      >
+        ↻ Regenerate
+      </Button>
+    )}
+  </Box>
   
   <Editor value={postContent} onChange={setPostContent} />
 </Box>
