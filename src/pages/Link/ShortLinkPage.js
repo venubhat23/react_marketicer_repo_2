@@ -81,6 +81,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
   const [qrDialog, setQrDialog] = useState({ open: false, url: null });
   const [analyticsDialog, setAnalyticsDialog] = useState({ open: false, url: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [hasInitialLoad, setHasInitialLoad] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -119,7 +120,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
       }
       
       const response = await getUserUrls(user.id, page, perPage);
-      debugger
+      
       if (response.success) {
         const data = response.data;
         setUrls(data.urls || []);
@@ -131,12 +132,24 @@ const ShortLinkPage = ({ noLayout = false }) => {
         // Calculate total pages
         const calculatedTotalPages = Math.ceil((data.total_links || 0) / (data.per_page || 20));
         setTotalPages(calculatedTotalPages);
+        
+        setHasInitialLoad(true);
       } else {
         showSnackbar('Failed to load URLs', 'error');
+        // Set empty state on failure
+        setUrls([]);
+        setTotalLinks(0);
+        setTotalClicks(0);
+        setHasInitialLoad(true);
       }
     } catch (error) {
       console.error('Error loading URLs:', error);
       showSnackbar('Error loading URLs', 'error');
+      // Set empty state on error
+      setUrls([]);
+      setTotalLinks(0);
+      setTotalClicks(0);
+      setHasInitialLoad(true);
     } finally {
       setLoadingUrls(false);
       setRefreshing(false);
@@ -149,6 +162,24 @@ const ShortLinkPage = ({ noLayout = false }) => {
       loadUserUrls(1);
     }
   }, [user, loadUserUrls]);
+
+  // Additional effect to ensure data loads when user is available
+  useEffect(() => {
+    if (user?.id && !hasInitialLoad && !loadingUrls) {
+      loadUserUrls(1);
+    }
+  }, [user?.id, hasInitialLoad, loadingUrls, loadUserUrls]);
+
+  // Force load on component mount regardless of user state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (user?.id && !hasInitialLoad) {
+        loadUserUrls(1);
+      }
+    }, 100); // Small delay to ensure auth context is ready
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
@@ -492,8 +523,11 @@ const ShortLinkPage = ({ noLayout = false }) => {
               <Divider />
               
               {loadingUrls ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                  <CircularProgress size={50} />
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 8 }}>
+                  <CircularProgress size={50} sx={{ mb: 2 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Loading your short URLs...
+                  </Typography>
                 </Box>
               ) : urls.length === 0 ? (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
@@ -501,9 +535,17 @@ const ShortLinkPage = ({ noLayout = false }) => {
                   <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
                     No URLs Created Yet
                   </Typography>
-                  <Typography variant="body2" color="text.disabled">
+                  <Typography variant="body2" color="text.disabled" sx={{ mb: 2 }}>
                     Create your first short URL using the form above
                   </Typography>
+                  <Button
+                    variant="outlined"
+                    startIcon={<RefreshIcon />}
+                    onClick={() => loadUserUrls(1)}
+                    size="small"
+                  >
+                    Try Loading Again
+                  </Button>
                 </Box>
               ) : (
                 <>
