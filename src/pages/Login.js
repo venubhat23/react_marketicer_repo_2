@@ -50,14 +50,15 @@ const Login = () => {
       const res = await axios.post("https://api.marketincer.com/api/v1/login", form);
       //localStorage.setItem("token", res.data.token); // Save token
       
-      // Extract user role from the API response
+      // Extract user data from the API response
       const userRole = res.data.user?.role || 'influencer'; // Default to 'influencer' if role not provided
+      const userId = res.data.user?.id || res.data.user?.user_id || res.data.userId; // Try different possible user ID fields
       
       // Save user role using utility function
       setUserRole(userRole);
       
-      // Pass both token and role to login function
-      login(res.data.token, userRole);
+      // Pass token, role, and user ID to login function
+      login(res.data.token, userRole, userId);
       navigate('/createPost');
       
     } catch (error) {
