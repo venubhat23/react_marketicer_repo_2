@@ -1,18 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Container, 
   Box, 
   Grid, 
   Paper, 
   Typography, 
-  IconButton 
+  IconButton,
+  Button
 } from '@mui/material';
 import { 
   Notifications as NotificationsIcon, 
   AccountCircle as AccountCircleIcon 
 } from '@mui/icons-material';
 import Layout from '../../components/Layout';
-import TabComponent from '../../components/TabComponent';
 import Sidebar from '../../components/Sidebar';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 
@@ -21,21 +21,15 @@ import ShortLinkPage from './ShortLinkPage';
 import LinkAdvancedPage from './LinkAdvancedPage';
 
 const LinkPage = () => {
-  // Create tab configuration for the switcher
-  const tabs = [
-    {
-      label: 'ShortLink',
-      content: <ShortLinkPage noLayout={true} />
-    },
-    {
-      label: 'Link Advanced', 
-      content: <LinkAdvancedPage />
-    }
-  ];
+  const [activeView, setActiveView] = useState('shortlink'); // Default to shortlink
 
   // Get header title for the Link module
   const getHeaderTitle = () => {
     return 'Link Management';
+  };
+
+  const handleViewChange = (view) => {
+    setActiveView(view);
   };
 
   return (
@@ -78,9 +72,48 @@ const LinkPage = () => {
             </Box>
           </Paper>
 
-          {/* Main Content */}
+          {/* Button Navigation */}
           <Container maxWidth="xl" sx={{ py: 3 }}>
-            <TabComponent tabs={tabs} defaultIndex={0} />
+            <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+              <Button
+                variant={activeView === 'shortlink' ? 'contained' : 'outlined'}
+                onClick={() => handleViewChange('shortlink')}
+                sx={{
+                  backgroundColor: activeView === 'shortlink' ? '#091a48' : 'transparent',
+                  color: activeView === 'shortlink' ? 'white' : '#091a48',
+                  borderColor: '#091a48',
+                  '&:hover': {
+                    backgroundColor: activeView === 'shortlink' ? '#0d2557' : 'rgba(9, 26, 72, 0.1)',
+                  }
+                }}
+              >
+                Short Link
+              </Button>
+              <Button
+                variant={activeView === 'advanced' ? 'contained' : 'outlined'}
+                onClick={() => handleViewChange('advanced')}
+                sx={{
+                  backgroundColor: activeView === 'advanced' ? '#091a48' : 'transparent',
+                  color: activeView === 'advanced' ? 'white' : '#091a48',
+                  borderColor: '#091a48',
+                  '&:hover': {
+                    backgroundColor: activeView === 'advanced' ? '#0d2557' : 'rgba(9, 26, 72, 0.1)',
+                  }
+                }}
+              >
+                Advanced Link
+              </Button>
+            </Box>
+
+            {/* Content Area */}
+            <Box>
+              {activeView === 'shortlink' && (
+                <ShortLinkPage noLayout={true} />
+              )}
+              {activeView === 'advanced' && (
+                <LinkAdvancedPage />
+              )}
+            </Box>
           </Container>
         </Grid>
       </Grid>

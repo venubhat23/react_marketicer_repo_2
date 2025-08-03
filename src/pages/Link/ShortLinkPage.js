@@ -544,8 +544,15 @@ const ShortLinkPage = ({ noLayout = false }) => {
                                     maxWidth: 150,
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap'
+                                    whiteSpace: 'nowrap',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      textDecoration: 'underline',
+                                      color: '#1565c0'
+                                    }
                                   }}
+                                  onClick={handleRefresh}
+                                  title="Click to refresh table"
                                 >
                                   {url.short_url}
                                 </Typography>
