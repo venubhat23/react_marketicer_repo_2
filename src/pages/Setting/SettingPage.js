@@ -55,7 +55,10 @@ import {
   useGetSettings, 
   useUpdatePersonalInformation, 
   useUpdateCompanyDetails, 
-  useChangePassword 
+  useChangePassword,
+  useGetTimezones,
+  useUpdateTimezone,
+  useDeleteAccount
 } from '../../hooks/useSettings';
 import Sidebar from '../../components/Sidebar'
 
@@ -106,6 +109,9 @@ const SettingPage = () => {
     const updatePersonalInfo = useUpdatePersonalInformation();
     const updateCompanyDetails = useUpdateCompanyDetails();
     const changePassword = useChangePassword();
+    const { data: timezonesData, isLoading: timezonesLoading } = useGetTimezones();
+    const updateTimezone = useUpdateTimezone();
+    const deleteAccount = useDeleteAccount();
     
     // Personal Information Form State
     const [personalFormData, setPersonalFormData] = useState({
@@ -134,10 +140,17 @@ const SettingPage = () => {
         confirm_password: '',
       });
 
+    // Timezone State
+    const [selectedTimezone, setSelectedTimezone] = useState('');
+    
+    // Delete Account State
+    const [deleteAccountPassword, setDeleteAccountPassword] = useState('');
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
     // Load data from API when available
     useEffect(() => {
       if (settingsData?.data) {
-        const { personal_information, company_details } = settingsData.data;
+        const { personal_information, company_details, timezone } = settingsData.data;
         
         if (personal_information) {
           setPersonalFormData({
@@ -159,6 +172,11 @@ const SettingPage = () => {
             company_address: company_details.address || '',
             company_website: company_details.website || '',
           });
+        }
+
+        // Set current timezone
+        if (timezone) {
+          setSelectedTimezone(timezone);
         }
       }
     }, [settingsData]);
@@ -235,6 +253,37 @@ const SettingPage = () => {
         } catch (error) {
           // Error is handled by the hook
           console.error('Failed to change password:', error);
+        }
+      };
+
+      const handleTimezoneChange = async (event) => {
+        const newTimezone = event.target.value;
+        setSelectedTimezone(newTimezone);
+        
+        try {
+          await updateTimezone.mutateAsync(newTimezone);
+        } catch (error) {
+          // Revert the selection on error
+          setSelectedTimezone(settingsData?.data?.timezone || '');
+          console.error('Failed to update timezone:', error);
+        }
+      };
+
+      const handleDeleteAccountSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!deleteAccountPassword.trim()) {
+          toast.error('Password is required to delete account');
+          return;
+        }
+
+        try {
+          await deleteAccount.mutateAsync(deleteAccountPassword);
+          setShowDeleteConfirmation(false);
+          setDeleteAccountPassword('');
+        } catch (error) {
+          // Error is handled by the hook
+          console.error('Failed to delete account:', error);
         }
       };
 
@@ -629,10 +678,187 @@ const SettingPage = () => {
           <Typography>Enable 2FA options</Typography>
         </TabPanel>
         <TabPanel value={selectedTab} index={6}>
-          <Typography>Timezone selection dropdown</Typography>
+          <Box maxWidth="600px">
+            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <AccessTime color="primary" />
+              Timezone Settings
+            </Typography>
+            
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Set your timezone to ensure accurate time display across the platform.
+            </Typography>
+
+            {timezonesLoading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <CircularProgress size={20} />
+                <Typography>Loading timezones...</Typography>
+              </Box>
+            ) : (
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 8, md: 6 }}>
+                  <FormControl fullWidth>
+                    <InputLabel>Select Timezone</InputLabel>
+                    <Select
+                      value={selectedTimezone}
+                      onChange={handleTimezoneChange}
+                      label="Select Timezone"
+                      disabled={updateTimezone.isPending}
+                    >
+                      {timezonesData?.data?.timezones?.map((timezone) => (
+                        <MenuItem key={timezone.name} value={timezone.name}>
+                          <Box>
+                            <Typography variant="body2" fontWeight="medium">
+                              {timezone.display_name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Offset: {timezone.offset}
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid size={{ xs: 12 }}>
+                  {selectedTimezone && (
+                    <Box sx={{ 
+                      p: 2, 
+                      backgroundColor: 'primary.50', 
+                      borderRadius: 1, 
+                      border: '1px solid',
+                      borderColor: 'primary.200'
+                    }}>
+                      <Typography variant="body2" color="primary.main">
+                        <strong>Current Timezone:</strong> {selectedTimezone}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Changes are saved automatically
+                      </Typography>
+                    </Box>
+                  )}
+                </Grid>
+
+                {updateTimezone.isPending && (
+                  <Grid size={{ xs: 12 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CircularProgress size={16} />
+                      <Typography variant="body2" color="text.secondary">
+                        Updating timezone...
+                      </Typography>
+                    </Box>
+                  </Grid>
+                )}
+              </Grid>
+            )}
+          </Box>
         </TabPanel>
         <TabPanel value={selectedTab} index={7}>
-          <Typography>Delete account confirmation</Typography>
+          <Box maxWidth="600px">
+            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'error.main' }}>
+              <Delete color="error" />
+              Delete Account
+            </Typography>
+            
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </Typography>
+
+            {/* Warning Box */}
+            <Box sx={{ 
+              p: 2, 
+              mb: 3,
+              backgroundColor: 'error.50', 
+              borderRadius: 1, 
+              border: '1px solid',
+              borderColor: 'error.200'
+            }}>
+              <Typography variant="body2" color="error.main" fontWeight="medium" gutterBottom>
+                ⚠️ Warning: This action is irreversible
+              </Typography>
+              <Typography variant="body2" color="error.dark">
+                Deleting your account will permanently remove:
+              </Typography>
+              <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2 }}>
+                <li><Typography variant="body2" color="error.dark">User profile and personal information</Typography></li>
+                <li><Typography variant="body2" color="error.dark">All marketplace posts and bids</Typography></li>
+                <li><Typography variant="body2" color="error.dark">All short URLs and analytics</Typography></li>
+                <li><Typography variant="body2" color="error.dark">All associated data</Typography></li>
+              </Box>
+            </Box>
+
+            {!showDeleteConfirmation ? (
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => setShowDeleteConfirmation(true)}
+                sx={{ mb: 2 }}
+              >
+                I want to delete my account
+              </Button>
+            ) : (
+              <form onSubmit={handleDeleteAccountSubmit}>
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12 }}>
+                    <Typography variant="body2" fontWeight="medium" gutterBottom>
+                      Please enter your password to confirm account deletion:
+                    </Typography>
+                  </Grid>
+                  
+                  <Grid size={{ xs: 12, sm: 8, md: 6 }}>
+                    <TextField
+                      label="Password"
+                      type="password"
+                      value={deleteAccountPassword}
+                      onChange={(e) => setDeleteAccountPassword(e.target.value)}
+                      fullWidth
+                      size="small"
+                      placeholder="Enter your password"
+                      required
+                      error={deleteAccount.isError}
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12 }}>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button
+                        variant="outlined"
+                        onClick={() => {
+                          setShowDeleteConfirmation(false);
+                          setDeleteAccountPassword('');
+                        }}
+                        disabled={deleteAccount.isPending}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        color="error"
+                        disabled={deleteAccount.isPending || !deleteAccountPassword.trim()}
+                        sx={{ minWidth: 120 }}
+                      >
+                        {deleteAccount.isPending ? (
+                          <>
+                            <CircularProgress size={16} sx={{ mr: 1 }} />
+                            Deleting...
+                          </>
+                        ) : (
+                          'Delete Account'
+                        )}
+                      </Button>
+                    </Box>
+                  </Grid>
+
+                  <Grid size={{ xs: 12 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      This action cannot be undone. Your account will be permanently deleted.
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </form>
+            )}
+          </Box>
         </TabPanel>
       </Box>
     </Box>
