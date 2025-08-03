@@ -38,6 +38,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import { Link, useNavigate } from "react-router-dom";
 import LanguageIcon from '@mui/icons-material/Language';
 import { useAuth } from "../authContext/AuthContext";
+import LinkModal from './LinkModal';
 
 const footerItems = [
   { icon: <MessageSquareIcon />, active: true },
@@ -48,6 +49,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [, forceUpdate] = useState({});
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
 
   // Force re-render when user changes
   useEffect(() => {
@@ -207,13 +209,14 @@ const Sidebar = () => {
         </ListItem>
 
         <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Link to="/link">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <LanguageIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Link</Typography>
-              </Box>
-            </Link>
+          <ListItemButton 
+            sx={{ display: 'flex', justifyContent: 'center' }}
+            onClick={() => setLinkModalOpen(true)}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+              <LanguageIcon fontSize="medium" />
+              <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Link</Typography>
+            </Box>
           </ListItemButton>
         </ListItem>
 
@@ -272,6 +275,12 @@ const Sidebar = () => {
 
         
       </Box>
+      
+      {/* Link Modal */}
+      <LinkModal 
+        open={linkModalOpen} 
+        onClose={() => setLinkModalOpen(false)} 
+      />
     </Box>
   );
 };
