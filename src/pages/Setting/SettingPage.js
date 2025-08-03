@@ -343,11 +343,11 @@ const SettingPage = () => {
                 </Box>
               </Box>
         </Paper>
-      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'10px'}}>
+      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: 'calc(100vh - 64px)', overflow: 'hidden !important', padding:'10px'}}>
         <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
-          <Grid size={{ xs: 6, sm: 12, md:12 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)'}}>
+          <Grid size={{ xs: 6, sm: 12, md:12 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height: '100%'}}>
             
-            <Box display="flex" >
+            <Box display="flex" sx={{ height: '100%' }}>
               {/* Sidebar Tabs */}
       
               <Tabs
@@ -357,19 +357,36 @@ const SettingPage = () => {
                 aria-label="Settings Tabs"
                 variant="scrollable"
                 sx={{
-                    width: '250px', // Ensures the Tabs container has fixed width
+                    width: '250px',
+                    height: '100%',
+                    backgroundColor: '#4A5FA3', // Updated main background color
+                    borderRadius: '8px',
                   '.MuiTab-root': {
-                    width: '100%', // Ensures each Tab fills the Tabs container
+                    width: '100%',
                     justifyContent: 'flex-start',
                     alignItems: 'center',
                     textTransform: 'none',
-                    color: '#f5f5f5',
-                    backgroundColor: '#1B357C',
+                    color: '#B8C5E8', // Light blue-gray text for inactive tabs
+                    backgroundColor: 'transparent',
+                    padding: '12px 16px',
+                    margin: '2px 4px',
+                    borderRadius: '6px',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    transition: 'all 0.2s ease-in-out',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      color: '#E8EEFF',
+                    }
                   },
                   '.Mui-selected': {
-                    backgroundColor: '#f5f5f5',
-                    color: 'primary.main',
-                    width: '100%'
+                    backgroundColor: '#2D3F7A !important', // Darker blue for selected tab
+                    color: '#FFFFFF !important', // White text for selected tab
+                    fontWeight: 600,
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)',
+                  },
+                  '.MuiTabs-indicator': {
+                    display: 'none', // Hide the default indicator
                   },
                 }}
               >
@@ -384,7 +401,7 @@ const SettingPage = () => {
       
 
       {/* Right Panel */}
-      <Box flexGrow={1} p={3}>
+      <Box flexGrow={1} p={3} sx={{ height: '100%', overflow: 'auto' }}>
         <Typography variant="h6" gutterBottom>
           {tabData[selectedTab].label}
         </Typography>
