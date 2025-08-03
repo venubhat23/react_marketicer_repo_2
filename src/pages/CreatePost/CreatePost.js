@@ -97,40 +97,151 @@ const CreatePost = () => {
   const [selectedUsers, setSelectedUsers] = useState([])
   const [selectedChipId, setSelectedChipId] = useState(null);
   const [generatingContent, setGeneratingContent] = useState(false);
+  const [aiDescription, setAiDescription] = useState(""); // Add state for AI description input
+  const [showAiInput, setShowAiInput] = useState(false); // Add state to toggle AI input visibility
 
   console.log('hereree', selectUser)
 
-  // Generate with AI function
-  const handleGenerateWithAI = async () => {
+  // Enhanced Generate with AI function
+  const handleGenerateWithAI = async (customDescription = null) => {
     setGeneratingContent(true);
+    
+    // Determine the description to use
+    let description = customDescription || aiDescription || "generate engaging social media content";
+    
+    // Make description more dynamic based on context
+    if (brandName && selectedUsers.length > 0) {
+      const platforms = [...new Set(selectedUsers.map(user => user.page_type))].join(', ');
+      description = customDescription || aiDescription || `generate engaging social media content for ${brandName} brand suitable for ${platforms}`;
+    }
+    
     try {
       const token = localStorage.getItem("token");
+      
+      // Prepare request payload with additional context
+      const requestPayload = {
+        description: description,
+        // Add optional parameters for better content generation
+        ...(brandName && { brand_name: brandName }),
+        ...(selectedUsers.length > 0 && { 
+          platforms: selectedUsers.map(user => user.page_type),
+          tone: "professional"
+        })
+      };
+      
       const response = await axios.post(
-        "https://api.marketincer.com/api/v1/generate-content", // Replace with your actual endpoint
-        {
-          description: "generate note on social media"
-        },
+        "https://api.marketincer.com/api/v1/generate-content",
+        requestPayload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"
-          }
+          },
+          timeout: 30000 // 30 second timeout
         }
       );
       
+      // Enhanced response handling
+      let generatedContent = "";
+      if (response.data && response.data.content) {
+        generatedContent = response.data.content;
+      } else if (response.data && response.data.message) {
+        generatedContent = response.data.message;
+      } else if (typeof response.data === 'string') {
+        generatedContent = response.data;
+      } else {
+        throw new Error("Invalid response format");
+      }
+      
       // Insert the generated content into the editor
-      const generatedContent = response.data.content || response.data.message || response.data;
       setPostContent(generatedContent);
+      
+      // Clear the AI description input after successful generation
+      setAiDescription("");
+      setShowAiInput(false);
       
       toast.success("Content generated successfully!", {
         position: "top-right",
         autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
       });
+      
     } catch (error) {
       console.error("Error generating content:", error);
       
-      // For demo purposes, use the sample response you provided
-      const sampleResponse = `Here's a well-structured note on social media:
+      // Enhanced error handling
+      let errorMessage = "Failed to generate content. ";
+      let fallbackContent = null;
+      
+      if (error.response) {
+        // Server responded with error status
+        const status = error.response.status;
+        const errorData = error.response.data;
+        
+        switch (status) {
+          case 401:
+            errorMessage += "Please check your authentication.";
+            break;
+          case 429:
+            errorMessage += "Rate limit exceeded. Please try again later.";
+            break;
+          case 500:
+            errorMessage += "Server error. Please try again.";
+            break;
+          default:
+            errorMessage += errorData?.message || "Unknown error occurred.";
+        }
+        
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 5000,
+        });
+        
+      } else if (error.request) {
+        // Network error
+        errorMessage += "Network error. Please check your connection.";
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 5000,
+        });
+        
+        // Use fallback content for demo
+        fallbackContent = getSampleContent(description);
+        
+      } else {
+        // Other error
+        errorMessage += error.message || "Unknown error occurred.";
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 5000,
+        });
+      }
+      
+      // Use fallback content if available
+      if (fallbackContent || (!error.response && error.request)) {
+        const sampleContent = fallbackContent || getSampleContent(description);
+        setPostContent(sampleContent);
+        
+        toast.info("Using sample content for demo", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+      
+    } finally {
+      setGeneratingContent(false);
+    }
+  };
+
+  // Helper function to generate sample content based on description
+  const getSampleContent = (description) => {
+    const lowerDesc = description.toLowerCase();
+    
+    if (lowerDesc.includes('social media')) {
+      return `Here's a well-structured note on social media:
 ---
 ### Note on Social Media
 Definition:
@@ -164,19 +275,40 @@ Negative Impacts:
 * Privacy concerns and data breaches.
 ---
 Conclusion:
-Social media is a powerful tool that can connect, educate, and entertain. However, responsible usage is essential to avoid its negative effects and ensure a safe online environment.
----
-Would you like me to create this as a short handwritten-style note (suitable for study/revision) or as a detailed infographic-style note?`;
-      
-      setPostContent(sampleResponse);
-      
-      toast.info("Using sample content for demo", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    } finally {
-      setGeneratingContent(false);
+Social media is a powerful tool that can connect, educate, and entertain. However, responsible usage is essential to avoid its negative effects and ensure a safe online environment.`;
+    } else if (brandName) {
+      return `🚀 Exciting news from ${brandName}! 
+
+We're passionate about bringing you the best experience and quality products. Our commitment to excellence drives everything we do.
+
+✨ What makes us special:
+• Customer-first approach
+• Quality guaranteed
+• Innovation at heart
+• Community focused
+
+Join us on this amazing journey! Share your thoughts and let us know how we can serve you better.
+
+#${brandName.replace(/[^a-zA-Z0-9]/g, '')} #Quality #Innovation #CustomerFirst`;
+    } else {
+      return `🌟 Ready to make an impact? Here's some engaging content to get you started!
+
+💡 Key insights:
+• Authenticity builds trust
+• Consistency creates momentum  
+• Engagement drives growth
+• Value adds meaning
+
+What's your take on this? Let's start a conversation! 👇
+
+#SocialMedia #Engagement #Growth #Community`;
     }
+  };
+
+  // Quick AI generation with predefined prompts
+  const handleQuickGenerate = (prompt) => {
+    setAiDescription(prompt);
+    handleGenerateWithAI(prompt);
   };
 
   // Function to get tab index based on page type
@@ -860,8 +992,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
   {/* Generate with AI Button */}
   <Button
     variant="contained"
-    onClick={handleGenerateWithAI}
-    disabled={generatingContent}
+    onClick={() => setShowAiInput(true)}
     sx={{
       position: 'absolute',
       top: -45,
@@ -886,10 +1017,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
       }
     }}
     startIcon={
-      generatingContent ? (
-        <CircularProgress size={16} sx={{ color: '#fff' }} />
-      ) : (
-        <Box
+      <Box
           sx={{
             width: 20,
             height: 20,
@@ -911,12 +1039,153 @@ Would you like me to create this as a short handwritten-style note (suitable for
             }}
           />
         </Box>
-      )
     }
   >
-    {generatingContent ? 'Generating...' : 'Generate with AI'}
+    Generate with AI
   </Button>
   
+     {showAiInput && (
+     <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 2, backgroundColor: '#fafafa' }}>
+       <Typography variant="subtitle2" sx={{ mb: 2, color: '#7f56d9', fontWeight: 600 }}>
+         AI Content Generator
+       </Typography>
+       
+       {/* Quick Generation Buttons */}
+       <Box sx={{ mb: 2 }}>
+         <Typography variant="caption" sx={{ mb: 1, display: 'block', color: '#666' }}>
+           Quick Generate:
+         </Typography>
+         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+           <Button
+             size="small"
+             variant="outlined"
+             onClick={() => handleQuickGenerate('generate engaging promotional content')}
+             disabled={generatingContent}
+             sx={{ textTransform: 'none', fontSize: '12px' }}
+           >
+             Promotional
+           </Button>
+           <Button
+             size="small"
+             variant="outlined"
+             onClick={() => handleQuickGenerate('generate educational content with tips and insights')}
+             disabled={generatingContent}
+             sx={{ textTransform: 'none', fontSize: '12px' }}
+           >
+             Educational
+           </Button>
+           <Button
+             size="small"
+             variant="outlined"
+             onClick={() => handleQuickGenerate('generate engaging question to start conversation')}
+             disabled={generatingContent}
+             sx={{ textTransform: 'none', fontSize: '12px' }}
+           >
+             Engagement
+           </Button>
+           <Button
+             size="small"
+             variant="outlined"
+             onClick={() => handleQuickGenerate('generate motivational and inspiring content')}
+             disabled={generatingContent}
+             sx={{ textTransform: 'none', fontSize: '12px' }}
+           >
+             Motivational
+           </Button>
+         </Box>
+       </Box>
+
+       <TextField
+         fullWidth
+         label="Custom AI Description (optional)"
+         variant="outlined"
+         size="small"
+         value={aiDescription}
+         onChange={(e) => setAiDescription(e.target.value)}
+         placeholder="e.g., generate content about new product launch with excitement"
+         sx={{ mb: 2 }}
+         helperText="Describe what kind of content you want to generate"
+       />
+       
+       <Box sx={{ display: 'flex', gap: 1 }}>
+         <Button
+           variant="contained"
+           onClick={() => handleGenerateWithAI(aiDescription)}
+           disabled={generatingContent}
+           sx={{
+             backgroundColor: '#7f56d9',
+             color: 'white',
+             borderRadius: '8px',
+             textTransform: 'none',
+             fontSize: '14px',
+             fontWeight: 500,
+             padding: '8px 16px',
+             minWidth: 'auto',
+             '&:hover': {
+               backgroundColor: '#6941c6',
+             },
+             '&:disabled': {
+               backgroundColor: '#9575cd',
+               color: '#fff'
+             }
+           }}
+           startIcon={
+             generatingContent ? (
+               <CircularProgress size={16} sx={{ color: '#fff' }} />
+             ) : (
+               <Box
+                 sx={{
+                   width: 20,
+                   height: 20,
+                   backgroundColor: '#fff',
+                   borderRadius: '4px',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   overflow: 'hidden'
+                 }}
+               >
+                 <img 
+                   src="/marketincer.jpg" 
+                   alt="Marketincer Logo" 
+                   style={{
+                     width: '100%',
+                     height: '100%',
+                     objectFit: 'contain'
+                   }}
+                 />
+               </Box>
+             )
+           }
+         >
+           {generatingContent ? 'Generating...' : 'Generate Custom'}
+         </Button>
+         <Button
+           variant="outlined"
+           onClick={() => {
+             setShowAiInput(false);
+             setAiDescription('');
+           }}
+           disabled={generatingContent}
+           sx={{ textTransform: 'none' }}
+         >
+           Cancel
+         </Button>
+       </Box>
+       
+       {/* Context Info */}
+       {(brandName || selectedUsers.length > 0) && (
+         <Box sx={{ mt: 2, p: 1, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
+           <Typography variant="caption" sx={{ color: '#2e7d32', fontWeight: 500 }}>
+             Context: 
+             {brandName && ` Brand: ${brandName}`}
+             {selectedUsers.length > 0 && ` | Platforms: ${[...new Set(selectedUsers.map(user => user.page_type))].join(', ')}`}
+           </Typography>
+         </Box>
+       )}
+     </Box>
+   )}
+
   <Editor value={postContent} onChange={setPostContent} />
 </Box>
 
