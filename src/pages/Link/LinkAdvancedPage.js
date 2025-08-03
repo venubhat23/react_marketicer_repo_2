@@ -40,16 +40,11 @@ import {
   CloudUpload as UploadIcon,
   Palette as PaletteIcon,
   Visibility as PreviewIcon,
-  Settings as SettingsIcon,
-  ArrowBack as ArrowBackIcon
+  Settings as SettingsIcon
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '../../components/Sidebar';
 import AxiosManager from '../../utils/api';
 
 const LinkAdvancedPage = () => {
-  const navigate = useNavigate();
-  
   // Basic form states
   const [longUrl, setLongUrl] = useState('');
   const [title, setTitle] = useState('');
@@ -266,47 +261,7 @@ const LinkAdvancedPage = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
-      <Grid container>
-        <Grid size={{ md: 1 }} className="side_section">
-          <Sidebar/>
-        </Grid>
-        <Grid size={{ md: 11 }}>
-          {/* Header */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 1,
-              backgroundColor: '#091a48',
-              borderRadius: 0,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}
-          >
-            <Typography variant="h6" sx={{ color: '#fff' }}>
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="back"
-                sx={{ mr: 2, color: '#fff' }}
-                onClick={() => navigate(-1)}
-              >
-                <ArrowBackIcon />
-              </IconButton>
-              Advanced Link Management
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <IconButton size="large" sx={{ color: 'white' }}>
-                <NotificationsIcon />
-              </IconButton>
-              <IconButton size="large" sx={{ color: 'white' }}>
-                <AccountCircleIcon />
-              </IconButton>
-            </Box>
-          </Paper>
-          
-          <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Box sx={{ minHeight: '100vh' }}>
       {/* Header */}
 
         <Card sx={{ mb: 4, boxShadow: 4, borderRadius: 1 }}>
@@ -979,9 +934,7 @@ const LinkAdvancedPage = () => {
             {snackbar.message}
           </Alert>
         </Snackbar>
-          </Container>
-        </Grid>
-      </Grid>
+      
     </Box>
   );
 };
