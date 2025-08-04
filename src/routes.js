@@ -21,7 +21,8 @@ import DataDeletion from "@/layouts/dataDeletion";
 import PrivacyPolicy from "@/layouts/privacyPolicy";
 import TermsAndConditions from "@/layouts/TermsAndConditions";
 import Home from "@/layouts/home";
-import PurchaseOrders from "@/layouts/purchaseOrder"
+import PurchaseOrders from "@/layouts/purchaseOrder";
+import ContractPage from "@/pages/Contract/ContractPage";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -267,7 +268,7 @@ const routes = [
     name: "Contract",
     key: "contract",
     route: "/contract",
-    component: <ContractPa />,
+    component: <ContractPage />,
   },
 ];
 
