@@ -43,21 +43,21 @@ const MarketplaceModule = () => {
   const isBrand = user?.role === 'Brand' || user?.role === 'brand';
   
   // Determine current view based on route - Admin can access both views
-  const getCurrentView = () => {
+  const getCurrentView = useCallback(() => {
     const path = location.pathname;
     if (path.includes('/brand/marketplace/new')) return 'create';
     if (path.includes('/brand/marketplace')) return 'listing';
     if (path.includes('/influencer/marketplace')) return 'feed';
     return isInfluencer ? 'feed' : 'listing';
-  };
+  }, [location.pathname, isInfluencer]);
 
   // Determine current interface mode based on route
-  const getCurrentMode = () => {
+  const getCurrentMode = useCallback(() => {
     const path = location.pathname;
     if (path.includes('/brand/marketplace')) return 'brand';
     if (path.includes('/influencer/marketplace')) return 'influencer';
     return isInfluencer ? 'influencer' : 'brand';
-  };
+  }, [location.pathname, isInfluencer]);
 
   const [currentView, setCurrentView] = useState(getCurrentView());
   const [currentMode, setCurrentMode] = useState(getCurrentMode());
@@ -114,7 +114,7 @@ const MarketplaceModule = () => {
     }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery, statusFilter, typeFilter, categoryFilter, targetAudienceFilter]);
+  }, [searchQuery, statusFilter, typeFilter, categoryFilter, targetAudienceFilter, loadMarketplacePosts]);
 
   useEffect(() => {
     // Update view when route changes
@@ -123,19 +123,19 @@ const MarketplaceModule = () => {
     setCurrentPage(1);
     loadMarketplacePosts();
     loadStatistics();
-  }, [location.pathname]);
+  }, [location.pathname, loadMarketplacePosts, loadStatistics, getCurrentView, getCurrentMode]);
 
   // Load posts when page changes
   useEffect(() => {
     loadMarketplacePosts();
-  }, [currentPage]);
+  }, [currentPage, loadMarketplacePosts]);
 
   // Load bids when influencer switches to bids view
   useEffect(() => {
     if (currentMode === 'influencer' && influencerView === 'bids') {
       loadMyBids();
     }
-  }, [influencerView, currentMode]);
+  }, [influencerView, currentMode, loadMyBids]);
 
   // Redirect based on user role (only for non-admin users accessing wrong routes)
   useEffect(() => {
@@ -158,7 +158,7 @@ const MarketplaceModule = () => {
     }
   }, [user, location.pathname, navigate, isInfluencer, isBrand, isAdmin]);
 
-  const loadMarketplacePosts = async () => {
+  const loadMarketplacePosts = useCallback(async () => {
     setPostsLoading(true);
     try {
       let response;
@@ -280,9 +280,9 @@ const MarketplaceModule = () => {
     } finally {
       setPostsLoading(false);
     }
-  };
+  }, [searchQuery, statusFilter, typeFilter, categoryFilter, targetAudienceFilter, currentPage, currentMode]);
 
-  const loadMyBids = async () => {
+  const loadMyBids = useCallback(async () => {
     setBidsLoading(true);
     try {
       const response = await MarketplaceAPI.getMyBids();
@@ -354,9 +354,9 @@ const MarketplaceModule = () => {
     } finally {
       setBidsLoading(false);
     }
-  };
+  }, []);
 
-  const loadStatistics = async () => {
+  const loadStatistics = useCallback(async () => {
     try {
       const response = await MarketplaceAPI.getMarketplaceStatistics();
       
@@ -367,7 +367,7 @@ const MarketplaceModule = () => {
       console.error('Error loading statistics:', error);
       // Statistics are optional, don't show error to user
     }
-  };
+  }, []);
 
   const handleEditDirect = (post) => {
     navigate('/brand/marketplace/new', { state: { editPost: post } });
