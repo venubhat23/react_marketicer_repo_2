@@ -106,36 +106,21 @@ const MarketplaceModule = () => {
   //   inputRef.current?.focus();
   // }, []);
 
-  // Debounced search effect
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      setCurrentPage(1); // Reset to first page when searching
-      loadMarketplacePosts();
-    }, 300);
-
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery, statusFilter, typeFilter, categoryFilter, targetAudienceFilter, loadMarketplacePosts]);
-
-  useEffect(() => {
-    // Update view when route changes
-    setCurrentView(getCurrentView());
-    setCurrentMode(getCurrentMode());
-    setCurrentPage(1);
-    loadMarketplacePosts();
-    loadStatistics();
-  }, [location.pathname, loadMarketplacePosts, loadStatistics, getCurrentView, getCurrentMode]);
-
   // Load posts when page changes
   useEffect(() => {
-    loadMarketplacePosts();
-  }, [currentPage, loadMarketplacePosts]);
+    if (typeof loadMarketplacePosts === 'function') {
+      loadMarketplacePosts();
+    }
+  }, [currentPage]);
 
   // Load bids when influencer switches to bids view
   useEffect(() => {
     if (currentMode === 'influencer' && influencerView === 'bids') {
-      loadMyBids();
+      if (typeof loadMyBids === 'function') {
+        loadMyBids();
+      }
     }
-  }, [influencerView, currentMode, loadMyBids]);
+  }, [influencerView, currentMode]);
 
   // Redirect based on user role (only for non-admin users accessing wrong routes)
   useEffect(() => {
@@ -368,6 +353,26 @@ const MarketplaceModule = () => {
       // Statistics are optional, don't show error to user
     }
   }, []);
+
+  // Debounced search effect - placed after function definitions
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      setCurrentPage(1); // Reset to first page when searching
+      loadMarketplacePosts();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, statusFilter, typeFilter, categoryFilter, targetAudienceFilter, loadMarketplacePosts]);
+
+  // Route change effect - placed after function definitions
+  useEffect(() => {
+    // Update view when route changes
+    setCurrentView(getCurrentView());
+    setCurrentMode(getCurrentMode());
+    setCurrentPage(1);
+    loadMarketplacePosts();
+    loadStatistics();
+  }, [location.pathname, loadMarketplacePosts, loadStatistics, getCurrentView, getCurrentMode]);
 
   const handleEditDirect = (post) => {
     navigate('/brand/marketplace/new', { state: { editPost: post } });
