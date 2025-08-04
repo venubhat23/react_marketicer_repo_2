@@ -770,6 +770,7 @@ const AIContractGenerator = ({ onBack = null }) => {
           <Box sx={{ padding: '24px' }}>
             <Grid container spacing={3}>
               {/* Left Panel - Contract Details Form */}
+              
               <Grid size={{ md: 6 }}>
                 <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
                   <CardContent sx={{ p: 4, minHeight:'445px' }}>

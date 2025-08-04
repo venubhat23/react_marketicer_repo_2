@@ -1448,7 +1448,20 @@ const MarketplaceModule = () => {
               </Box>
             ) : (
               <Grid container spacing={3}>
+                <Table>
+                  <thead>
+                    <th>sdckbmn</th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        fvbnm
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
                 {myBids.map((bid) => (
+
                   <Grid size={{ xs: 12, sm: 6, md: 6 }} key={bid.id}>
                     <Card sx={{
                       height: '100%',

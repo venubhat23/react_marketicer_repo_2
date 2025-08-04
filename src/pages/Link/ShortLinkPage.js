@@ -92,6 +92,12 @@ const ShortLinkPage = ({ noLayout = false }) => {
     setIsModalOpen(false);
   };
   
+  useEffect(() => {
+    loadUserUrls();
+  }, []);
+  
+
+  
   // Pagination and filtering states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -123,7 +129,8 @@ const ShortLinkPage = ({ noLayout = false }) => {
         setLoadingUrls(true);
       }
       
-      const response = await getUserUrls(user?.id, page, perPageRef.current);
+      const response = await getUserUrls(user.id, page, perPage);
+    
       if (response.success) {
         const data = response.data;
         setUrls(data.urls || []);
@@ -183,7 +190,9 @@ const ShortLinkPage = ({ noLayout = false }) => {
   };
 
   const handleGenerateShortUrl = async () => {
+    debugger
     // Validate input
+
     if (!longUrl.trim()) {
       showSnackbar('Please enter a URL', 'warning');
       return;
@@ -196,12 +205,11 @@ const ShortLinkPage = ({ noLayout = false }) => {
 
     try {
       setLoading(true);
-      
       // Create payload similar to LinkAdvancedPage
       const payload = {
         short_url: {
           long_url: longUrl.trim(),
-          title: title.trim() || undefined,
+          title: title.trim() ||  undefined,
           description: description.trim() || undefined
         }
       };

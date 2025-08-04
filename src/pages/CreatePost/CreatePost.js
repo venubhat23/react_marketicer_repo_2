@@ -863,9 +863,9 @@ Would you like me to create this as a short handwritten-style note (suitable for
     onClick={handleGenerateWithAI}
     disabled={generatingContent}
     sx={{
-      position: 'absolute',
-      top: -45,
-      right: 0,
+      
+      top: '42px',
+      left: '25%',
       zIndex: 10,
       backgroundColor: '#7f56d9',
       color: 'white',
@@ -875,8 +875,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
       fontWeight: 500,
       padding: '8px 16px',
       minWidth: 'auto',
-  marginTop: '49px',
-  marginRight: '500px',
+  
       '&:hover': {
         backgroundColor: '#6941c6',
       },

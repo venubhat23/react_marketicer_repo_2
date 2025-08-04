@@ -343,9 +343,9 @@ const SettingPage = () => {
                 </Box>
               </Box>
         </Paper>
-      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: 'calc(100vh - 64px)', overflow: 'hidden !important', padding:'10px'}}>
-        <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
-          <Grid size={{ xs: 6, sm: 12, md:12 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height: '100%'}}>
+      <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: 'calc(100vh - 64px)', overflow: 'hidden !important'}}>
+        <Grid container sx={{ height: '100%', overflow: 'hidden !important' }}>
+          <Grid size={{ xs: 6, sm: 12, md:12 }}  sx={{ bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height: '100%'}}>
             
             <Box display="flex" sx={{ height: '100%' }}>
               {/* Sidebar Tabs */}
@@ -356,11 +356,11 @@ const SettingPage = () => {
                 onChange={(e, newValue) => setSelectedTab(newValue)}
                 aria-label="Settings Tabs"
                 variant="scrollable"
+                scrollButtons={false} 
                 sx={{
                     width: '250px',
                     height: '100%',
-                    backgroundColor: '#4A5FA3', // Updated main background color
-                    borderRadius: '8px',
+                    backgroundColor: '#1B357C', // Updated main background color
                   '.MuiTab-root': {
                     width: '100%',
                     justifyContent: 'flex-start',
@@ -370,9 +370,6 @@ const SettingPage = () => {
                     backgroundColor: 'transparent',
                     padding: '12px 16px',
                     margin: '2px 4px',
-                    borderRadius: '6px',
-                    fontWeight: 500,
-                    fontSize: '14px',
                     transition: 'all 0.2s ease-in-out',
                     '&:hover': {
                       backgroundColor: 'rgba(255, 255, 255, 0.05)',
