@@ -30,17 +30,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await AxiosManager.get('/api/v1/user/profile');
       const profileData = response.data;
       
-      if (profileData && user) {
+      if (profileData) {
         const userId = profileData.id || profileData.user_id;
         if (userId) {
           localStorage.setItem('userId', userId.toString());
-          setUser(prevUser => ({ ...prevUser!, id: userId }));
+          setUser(prevUser => prevUser ? { ...prevUser, id: userId } : null);
         }
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');

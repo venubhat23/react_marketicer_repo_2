@@ -106,19 +106,15 @@ const MarketplaceModule = () => {
   //   inputRef.current?.focus();
   // }, []);
 
-  // Load posts when page changes
+  // Load posts when page changes or initial mount
   useEffect(() => {
-    if (typeof loadMarketplacePosts === 'function') {
-      loadMarketplacePosts();
-    }
-  }, [currentPage]);
+    loadMarketplacePosts();
+  }, [currentPage, currentMode]);
 
   // Load bids when influencer switches to bids view
   useEffect(() => {
     if (currentMode === 'influencer' && influencerView === 'bids') {
-      if (typeof loadMyBids === 'function') {
-        loadMyBids();
-      }
+      loadMyBids();
     }
   }, [influencerView, currentMode]);
 
@@ -362,7 +358,7 @@ const MarketplaceModule = () => {
     }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery, statusFilter, typeFilter, categoryFilter, targetAudienceFilter, loadMarketplacePosts]);
+  }, [searchQuery, statusFilter, typeFilter, categoryFilter, targetAudienceFilter]);
 
   // Route change effect - placed after function definitions
   useEffect(() => {
@@ -372,7 +368,7 @@ const MarketplaceModule = () => {
     setCurrentPage(1);
     loadMarketplacePosts();
     loadStatistics();
-  }, [location.pathname, loadMarketplacePosts, loadStatistics, getCurrentView, getCurrentMode]);
+  }, [location.pathname]);
 
   const handleEditDirect = (post) => {
     navigate('/brand/marketplace/new', { state: { editPost: post } });

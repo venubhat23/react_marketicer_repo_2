@@ -167,7 +167,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
         }
       });
     }
-  }, [user, fetchUserProfile]);
+  }, [user]);
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
