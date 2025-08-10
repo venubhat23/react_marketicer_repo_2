@@ -26,6 +26,7 @@ import MarketplaceStatistics from './pages/MarketPlace/MarketplaceStatistics';
 import SettingPage from './pages/Setting/SettingPage';
 import LinkPage from './pages/Link/LinkPage';
 import LinkAdvancedPage from './pages/Link/LinkAdvancedPage';
+import SocialMonitoring from './pages/SocialMonitoring/SocialMonitoring';
 
 // Component that renders routes based on user role
 const AppRoutes = () => {
@@ -217,6 +218,12 @@ const AppRoutes = () => {
       <Route path="/link-advanced" element={
         <ProtectedRoute>
           <LinkAdvancedPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/social-monitoring" element={
+        <ProtectedRoute>
+          <SocialMonitoring />
         </ProtectedRoute>
       } />
       

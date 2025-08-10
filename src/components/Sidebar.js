@@ -19,6 +19,7 @@ import {
   Group as GroupIcon,
   Assessment as AssessmentIcon,
   Close as CloseIcon,
+  Monitor as MonitorIcon,
 } from '@mui/icons-material';
 
 import {
@@ -190,6 +191,17 @@ const Sidebar = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <People fontSize="medium" />
                 <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Social Media</Typography>
+              </Box>
+            </Link>
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/social-monitoring">
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                <MonitorIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Social Monitoring</Typography>
               </Box>
             </Link>
           </ListItemButton>
