@@ -31,13 +31,17 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
 import AppsIcon from '@mui/icons-material/Apps';
 import SettingsIcon from "@mui/icons-material/Settings";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DescriptionIcon from '@mui/icons-material/Description';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import BusinessIcon from '@mui/icons-material/Business';
 import PersonIcon from '@mui/icons-material/Person';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { Link, useNavigate } from "react-router-dom";
 import LanguageIcon from '@mui/icons-material/Language';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { useAuth } from "../authContext/AuthContext";
 
 const footerItems = [
@@ -136,6 +140,17 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
 
+        <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/calendar">
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                <CalendarTodayIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Calendar</Typography>
+              </Box>
+            </Link>
+          </ListItemButton>
+        </ListItem>
+
           <ListItem disablePadding >
             <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
               <Link to="/dashboard">
@@ -229,6 +244,28 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
 
+        <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/invoices">
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                <ReceiptIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Invoices</Typography>
+              </Box>
+            </Link>
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/purchase-orders">
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                <ShoppingCartIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Purchase Orders</Typography>
+              </Box>
+            </Link>
+          </ListItemButton>
+        </ListItem>
+
         {/* Dynamic Marketplace Options Based on Role */}
         {marketplaceOptions.map((option, index) => (
           <ListItem key={`marketplace-${index}`} disablePadding>
@@ -265,6 +302,20 @@ const Sidebar = () => {
               </Link>
             </ListItemButton>
           </ListItem>
+
+          {/* System Settings - Only for Admin users */}
+          {(user?.role === 'Admin' || user?.role === 'admin' || user?.role === 'Super Admin' || user?.role === 'super-admin') && (
+            <ListItem disablePadding>
+              <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Link to="/system-settings">
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                    <AdminPanelSettingsIcon fontSize="medium" />
+                    <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Admin</Typography>
+                  </Box>
+                </Link>
+              </ListItemButton>
+            </ListItem>
+          )}
 
           {/* Logout item */}
           <ListItem disablePadding>

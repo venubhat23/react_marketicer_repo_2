@@ -298,11 +298,11 @@ const SocialMonitoring = () => {
 
   return (
     <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
-      <Grid container>
-        <Grid item xs={12} md={1} className="side_section">
+      <Grid container spacing={0}>
+        <Grid item xs={12} sm={2} md={2} lg={1} className="side_section">
           <Sidebar />
         </Grid>
-        <Grid item xs={12} md={11}>
+        <Grid item xs={12} sm={10} md={10} lg={11}>
           {/* Header */}
           <Paper
             elevation={0}
@@ -334,11 +334,23 @@ const SocialMonitoring = () => {
             </Box>
           </Paper>
 
-          <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '20px' }}>
+          <Box sx={{ 
+            flexGrow: 1, 
+            mt: { xs: 8, md: 0 }, 
+            padding: { xs: '10px', sm: '15px', md: '20px' },
+            maxWidth: '100%',
+            overflow: 'hidden'
+          }}>
             {/* Top Stats Bar */}
             <Card sx={{ mb: 3, backgroundColor: '#882AFF', color: 'white' }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  justifyContent: 'space-between', 
+                  alignItems: { xs: 'flex-start', sm: 'center' },
+                  gap: { xs: 2, sm: 0 }
+                }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
                       {filteredPosts.length}
@@ -347,7 +359,12 @@ const SocialMonitoring = () => {
                       Total Mentions Found
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    gap: { xs: 1, sm: 2 },
+                    width: { xs: '100%', sm: 'auto' }
+                  }}>
                     <Button
                       variant="outlined"
                       onClick={() => setShowAddKeyword(true)}
@@ -384,7 +401,13 @@ const SocialMonitoring = () => {
             {/* Search and Filters */}
             <Card sx={{ mb: 3 }}>
               <CardContent>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  flexWrap: 'wrap', 
+                  gap: { xs: 1, sm: 2 }, 
+                  alignItems: { xs: 'stretch', sm: 'center' }
+                }}>
                   {/* Search Bar */}
                   <TextField
                     placeholder="Search mentions..."
@@ -396,7 +419,9 @@ const SocialMonitoring = () => {
                       startAdornment: <Search sx={{ mr: 1, color: '#882AFF' }} />
                     }}
                     sx={{ 
-                      minWidth: 300,
+                      width: { xs: '100%', sm: 'auto' },
+                      minWidth: { sm: 250, md: 300 },
+                      flex: { sm: 1, md: 'none' },
                       '& .MuiOutlinedInput-root': {
                         '&.Mui-focused fieldset': {
                           borderColor: '#882AFF',
@@ -406,7 +431,10 @@ const SocialMonitoring = () => {
                   />
 
                   {/* Filter Dropdowns */}
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <FormControl size="small" sx={{ 
+                    minWidth: { xs: '100%', sm: 120 },
+                    width: { xs: '100%', sm: 'auto' }
+                  }}>
                     <InputLabel>Keywords</InputLabel>
                     <Select
                       value={activeFilters.keywords}
@@ -420,7 +448,10 @@ const SocialMonitoring = () => {
                     </Select>
                   </FormControl>
 
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <FormControl size="small" sx={{ 
+                    minWidth: { xs: '100%', sm: 120 },
+                    width: { xs: '100%', sm: 'auto' }
+                  }}>
                     <InputLabel>Platforms</InputLabel>
                     <Select
                       value={activeFilters.platforms}
@@ -437,7 +468,10 @@ const SocialMonitoring = () => {
                     </Select>
                   </FormControl>
 
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <FormControl size="small" sx={{ 
+                    minWidth: { xs: '100%', sm: 120 },
+                    width: { xs: '100%', sm: 'auto' }
+                  }}>
                     <InputLabel>Sentiment</InputLabel>
                     <Select
                       value={activeFilters.sentiment}
@@ -456,6 +490,7 @@ const SocialMonitoring = () => {
                     onClick={() => setActiveFilters({...activeFilters, bookmarks: !activeFilters.bookmarks})}
                     startIcon={<Bookmark />}
                     sx={{
+                      width: { xs: '100%', sm: 'auto' },
                       backgroundColor: activeFilters.bookmarks ? '#882AFF' : 'transparent',
                       borderColor: '#882AFF',
                       color: activeFilters.bookmarks ? 'white' : '#882AFF',
@@ -471,7 +506,7 @@ const SocialMonitoring = () => {
             </Card>
 
             {/* Keyword Cards */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: 4 }}>
               {keywords.map((keyword, index) => {
                 const keywordPosts = posts.filter(post => post.keyword === keyword);
                 const brandType = keywordPosts.length > 0 ? keywordPosts[0].brandType : 'OWN BRAND';
@@ -481,7 +516,7 @@ const SocialMonitoring = () => {
                 const neutralMentions = keywordPosts.filter(post => post.sentiment === 'neutral').length;
                 
                 return (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Grid item xs={12} sm={6} md={6} lg={4} key={index}>
                     <Card 
                       sx={{ 
                         height: '100%', 
@@ -569,6 +604,7 @@ const SocialMonitoring = () => {
                             startIcon={<Visibility />}
                             sx={{ 
                               flex: 1, 
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
                               borderColor: '#882AFF', 
                               color: '#882AFF',
                               '&:hover': { 
@@ -584,6 +620,7 @@ const SocialMonitoring = () => {
                             variant="contained"
                             startIcon={<Analytics />}
                             sx={{ 
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
                               backgroundColor: '#882AFF',
                               '&:hover': { backgroundColor: '#7a4dd3' }
                             }}
@@ -598,7 +635,7 @@ const SocialMonitoring = () => {
               })}
               
               {/* Add New Keyword Card */}
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid item xs={12} sm={6} md={6} lg={4}>
                 <Card 
                   sx={{ 
                     height: '100%', 
@@ -607,7 +644,7 @@ const SocialMonitoring = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minHeight: 200,
+                    minHeight: { xs: 150, sm: 200 },
                     '&:hover': { 
                       borderColor: '#882AFF',
                       backgroundColor: '#f9f9f9'
@@ -639,11 +676,23 @@ const SocialMonitoring = () => {
             ) : filteredPosts.length > 0 ? (
               <Box sx={{ space: 2 }}>
                 {filteredPosts.map((post) => (
-                  <Card key={post.id} sx={{ mb: 2, border: '1px solid #f0f0f0', '&:hover': { boxShadow: 2 } }}>
+                  <Card key={post.id} sx={{ 
+                    mb: 2, 
+                    border: '1px solid #f0f0f0', 
+                    '&:hover': { boxShadow: 2 },
+                    overflow: 'hidden'
+                  }}>
                     <CardContent>
                       {/* Post Header */}
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        justifyContent: 'space-between', 
+                        alignItems: { xs: 'flex-start', sm: 'flex-start' }, 
+                        gap: { xs: 2, sm: 0 },
+                        mb: 2 
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 }, flex: 1 }}>
                           <Avatar 
                             sx={{ 
                               backgroundColor: post.platform.color, 
@@ -660,49 +709,71 @@ const SocialMonitoring = () => {
                             <Typography variant="body2" color="textSecondary">
                               Mention of <strong style={{ color: '#882AFF' }}>{post.keyword}</strong> in {post.platform.name}
                             </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                              <CalendarToday sx={{ fontSize: 14, color: 'textSecondary' }} />
-                              <Typography variant="caption" color="textSecondary">
-                                {post.postedDate}
-                              </Typography>
-                              <Typography variant="caption" color="textSecondary">by</Typography>
-                              <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
-                                {post.author}
-                              </Typography>
-                              <Button
-                                size="small"
-                                onClick={() => {
-                                  markAsViewed(post.id);
-                                  window.open(post.url, '_blank');
-                                }}
-                                endIcon={<ExternalLink sx={{ fontSize: 14 }} />}
-                                sx={{ 
-                                  color: '#882AFF', 
-                                  textTransform: 'none',
-                                  minWidth: 'auto',
-                                  p: 0,
-                                  '&:hover': { textDecoration: 'underline' }
-                                }}
-                              >
-                                View Post
-                              </Button>
-                              <Chip 
-                                label={post.sentiment}
-                                size="small"
-                                sx={getSentimentStyle(post.sentiment)}
-                              />
+                            <Box sx={{ 
+                              display: 'flex', 
+                              flexDirection: { xs: 'column', sm: 'row' },
+                              alignItems: { xs: 'flex-start', sm: 'center' }, 
+                              gap: { xs: 0.5, sm: 1 }, 
+                              mt: 0.5,
+                              flexWrap: 'wrap'
+                            }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                                <CalendarToday sx={{ fontSize: 14, color: 'textSecondary' }} />
+                                <Typography variant="caption" color="textSecondary">
+                                  {post.postedDate}
+                                </Typography>
+                                <Typography variant="caption" color="textSecondary">by</Typography>
+                                <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+                                  {post.author}
+                                </Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: { xs: 0.5, sm: 0 } }}>
+                                <Button
+                                  size="small"
+                                  onClick={() => {
+                                    markAsViewed(post.id);
+                                    window.open(post.url, '_blank');
+                                  }}
+                                  endIcon={<ExternalLink sx={{ fontSize: 14 }} />}
+                                  sx={{ 
+                                    color: '#882AFF', 
+                                    textTransform: 'none',
+                                    minWidth: 'auto',
+                                    p: 0,
+                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                    '&:hover': { textDecoration: 'underline' }
+                                  }}
+                                >
+                                  View Post
+                                </Button>
+                                <Chip 
+                                  label={post.sentiment}
+                                  size="small"
+                                  sx={getSentimentStyle(post.sentiment)}
+                                />
+                              </Box>
                             </Box>
                           </Box>
                         </Box>
                         
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexDirection: { xs: 'row', sm: 'row' },
+                          alignItems: 'center', 
+                          gap: 1,
+                          flexWrap: 'wrap',
+                          justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+                          width: { xs: '100%', sm: 'auto' }
+                        }}>
                           <Button
                             size="small"
                             variant="outlined"
                             sx={{ 
                               color: '#882AFF', 
                               borderColor: '#882AFF',
-                              textTransform: 'none'
+                              textTransform: 'none',
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                              whiteSpace: 'nowrap'
                             }}
                           >
                             Generate AI Reply

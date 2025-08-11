@@ -10,6 +10,8 @@ import SignUp from './pages/SignUp';
 import {AuthProvider} from './authContext/AuthContext'
 import ProtectedRoute from './components/ProctedRoute'
 import { getUserRole } from './utils/userUtils';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import CreatePost from './pages/CreatePost/CreatePost';
 import Analytics  from './pages/Profile/Analytics';
@@ -27,6 +29,10 @@ import SettingPage from './pages/Setting/SettingPage';
 import LinkPage from './pages/Link/LinkPage';
 import LinkAdvancedPage from './pages/Link/LinkAdvancedPage';
 import SocialMonitoring from './pages/SocialMonitoring/SocialMonitoring';
+import Calendar from './pages/Calendar/Calendar';
+import { InvoiceList, InvoiceForm, InvoiceDetail, InvoiceDashboard } from './pages/Invoice';
+import { PurchaseOrderList, PurchaseOrderForm, PurchaseOrderDetail, PurchaseOrderDashboard } from './pages/PurchaseOrder';
+import SystemSettings from './pages/SystemSettings';
 
 // Component that renders routes based on user role
 const AppRoutes = () => {
@@ -209,6 +215,12 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
+      <Route path="/system-settings" element={
+        <ProtectedRoute>
+          <SystemSettings />
+        </ProtectedRoute>
+      } />
+
       <Route path="/link" element={
         <ProtectedRoute>
           <LinkPage />
@@ -224,6 +236,66 @@ const AppRoutes = () => {
       <Route path="/social-monitoring" element={
         <ProtectedRoute>
           <SocialMonitoring />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/calendar" element={
+        <ProtectedRoute>
+          <Calendar />
+        </ProtectedRoute>
+      } />
+
+      {/* Invoice Routes */}
+      <Route path="/invoices" element={
+        <ProtectedRoute>
+          <InvoiceList />
+        </ProtectedRoute>
+      } />
+      <Route path="/invoices/dashboard" element={
+        <ProtectedRoute>
+          <InvoiceDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/invoices/create" element={
+        <ProtectedRoute>
+          <InvoiceForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/invoices/edit/:id" element={
+        <ProtectedRoute>
+          <InvoiceForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/invoices/:id" element={
+        <ProtectedRoute>
+          <InvoiceDetail />
+        </ProtectedRoute>
+      } />
+
+      {/* Purchase Order Routes */}
+      <Route path="/purchase-orders" element={
+        <ProtectedRoute>
+          <PurchaseOrderList />
+        </ProtectedRoute>
+      } />
+      <Route path="/purchase-orders/dashboard" element={
+        <ProtectedRoute>
+          <PurchaseOrderDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/purchase-orders/create" element={
+        <ProtectedRoute>
+          <PurchaseOrderForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/purchase-orders/edit/:id" element={
+        <ProtectedRoute>
+          <PurchaseOrderForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/purchase-orders/:id" element={
+        <ProtectedRoute>
+          <PurchaseOrderDetail />
         </ProtectedRoute>
       } />
       
@@ -244,6 +316,17 @@ function App() {
     <ThemeProvider theme={theme}>
       <AuthProvider>
         <AppRoutes />
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       </AuthProvider>    
     </ThemeProvider>
     </div>
