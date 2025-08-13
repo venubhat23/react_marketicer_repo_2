@@ -84,6 +84,8 @@ code {
   color: #ffffff !important;
 }
 
+
+
 /* ===== RESPONSIVE MEDIA QUERIES FOR BUTTONS AND GLOBAL STYLES ===== */
 
 /* Mobile First - Base styles for mobile devices */
@@ -170,7 +172,6 @@ code {
   .submit-button {
     min-width: 150px !important;
   }
-
   /* Button group adjustments */
   .MuiButtonGroup-root .MuiButton-root {
     padding: 10px 16px !important;
@@ -295,3 +296,5 @@ code {
     padding: 20px !important;
   }
 }
+
+

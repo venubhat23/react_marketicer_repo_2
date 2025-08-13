@@ -42,7 +42,8 @@ import InstaIcon from '../../assets/images/instagram.png';
 import LinkedInIcon from '../../assets/images/linkedin.png';
 import ImageIcon from '@mui/icons-material/Image';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import Sidebar from '../../components/Sidebar' 
+import Sidebar from '../../components/Sidebar';
+import MarketincerIcon from '../../assets/images/marketincerlogo.png';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -855,32 +856,34 @@ Would you like me to create this as a short handwritten-style note (suitable for
               {/* Text Field with Generate AI Button */}
 <Box sx={{ 
   position: 'relative', 
-  mb: 2
+  mb: 2,
+
 }}>
   {/* Generate with AI Button */}
   <Button
+    className="genAI"
     variant="contained"
     onClick={handleGenerateWithAI}
     disabled={generatingContent}
     sx={{
-      
-      top: '42px',
-      left: '25%',
+      top: '46px',
+      left: '35%',
       zIndex: 10,
-      backgroundColor: '#7f56d9',
+      backgroundColor: 'none !important',
       color: 'white',
-      borderRadius: '8px',
+      //borderRadius: '50%',
       textTransform: 'none',
       fontSize: '14px',
       fontWeight: 500,
-      padding: '8px 16px',
+      //padding: '8px 16px',
       minWidth: 'auto',
+     
   
       '&:hover': {
-        backgroundColor: '#6941c6',
+        backgroundColor: 'none !important',
       },
       '&:disabled': {
-        backgroundColor: '#9575cd',
+        //backgroundColor: '#9575cd',
         color: '#fff'
       }
     }}
@@ -888,32 +891,12 @@ Would you like me to create this as a short handwritten-style note (suitable for
       generatingContent ? (
         <CircularProgress size={16} sx={{ color: '#fff' }} />
       ) : (
-        <Box
-          sx={{
-            width: 20,
-            height: 20,
-            backgroundColor: '#fff',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden'
-          }}
-        >
-          <img 
-            src="/marketincer.jpg" 
-            alt="Marketincer Logo" 
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain'
-            }}
-          />
-        </Box>
+        <img src={MarketincerIcon} alt="facebook" width='30' height='30' />
+       
       )
     }
   >
-    {generatingContent ? 'Generating...' : 'Generate with AI'}
+    {generatingContent ? 'Generating...' : ''}
   </Button>
   
   <Editor value={postContent} onChange={setPostContent} />

@@ -253,6 +253,22 @@ body {
     margin: 2px;
   }
 }
+.genAI{
+  background-color: #fff !important;
+  width:40px !important;
+  height:40px !important;
+  border:none !important;
+}
+
+.genAI .MuiButton-startIcon{
+  margin-right:'0'
+}
+
+
+
+
+
+
 
 /* Desktop */
 @media screen and (min-width: 1025px) and (max-width: 1440px) {
@@ -332,3 +348,4 @@ body {
     margin: 5px;
   }
 }
+
