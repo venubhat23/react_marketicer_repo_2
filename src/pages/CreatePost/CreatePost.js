@@ -516,9 +516,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
     ];
 
     return (
-        <Card
-          sx={{ borderRadius: 2, padding: '10px' }}
-        >
+        <Card sx={{ borderRadius: 2, padding: '10px' }} >
           <CardContent sx={{ p: 0 }}>
             
             {/* Post Image */}

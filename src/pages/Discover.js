@@ -207,19 +207,27 @@ const Discover = () => {
             display: 'flex',
             flexDirection: 'row',
             gap: 2, // spacing between items
-            alignItems: 'center',bgcolor: '#B1C6FF',padding: '15px',
+            alignItems: 'center',bgcolor: '#B1C6FF',padding: '10px',
           }}>
                     
                 <TextField
                   placeholder="Search..."
                   variant="outlined"
                   fullWidth
+                  size="small"
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
                         <SearchIcon color="action" />
                       </InputAdornment>
                     ),
+                  }}
+                  sx={{ 
+                    borderRadius: '50px',
+                    '& .MuiOutlinedInput-root': {
+                      bgcolor: 'white',
+                      borderRadius: 10,
+                    }
                   }}
                 />
               
@@ -228,11 +236,15 @@ const Discover = () => {
                     labelId="filter-label"
                     value={filterType}
                     //label="Filter"
+                    size="small"
                     onChange={handleSelectChange}
                     displayEmpty
                     renderValue={(selected) =>
                     selected !== '' ? selected : <Typography color="#882AFF">Filter </Typography>
                     }
+                    sx={{
+                      borderRadius: 10,
+                    }}
                   >
                     <Grid container>
                     <Grid container spacing={3} className='filterSection'>
@@ -278,12 +290,13 @@ const Discover = () => {
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   displayEmpty
+                  size="small"
                   renderValue={(selected) =>
                     selected !== '' ? selected : <Typography color="#882AFF">Sort by</Typography>
                   }
                   sx={{
                     backgroundColor: '#fff',
-                    borderRadius: 1,
+                    borderRadius: 10,
                     
                   }}
                 >
@@ -330,19 +343,19 @@ const Discover = () => {
                 <Grid container spacing={2}>
                   
                   <Grid size={{ xs: 2, sm: 4, md: 12 }}>
-                  <Box mt={4}>
+                  <Box >
                     <Typography variant="h6" gutterBottom>1887 Influencer Found</Typography>
                     <>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#f3f4f6' }}>
-              <TableCell>Name</TableCell>
-              <TableCell>Tags</TableCell>
-              <TableCell>Followers</TableCell>
-              <TableCell>Email address</TableCell>
-              <TableCell>Platform</TableCell>
-              <TableCell>Analytics</TableCell>
+            <TableRow sx={{ backgroundColor: '#B1C6FF', color:'#fff' }}>
+              <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Tags</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Followers</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Email address</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Platform</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Analytics</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

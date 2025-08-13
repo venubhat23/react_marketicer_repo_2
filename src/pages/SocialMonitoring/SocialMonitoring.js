@@ -14,6 +14,7 @@ import {
 } from '@mui/icons-material';
 import { toast } from "react-toastify";
 import Sidebar from '../../components/Sidebar';
+import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 
 const SocialMonitoring = () => {
   // State management
@@ -299,10 +300,8 @@ const SocialMonitoring = () => {
   return (
     <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
       <Grid container spacing={0}>
-        <Grid item xs={12} sm={2} md={2} lg={1} className="side_section">
-          <Sidebar />
-        </Grid>
-        <Grid item xs={12} sm={10} md={10} lg={11}>
+        <Grid size={{ md: 1 }} className="side_section"><Sidebar /></Grid>
+        <Grid size={{ md: 11 }}>
           {/* Header */}
           <Paper
             elevation={0}
@@ -321,6 +320,14 @@ const SocialMonitoring = () => {
               alignItems: 'center'
             }}>
               <Typography variant="h6" sx={{ color: '#fff', ml: 2 }}>
+              <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="back"
+                    sx={{ mr: 2, color: '#fff' }}
+                  >
+                    <ArrowLeftIcon />
+                  </IconButton>
                 Social Monitoring
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
@@ -342,14 +349,16 @@ const SocialMonitoring = () => {
             overflow: 'hidden'
           }}>
             {/* Top Stats Bar */}
-            <Card sx={{ mb: 3, backgroundColor: '#882AFF', color: 'white' }}>
-              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+            
                 <Box sx={{ 
                   display: 'flex', 
                   flexDirection: { xs: 'column', sm: 'row' },
                   justifyContent: 'space-between', 
                   alignItems: { xs: 'flex-start', sm: 'center' },
-                  gap: { xs: 2, sm: 0 }
+                  gap: { xs: 2, sm: 0 },
+                  backgroundColor: '#B1C6FF', color: 'white',
+                  padding:'10px',
+                  mb:'2%'
                 }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
@@ -395,8 +404,7 @@ const SocialMonitoring = () => {
                     </Button>
                   </Box>
                 </Box>
-              </CardContent>
-            </Card>
+              
 
             {/* Search and Filters */}
             <Card sx={{ mb: 3 }}>
@@ -516,11 +524,11 @@ const SocialMonitoring = () => {
                 const neutralMentions = keywordPosts.filter(post => post.sentiment === 'neutral').length;
                 
                 return (
-                  <Grid item xs={12} sm={6} md={6} lg={4} key={index}>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }}  key={index}>
                     <Card 
                       sx={{ 
                         height: '100%', 
-                        border: '2px solid #f0f0f0',
+                        border: '1px solid #fff',
                         '&:hover': { 
                           boxShadow: 4,
                           borderColor: '#882AFF'
@@ -562,7 +570,7 @@ const SocialMonitoring = () => {
                           
                           {/* Sentiment Grid */}
                           <Grid container spacing={1} sx={{ mt: 1 }}>
-                            <Grid item xs={4}>
+                            <Grid size={{ xs: 12, sm: 6, md: 3 }} >
                               <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#E8F5E8', borderRadius: 1 }}>
                                 <Typography variant="body2" sx={{ color: '#2E7D32', fontWeight: 'bold' }}>
                                   {positiveMentions}
@@ -635,16 +643,16 @@ const SocialMonitoring = () => {
               })}
               
               {/* Add New Keyword Card */}
-              <Grid item xs={12} sm={6} md={6} lg={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} lg={4}>
                 <Card 
                   sx={{ 
-                    height: '100%', 
-                    border: '2px dashed #ccc',
+                    //height: '100%', 
+                    border: '1px dashed #ccc',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minHeight: { xs: 150, sm: 200 },
+                    minHeight: { xs: 300, sm: 300 },
                     '&:hover': { 
                       borderColor: '#882AFF',
                       backgroundColor: '#f9f9f9'
