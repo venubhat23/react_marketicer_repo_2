@@ -15,6 +15,7 @@ import {
 import { toast } from "react-toastify";
 import Sidebar from '../../components/Sidebar';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
+import {Link} from 'react-router-dom'
 
 const SocialMonitoring = () => {
   // State management
@@ -334,9 +335,11 @@ const SocialMonitoring = () => {
                 <IconButton size="large" sx={{ color: '#fff' }}>
                   <NotificationsIcon />
                 </IconButton>
-                <IconButton size="large" sx={{ color: '#fff' }}>
-                  <AccountCircleIcon />
-                </IconButton>
+                <Link to="/SettingPage"> 
+                    <IconButton size="large" sx={{ color: '#fff' }}>
+                      <AccountCircleIcon /> 
+                    </IconButton>
+                  </Link>
               </Box>
             </Box>
           </Paper>
@@ -428,7 +431,7 @@ const SocialMonitoring = () => {
                     }}
                     sx={{ 
                       width: { xs: '100%', sm: 'auto' },
-                      minWidth: { sm: 250, md: 300 },
+                      minWidth: { sm: 250, md: 220 },
                       flex: { sm: 1, md: 'none' },
                       '& .MuiOutlinedInput-root': {
                         '&.Mui-focused fieldset': {
@@ -440,7 +443,7 @@ const SocialMonitoring = () => {
 
                   {/* Filter Dropdowns */}
                   <FormControl size="small" sx={{ 
-                    minWidth: { xs: '100%', sm: 120 },
+                    minWidth: { xs: '100%', sm: 220 },
                     width: { xs: '100%', sm: 'auto' }
                   }}>
                     <InputLabel>Keywords</InputLabel>
@@ -457,7 +460,7 @@ const SocialMonitoring = () => {
                   </FormControl>
 
                   <FormControl size="small" sx={{ 
-                    minWidth: { xs: '100%', sm: 120 },
+                    minWidth: { xs: '100%', sm: 220 },
                     width: { xs: '100%', sm: 'auto' }
                   }}>
                     <InputLabel>Platforms</InputLabel>
@@ -477,7 +480,7 @@ const SocialMonitoring = () => {
                   </FormControl>
 
                   <FormControl size="small" sx={{ 
-                    minWidth: { xs: '100%', sm: 120 },
+                    minWidth: { xs: '100%', sm:200 },
                     width: { xs: '100%', sm: 'auto' }
                   }}>
                     <InputLabel>Sentiment</InputLabel>
@@ -527,7 +530,7 @@ const SocialMonitoring = () => {
                   <Grid size={{ xs: 12, sm: 6, md: 3 }}  key={index}>
                     <Card 
                       sx={{ 
-                        height: '100%', 
+                        //height: '100%', 
                         border: '1px solid #fff',
                         '&:hover': { 
                           boxShadow: 4,
@@ -538,14 +541,13 @@ const SocialMonitoring = () => {
                     >
                       <CardContent>
                         {/* Brand Type Badge and Delete */}
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <Chip 
                             label={brandType}
                             size="small"
                             sx={{
                               backgroundColor: brandType === 'OWN BRAND' ? '#882AFF' : '#f44336',
                               color: 'white',
-                              fontWeight: 'bold'
                             }}
                           />
                           <IconButton 
@@ -558,21 +560,21 @@ const SocialMonitoring = () => {
                         </Box>
 
                         {/* Keyword Name */}
-                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#091A48' }}>
+                        <Typography variant="body" sx={{ fontWeight:'500', mb: 1, color: '#091A48' }}>
                           {keyword}
                         </Typography>
 
                         {/* Stats */}
-                        <Box sx={{ mb: 2 }}>
+                        <Box sx={{ mb: 1 }}>
                           <Typography variant="body2" color="textSecondary" gutterBottom>
-                            Total Mentions: <strong>{mentionCount}</strong>
+                            Total Mentions: {mentionCount}
                           </Typography>
                           
                           {/* Sentiment Grid */}
                           <Grid container spacing={1} sx={{ mt: 1 }}>
-                            <Grid size={{ xs: 12, sm: 6, md: 3 }} >
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }} >
                               <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#E8F5E8', borderRadius: 1 }}>
-                                <Typography variant="body2" sx={{ color: '#2E7D32', fontWeight: 'bold' }}>
+                                <Typography variant="body2" sx={{ color: '#2E7D32' }}>
                                   {positiveMentions}
                                 </Typography>
                                 <Typography variant="caption" sx={{ color: '#4CAF50' }}>
@@ -580,9 +582,9 @@ const SocialMonitoring = () => {
                                 </Typography>
                               </Box>
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                               <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#F5F5F5', borderRadius: 1 }}>
-                                <Typography variant="body2" sx={{ color: '#616161', fontWeight: 'bold' }}>
+                                <Typography variant="body2" sx={{ color: '#616161', }}>
                                   {neutralMentions}
                                 </Typography>
                                 <Typography variant="caption" sx={{ color: '#9E9E9E' }}>
@@ -590,9 +592,9 @@ const SocialMonitoring = () => {
                                 </Typography>
                               </Box>
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                               <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#FFEBEE', borderRadius: 1 }}>
-                                <Typography variant="body2" sx={{ color: '#C62828', fontWeight: 'bold' }}>
+                                <Typography variant="body2" sx={{ color: '#C62828' }}>
                                   {negativeMentions}
                                 </Typography>
                                 <Typography variant="caption" sx={{ color: '#F44336' }}>
@@ -604,7 +606,7 @@ const SocialMonitoring = () => {
                         </Box>
 
                         {/* Action Buttons */}
-                        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                        <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
                           <Button 
                             size="small"
                             variant="outlined"
@@ -612,7 +614,6 @@ const SocialMonitoring = () => {
                             startIcon={<Visibility />}
                             sx={{ 
                               flex: 1, 
-                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
                               borderColor: '#882AFF', 
                               color: '#882AFF',
                               '&:hover': { 
@@ -628,7 +629,6 @@ const SocialMonitoring = () => {
                             variant="contained"
                             startIcon={<Analytics />}
                             sx={{ 
-                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
                               backgroundColor: '#882AFF',
                               '&:hover': { backgroundColor: '#7a4dd3' }
                             }}
@@ -652,7 +652,7 @@ const SocialMonitoring = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minHeight: { xs: 300, sm: 300 },
+                    minHeight: { xs: 300, sm: 220 },
                     '&:hover': { 
                       borderColor: '#882AFF',
                       backgroundColor: '#f9f9f9'

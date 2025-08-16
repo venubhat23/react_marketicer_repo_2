@@ -19,6 +19,7 @@ import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 // Import the original components
 import ShortLinkPage from './ShortLinkPage';
 import LinkAdvancedPage from './LinkAdvancedPage';
+import {Link } from 'react-router-dom';
 
 const LinkPage = () => {
   // Create tab configuration for the switcher
@@ -72,9 +73,11 @@ const LinkPage = () => {
               <IconButton size="large" sx={{ color: 'white' }}>
                 <NotificationsIcon />
               </IconButton>
-              <IconButton size="large" sx={{ color: 'white' }}>
-                <AccountCircleIcon />
-              </IconButton>
+              <Link to="/SettingPage"> 
+                    <IconButton size="large" sx={{ color: '#fff' }}>
+                      <AccountCircleIcon /> 
+                    </IconButton>
+                  </Link>
             </Box>
           </Paper>
 

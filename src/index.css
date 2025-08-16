@@ -83,6 +83,17 @@ code {
   background-color: #882AFF !important;
   color: #ffffff !important;
 }
+.MuiButton-outlinedSuccess {
+  /* background-color: green !important; */
+  color: green !important;
+  border: 1px solid green !important;
+}
+.MuiButton-outlinedSuccess:hover {
+  background-color: rgb(190, 245, 190) !important;
+  color: green !important;
+  border: 1px solid green !important;
+}
+
 
 
 
@@ -185,8 +196,8 @@ code {
   }
 
   .MuiButton-root {
-    padding: 12px 24px !important;
-    font-size: 14px !important;
+    padding: 8px 16px !important;
+    /* font-size: 14px !important; */
   }
 
   .MuiButton-root + .MuiButton-root {

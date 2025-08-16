@@ -23,7 +23,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from "../../components/Layout";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import Sidebar from '../../components/Sidebar'
+import Sidebar from '../../components/Sidebar';
+import {Link} from 'react-router-dom';
 
 const AIContractGenerator = ({ onBack = null }) => {
   const navigate = useNavigate();
@@ -752,9 +753,11 @@ const AIContractGenerator = ({ onBack = null }) => {
                 <IconButton size="large" sx={{ color: 'white' }}>
                   <NotificationsIcon />
                 </IconButton>
-                <IconButton size="large" sx={{ color: 'white' }}>
-                  <AccountCircleIcon />
-                </IconButton>
+                <Link to="/SettingPage"> 
+                    <IconButton size="large" sx={{ color: '#fff' }}>
+                      <AccountCircleIcon /> 
+                    </IconButton>
+                  </Link>
               </Box>
             </Box>
           </Paper>

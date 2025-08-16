@@ -32,7 +32,10 @@ import {
 import { useNavigate } from 'react-router-dom';
 import InvoiceAPI from '../../services/invoiceApi';
 import { toast } from 'react-toastify';
-import Layout from '../../components/Layout';
+import Sidebar from '../../components/Sidebar';
+import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
+import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
+import {Link } from 'react-router-dom';
 
 const InvoiceList = () => {
   const navigate = useNavigate();
@@ -126,144 +129,213 @@ const InvoiceList = () => {
   }
 
   return (
-    <Layout>
-    <Box sx={{ p: 3, bgcolor: '#FFFFFF', minHeight: '100vh' }}>
-      <Box display="flex" justifyContent="between" alignItems="center" mb={3}>
-        <Typography variant="h4" sx={{ color: '#091A48', fontWeight: 'bold' }}>
-          Invoices
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/invoices/create')}
-          sx={{ bgcolor: '#882AFF', '&:hover': { bgcolor: '#7020CC' } }}
-        >
-          Create Invoice
-        </Button>
-      </Box>
 
-      <Grid container spacing={2} mb={3}>
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Search invoices..."
-            variant="outlined"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <FormControl fullWidth>
-            <InputLabel>Status</InputLabel>
-            <Select
+    <><Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100vh' }}>
+      <Grid container>
+        <Grid size={{ md: 1 }} className="side_section"> <Sidebar /></Grid>
+        <Grid size={{ md: 11 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              display: { xs: 'none', md: 'block' },
+              p: 1,
+              backgroundColor: '#091a48',
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 0
+            }}
+          >
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+
+              <Typography variant="h6" sx={{ color: '#fff' }}>
+                <IconButton
+                  edge="start"
+                  color="inherit"
+                  aria-label="back"
+                  sx={{ mr: 2, color: '#fff' }}
+                >
+                  <ArrowLeftIcon />
+                </IconButton>
+                  Invoices
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => navigate('/invoices/create')}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  lineHeight:0,
+                }}
+              >
+                Create Invoice
+              </Button>
+              </Box>
+
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <IconButton size="large" sx={{ color: '#fff' }}>
+                  <NotificationsIcon />
+                </IconButton>
+
+                <Link to="/SettingPage">
+                  <IconButton size="large" sx={{ color: '#fff' }}>
+                    <AccountCircleIcon />
+                  </IconButton>
+                </Link>
+
+
+              </Box>
+            </Box>
+          </Paper>
+          <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 2, // spacing between items
+            alignItems: 'center',bgcolor: '#B1C6FF',padding: '10px',
+          }}>
+              <TextField
+              fullWidth
+              size='small'
+              label="Search invoices..."
+              variant="outlined"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)} 
+              />
+
+            <FormControl fullWidth>
+              
+              <Select
               value={statusFilter}
               label="Status"
+              size="small"
               onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <MenuItem value="">All</MenuItem>
-              <MenuItem value="paid">Paid</MenuItem>
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="draft">Draft</MenuItem>
-              <MenuItem value="cancelled">Cancelled</MenuItem>
-            </Select>
-          </FormControl>
+              renderValue={(selected) =>
+                selected !== '' ? selected : <Typography color="#882AFF"> Status </Typography>
+                }
+              sx={{
+                borderRadius: 10,
+              }}
+                
+                
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="paid">Paid</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="draft">Draft</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
+              </Select>
+            </FormControl>
+
+
+          </Box>
+          <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, padding:'20px'}}>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 2, sm: 4, md: 12 }}>
+                <TableContainer component={Paper}>
+              <Table>
+                <TableHead sx={{ bgcolor: '#B1C6FF', color:'#fff' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Invoice ID</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Company</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Customer</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Amount</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Due Date</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {paginatedInvoices.map((invoice) => (
+                    <TableRow key={invoice.id} hover>
+                      <TableCell>#{invoice.id}</TableCell>
+                      <TableCell>{invoice.company_name}</TableCell>
+                      <TableCell>{invoice.customer}</TableCell>
+                      <TableCell>${invoice.total_amount?.toFixed(2) || '0.00'}</TableCell>
+                      <TableCell>
+                        <FormControl size="small" sx={{ minWidth: 100 }}>
+                          <Select
+                            value={invoice.status || ''}
+                            onChange={(e) => handleStatusChange(invoice.id, e.target.value)}
+                            displayEmpty
+                          >
+                            <MenuItem value="Paid">Paid</MenuItem>
+                            <MenuItem value="Pending">Pending</MenuItem>
+                            <MenuItem value="Draft">Draft</MenuItem>
+                            <MenuItem value="Cancelled">Cancelled</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </TableCell>
+                      <TableCell>{invoice.due_date}</TableCell>
+                      <TableCell>
+                        <IconButton
+                          onClick={() => navigate(`/invoices/${invoice.id}`)}
+                          color="primary"
+                          size="small"
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => navigate(`/invoices/edit/${invoice.id}`)}
+                          color="secondary"
+                          size="small"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => setDeleteDialog({ open: true, invoiceId: invoice.id })}
+                          color="error"
+                          size="small"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+                </TableContainer>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={filteredInvoices.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage} />
+              </Grid>
+            </Grid>
+          </Box>
         </Grid>
       </Grid>
-
-      <Paper elevation={3}>
-        <TableContainer>
-          <Table>
-            <TableHead sx={{ bgcolor: '#F5F5F5' }}>
-              <TableRow>
-                <TableCell><strong>Invoice ID</strong></TableCell>
-                <TableCell><strong>Company</strong></TableCell>
-                <TableCell><strong>Customer</strong></TableCell>
-                <TableCell><strong>Amount</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
-                <TableCell><strong>Due Date</strong></TableCell>
-                <TableCell><strong>Actions</strong></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedInvoices.map((invoice) => (
-                <TableRow key={invoice.id} hover>
-                  <TableCell>#{invoice.id}</TableCell>
-                  <TableCell>{invoice.company_name}</TableCell>
-                  <TableCell>{invoice.customer}</TableCell>
-                  <TableCell>${invoice.total_amount?.toFixed(2) || '0.00'}</TableCell>
-                  <TableCell>
-                    <FormControl size="small" sx={{ minWidth: 100 }}>
-                      <Select
-                        value={invoice.status || ''}
-                        onChange={(e) => handleStatusChange(invoice.id, e.target.value)}
-                        displayEmpty
-                      >
-                        <MenuItem value="Paid">Paid</MenuItem>
-                        <MenuItem value="Pending">Pending</MenuItem>
-                        <MenuItem value="Draft">Draft</MenuItem>
-                        <MenuItem value="Cancelled">Cancelled</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </TableCell>
-                  <TableCell>{invoice.due_date}</TableCell>
-                  <TableCell>
-                    <IconButton
-                      onClick={() => navigate(`/invoices/${invoice.id}`)}
-                      color="primary"
-                      size="small"
-                    >
-                      <VisibilityIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => navigate(`/invoices/edit/${invoice.id}`)}
-                      color="secondary"
-                      size="small"
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => setDeleteDialog({ open: true, invoiceId: invoice.id })}
-                      color="error"
-                      size="small"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={filteredInvoices.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
-
-      <Dialog
-        open={deleteDialog.open}
-        onClose={() => setDeleteDialog({ open: false, invoiceId: null })}
-      >
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete this invoice?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, invoiceId: null })}>
-            Cancel
-          </Button>
-          <Button onClick={() => handleDelete(deleteDialog.invoiceId)} color="error">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
-    </Layout>
+    
+    <Box sx={{ p: 3, bgcolor: '#FFFFFF', minHeight: '100vh' }}>
+        <Dialog
+          open={deleteDialog.open}
+          onClose={() => setDeleteDialog({ open: false, invoiceId: null })}
+        >
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            <Typography>Are you sure you want to delete this invoice?</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialog({ open: false, invoiceId: null })}>
+              Cancel
+            </Button>
+            <Button onClick={() => handleDelete(deleteDialog.invoiceId)} color="error">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box></>
+
   );
 };
 

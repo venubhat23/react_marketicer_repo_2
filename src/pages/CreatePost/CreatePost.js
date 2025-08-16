@@ -44,6 +44,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import Sidebar from '../../components/Sidebar';
 import MarketincerIcon from '../../assets/images/marketincerlogo.png';
+import { Link } from "react-router-dom";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -737,9 +738,14 @@ Would you like me to create this as a short handwritten-style note (suitable for
                   <IconButton size="large" sx={{ color: '#fff' }}>
                     <NotificationsIcon />
                   </IconButton>
-                  <IconButton size="large" sx={{ color: '#fff' }}>
-                    <AccountCircleIcon />
-                  </IconButton>
+                  
+                  <Link to="/SettingPage"> 
+                    <IconButton size="large" sx={{ color: '#fff' }}>
+                      <AccountCircleIcon /> 
+                    </IconButton>
+                  </Link>
+
+                  
                 </Box>
               </Box>
         </Paper>
@@ -860,58 +866,63 @@ Would you like me to create this as a short handwritten-style note (suitable for
   {/* Generate with AI Button */}
   <Button
     className="genAI"
-    variant="contained"
+    variant="outlined"
     onClick={handleGenerateWithAI}
     disabled={generatingContent}
     sx={{
-      top: '46px',
-      left: '35%',
+      position:'absolute',
+      top: '7px',
+      left: '25%',
       zIndex: 10,
-      backgroundColor: 'none !important',
-      color: 'white',
-      //borderRadius: '50%',
-      textTransform: 'none',
-      fontSize: '14px',
-      fontWeight: 500,
-      //padding: '8px 16px',
-      minWidth: 'auto',
-     
-  
-      '&:hover': {
-        backgroundColor: 'none !important',
-      },
-      '&:disabled': {
-        //backgroundColor: '#9575cd',
-        color: '#fff'
-      }
+      backgroundColor: '#882AFF !important',
+      color: '#fff !important',
+      
     }}
     startIcon={
       generatingContent ? (
         <CircularProgress size={16} sx={{ color: '#fff' }} />
       ) : (
-        <img src={MarketincerIcon} alt="facebook" width='30' height='30' />
+        <img src={MarketincerIcon} alt="Marketincer" width='30' height='30' sx={{ borderRadius:'15px', bgcolor:'#fff' }} />
        
       )
     }
   >
-    {generatingContent ? 'Generating...' : ''}
+    {generatingContent ? 'Generating...' : 'Generate with AI'}
+  </Button>
+
+  {/* PDF Button */}
+  <Button
+    className="genPost"
+    variant="outlined"
+    onClick={handleGenerateWithAI}
+    disabled={generatingContent}
+    color='success'
+    sx={{
+      position:'absolute',
+      top: '7px',
+      left: '55%',
+      zIndex: 10,
+      backgroundColor: 'none !important',
+    }}
+  >
+    PDF Post
   </Button>
   
   <Editor value={postContent} onChange={setPostContent} />
 </Box>
 
-              <Typography variant="caption" display="block" mb={2}>
+              <Typography variant="caption" display="block" mb={1}>
                 275 characters left
               </Typography>
 
               {/* Uploaded Images */}
-              <Box display="flex" gap={1} mb={2}>
+              <Box display="flex" gap={1} mb={1}>
                 {uploadedImageUrl && (
                   <Box position="relative">
                     <Avatar
                       variant="rounded"
                       src={uploadedImageUrl}
-                      sx={{ width: 80, height: 80 }}
+                      sx={{ width: 120, height: 120 }}
                     />
                     <IconButton
                       size="small"
@@ -941,14 +952,14 @@ Would you like me to create this as a short handwritten-style note (suitable for
                 flexDirection="column"
                 sx={{
                   //width: "100%",
-                  padding: "16px",
+                  padding: "12px",
                   border: "1px solid #f0f0f0",
                   borderRadius: "8px",
                   backgroundColor: "#fff",
                   textAlign: "center",
                   cursor: "pointer",
-                  my: 2,
-                  margin: "10px",
+                  my: 1,
+                  //margin: "10px",
                   marginLeft: "0px",
                   boxShadow: '0px 2px 1px -1px rgb(247 247 247 / 12%), 0px 1px 1px 0px rgb(247 247 247 / 12%), 0px 1px 3px 0px rgb(247 247 247 / 12%)'
                 }}
@@ -958,7 +969,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
               >
 
 
-                <Typography variant="body1" sx={{ color: "#000", }}>
+                <Typography variant="body2" sx={{ color: "#000", padding:'0px'}}>
                   +  Upload Media
                 </Typography>
 

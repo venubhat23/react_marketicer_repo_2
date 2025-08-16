@@ -254,10 +254,18 @@ body {
   }
 }
 .genAI{
+  font-size: 12px !important;
   background-color: #fff !important;
-  width:40px !important;
-  height:40px !important;
-  border:none !important;
+  width: 31% !important;
+  height: 35px !important;
+  border: none !important;
+  font-weight: 500 !important;
+}
+.genPost{
+  width:20% !important;
+  height:35px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
 }
 
 .genAI .MuiButton-startIcon{

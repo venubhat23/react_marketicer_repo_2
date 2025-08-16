@@ -23,6 +23,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import Sidebar from '../components/Sidebar'
+import {Link} from 'react-router-dom'
 
 
 // Create theme
@@ -196,9 +197,11 @@ const Discover = () => {
                   <IconButton size="large" sx={{ color: '#fff' }}>
                     <NotificationsIcon />
                   </IconButton>
-                  <IconButton size="large" sx={{ color: '#fff' }}>
-                    <AccountCircleIcon />
-                  </IconButton>
+                  <Link to="/SettingPage"> 
+                    <IconButton size="large" sx={{ color: '#fff' }}>
+                      <AccountCircleIcon /> 
+                    </IconButton>
+                  </Link>
                 </Box>
               </Box>
         </Paper>

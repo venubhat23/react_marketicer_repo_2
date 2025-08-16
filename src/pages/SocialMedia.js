@@ -36,6 +36,7 @@ import SocialDisConnect from './SocialDisConnect';
 import Layout from '../components/Layout';
 import Sidebar from '../components/Sidebar';
 import axios from "axios";
+import {Link } from 'react-router-dom'
 
 const style = {
   position: 'absolute',
@@ -229,9 +230,11 @@ const SocialMedia =()=>{
                 <IconButton size="large" sx={{ color: '#fff' }}>
                   <NotificationsIcon />
                 </IconButton>
-                <IconButton size="large" sx={{ color: '#fff' }}>
-                  <AccountCircleIcon />
-                </IconButton>
+                <Link to="/SettingPage"> 
+                    <IconButton size="large" sx={{ color: '#fff' }}>
+                      <AccountCircleIcon /> 
+                    </IconButton>
+                  </Link>
               </Box>
             </Box>
           </Paper>

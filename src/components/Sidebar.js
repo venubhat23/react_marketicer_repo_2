@@ -114,7 +114,7 @@ const Sidebar = () => {
   const marketplaceOptions = getMarketplaceOptions();
 
   return(
-    <Box sx={{ bgcolor: "#091a48", flexDirection: "column", width:"100%", height: "100vh" }}>
+    <Box sx={{ bgcolor: "#091a48", flexDirection: "column", width:"100%", minHeight: "800px" }}>
       {/* Logo */}
       <Box sx={{ p: 2, pt: 4, pb: 2 }}>
         <img
@@ -292,8 +292,8 @@ const Sidebar = () => {
             <ListItem key={index} disablePadding sx={{ mb: 0.5, p: 0 }} />
           ))}
 
-          <ListItem disablePadding>
-            <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+          <ListItem disablePadding >
+            <ListItemButton sx={{ display: 'flex', justifyContent: 'center', display:'none' }}>
             <Link to="/settingPage">
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <SettingsIcon fontSize="medium" />

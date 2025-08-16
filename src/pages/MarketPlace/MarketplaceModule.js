@@ -714,6 +714,7 @@ const MarketplaceModule = () => {
               borderRadius: 2,
               border: '1px solid #e1e7ff',
               mt:1,
+              mb:1
             }}>
               <FormControl size="small" sx={{ minWidth: 260 }}>
                 <InputLabel>Status</InputLabel>
@@ -1009,10 +1010,11 @@ const MarketplaceModule = () => {
               backgroundColor: 'white',
               '& .MuiTabs-indicator': {
                 backgroundColor: '#882AFF',
-                height: '2px',
+                //height: '2px',
               },
               '& .MuiTab-root': {
-                minWidth: '120px',
+                minWidth:'150px',
+                minHeight: '50px !important',
                 color: '#666',
                 '&.Mui-selected': {
                   color: '#882AFF'
@@ -1451,7 +1453,7 @@ const MarketplaceModule = () => {
                 
                 {myBids.map((bid) => (
 
-                  <Grid size={{ xs: 12, sm: 6, md: 6 }} key={bid.id}>
+                  <Grid size={{ xs: 12, sm: 12, md: 12 }} key={bid.id}>
                     <Card sx={{
                       height: '100%',
                       borderRadius: 3,
@@ -1607,7 +1609,7 @@ const MarketplaceModule = () => {
                         </Box> */}
 
                         {/* Deadline */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <LocationOnIcon sx={{ color: '#666', fontSize: 16, mr: 1 }} />
                           <Typography variant="body2" color="text.secondary">
                             Deadline: {bid.deadline}

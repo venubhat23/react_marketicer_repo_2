@@ -36,6 +36,7 @@ import Layout from "../../components/Layout";
 import { useNavigate } from "react-router-dom";
 import AIContractGenerator from './AIContractGenerator';
 import Sidebar from '../../components/Sidebar'
+import {Link} from 'react-router-dom'
 
 const ContractPage = () => {
   const [viewMode, setViewMode] = useState('list');
@@ -561,9 +562,11 @@ const ContractPage = () => {
                 <IconButton size="large" sx={{ color: 'white' }}>
                   <NotificationsIcon />
                 </IconButton>
-                <IconButton size="large" sx={{ color: 'white' }}>
-                  <AccountCircleIcon />
-                </IconButton>
+                <Link to="/SettingPage"> 
+                    <IconButton size="large" sx={{ color: '#fff' }}>
+                      <AccountCircleIcon /> 
+                    </IconButton>
+                  </Link>
               </Box>
             </Box>
           </Paper>
