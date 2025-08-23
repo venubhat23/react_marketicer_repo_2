@@ -321,7 +321,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
       formData.append("file", file);
 
       const response = await fetch(
-        "https://kitintellect.tech/storage/public/api/upload/aaFacebook",
+        "https://crisp-jay-humorous.ngrok-free.app/api/upload",
         {
           method: "POST",
           body: formData,
