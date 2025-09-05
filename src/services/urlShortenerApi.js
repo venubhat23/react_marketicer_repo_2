@@ -32,7 +32,7 @@ export const createShortUrl = async (longUrl, title = '', description = '') => {
       }
     };
     
-    const response = await AxiosManager.post(`${API_BASE}/shorten`, requestData);
+    const response = await AxiosManager.post(`${API_BASE}/shorten.json`, requestData);
     return {
       success: true,
       data: response.data
@@ -46,7 +46,7 @@ export const createShortUrl = async (longUrl, title = '', description = '') => {
 // Get User URLs with pagination
 export const getUserUrls = async (userId, page = 1, perPage = 20) => {
   try {
-    const response = await AxiosManager.get(`${API_BASE}/users/${userId}/urls`, {
+    const response = await AxiosManager.get(`${API_BASE}/users/${userId}/urls.json`, {
       params: {
         page: page,
         per_page: perPage
@@ -65,7 +65,7 @@ export const getUserUrls = async (userId, page = 1, perPage = 20) => {
 // Get Single URL Details
 export const getUrlDetails = async (urlId) => {
   try {
-    const response = await AxiosManager.get(`${API_BASE}/short_urls/${urlId}`);
+    const response = await AxiosManager.get(`${API_BASE}/short_urls/${urlId}.json`);
     return {
       success: true,
       data: response.data
@@ -87,7 +87,7 @@ export const updateShortUrl = async (urlId, title, description, active = true) =
       }
     };
     
-    const response = await AxiosManager.put(`${API_BASE}/short_urls/${urlId}`, requestData);
+    const response = await AxiosManager.put(`${API_BASE}/short_urls/${urlId}.json`, requestData);
     return {
       success: true,
       data: response.data
@@ -101,7 +101,7 @@ export const updateShortUrl = async (urlId, title, description, active = true) =
 // Delete/Deactivate URL
 export const deleteShortUrl = async (urlId) => {
   try {
-    const response = await AxiosManager.delete(`${API_BASE}/short_urls/${urlId}`);
+    const response = await AxiosManager.delete(`${API_BASE}/short_urls/${urlId}.json`);
     return {
       success: true,
       data: response.data
@@ -119,7 +119,7 @@ export const deleteShortUrl = async (urlId) => {
 // Get User Dashboard
 export const getUserDashboard = async (userId) => {
   try {
-    const response = await AxiosManager.get(`${API_BASE}/users/${userId}/dashboard`);
+    const response = await AxiosManager.get(`${API_BASE}/users/${userId}/dashboard.json`);
     return {
       success: true,
       data: response.data
@@ -133,7 +133,7 @@ export const getUserDashboard = async (userId) => {
 // Get URL Analytics - Enhanced with comprehensive data
 export const getUrlAnalytics = async (shortCode) => {
   try {
-    const response = await AxiosManager.get(`${API_BASE}/analytics/${shortCode}`);
+    const response = await AxiosManager.get(`${API_BASE}/analytics/${shortCode}.json`);
     return {
       success: true,
       data: response.data
@@ -185,7 +185,7 @@ export const getUnifiedAnalytics = async (shortCode) => {
 // Get Analytics Summary - Aggregated analytics for all user's URLs
 export const getAnalyticsSummary = async () => {
   try {
-    const response = await AxiosManager.get(`${API_BASE}/analytics/summary`);
+    const response = await AxiosManager.get(`${API_BASE}/analytics/summary.json`);
     return {
       success: true,
       data: response.data
