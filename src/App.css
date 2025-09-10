@@ -1,0 +1,359 @@
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: #f6edf8; /* or your preferred background color */
+  
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.MuiButtonBase-root.MuiListItemButton-root.MuiListItemButton-gutters a {
+  text-decoration: none !important;
+}
+.profilecontent ul{
+    list-style: none;
+    padding: 0;
+    margin: 5px;
+} 
+
+.profilecontent li{padding: 5px}
+.custom-chip {
+  background-color: #F9F5FF !important;
+  color: #000;
+  border-radius: 6px;
+}
+.MuiTypography-body2.audDeatils{
+  margin: 20px 0
+}
+.warnButton{
+  border: 4px solid #fa685b;
+  padding: 10px;
+  border-radius: 30px;
+}
+.disconnectBtn{
+  width: 50%
+}
+.side_section{
+  background-color: #091a48;
+}
+.loginContent{
+  background: #091a4859;
+  padding: 20px;
+  border-radius: 30px;
+}
+.MuiTypography-h6.form_header {
+  color: #fff;
+  font-size: 12px;
+  margin-top: 12px;
+}
+.filterSection{
+  margin: 10px;
+}
+.analyticModal{
+  margin-bottom: 20px;
+}
+
+/* ===== RESPONSIVE MEDIA QUERIES ===== */
+
+/* Mobile First - Base styles for mobile devices */
+@media screen and (max-width: 480px) {
+  .App {
+    text-align: center;
+    padding: 0 10px;
+  }
+
+  html, body, #root {
+    font-size: 14px;
+  }
+
+  .App-header {
+    min-height: 100vh;
+    font-size: calc(8px + 2vmin);
+    padding: 20px 10px;
+  }
+
+  .loginContent {
+    background: #091a4859;
+    padding: 15px;
+    border-radius: 20px;
+    margin: 10px;
+  }
+
+  .MuiTypography-h6.form_header {
+    font-size: 10px;
+  }
+
+  .filterSection {
+    margin: 5px;
+  }
+
+  .profilecontent ul {
+    margin: 2px;
+  }
+
+  .profilecontent li {
+    padding: 3px;
+  }
+
+  .disconnectBtn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .warnButton {
+    border: 3px solid #fa685b;
+    padding: 8px;
+    border-radius: 20px;
+  }
+
+  .custom-chip {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .analyticModal {
+    margin-bottom: 15px;
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+}
+
+/* Large Mobile / Small Tablet */
+@media screen and (min-width: 481px) and (max-width: 767px) {
+  .App {
+    padding: 0 15px;
+  }
+
+  html, body, #root {
+    font-size: 15px;
+  }
+
+  .App-header {
+    font-size: calc(9px + 2vmin);
+    padding: 25px 15px;
+  }
+
+  .loginContent {
+    padding: 18px;
+    border-radius: 25px;
+    margin: 15px;
+  }
+
+  .MuiTypography-h6.form_header {
+    font-size: 11px;
+  }
+
+  .filterSection {
+    margin: 8px;
+  }
+
+  .disconnectBtn {
+    width: 75%;
+    margin-bottom: 10px;
+  }
+
+  .warnButton {
+    padding: 9px;
+    border-radius: 25px;
+  }
+
+  .analyticModal {
+    margin-bottom: 18px;
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}
+
+/* Tablet */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .App {
+    padding: 0 20px;
+  }
+
+  html, body, #root {
+    font-size: 16px;
+  }
+
+  .App-header {
+    font-size: calc(10px + 2vmin);
+    padding: 30px 20px;
+  }
+
+  .loginContent {
+    padding: 20px;
+    border-radius: 30px;
+    max-width: 600px;
+    margin: 20px auto;
+  }
+
+  .filterSection {
+    margin: 10px;
+  }
+
+  .disconnectBtn {
+    width: 60%;
+  }
+
+  .analyticModal {
+    margin-bottom: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .profilecontent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .custom-chip {
+    margin: 2px;
+  }
+}
+.genAI{
+  font-size: 12px !important;
+  background-color: #fff !important;
+  width: 31% !important;
+  height: 35px !important;
+  border: none !important;
+  font-weight: 500 !important;
+}
+.genPost{
+  width:20% !important;
+  height:35px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.genAI .MuiButton-startIcon{
+  margin-right:'0'
+}
+
+
+
+
+
+
+
+/* Desktop */
+@media screen and (min-width: 1025px) and (max-width: 1440px) {
+  .App {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 30px;
+  }
+
+  .loginContent {
+    max-width: 500px;
+    margin: 30px auto;
+  }
+
+  .analyticModal {
+    margin-bottom: 20px;
+  }
+
+  .profilecontent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+}
+
+/* Large Desktop */
+@media screen and (min-width: 1441px) {
+  .App {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .loginContent {
+    max-width: 600px;
+    margin: 40px auto;
+  }
+
+  .App-header {
+    padding: 40px;
+  }
+
+  .profilecontent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .analyticModal {
+    margin-bottom: 25px;
+  }
+}
+
+/* Ultra-wide screens */
+@media screen and (min-width: 1921px) {
+  .App {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 50px;
+  }
+
+  html, body, #root {
+    font-size: 18px;
+  }
+}
+
+/* Landscape orientation adjustments for mobile */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .App-header {
+    min-height: 100vh;
+    font-size: calc(6px + 2vmin);
+    padding: 15px;
+  }
+
+  .loginContent {
+    padding: 10px;
+    margin: 5px;
+  }
+}
+

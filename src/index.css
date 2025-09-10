@@ -1,0 +1,311 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Global Button Consistency Styles */
+.MuiButton-root {
+  background-color: #882AFF !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+}
+
+.MuiButton-root:hover {
+  background-color: #882AFF !important;
+  color: #ffffff !important;
+}
+
+.MuiButton-root:focus {
+  background-color: #882AFF !important;
+  color: #ffffff !important;
+}
+
+.MuiButton-root:active {
+  background-color: #882AFF !important;
+  color: #ffffff !important;
+}
+
+.MuiButton-root.Mui-focusVisible {
+  background-color: #882AFF !important;
+  color: #ffffff !important;
+}
+
+/* Text and Outlined Button Variants */
+.MuiButton-text {
+  background-color: transparent !important;
+  color: #882AFF !important;
+}
+
+.MuiButton-text:hover {
+  background-color: rgba(136, 42, 255, 0.1) !important;
+  color: #882AFF !important;
+}
+
+.MuiButton-outlined {
+  background-color: transparent !important;
+  color: #882AFF !important;
+  border-color: #882AFF !important;
+}
+
+.MuiButton-outlined:hover {
+  background-color: rgba(136, 42, 255, 0.1) !important;
+  color: #882AFF !important;
+  border-color: #882AFF !important;
+}
+
+/* Ensure contained buttons maintain consistency */
+.MuiButton-contained {
+  background-color: #882AFF !important;
+  color: #ffffff !important;
+}
+
+.MuiButton-contained:hover {
+  background-color: #882AFF !important;
+  color: #ffffff !important;
+}
+
+.MuiButton-contained:focus {
+  background-color: #882AFF !important;
+  color: #ffffff !important;
+}
+
+.MuiButton-contained:active {
+  background-color: #882AFF !important;
+  color: #ffffff !important;
+}
+.MuiButton-outlinedSuccess {
+  /* background-color: green !important; */
+  color: green !important;
+  border: 1px solid green !important;
+}
+.MuiButton-outlinedSuccess:hover {
+  background-color: rgb(190, 245, 190) !important;
+  color: green !important;
+  border: 1px solid green !important;
+}
+
+
+
+
+/* ===== RESPONSIVE MEDIA QUERIES FOR BUTTONS AND GLOBAL STYLES ===== */
+
+/* Mobile First - Base styles for mobile devices */
+@media screen and (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
+
+  /* Mobile button adjustments */
+  .MuiButton-root {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    min-width: auto !important;
+  }
+
+  /* Stack buttons vertically on mobile */
+  .MuiButton-root + .MuiButton-root {
+    margin-top: 8px !important;
+    margin-left: 0 !important;
+  }
+
+  /* Full width buttons for mobile forms */
+  .MuiButton-root.mobile-full-width,
+  .login-button,
+  .signup-button,
+  .submit-button {
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Adjust button spacing in button groups */
+  .MuiButtonGroup-root {
+    flex-direction: column !important;
+  }
+
+  .MuiButtonGroup-root .MuiButton-root {
+    border-radius: 4px !important;
+    margin-bottom: 4px !important;
+  }
+}
+
+/* Large Mobile / Small Tablet */
+@media screen and (min-width: 481px) and (max-width: 767px) {
+  body {
+    font-size: 15px;
+  }
+
+  .MuiButton-root {
+    padding: 10px 16px !important;
+    font-size: 13px !important;
+  }
+
+  /* Adjust button spacing */
+  .MuiButton-root + .MuiButton-root {
+    margin-left: 8px !important;
+  }
+
+  /* Semi-full width for important buttons */
+  .login-button,
+  .signup-button,
+  .submit-button {
+    min-width: 200px !important;
+  }
+}
+
+/* Tablet */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  body {
+    font-size: 16px;
+  }
+
+  .MuiButton-root {
+    padding: 12px 20px !important;
+    font-size: 14px !important;
+  }
+
+  .MuiButton-root + .MuiButton-root {
+    margin-left: 12px !important;
+  }
+
+  /* Standard button widths for tablet */
+  .login-button,
+  .signup-button,
+  .submit-button {
+    min-width: 150px !important;
+  }
+  /* Button group adjustments */
+  .MuiButtonGroup-root .MuiButton-root {
+    padding: 10px 16px !important;
+  }
+}
+
+/* Desktop */
+@media screen and (min-width: 1025px) and (max-width: 1440px) {
+  body {
+    font-size: 16px;
+  }
+
+  .MuiButton-root {
+    padding: 8px 16px !important;
+    /* font-size: 14px !important; */
+  }
+
+  .MuiButton-root + .MuiButton-root {
+    margin-left: 16px !important;
+  }
+
+  /* Standard desktop button sizes */
+  .login-button,
+  .signup-button,
+  .submit-button {
+    min-width: 120px !important;
+  }
+}
+
+/* Large Desktop */
+@media screen and (min-width: 1441px) {
+  body {
+    font-size: 17px;
+  }
+
+  .MuiButton-root {
+    padding: 14px 28px !important;
+    font-size: 15px !important;
+  }
+
+  .MuiButton-root + .MuiButton-root {
+    margin-left: 20px !important;
+  }
+
+  .login-button,
+  .signup-button,
+  .submit-button {
+    min-width: 140px !important;
+  }
+}
+
+/* Ultra-wide screens */
+@media screen and (min-width: 1921px) {
+  body {
+    font-size: 18px;
+  }
+
+  .MuiButton-root {
+    padding: 16px 32px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* Touch device adjustments */
+@media (hover: none) and (pointer: coarse) {
+  .MuiButton-root {
+    padding: 14px 20px !important;
+    min-height: 44px !important; /* Minimum touch target size */
+  }
+
+  .MuiButton-root:hover {
+    background-color: #882AFF !important;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .MuiButton-root {
+    border-width: 0.5px !important;
+  }
+}
+
+/* Container and layout responsiveness */
+@media screen and (max-width: 480px) {
+  * {
+    box-sizing: border-box;
+  }
+  
+  .container,
+  .main-content,
+  .page-wrapper {
+    padding: 10px !important;
+    margin: 0 !important;
+  }
+}
+
+@media screen and (min-width: 481px) and (max-width: 767px) {
+  .container,
+  .main-content,
+  .page-wrapper {
+    padding: 15px !important;
+    max-width: 100% !important;
+  }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .container,
+  .main-content,
+  .page-wrapper {
+    padding: 20px !important;
+    max-width: 95% !important;
+    margin: 0 auto !important;
+  }
+}
+
+@media screen and (min-width: 1025px) {
+  .container,
+  .main-content,
+  .page-wrapper {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+  }
+}
+
+
