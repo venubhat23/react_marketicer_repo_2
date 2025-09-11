@@ -42,6 +42,7 @@ import InstaIcon from '../../assets/images/instagram.png';
 import LinkedInIcon from '../../assets/images/linkedin.png';
 import ImageIcon from '@mui/icons-material/Image';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import Sidebar from '../../components/Sidebar';
 import MarketincerIcon from '../../assets/images/marketincerlogo.png';
 import { Link } from "react-router-dom";
@@ -99,8 +100,64 @@ const CreatePost = () => {
   const [selectedUsers, setSelectedUsers] = useState([])
   const [selectedChipId, setSelectedChipId] = useState(null);
   const [generatingContent, setGeneratingContent] = useState(false);
+  const [isPdfMode, setIsPdfMode] = useState(false);
+  const [documentName, setDocumentName] = useState('');
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionPosition, setMentionPosition] = useState(0);
 
   console.log('hereree', selectUser)
+
+  // Function to process mentions in content
+  const processMentions = (content) => {
+    if (!content) return content;
+    
+    // Replace @mentions with styled spans
+    return content.replace(/@(\w+(?:\s+\w+)*)/g, (match, name) => {
+      return `<span style="color: #0a66c2; font-weight: 600;">${match}</span>`;
+    });
+  };
+
+  // Mention handling functions
+  const handleMention = (user) => {
+    const beforeMention = postContent.slice(0, mentionPosition - mentionQuery.length - 1);
+    const afterMention = postContent.slice(mentionPosition);
+    const mentionText = `@${user.name}`;
+    const newContent = beforeMention + mentionText + afterMention;
+    setPostContent(newContent);
+    setShowMentions(false);
+    setMentionQuery('');
+  };
+
+  const handleContentChange = (content) => {
+    setPostContent(content);
+    
+    // Check for @ mention trigger
+    const lastAtIndex = content.lastIndexOf('@');
+    if (lastAtIndex !== -1) {
+      const textAfterAt = content.slice(lastAtIndex + 1);
+      const spaceIndex = textAfterAt.indexOf(' ');
+      const currentQuery = spaceIndex === -1 ? textAfterAt : textAfterAt.slice(0, spaceIndex);
+      
+      if (spaceIndex === -1 && currentQuery.length <= 20) {
+        setMentionQuery(currentQuery);
+        setMentionPosition(lastAtIndex + 1 + currentQuery.length);
+        setShowMentions(true);
+      } else {
+        setShowMentions(false);
+      }
+    } else {
+      setShowMentions(false);
+    }
+  };
+
+  // Filter users for mentions based on query
+  const getMentionSuggestions = () => {
+    if (!mentionQuery) return selectedUsers.slice(0, 5);
+    return selectedUsers.filter(user => 
+      user.name.toLowerCase().includes(mentionQuery.toLowerCase())
+    ).slice(0, 5);
+  };
 
   // Generate with AI function
   const handleGenerateWithAI = async () => {
@@ -509,80 +566,417 @@ Would you like me to create this as a short handwritten-style note (suitable for
 
   // LinkedIn Preview Component
   const LinkedinPreview = () => {
-    const interactionButtons = [
-      { icon: <FavoriteBorderIcon />  },
-      { icon: <ChatBubbleOutlineIcon /> },
-      // { icon: <Repeat />, text: "Repost" },
-      { icon: <SendIcon /> },
+    const linkedinInteractionButtons = [
+      { icon: <ThumbUp />, text: "Like", color: "#0a66c2" },
+      { icon: <ChatBubbleOutlineIcon />, text: "Comment", color: "#666" },
+      { icon: <Repeat />, text: "Repost", color: "#666" },
+      { icon: <SendIcon />, text: "Send", color: "#666" },
     ];
 
     return (
-        <Card sx={{ borderRadius: 2, padding: '10px' }} >
-          <CardContent sx={{ p: 0 }}>
-            
-            {/* Post Image */}
-            {uploadedImageUrl ? (
-              <Avatar 
-              src={uploadedImageUrl} 
-              alt="LinkedIn post image" 
-              sx={{ width: 300, height: 350, display: 'block', margin: 'auto',borderRadius:'inherit' }} />
-            ) : (
-              <Skeleton animation="wave" variant="circular" width={300} height={350} sx={{ display: 'block', margin: 'auto', borderRadius:'inherit' }} />
-            )}
-
-            {/* Image Indicators */}
-            <Box
-              display="flex"
-              justifyContent="center"
-              gap={1}
-              mt={-3}
-              mb={1.5}
-            >
-              <Box
-                width="10px"
-                height="10px"
-                bgcolor="#882AFF"
-                borderRadius="4px"
-              />
-              <Box
-                width="10px"
-                height="10px"
-                bgcolor="#E7D3FF"
-                borderRadius="4px"
-              />
+      <Card sx={{ 
+        borderRadius: 2, 
+        padding: '16px', 
+        backgroundColor: '#fff',
+        border: '1px solid #e0e0e0',
+        maxWidth: 350,
+        margin: '0 auto'
+      }}>
+        <CardContent sx={{ p: 0 }}>
+          {/* LinkedIn Post Header */}
+          <Box display="flex" alignItems="center" mb={2}>
+            <Avatar 
+              src={selectUser?.picture_url || "https://via.placeholder.com/40"} 
+              sx={{ width: 40, height: 40, mr: 2 }}
+            />
+            <Box>
+              <Typography variant="body1" fontWeight="600" color="#000">
+                {selectUser?.name || 'User Name'}
+              </Typography>
+              <Typography variant="body2" color="#666" sx={{ fontSize: '12px' }}>
+                Professional Title • 1st
+              </Typography>
+              <Typography variant="body2" color="#666" sx={{ fontSize: '12px' }}>
+                2h • 🌍
+              </Typography>
             </Box>
+          </Box>
 
-            {/* Post Actions */}
+          {/* Post Content */}
+          {postContent && (
+            <Box mb={2}>
+              <Typography variant="body2" color="#000" sx={{ lineHeight: 1.5 }}>
+                <span dangerouslySetInnerHTML={{ __html: processMentions(postContent) }} />
+              </Typography>
+            </Box>
+          )}
 
-            {postContent && (
-              <Box px={2.5} pb={1} mt={3}>
-                <Typography variant="body2" color="#882AFF" sx={{textAlign:'justify'}}>
-                  <span dangerouslySetInnerHTML={{ __html: postContent }} />
+          {/* Post Image or PDF Document */}
+          {uploadedImageUrl ? (
+            isPdfMode ? (
+              /* PDF Document Preview */
+              <Box sx={{ mb: 2 }}>
+                {/* PDF Document Header */}
+                <Box 
+                  sx={{ 
+                    width: '100%', 
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '4px 4px 0 0', 
+                    p: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    backgroundColor: '#f8f9fa'
+                  }}
+                >
+                  <Box 
+                    sx={{ 
+                      width: 40, 
+                      height: 50,
+                      backgroundColor: '#d73527',
+                      borderRadius: 0.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: 'bold',
+                      fontSize: '10px'
+                    }}
+                  >
+                    PDF
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" fontWeight="600" color="#000">
+                      {documentName || 'Untitled Document'}
+                    </Typography>
+                    <Typography variant="body2" color="#666" sx={{ fontSize: '12px' }}>
+                      PDF Document • Click to view
+                    </Typography>
+                  </Box>
+                  <IconButton size="small" sx={{ color: '#666' }}>
+                    <MoreVert />
+                  </IconButton>
+                </Box>
+                
+                {/* PDF Document Content Preview */}
+                <Box 
+                  sx={{ 
+                    width: '100%', 
+                    border: '1px solid #e0e0e0',
+                    borderTop: 'none',
+                    borderRadius: '0 0 4px 4px',
+                    overflow: 'hidden',
+                    backgroundColor: '#fff'
+                  }}
+                >
+                  <img 
+                    src={uploadedImageUrl} 
+                    alt="PDF document preview" 
+                    style={{ 
+                      width: '100%', 
+                      height: 'auto',
+                      maxHeight: '200px',
+                      objectFit: 'contain',
+                      display: 'block',
+                      backgroundColor: '#f5f5f5'
+                    }} 
+                  />
+                </Box>
+              </Box>
+            ) : (
+              /* Regular Image Preview */
+              <Box 
+                sx={{ 
+                  width: '100%', 
+                  borderRadius: 1, 
+                  overflow: 'hidden',
+                  mb: 2
+                }}
+              >
+                <img 
+                  src={uploadedImageUrl} 
+                  alt="LinkedIn post" 
+                  style={{ 
+                    width: '100%', 
+                    height: 'auto',
+                    maxHeight: '300px',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }} 
+                />
+              </Box>
+            )
+          ) : (
+            <Skeleton 
+              animation="wave" 
+              variant="rectangular" 
+              width="100%" 
+              height={200} 
+              sx={{ borderRadius: 1, mb: 2 }} 
+            />
+          )}
+
+          {/* Engagement Stats */}
+          <Box display="flex" justifyContent="space-between" alignItems="center" py={1} mb={1} sx={{ borderBottom: '1px solid #e0e0e0' }}>
+            <Box display="flex" alignItems="center">
+              <Box sx={{ width: 16, height: 16, backgroundColor: '#0a66c2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', mr: 0.5 }}>
+                <ThumbUp sx={{ fontSize: 10, color: '#fff' }} />
+              </Box>
+              <Typography variant="body2" color="#666" sx={{ fontSize: '12px' }}>
+                24
+              </Typography>
+            </Box>
+            <Typography variant="body2" color="#666" sx={{ fontSize: '12px' }}>
+              3 comments
+            </Typography>
+          </Box>
+
+          {/* LinkedIn Actions */}
+          <Box display="flex" justifyContent="space-around" pt={1}>
+            {linkedinInteractionButtons.map((button, index) => (
+              <Box
+                key={index}
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                sx={{ 
+                  cursor: "pointer",
+                  p: 1,
+                  borderRadius: 1,
+                  '&:hover': { backgroundColor: '#f3f3f3' },
+                  flex: 1
+                }}
+              >
+                <Box sx={{ "& svg": { width: 20, height: 20, color: button.color } }}>
+                  {button.icon}
+                </Box>
+                <Typography 
+                  variant="body2" 
+                  fontWeight="600" 
+                  color={button.color}
+                  sx={{ fontSize: '12px', mt: 0.5 }}
+                >
+                  {button.text}
                 </Typography>
               </Box>
-            )}
+            ))}
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  };
 
-            <CardActions
-              
-            >
-              {interactionButtons.map((button, index) => (
-                <Stack
-                  key={index}
-                  direction="row"
-                  spacing={1}
-                  alignItems="center"
-                  sx={{ cursor: "pointer" }}
-                >
-                  <Box sx={{ "& svg": { width: 20, height: 20 } }}>
-                    {button.icon}
+  // Instagram Preview Component
+  const InstagramPreview = () => {
+    return (
+      <Card sx={{ 
+        borderRadius: 2, 
+        backgroundColor: '#fff',
+        border: '1px solid #dbdbdb',
+        maxWidth: 350,
+        margin: '0 auto'
+      }}>
+        <CardContent sx={{ p: 0 }}>
+          {/* Instagram Post Header */}
+          <Box display="flex" alignItems="center" p={2} pb={1}>
+            <Avatar 
+              src={selectUser?.picture_url || "https://via.placeholder.com/40"} 
+              sx={{ width: 32, height: 32, mr: 1.5 }}
+            />
+            <Box>
+              <Typography variant="body2" fontWeight="600" color="#000">
+                {selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
+              </Typography>
+              <Typography variant="body2" color="#8e8e8e" sx={{ fontSize: '12px' }}>
+                Location
+              </Typography>
+            </Box>
+            <Box sx={{ ml: 'auto' }}>
+              <MoreVert sx={{ fontSize: 20, color: '#8e8e8e' }} />
+            </Box>
+          </Box>
+
+          {/* Post Image */}
+          {uploadedImageUrl ? (
+            <Box sx={{ width: '100%', aspectRatio: '1/1', overflow: 'hidden' }}>
+              <img 
+                src={uploadedImageUrl} 
+                alt="Instagram post" 
+                style={{ 
+                  width: '100%', 
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block'
+                }} 
+              />
+            </Box>
+          ) : (
+            <Skeleton 
+              animation="wave" 
+              variant="rectangular" 
+              width="100%" 
+              height={350} 
+            />
+          )}
+
+          {/* Instagram Actions */}
+          <Box p={2} pb={1}>
+            <Box display="flex" justifyContent="space-between" mb={1}>
+              <Box display="flex" gap={2}>
+                <FavoriteBorderIcon sx={{ fontSize: 24, color: '#262626', cursor: 'pointer' }} />
+                <ChatBubbleOutlineIcon sx={{ fontSize: 24, color: '#262626', cursor: 'pointer' }} />
+                <SendIcon sx={{ fontSize: 24, color: '#262626', cursor: 'pointer' }} />
+              </Box>
+              <BookmarkBorderIcon sx={{ fontSize: 24, color: '#262626', cursor: 'pointer' }} />
+            </Box>
+            
+            <Typography variant="body2" fontWeight="600" color="#000" mb={0.5}>
+              127 likes
+            </Typography>
+            
+            {/* Post Caption */}
+            {postContent && (
+              <Typography variant="body2" color="#000" sx={{ lineHeight: 1.4 }}>
+                <span style={{ fontWeight: 600, marginRight: '4px' }}>
+                  {selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
+                </span>
+                <span dangerouslySetInnerHTML={{ __html: processMentions(postContent) }} />
+              </Typography>
+            )}
+            
+            <Typography variant="body2" color="#8e8e8e" sx={{ fontSize: '12px', mt: 1 }}>
+              View all 15 comments
+            </Typography>
+            <Typography variant="body2" color="#8e8e8e" sx={{ fontSize: '10px', mt: 0.5 }}>
+              2 HOURS AGO
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Facebook Preview Component  
+  const FacebookPreview = () => {
+    return (
+      <Card sx={{ 
+        borderRadius: 2, 
+        backgroundColor: '#fff',
+        border: '1px solid #dddfe2',
+        maxWidth: 350,
+        margin: '0 auto'
+      }}>
+        <CardContent sx={{ p: 0 }}>
+          {/* Facebook Post Header */}
+          <Box display="flex" alignItems="center" p={2} pb={1}>
+            <Avatar 
+              src={selectUser?.picture_url || "https://via.placeholder.com/40"} 
+              sx={{ width: 40, height: 40, mr: 1.5 }}
+            />
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="body1" fontWeight="600" color="#1c1e21">
+                {selectUser?.name || 'User Name'}
+              </Typography>
+              <Typography variant="body2" color="#65676b" sx={{ fontSize: '13px' }}>
+                2h • 🌍
+              </Typography>
+            </Box>
+            <Box>
+              <MoreVert sx={{ fontSize: 20, color: '#65676b' }} />
+            </Box>
+          </Box>
+
+          {/* Post Content */}
+          {postContent && (
+            <Box px={2} pb={1}>
+              <Typography variant="body1" color="#1c1e21" sx={{ lineHeight: 1.5 }}>
+                <span dangerouslySetInnerHTML={{ __html: processMentions(postContent) }} />
+              </Typography>
+            </Box>
+          )}
+
+          {/* Post Image */}
+          {uploadedImageUrl ? (
+            <Box sx={{ width: '100%', overflow: 'hidden' }}>
+              <img 
+                src={uploadedImageUrl} 
+                alt="Facebook post" 
+                style={{ 
+                  width: '100%', 
+                  height: 'auto',
+                  maxHeight: '400px',
+                  objectFit: 'cover',
+                  display: 'block'
+                }} 
+              />
+            </Box>
+          ) : (
+            <Skeleton 
+              animation="wave" 
+              variant="rectangular" 
+              width="100%" 
+              height={250} 
+            />
+          )}
+
+          {/* Engagement Stats */}
+          <Box px={2} py={1} sx={{ borderBottom: '1px solid #ced0d4' }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Box display="flex" alignItems="center">
+                <Box display="flex" mr={1}>
+                  <Box sx={{ width: 18, height: 18, backgroundColor: '#1877f2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', mr: -0.5, zIndex: 2 }}>
+                    <ThumbUp sx={{ fontSize: 10, color: '#fff' }} />
                   </Box>
-                  <Typography fontWeight="medium">{button.text}</Typography>
-                </Stack>
-              ))}
-            </CardActions>
-          </CardContent>
-        </Card>
-      
+                  <Box sx={{ width: 18, height: 18, backgroundColor: '#f33e58', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FavoriteBorderIcon sx={{ fontSize: 10, color: '#fff' }} />
+                  </Box>
+                </Box>
+                <Typography variant="body2" color="#65676b" sx={{ fontSize: '13px' }}>
+                  You and 42 others
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="#65676b" sx={{ fontSize: '13px' }}>
+                8 comments • 2 shares
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Facebook Actions */}
+          <Box display="flex" justifyContent="space-around" py={1}>
+            {[
+              { icon: <ThumbUp />, text: "Like", color: "#65676b" },
+              { icon: <ChatBubbleOutlineIcon />, text: "Comment", color: "#65676b" },
+              { icon: <SendIcon />, text: "Share", color: "#65676b" }
+            ].map((button, index) => (
+              <Box
+                key={index}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                sx={{ 
+                  cursor: "pointer",
+                  p: 1,
+                  borderRadius: 1,
+                  '&:hover': { backgroundColor: '#f2f3f5' },
+                  flex: 1
+                }}
+              >
+                <Box sx={{ "& svg": { width: 18, height: 18, color: button.color, mr: 0.5 } }}>
+                  {button.icon}
+                </Box>
+                <Typography 
+                  variant="body2" 
+                  fontWeight="600" 
+                  color={button.color}
+                  sx={{ fontSize: '13px' }}
+                >
+                  {button.text}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </CardContent>
+      </Card>
     );
   };
 
@@ -608,78 +1002,25 @@ Would you like me to create this as a short handwritten-style note (suitable for
       );
     }
 
+    // Instagram Preview
+    if (tabIndex === 0) {
+      return <InstagramPreview />;
+    }
+
     // LinkedIn Preview
     if (tabIndex === 1) {
       return <LinkedinPreview />;
     }
 
-    // Instagram and Facebook Preview (existing logic)
+    // Facebook Preview
+    if (tabIndex === 2) {
+      return <FacebookPreview />;
+    }
+
+    // Fallback preview
     return (
       <Card sx={{ borderRadius: 2, padding: '10px' }}>
-        {!uploadedImageUrl || !postContent ? (
-          <Skeleton animation="wave" variant="circular" width={300} height={350} sx={{ display: 'block', margin: 'auto', borderRadius:'inherit' }} />
-        ) : (
-          <Avatar src={uploadedImageUrl} alt="Uploaded" sx={{ width: 300, height: 350, display: 'block', margin: 'auto',borderRadius:'inherit' }} />
-        )}
-        <CardContent sx={{ p: 0 }}>
-          {uploadedImageUrl && postContent && (
-            <Typography variant="body2" color="text.secondary" sx={{ display: "flex" }}>
-              <span dangerouslySetInnerHTML={{ __html: postContent }} />
-            </Typography>
-          )}
-
-          {/* Platform-specific interaction buttons */}
-          <Box display="flex" alignItems="center" mt={2} gap={3}>
-            {tabIndex === 0 && ( // Instagram
-              <>
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <FavoriteBorderIcon fontSize="small" />
-                  {/* <Typography variant="body2">37.8K</Typography> */}
-                </Box>
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <ChatBubbleOutlineIcon fontSize="small" />
-                  {/* <Typography variant="body2">248</Typography> */}
-                </Box>
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <SendIcon fontSize="small" />
-                  {/* <Typography variant="body2">234</Typography> */}
-                </Box>
-              </>
-            )}
-            {tabIndex === 2 && ( // Facebook
-              <>
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <FavoriteBorderIcon fontSize="small" />
-                  {/* <Typography variant="body2">Like</Typography> */}
-                </Box>
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <ChatBubbleOutlineIcon fontSize="small" />
-                  {/* <Typography variant="body2">Comment</Typography> */}
-                </Box>
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <SendIcon fontSize="small" />
-                  {/* <Typography variant="body2">Share</Typography> */}
-                </Box>
-              </>
-            )}
-          </Box>
-          {/* Metadata */}
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mt={2}
-          >
-            <Typography variant="body2" color="text.secondary">
-              {selectUser?.name || 'Select a user'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Just Now
-            </Typography>
-          </Box>
-
-          
-        </CardContent>
+        <Skeleton animation="wave" variant="rectangular" width={300} height={350} sx={{ display: 'block', margin: 'auto', borderRadius:'inherit' }} />
       </Card>
     );
   };
@@ -755,7 +1096,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
               {/* Dropdowns */}
               <Box display="flex" gap={2} mb={2} >
                 <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-label">Brand</InputLabel>
+                  <InputLabel id="demo-simple-select-label" sx={{ fontSize: '14px', color: '#666' }}>Brand</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
@@ -763,16 +1104,70 @@ Would you like me to create this as a short handwritten-style note (suitable for
                     size="small"
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
-                    sx={{ height:'40px',mt:'6px', color:'#882AFF'}}
+                    sx={{ 
+                      height:'40px',
+                      mt:'6px', 
+                      bgcolor: '#fff',
+                      borderRadius: '8px',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#e0e0e0',
+                        borderWidth: '1px'
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#882AFF',
+                        borderWidth: '1px'
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#882AFF',
+                        borderWidth: '2px',
+                        boxShadow: `0 0 0 3px rgba(136, 42, 255, 0.08)`
+                      },
+                      '& .MuiSelect-select': {
+                        padding: '8px 12px',
+                        color: '#333',
+                        fontSize: '14px',
+                        '&:focus': {
+                          backgroundColor: 'transparent'
+                        }
+                      },
+                      '& .MuiSelect-icon': {
+                        color: '#666'
+                      }
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                          border: '1px solid #e0e0e0',
+                          mt: 1,
+                          '& .MuiMenuItem-root': {
+                            fontSize: '14px',
+                            color: '#333',
+                            padding: '10px 16px',
+                            '&:hover': {
+                              backgroundColor: '#f5f5f5'
+                            },
+                            '&.Mui-selected': {
+                              backgroundColor: 'rgba(136, 42, 255, 0.08)',
+                              color: '#882AFF',
+                              '&:hover': {
+                                backgroundColor: 'rgba(136, 42, 255, 0.12)'
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }}
                   >
                     {Brands.map((brand) => (
-                      <MenuItem key={brand} value={brand} sx={{color:'#882AFF'}} >{brand}</MenuItem>
+                      <MenuItem key={brand} value={brand}>{brand}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
 
                 <FormControl fullWidth>
-                  <InputLabel id="multi-user-label">Social Media</InputLabel>
+                  <InputLabel id="multi-user-label" sx={{ fontSize: '14px', color: '#666' }}>Social Media</InputLabel>
                   <Select
                     labelId="multi-user-label"
                     multiple
@@ -780,7 +1175,61 @@ Would you like me to create this as a short handwritten-style note (suitable for
                     value={selectedUsers.map((user) => user.id)}
                     onChange={handleUsersChange}
                     input={<OutlinedInput label="Select Users" />}
-                    sx={{ height:'40px',mt:'6px', color:'#882AFF'}}
+                    sx={{ 
+                      height:'40px',
+                      mt:'6px', 
+                      bgcolor: '#fff',
+                      borderRadius: '8px',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#e0e0e0',
+                        borderWidth: '1px'
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#882AFF',
+                        borderWidth: '1px'
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#882AFF',
+                        borderWidth: '2px',
+                        boxShadow: `0 0 0 3px rgba(136, 42, 255, 0.08)`
+                      },
+                      '& .MuiSelect-select': {
+                        padding: '8px 12px',
+                        color: '#333',
+                        fontSize: '14px',
+                        '&:focus': {
+                          backgroundColor: 'transparent'
+                        }
+                      },
+                      '& .MuiSelect-icon': {
+                        color: '#666'
+                      }
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                          border: '1px solid #e0e0e0',
+                          mt: 1,
+                          maxHeight: '200px',
+                          '& .MuiMenuItem-root': {
+                            fontSize: '14px',
+                            color: '#333',
+                            padding: '10px 16px',
+                            '&:hover': {
+                              backgroundColor: '#f5f5f5'
+                            },
+                            '&.Mui-selected': {
+                              backgroundColor: 'rgba(136, 42, 255, 0.08)',
+                              '&:hover': {
+                                backgroundColor: 'rgba(136, 42, 255, 0.12)'
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }}
                     renderValue={(selected) => 
                       selectedUsers.map(user => user.name).join(', ')
                     }
@@ -793,7 +1242,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
                           {getPlatformIcon(user.page_type)}
                         </ListItemIcon>
                         
-                        <ListItemText primary={user.name} sx={{color:'#882AFF'}} />
+                        <ListItemText primary={user.name} sx={{color:'#333'}} />
                         <Checkbox className="custom-checkbox"
                         sx={{bgcolor:'#cbaef7', width:'10px', height:'10px', color:'#cbaef7'}}
                           checked={selectedUsers.some((selected) => selected.id === user.id)}
@@ -872,15 +1321,18 @@ Would you like me to create this as a short handwritten-style note (suitable for
     sx={{
       position:'absolute',
       top: '7px',
-      left: '25%',
+      left: '20%',
       zIndex: 10,
-      backgroundColor: '#882AFF !important',
-      color: '#fff !important',
-      
+      backgroundColor: '#E6D7FF !important',
+      color: '#882AFF !important',
+      border: '1px solid #882AFF !important',
+      '&:hover': {
+        backgroundColor: '#D4C5F9 !important'
+      }
     }}
     startIcon={
       generatingContent ? (
-        <CircularProgress size={16} sx={{ color: '#fff' }} />
+        <CircularProgress size={16} sx={{ color: '#882AFF' }} />
       ) : (
         <img src={MarketincerIcon} alt="Marketincer" width='30' height='30' sx={{ borderRadius:'15px', bgcolor:'#fff' }} />
        
@@ -890,30 +1342,129 @@ Would you like me to create this as a short handwritten-style note (suitable for
     {generatingContent ? 'Generating...' : 'Generate with AI'}
   </Button>
 
-  {/* PDF Button */}
-  <Button
-    className="genPost"
-    variant="outlined"
-    onClick={handleGenerateWithAI}
-    disabled={generatingContent}
-    color='success'
-    sx={{
-      position:'absolute',
+  {/* PDF Document Toggle for LinkedIn Only */}
+  {tabValue === 1 && (
+    <Box sx={{ 
+      position: 'absolute',
       top: '7px',
-      left: '55%',
+      right: '10px',
       zIndex: 10,
-      backgroundColor: 'none !important',
-    }}
-  >
-    PDF Post
-  </Button>
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1,
+      bgcolor: '#fff',
+      px: 1,
+      borderRadius: 1,
+      border: '1px solid #e0e0e0'
+    }}>
+      <Checkbox
+        checked={isPdfMode}
+        onChange={(e) => setIsPdfMode(e.target.checked)}
+        size="small"
+        sx={{ p: 0.5 }}
+      />
+      <Typography variant="body2" sx={{ fontSize: '12px', color: '#666' }}>
+        Post as PDF Document
+      </Typography>
+    </Box>
+  )}
   
-  <Editor value={postContent} onChange={setPostContent} />
+  <Box sx={{ position: 'relative' }}>
+    <Editor value={postContent} onChange={handleContentChange} />
+    
+    {/* Mention Suggestions Dropdown */}
+    {showMentions && getMentionSuggestions().length > 0 && (
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          backgroundColor: '#fff',
+          border: '1px solid #e0e0e0',
+          borderRadius: '8px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          maxHeight: '200px',
+          overflow: 'auto'
+        }}
+      >
+        {getMentionSuggestions().map((user) => (
+          <Box
+            key={user.id}
+            onClick={() => handleMention(user)}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              p: 2,
+              cursor: 'pointer',
+              '&:hover': {
+                backgroundColor: '#f5f5f5'
+              },
+              borderBottom: '1px solid #f0f0f0',
+              '&:last-child': {
+                borderBottom: 'none'
+              }
+            }}
+          >
+            <Avatar 
+              src={user.picture_url} 
+              sx={{ width: 32, height: 32 }}
+            />
+            <Box>
+              <Typography variant="body2" fontWeight="600">
+                {user.name}
+              </Typography>
+              <Typography variant="body2" color="#666" sx={{ fontSize: '12px' }}>
+                @{user.name.toLowerCase().replace(/\s+/g, '_')}
+              </Typography>
+            </Box>
+            {getPlatformIcon(user.page_type)}
+          </Box>
+        ))}
+      </Box>
+    )}
+  </Box>
 </Box>
 
-              <Typography variant="caption" display="block" mb={1}>
-                275 characters left
-              </Typography>
+{/* Document Name Input for PDF Mode */}
+{isPdfMode && tabValue === 1 && (
+  <Box sx={{ mb: 2 }}>
+    <TextField
+      fullWidth
+      size="small"
+      label="Document Name"
+      value={documentName}
+      onChange={(e) => setDocumentName(e.target.value)}
+      placeholder="Enter document name (e.g., Marketing Strategy 2024)"
+      sx={{
+        '& .MuiOutlinedInput-root': {
+          borderRadius: '8px',
+          '& fieldset': {
+            borderColor: '#e0e0e0',
+          },
+          '&:hover fieldset': {
+            borderColor: '#882AFF',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#882AFF',
+            boxShadow: `0 0 0 3px rgba(136, 42, 255, 0.08)`
+          }
+        }
+      }}
+    />
+  </Box>
+)}
+
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Typography variant="caption" color="#666" sx={{ fontSize: '12px' }}>
+                  Type @ to mention someone
+                </Typography>
+                <Typography variant="caption" display="block">
+                  275 characters left
+                </Typography>
+              </Box>
 
               {/* Uploaded Images */}
               <Box display="flex" gap={1} mb={1}>

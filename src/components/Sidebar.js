@@ -31,7 +31,6 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
 import AppsIcon from '@mui/icons-material/Apps';
 import SettingsIcon from "@mui/icons-material/Settings";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DescriptionIcon from '@mui/icons-material/Description';
 import StorefrontIcon from '@mui/icons-material/Storefront';
@@ -303,19 +302,6 @@ const Sidebar = () => {
             </ListItemButton>
           </ListItem>
 
-          {/* System Settings - Only for Admin users */}
-          {(user?.role === 'Admin' || user?.role === 'admin' || user?.role === 'Super Admin' || user?.role === 'super-admin') && (
-            <ListItem disablePadding>
-              <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Link to="/system-settings">
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                    <AdminPanelSettingsIcon fontSize="medium" />
-                    <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Admin</Typography>
-                  </Box>
-                </Link>
-              </ListItemButton>
-            </ListItem>
-          )}
 
           {/* Logout item */}
           <ListItem disablePadding>

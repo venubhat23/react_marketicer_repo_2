@@ -91,9 +91,9 @@ const tabData = [
         sx={{ flexGrow: 1, p: 3, minHeight: '300px', }}
       >
         {value === index && (
-          <Typography variant="body1" color="text.primary">
+          <Box sx={{ fontSize: '14px', lineHeight: 1.6, color: '#374151' }}>
             {children}
-          </Typography>
+          </Box>
         )}
       </Box>
     );
@@ -399,7 +399,17 @@ const SettingPage = () => {
 
       {/* Right Panel */}
       <Box flexGrow={1} p={3} sx={{ height: '100%', overflow: 'auto' }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography 
+          variant="h5" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 600, 
+            fontSize: '22px', 
+            color: '#1a1a1a',
+            letterSpacing: '-0.025em',
+            mb: 3
+          }}
+        >
           {tabData[selectedTab].label}
         </Typography>
 
@@ -426,6 +436,15 @@ const SettingPage = () => {
                     fullWidth
                     size="small"
                     disabled={!personalEditMode}
+                    sx={{
+                      '& .MuiInputLabel-root': {
+                        fontSize: '14px',
+                        fontWeight: 500
+                      },
+                      '& .MuiInputBase-input': {
+                        fontSize: '14px'
+                      }
+                    }}
                 />
                 </Grid>
 
@@ -439,6 +458,15 @@ const SettingPage = () => {
                     fullWidth
                     size="small"
                     disabled={!personalEditMode}
+                    sx={{
+                      '& .MuiInputLabel-root': {
+                        fontSize: '14px',
+                        fontWeight: 500
+                      },
+                      '& .MuiInputBase-input': {
+                        fontSize: '14px'
+                      }
+                    }}
                 />
                 </Grid>
 
@@ -452,6 +480,15 @@ const SettingPage = () => {
                     fullWidth
                     size="small"
                     disabled={!personalEditMode}
+                    sx={{
+                      '& .MuiInputLabel-root': {
+                        fontSize: '14px',
+                        fontWeight: 500
+                      },
+                      '& .MuiInputBase-input': {
+                        fontSize: '14px'
+                      }
+                    }}
                 />
                 </Grid>
 
@@ -466,6 +503,15 @@ const SettingPage = () => {
                     size="small"
                     disabled={!personalEditMode}
                     placeholder="+1 (555) 000-0000"
+                    sx={{
+                      '& .MuiInputLabel-root': {
+                        fontSize: '14px',
+                        fontWeight: 500
+                      },
+                      '& .MuiInputBase-input': {
+                        fontSize: '14px'
+                      }
+                    }}
                 />
                 </Grid>
 
@@ -480,6 +526,15 @@ const SettingPage = () => {
                     size="small"
                     disabled={!personalEditMode}
                     placeholder="https://example.com/avatar.jpg"
+                    sx={{
+                      '& .MuiInputLabel-root': {
+                        fontSize: '14px',
+                        fontWeight: 500
+                      },
+                      '& .MuiInputBase-input': {
+                        fontSize: '14px'
+                      }
+                    }}
                 />
                 </Grid>
 
@@ -495,20 +550,52 @@ const SettingPage = () => {
                     multiline
                     minRows={4}
                     disabled={!personalEditMode}
+                    sx={{
+                      '& .MuiInputLabel-root': {
+                        fontSize: '14px',
+                        fontWeight: 500
+                      },
+                      '& .MuiInputBase-input': {
+                        fontSize: '14px'
+                      }
+                    }}
                 />
                 </Grid>
 
                 {/* Buttons */}
                 <Grid item xs={12} textAlign="right">
                 {!personalEditMode ? (
-                    <Button variant="outlined" onClick={() => setPersonalEditMode(true)}>
-                    Edit
+                    <Button 
+                      variant="outlined" 
+                      onClick={() => setPersonalEditMode(true)}
+                      sx={{
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        textTransform: 'none',
+                        borderColor: '#8B5CF6',
+                        color: '#8B5CF6',
+                        '&:hover': {
+                          borderColor: '#7C3AED',
+                          backgroundColor: '#f3f4f6'
+                        }
+                      }}
+                    >
+                      Edit Profile
                     </Button>
                 ) : (
                     <Button 
                       variant="contained" 
                       onClick={handlePersonalSave}
                       disabled={updatePersonalInfo.isPending}
+                      sx={{
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        textTransform: 'none',
+                        backgroundColor: '#8B5CF6',
+                        '&:hover': {
+                          backgroundColor: '#7C3AED'
+                        }
+                      }}
                     >
                       {updatePersonalInfo.isPending ? 'Saving...' : 'Save Changes'}
                     </Button>
@@ -531,6 +618,15 @@ const SettingPage = () => {
                   fullWidth
                   size="small"
                   disabled={!companyEditMode}
+                  sx={{
+                    '& .MuiInputLabel-root': {
+                      fontSize: '14px',
+                      fontWeight: 500
+                    },
+                    '& .MuiInputBase-input': {
+                      fontSize: '14px'
+                    }
+                  }}
               />
               </Grid>
 
@@ -544,6 +640,15 @@ const SettingPage = () => {
                   size="small"
                   disabled={!companyEditMode}
                   placeholder="Enter your GST Name"
+                  sx={{
+                    '& .MuiInputLabel-root': {
+                      fontSize: '14px',
+                      fontWeight: 500
+                    },
+                    '& .MuiInputBase-input': {
+                      fontSize: '14px'
+                    }
+                  }}
               />
               </Grid>
 
@@ -557,6 +662,15 @@ const SettingPage = () => {
                   size="small"
                   disabled={!companyEditMode}
                   placeholder="XXX XXXX XXXX"
+                  sx={{
+                    '& .MuiInputLabel-root': {
+                      fontSize: '14px',
+                      fontWeight: 500
+                    },
+                    '& .MuiInputBase-input': {
+                      fontSize: '14px'
+                    }
+                  }}
               />
               </Grid>
 
@@ -570,6 +684,15 @@ const SettingPage = () => {
                   size="small"
                   disabled={!companyEditMode}
                   placeholder="+1 (555) 000-0000"
+                  sx={{
+                    '& .MuiInputLabel-root': {
+                      fontSize: '14px',
+                      fontWeight: 500
+                    },
+                    '& .MuiInputBase-input': {
+                      fontSize: '14px'
+                    }
+                  }}
               />
               </Grid>
 
@@ -585,6 +708,15 @@ const SettingPage = () => {
                   placeholder="Enter your Address"
                   multiline
                   minRows={3}
+                  sx={{
+                    '& .MuiInputLabel-root': {
+                      fontSize: '14px',
+                      fontWeight: 500
+                    },
+                    '& .MuiInputBase-input': {
+                      fontSize: '14px'
+                    }
+                  }}
               />
               </Grid>
 
@@ -598,19 +730,51 @@ const SettingPage = () => {
                   size="small"
                   disabled={!companyEditMode}
                   placeholder="https://www.example.com"
+                  sx={{
+                    '& .MuiInputLabel-root': {
+                      fontSize: '14px',
+                      fontWeight: 500
+                    },
+                    '& .MuiInputBase-input': {
+                      fontSize: '14px'
+                    }
+                  }}
               />
               </Grid>
 
               <Grid item xs={12} textAlign="right">
               {!companyEditMode ? (
-                  <Button variant="outlined" onClick={() => setCompanyEditMode(true)}>
-                  Edit
+                  <Button 
+                    variant="outlined" 
+                    onClick={() => setCompanyEditMode(true)}
+                    sx={{
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      textTransform: 'none',
+                      borderColor: '#8B5CF6',
+                      color: '#8B5CF6',
+                      '&:hover': {
+                        borderColor: '#7C3AED',
+                        backgroundColor: '#f3f4f6'
+                      }
+                    }}
+                  >
+                    Edit Company Details
                   </Button>
               ) : (
                   <Button 
                     variant="contained" 
                     onClick={handleCompanySave}
                     disabled={updateCompanyDetails.isPending}
+                    sx={{
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      textTransform: 'none',
+                      backgroundColor: '#8B5CF6',
+                      '&:hover': {
+                        backgroundColor: '#7C3AED'
+                      }
+                    }}
                   >
                     {updateCompanyDetails.isPending ? 'Saving...' : 'Save Changes'}
                   </Button>
@@ -634,6 +798,15 @@ const SettingPage = () => {
                   size="small"
                   placeholder="Enter current password"
                   required
+                  sx={{
+                    '& .MuiInputLabel-root': {
+                      fontSize: '14px',
+                      fontWeight: 500
+                    },
+                    '& .MuiInputBase-input': {
+                      fontSize: '14px'
+                    }
+                  }}
                 />
               </Grid>
 
@@ -648,6 +821,15 @@ const SettingPage = () => {
                   size="small"
                   placeholder="Enter new password"
                   required
+                  sx={{
+                    '& .MuiInputLabel-root': {
+                      fontSize: '14px',
+                      fontWeight: 500
+                    },
+                    '& .MuiInputBase-input': {
+                      fontSize: '14px'
+                    }
+                  }}
                 />
               </Grid>
 
@@ -662,6 +844,15 @@ const SettingPage = () => {
                   size="small"
                   placeholder="Confirm new password"
                   required
+                  sx={{
+                    '& .MuiInputLabel-root': {
+                      fontSize: '14px',
+                      fontWeight: 500
+                    },
+                    '& .MuiInputBase-input': {
+                      fontSize: '14px'
+                    }
+                  }}
                 />
               </Grid>
 
@@ -669,13 +860,21 @@ const SettingPage = () => {
                 <Button
                   type="submit"
                   variant="contained"
-                  color="secondary"
                   fullWidth
-                  size="small"
+                  size="medium"
                   disabled={changePassword.isPending}
-                  sx={{ backgroundColor: '#7E22CE' }} // Purple color as in image
+                  sx={{ 
+                    backgroundColor: '#8B5CF6',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    textTransform: 'none',
+                    py: 1.5,
+                    '&:hover': {
+                      backgroundColor: '#7C3AED'
+                    }
+                  }}
                 >
-                  {changePassword.isPending ? 'Updating...' : 'Update Password'}
+                  {changePassword.isPending ? 'Updating Password...' : 'Update Password'}
                 </Button>
               </Grid>
             </Grid>
@@ -683,49 +882,291 @@ const SettingPage = () => {
           </Box>
         </TabPanel>
         <TabPanel value={selectedTab} index={3}>
-          <Typography>Payment details go here</Typography>
+          <Box maxWidth="700px">
+            <Box sx={{ mb: 4 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1.5,
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  color: '#1a1a1a',
+                  mb: 1
+                }}
+              >
+                <Payment sx={{ color: '#8B5CF6', fontSize: '20px' }} />
+                Subscription & Payment
+              </Typography>
+              
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: '#6b7280', 
+                  fontSize: '14px',
+                  lineHeight: 1.5,
+                  mb: 3 
+                }}
+              >
+                Manage your subscription plan and payment methods.
+              </Typography>
+            </Box>
+            
+            <Box sx={{ 
+              p: 4, 
+              backgroundColor: '#f8f9fa', 
+              borderRadius: 2, 
+              border: '1px solid #e5e7eb',
+              textAlign: 'center'
+            }}>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: '#6b7280',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}
+              >
+                Payment and subscription management features coming soon.
+              </Typography>
+            </Box>
+          </Box>
         </TabPanel>
         <TabPanel value={selectedTab} index={4}>
-          <Typography>Social media linking options</Typography>
+          <Box maxWidth="700px">
+            <Box sx={{ mb: 4 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1.5,
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  color: '#1a1a1a',
+                  mb: 1
+                }}
+              >
+                <Share sx={{ color: '#8B5CF6', fontSize: '20px' }} />
+                Social Media Accounts
+              </Typography>
+              
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: '#6b7280', 
+                  fontSize: '14px',
+                  lineHeight: 1.5,
+                  mb: 3 
+                }}
+              >
+                Connect and manage your social media accounts for seamless posting.
+              </Typography>
+            </Box>
+            
+            <Box sx={{ 
+              p: 4, 
+              backgroundColor: '#f8f9fa', 
+              borderRadius: 2, 
+              border: '1px solid #e5e7eb',
+              textAlign: 'center'
+            }}>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: '#6b7280',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}
+              >
+                Social media account management features coming soon.
+              </Typography>
+            </Box>
+          </Box>
         </TabPanel>
         <TabPanel value={selectedTab} index={5}>
-          <Typography>Enable 2FA options</Typography>
+          <Box maxWidth="700px">
+            <Box sx={{ mb: 4 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1.5,
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  color: '#1a1a1a',
+                  mb: 1
+                }}
+              >
+                <Security sx={{ color: '#8B5CF6', fontSize: '20px' }} />
+                Two-step Verification
+              </Typography>
+              
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: '#6b7280', 
+                  fontSize: '14px',
+                  lineHeight: 1.5,
+                  mb: 3 
+                }}
+              >
+                Add an extra layer of security to your account with two-factor authentication.
+              </Typography>
+            </Box>
+            
+            <Box sx={{ 
+              p: 4, 
+              backgroundColor: '#f8f9fa', 
+              borderRadius: 2, 
+              border: '1px solid #e5e7eb',
+              textAlign: 'center'
+            }}>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: '#6b7280',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}
+              >
+                Two-factor authentication setup coming soon.
+              </Typography>
+            </Box>
+          </Box>
         </TabPanel>
         <TabPanel value={selectedTab} index={6}>
-          <Box maxWidth="600px">
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <AccessTime color="primary" />
-              Timezone Settings
-            </Typography>
-            
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Set your timezone to ensure accurate time display across the platform.
-            </Typography>
+          <Box maxWidth="700px">
+            <Box sx={{ mb: 4 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1.5,
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  color: '#1a1a1a',
+                  mb: 1
+                }}
+              >
+                <AccessTime sx={{ color: '#8B5CF6', fontSize: '20px' }} />
+                Timezone Settings
+              </Typography>
+              
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: '#6b7280', 
+                  fontSize: '14px',
+                  lineHeight: 1.5,
+                  mb: 3 
+                }}
+              >
+                Configure your timezone to ensure accurate scheduling and time display across all features.
+              </Typography>
+            </Box>
 
             {timezonesLoading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <CircularProgress size={20} />
-                <Typography>Loading timezones...</Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 2,
+                p: 3,
+                bgcolor: '#f8f9fa',
+                borderRadius: 2,
+                border: '1px solid #e5e7eb'
+              }}>
+                <CircularProgress size={20} sx={{ color: '#8B5CF6' }} />
+                <Typography sx={{ fontSize: '14px', color: '#6b7280' }}>
+                  Loading available timezones...
+                </Typography>
               </Box>
             ) : (
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 8, md: 6 }}>
+              <Grid container spacing={3}>
+                <Grid size={{ xs: 12, sm: 10, md: 8 }}>
                   <FormControl fullWidth>
-                    <InputLabel>Select Timezone</InputLabel>
+                    <InputLabel 
+                      sx={{ 
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        '&.Mui-focused': {
+                          color: '#8B5CF6'
+                        }
+                      }}
+                    >
+                      Select Timezone
+                    </InputLabel>
                     <Select
                       value={selectedTimezone}
                       onChange={handleTimezoneChange}
                       label="Select Timezone"
                       disabled={updateTimezone.isPending}
+                      sx={{
+                        fontSize: '14px',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#d1d5db'
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#8B5CF6'
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#8B5CF6',
+                          borderWidth: '2px'
+                        }
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            maxHeight: 300,
+                            borderRadius: 2,
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                            border: '1px solid #e5e7eb',
+                            mt: 1
+                          }
+                        }
+                      }}
                     >
                       {timezonesData?.data?.timezones?.map((timezone) => (
-                        <MenuItem key={timezone.name} value={timezone.name}>
+                        <MenuItem 
+                          key={timezone.name} 
+                          value={timezone.name}
+                          sx={{
+                            py: 1.5,
+                            px: 2,
+                            '&:hover': {
+                              backgroundColor: '#f3f4f6'
+                            },
+                            '&.Mui-selected': {
+                              backgroundColor: '#ede9fe',
+                              '&:hover': {
+                                backgroundColor: '#ddd6fe'
+                              }
+                            }
+                          }}
+                        >
                           <Box>
-                            <Typography variant="body2" fontWeight="medium">
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                fontWeight: 500,
+                                fontSize: '14px',
+                                color: '#1f2937',
+                                mb: 0.5
+                              }}
+                            >
                               {timezone.display_name}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              Offset: {timezone.offset}
+                            <Typography 
+                              variant="caption" 
+                              sx={{ 
+                                color: '#6b7280',
+                                fontSize: '12px'
+                              }}
+                            >
+                              UTC {timezone.offset}
                             </Typography>
                           </Box>
                         </MenuItem>
@@ -737,17 +1178,30 @@ const SettingPage = () => {
                 <Grid size={{ xs: 12 }}>
                   {selectedTimezone && (
                     <Box sx={{ 
-                      p: 2, 
-                      backgroundColor: 'primary.50', 
-                      borderRadius: 1, 
-                      border: '1px solid',
-                      borderColor: 'primary.200'
+                      p: 3, 
+                      backgroundColor: '#f0f9ff', 
+                      borderRadius: 2, 
+                      border: '1px solid #bae6fd'
                     }}>
-                      <Typography variant="body2" color="primary.main">
-                        <strong>Current Timezone:</strong> {selectedTimezone}
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: '#0369a1',
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          mb: 0.5
+                        }}
+                      >
+                        Current Timezone: {selectedTimezone}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Changes are saved automatically
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: '#0284c7',
+                          fontSize: '12px'
+                        }}
+                      >
+                        All scheduling and time displays will use this timezone
                       </Typography>
                     </Box>
                   )}
@@ -755,10 +1209,25 @@ const SettingPage = () => {
 
                 {updateTimezone.isPending && (
                   <Grid size={{ xs: 12 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <CircularProgress size={16} />
-                      <Typography variant="body2" color="text.secondary">
-                        Updating timezone...
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 2,
+                      p: 2,
+                      backgroundColor: '#fef3c7',
+                      borderRadius: 2,
+                      border: '1px solid #fcd34d'
+                    }}>
+                      <CircularProgress size={16} sx={{ color: '#d97706' }} />
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: '#92400e',
+                          fontSize: '14px',
+                          fontWeight: 500
+                        }}
+                      >
+                        Updating timezone preferences...
                       </Typography>
                     </Box>
                   </Grid>
@@ -830,6 +1299,15 @@ const SettingPage = () => {
                       placeholder="Enter your password"
                       required
                       error={deleteAccount.isError}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          fontSize: '14px',
+                          fontWeight: 500
+                        },
+                        '& .MuiInputBase-input': {
+                          fontSize: '14px'
+                        }
+                      }}
                     />
                   </Grid>
 
@@ -842,6 +1320,17 @@ const SettingPage = () => {
                           setDeleteAccountPassword('');
                         }}
                         disabled={deleteAccount.isPending}
+                        sx={{
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          textTransform: 'none',
+                          borderColor: '#d1d5db',
+                          color: '#6b7280',
+                          '&:hover': {
+                            borderColor: '#9ca3af',
+                            backgroundColor: '#f9fafb'
+                          }
+                        }}
                       >
                         Cancel
                       </Button>
@@ -850,11 +1339,20 @@ const SettingPage = () => {
                         variant="contained"
                         color="error"
                         disabled={deleteAccount.isPending || !deleteAccountPassword.trim()}
-                        sx={{ minWidth: 120 }}
+                        sx={{ 
+                          minWidth: 120,
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          textTransform: 'none',
+                          backgroundColor: '#dc2626',
+                          '&:hover': {
+                            backgroundColor: '#b91c1c'
+                          }
+                        }}
                       >
                         {deleteAccount.isPending ? (
                           <>
-                            <CircularProgress size={16} sx={{ mr: 1 }} />
+                            <CircularProgress size={16} sx={{ mr: 1, color: 'white' }} />
                             Deleting...
                           </>
                         ) : (

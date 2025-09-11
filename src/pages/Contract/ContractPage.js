@@ -546,19 +546,6 @@ const ContractPage = () => {
                   Contract
              </Typography>
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={handleCreateContract}
-                  sx={{
-                    px: 3,
-                    py: 1,
-                    borderRadius: 2,
-                    lineHeight:0,
-                  }}
-                >
-                  Create Contract
-                </Button>
                 <IconButton size="large" sx={{ color: 'white' }}>
                   <NotificationsIcon />
                 </IconButton>
@@ -582,45 +569,54 @@ const ContractPage = () => {
           <Box
             sx={{
               bgcolor: '#B1C6FF',
-              padding: '8px 10px',
+              padding: '4px 12px',
               display: 'flex',
               alignItems: 'center',
-              gap: 5,
+              justifyContent: 'space-between',
+              minHeight: '44px',
             }}
           >
-            {/* Search */}
-            <TextField
-              placeholder="Search"
-              variant="outlined"
-              size="small"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ color: '#666' }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ 
-                minWidth: 350,borderRadius: '50px',
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: 'white',
-                  borderRadius: 10,
-                }
-              }}
-            />
+            {/* Left Side - Search */}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <TextField
+                placeholder="Search"
+                variant="outlined"
+                size="small"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: '#666' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ 
+                  minWidth: 260,
+                  '& .MuiOutlinedInput-root': {
+                    bgcolor: 'white',
+                    borderRadius: 2,
+                    height: '32px',
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '6px 8px',
+                    fontSize: '14px'
+                  }
+                }}
+              />
+            </Box>
 
-            {/* Contract/Template Switcher */}
+            {/* Center-Right - Contract/Template Switcher */}
             <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 bgcolor: 'rgba(255,255,255,0.9)',
                 borderRadius: '50px',
-                padding: '4px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                mx: 'auto',
+                padding: '2px',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                marginLeft: 'auto',
+                marginRight: '20px',
               }}
             >
               <Button
@@ -628,19 +624,20 @@ const ContractPage = () => {
                 onClick={() => setShowTemplates(false)}
                 sx={{
                   borderRadius: '50px',
-                  px: 3,
-                  py: 1,
+                  px: 2,
+                  py: 0.5,
                   textTransform: 'none',
                   fontWeight: 600,
+                  fontSize: '13px',
                   minWidth: 'auto',
                   bgcolor: !showTemplates ? '#1a237e' : 'transparent',
                   color: !showTemplates ? '#fff' : '#1a237e',
                   '&:hover': {
                     bgcolor: !showTemplates ? '#1a237e' : 'rgba(26,35,126,0.1)',
-                    color:'#fff'
+                    color: !showTemplates ? '#fff' : '#1a237e'
                   },
                 }}
-                startIcon={<CreatedIcon sx={{ fontSize: 18 }} />}
+                startIcon={<CreatedIcon sx={{ fontSize: 14 }} />}
               >
                 Contracts ({contractCount})
               </Button>
@@ -650,17 +647,47 @@ const ContractPage = () => {
                 onClick={() => setShowTemplates(true)}
                 sx={{
                   borderRadius: '50px',
-                  px: 3,
-                  py: 1,
+                  px: 2,
+                  py: 0.5,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '13px',
                   minWidth: 'auto',
+                  bgcolor: showTemplates ? '#1a237e' : 'transparent',
+                  color: showTemplates ? '#fff' : '#1a237e',
+                  '&:hover': {
+                    bgcolor: showTemplates ? '#1a237e' : 'rgba(26,35,126,0.1)',
+                    color: showTemplates ? '#fff' : '#1a237e'
+                  },
                 }}
-                startIcon={<TemplateIcon sx={{ fontSize: 18 }} />}
+                startIcon={<TemplateIcon sx={{ fontSize: 14 }} />}
               >
                 Templates ({templateCount})
               </Button>
             </Box>
 
-            {/* View Mode Toggle */}
+            {/* Right Side - Create Contract Button */}
+            <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleCreateContract}
+                sx={{
+                  px: 2,
+                  py: 0.6,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  bgcolor: '#1a237e',
+                  '&:hover': {
+                    bgcolor: '#0d1942',
+                  },
+                }}
+              >
+                Create Contract
+              </Button>
+            </Box>
           </Box>
 
           {/* Main Content */}
