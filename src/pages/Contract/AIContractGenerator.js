@@ -44,7 +44,6 @@ const AIContractGenerator = ({ onBack = null }) => {
   const [error, setError] = useState('');
   const [generatedContract, setGeneratedContract] = useState('');
   const [showContractContent, setShowContractContent] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
 
   const API_BASE_URL = 'https://api.marketincer.com/api/v1';
 
@@ -100,9 +99,7 @@ const AIContractGenerator = ({ onBack = null }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
-        mode: 'cors',
         body: JSON.stringify({
           contract: {
             name: formData.contractName,
@@ -145,9 +142,7 @@ const AIContractGenerator = ({ onBack = null }) => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
-        mode: 'cors',
         body: JSON.stringify({
           contract: {
             name: formData.contractName,
@@ -205,9 +200,7 @@ const AIContractGenerator = ({ onBack = null }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
-        mode: 'cors',
         body: JSON.stringify(requestBody),
       });
 
@@ -231,16 +224,7 @@ const AIContractGenerator = ({ onBack = null }) => {
       }
       
     } catch (err) {
-      console.error('Full error object:', err);
-      
-      // More detailed error handling
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        setError('Network error: Unable to connect to the server. Please check your internet connection and try again.');
-      } else if (err.message.includes('CORS')) {
-        setError('CORS error: Please contact support for API access configuration.');
-      } else {
-        setError(`Error generating contract: ${err.message}`);
-      }
+      setError(`Error generating contract: ${err.message}`);
       console.error('Error generating contract:', err);
     } finally {
       setLoading(false);
@@ -295,28 +279,19 @@ const AIContractGenerator = ({ onBack = null }) => {
         year: 'numeric'
       });
       
-      // Process contract content with better formatting
-      const lines = contractContent.split('\n');
-      const processedLines = [];
-      
-      for (let i = 0; i < lines.length; i++) {
-        let line = lines[i].trim();
-        if (line) {
-          // Remove markdown headers (# symbols)
-          line = line.replace(/^#+\s*/, '');
-          // Handle markdown bold formatting
-          line = line.replace(/\*\*([^*]+)\*\*/g, '$1');
-          // Remove any remaining # symbols
-          line = line.replace(/#/g, '');
-          // Replace SERVICE AGREEMENT and CONTRACT AGREEMENT with COLLABORATION AGREEMENT
-          line = line.replace(/SERVICE AGREEMENT/gi, 'COLLABORATION AGREEMENT');
-          line = line.replace(/CONTRACT AGREEMENT/gi, 'COLLABORATION AGREEMENT');
-          processedLines.push(line);
-        } else {
-          // Add empty line for spacing
-          processedLines.push('');
-        }
-      }
+      // Process contract content to preserve formatting
+      const processedContent = contractContent
+        // Handle bold text patterns
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        // Handle line breaks and paragraphs
+        .replace(/\n\s*\n/g, '</p><p style="margin: 16px 0; page-break-inside: avoid; orphans: 3; widows: 3;">')
+        .replace(/\n/g, '<br>')
+        // Handle article/section headers
+        .replace(/(<strong>ARTICLE\s+\d+[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; page-break-before: auto; margin-top: 24px; margin-bottom: 16px;">$1</div>')
+        .replace(/(<strong>[^<]*AGREEMENT[^<]*<\/strong>)/gi, '<div style="page-break-inside: avoid; margin-top: 24px; margin-bottom: 16px; text-align: center;">$1</div>')
+        .replace(/^/, '<p style="margin: 16px 0; page-break-inside: avoid; orphans: 3; widows: 3;">')
+        .replace(/$/, '</p>');
       
       // Create PDF with proper A4 format
       const pdf = new jsPDF({
@@ -327,196 +302,132 @@ const AIContractGenerator = ({ onBack = null }) => {
       
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 25; // 25mm margin on all sides for better readability
+      const margin = 20; // 20mm margin on all sides
       const contentWidth = pageWidth - (margin * 2);
-      const lineHeight = 5; // 5mm line height for compact spacing
-      let yPosition = margin;
+      const contentHeight = pageHeight - (margin * 2);
+      const lineHeight = 6; // 6mm line height
+      const maxLinesPerPage = Math.floor((contentHeight - 30) / lineHeight); // Reserve space for 5 blank lines
       
-      // Add watermark function
-      const addWatermark = () => {
-        pdf.setGState(new pdf.GState({opacity: 0.1}));
-        pdf.setTextColor(150, 150, 150);
-        pdf.setFontSize(50);
+      // Add single diagonal watermark function
+      const addWatermark = (pdf) => {
+        pdf.setTextColor(200, 200, 200); // Light gray
+        pdf.setFontSize(40);
         pdf.setFont('helvetica', 'bold');
         
-        const watermarkText = 'MARKETINCER';
-        const textWidth = pdf.getTextWidth(watermarkText);
-        const x = (pageWidth - textWidth) / 2;
-        const y = pageHeight / 2;
-        
-        pdf.text(watermarkText, x, y, {
+        // Add single centered diagonal watermark
+        pdf.text('MARKETINCER', pageWidth / 2, pageHeight / 2, {
           angle: -45,
           align: 'center'
         });
         
-        // Reset state
-        pdf.setGState(new pdf.GState({opacity: 1}));
+        // Reset text color for content
         pdf.setTextColor(0, 0, 0);
       };
       
-      // Add watermark to first page
-      addWatermark();
+      // Split content into lines and pages
+      const lines = processedContent.split('<br>');
+      const pages = [];
+      let currentPage = [];
+      let currentLineCount = 0;
       
-      // Set default font
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'normal');
-      
-      // Process each line with proper formatting
-      for (let i = 0; i < processedLines.length; i++) {
-        const line = processedLines[i];
-        const nextLine = i < processedLines.length - 1 ? processedLines[i + 1] : '';
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].replace(/<[^>]*>/g, '').trim(); // Remove HTML tags for line counting
         
-        // Check if we need a new page with better margin
-        if (yPosition > pageHeight - margin - 40) {
-          pdf.addPage();
-          addWatermark();
-          yPosition = margin;
-          // Reset font state on new page to prevent font bleeding
-          pdf.setFont('helvetica', 'normal');
-          pdf.setFontSize(11);
-          pdf.setTextColor(0, 0, 0);
-        }
-        
-        if (line === '') {
-          // Empty line for spacing
-          yPosition += lineHeight * 0.3;
-          continue;
-        }
-        
-        // Detect main title (COLLABORATION AGREEMENT or CONTRACT AGREEMENT)
-        const isMainTitle = line.toUpperCase().includes('COLLABORATION AGREEMENT') || 
-                           line.toUpperCase().includes('CONTRACT AGREEMENT');
-        
-        // Detect headers (lines in all caps or with specific patterns)
-        const isHeader = !isMainTitle && line.toUpperCase() === line && line.length > 3 && 
-                        (line.includes('ARTICLE') || line.includes('AGREEMENT') || 
-                         line.includes('CONTRACT') || line.includes('TERMS') ||
-                         line.includes('PAYMENT') || line.includes('TIMELINE') ||
-                         line.includes('DESCRIPTION') || line.includes('SIGNATURES'));
-        
-        // Detect section numbering (1., 2., etc.)
-        const isNumberedSection = /^\d+\.\s/.test(line);
-        
-        // Detect bullet points
-        const isBulletPoint = line.startsWith('- ') || line.startsWith('• ');
-        
-        // Check if this is the end of a section (current line is content and next line is a header or empty)
-        const isEndOfSection = !isHeader && !isNumberedSection && !isMainTitle && 
-                              (nextLine === '' || 
-                               (nextLine && (nextLine.toUpperCase() === nextLine || /^\d+\.\s/.test(nextLine))));
-        
-        // Set font style based on content type (no spacing before points)
-        if (isMainTitle) {
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(16);
-          pdf.setTextColor(0, 100, 200); // Blue color
-          yPosition += lineHeight * 0.5; // Space before main title only
-        } else if (isHeader) {
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(12);
-          pdf.setTextColor(0, 0, 0); // Reset to black
-          // No extra space before headers/points
-        } else if (isNumberedSection) {
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(11);
-          pdf.setTextColor(0, 0, 0); // Reset to black
-          // No extra space before numbered sections/points
-        } else {
-          pdf.setFont('helvetica', 'normal');
-          pdf.setFontSize(11);
-          pdf.setTextColor(0, 0, 0); // Reset to black
-          // No extra space before regular content
-        }
-        
-        // Handle text wrapping and alignment
-        const words = line.split(' ');
-        let currentLine = '';
-        let xPosition = margin;
-        
-        // Add indentation for bullet points
-        if (isBulletPoint) {
-          xPosition = margin + 5;
-        }
-        
-        // Special handling for main title (center alignment)
-        if (isMainTitle) {
-          const titleWidth = pdf.getTextWidth(line);
-          xPosition = (pageWidth - titleWidth) / 2; // Center align
-          pdf.text(line, xPosition, yPosition);
-        } else {
-          // Regular text wrapping for other content
-          for (let j = 0; j < words.length; j++) {
-            const word = words[j];
-            const testLine = currentLine + (currentLine ? ' ' : '') + word;
-            const textWidth = pdf.getTextWidth(testLine);
-            
-            if (textWidth > contentWidth - (xPosition - margin) && currentLine) {
-              // Print current line and start new line
-              pdf.text(currentLine, xPosition, yPosition);
-              yPosition += lineHeight;
-              
-              // Check if we need a new page mid-paragraph
-              if (yPosition > pageHeight - margin - 20) {
-                pdf.addPage();
-                addWatermark();
-                yPosition = margin;
-              }
-              
-              currentLine = word;
-            } else {
-              currentLine = testLine;
+        if (line.length > 0) {
+          // Estimate number of lines needed for this content
+          const estimatedLines = Math.ceil(line.length / 80); // Rough estimate based on character count
+          
+          if (currentLineCount + estimatedLines > maxLinesPerPage && currentPage.length > 0) {
+            // Add 5 blank lines to current page
+            for (let j = 0; j < 5; j++) {
+              currentPage.push('');
             }
+            pages.push(currentPage);
+            currentPage = [];
+            currentLineCount = 0;
           }
           
-          // Print the remaining text
-          if (currentLine) {
-            // Check if we have enough space for this line
-            if (yPosition > pageHeight - margin - 40) {
-              pdf.addPage();
-              addWatermark();
-              yPosition = margin;
-              // Reset font state on new page
-              pdf.setFont('helvetica', 'normal');
-              pdf.setFontSize(11);
-              pdf.setTextColor(0, 0, 0);
-            }
-            pdf.text(currentLine, xPosition, yPosition);
-          }
+          currentPage.push(lines[i]);
+          currentLineCount += estimatedLines;
+        } else {
+          currentPage.push(lines[i]);
+          currentLineCount += 1;
         }
-        
-        // Move to next line
-        yPosition += lineHeight;
-        
-        // Add spacing only when sections actually end, not after headers
-        if (isMainTitle) {
-          yPosition += lineHeight * 0.5; // Space after main title
-          // Reset font after main title to prevent affecting subsequent content
-          pdf.setFont('helvetica', 'normal');
-          pdf.setFontSize(11);
-          pdf.setTextColor(0, 0, 0);
-        } else if (isEndOfSection) {
-          yPosition += lineHeight * 1; // 1 spacing after section content ends
-        }
-        // No spacing after headers like "Payment" - content should start immediately below
       }
       
-      // Add page numbers with proper font reset
+      // Add remaining content and 5 blank lines to last page
+      if (currentPage.length > 0) {
+        for (let j = 0; j < 5; j++) {
+          currentPage.push('');
+        }
+        pages.push(currentPage);
+      }
+      
+      // Generate PDF pages
+      for (let pageNum = 0; pageNum < pages.length; pageNum++) {
+        if (pageNum > 0) {
+          pdf.addPage();
+        }
+        
+        // Add single watermark to each page
+        addWatermark(pdf);
+        
+        // Add content
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'normal');
+        
+        let yPosition = margin + 10;
+        
+        for (let lineIndex = 0; lineIndex < pages[pageNum].length; lineIndex++) {
+          const line = pages[pageNum][lineIndex];
+          const cleanLine = line.replace(/<[^>]*>/g, '').trim();
+          
+          if (cleanLine.length > 0) {
+            // Handle bold text
+            if (line.includes('<strong>') && line.includes('</strong>')) {
+              pdf.setFont('helvetica', 'bold');
+            } else {
+              pdf.setFont('helvetica', 'normal');
+            }
+            
+            // Split long lines to fit page width
+            const words = cleanLine.split(' ');
+            let currentLine = '';
+            
+            for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
+              const word = words[wordIndex];
+              const testLine = currentLine + (currentLine ? ' ' : '') + word;
+              const textWidth = pdf.getTextWidth(testLine);
+              
+              if (textWidth > contentWidth && currentLine) {
+                pdf.text(currentLine, margin, yPosition);
+                yPosition += lineHeight;
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            }
+            
+            if (currentLine) {
+              pdf.text(currentLine, margin, yPosition);
+              yPosition += lineHeight;
+            }
+          } else {
+            // Empty line
+            yPosition += lineHeight;
+          }
+        }
+      }
+      
+      // Add page numbers
       const totalPages = pdf.internal.getNumberOfPages();
       for (let i = 1; i <= totalPages; i++) {
         pdf.setPage(i);
-        // Ensure font is properly set for page numbers
-        pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(9);
-        pdf.setTextColor(100, 100, 100);
-        pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 10, {
-          align: 'right'
-        });
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(128, 128, 128);
+        pdf.text(`Page ${i} of ${totalPages}`, pageWidth - 25, pageHeight - 10);
       }
-      
-      // Final reset to ensure clean state
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(11);
-      pdf.setTextColor(0, 0, 0);
       
       // Save the PDF
       const cleanDocumentType = documentType.replace(/[^a-zA-Z0-9]/g, '_');
@@ -545,188 +456,103 @@ const AIContractGenerator = ({ onBack = null }) => {
       };
 
       return (
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-          {/* Header with Edit/Clear Controls */}
-          <Box sx={{ 
-            p: 2, 
-            borderBottom: '1px solid #e0e0e0',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            bgcolor: '#f8f9fa'
-          }}>
-            <Typography variant="h6" sx={{ color: '#333', fontWeight: 600 }}>
-              {isEditMode ? 'Edit Contract Content' : 
-               isCreateFromTemplate ? 'Template Content' : 
-               'Generated Contract'}
-              <Typography variant="caption" sx={{ color: '#666', fontWeight: 400, ml: 2 }}>
-                {generatedContract ? `${generatedContract.length} characters` : 'No content'}
-              </Typography>
+        <Box>
+          <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+            {isEditMode ? 'Edit Contract Content' : 
+             isCreateFromTemplate ? 'Template Content' : 
+             'Generated Contract'}
+          </Typography>
+          
+          {/* Contract Editor */}
+          <Paper
+            sx={{
+              p: 0,
+              bgcolor: '#f8f9fa',
+              borderRadius: 2,
+              mb: 2,
+              border: '1px solid #e0e0e0',
+            }}
+          >
+            <TextField
+              fullWidth
+              multiline
+              rows={8}
+              value={generatedContract}
+              onChange={(e) => setGeneratedContract(e.target.value)}
+              variant="outlined"
+              placeholder={isCreateFromTemplate ? "Template content will appear here..." : "Generated contract will appear here..."}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  bgcolor: 'white',
+                  borderRadius: '8px 8px 0 0',
+                  '& fieldset': {
+                    border: 'none',
+                  },
+                  '&:hover fieldset': {
+                    border: 'none',
+                  },
+                  '&.Mui-focused fieldset': {
+                    border: '1px solid #2196f3',
+                  },
+                },
+                '& .MuiInputBase-input': {
+                  //fontSize: '14px',
+                  
+                },
+              }}
+            />
+          </Paper>
+
+          {/* Contract Preview */}
+          <Paper
+            sx={{
+              p: 3,
+              bgcolor: '#ffffff',
+              borderRadius: 2,
+              border: '1px solid #e0e0e0',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              maxHeight: '400px',
+              overflow: 'auto',
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: '#f1f1f1',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: '#c1c1c1',
+                borderRadius: '4px',
+                '&:hover': {
+                  backgroundColor: '#a8a8a8',
+                },
+              },
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600, borderBottom: '2px solid #2196f3', pb: 1 }}>
+              Preview
             </Typography>
             
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => setGeneratedContract('')}
-                sx={{
-                  color: '#f44336',
-                  borderColor: '#f44336',
-                  textTransform: 'none',
-                  fontSize: '12px',
-                  px: 2,
-                  py: 0.5,
-                  '&:hover': {
-                    borderColor: '#d32f2f',
-                    bgcolor: 'rgba(244, 67, 54, 0.04)',
-                  },
-                }}
-              >
-                Clear
-              </Button>
-              <Button
-                variant={isEditing ? "contained" : "outlined"}
-                size="small"
-                onClick={() => setIsEditing(!isEditing)}
-                sx={{
-                  color: isEditing ? '#fff' : '#2196f3',
-                  bgcolor: isEditing ? '#2196f3' : 'transparent',
-                  borderColor: '#2196f3',
-                  textTransform: 'none',
-                  fontSize: '12px',
-                  px: 2,
-                  py: 0.5,
-                  '&:hover': {
-                    borderColor: '#1976d2',
-                    bgcolor: isEditing ? '#1976d2' : 'rgba(33, 150, 243, 0.04)',
-                  },
-                }}
-              >
-                {isEditing ? 'Done' : 'Edit'}
-              </Button>
-            </Box>
-          </Box>
+            <Box
+              sx={{
+                textAlign: 'left',
+                fontSize: '14px',
+                color: '#333',
+                '& strong': {
+                  fontWeight: 700,
+                  color: '#1976d2',
+                },
+                '& br': {
+                  marginBottom: '8px',
+                },
+              }}
+              dangerouslySetInnerHTML={{
+                __html: formatContractContent(generatedContract || 'No content to preview')
+              }}
+            />
+          </Paper>
 
-          {/* Editable Preview Area - Full Height */}
-          <Box sx={{ 
-            flex: 1, 
-            p: 0,
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            {isEditing ? (
-              // Edit Mode - Full screen text editor
-              <TextField
-                fullWidth
-                multiline
-                value={generatedContract}
-                onChange={(e) => setGeneratedContract(e.target.value)}
-                variant="outlined"
-                placeholder={isCreateFromTemplate ? "Template content will appear here..." : "Generated contract will appear here..."}
-                sx={{
-                  height: '100%',
-                  '& .MuiOutlinedInput-root': {
-                    height: '100%',
-                    bgcolor: '#ffffff',
-                    borderRadius: 0,
-                    fontSize: '14px',
-                    lineHeight: 1.6,
-                    '& fieldset': {
-                      border: 'none',
-                    },
-                    '&:hover fieldset': {
-                      border: 'none',
-                    },
-                    '&.Mui-focused fieldset': {
-                      border: 'none',
-                    },
-                    '& textarea': {
-                      height: '100% !important',
-                      overflow: 'auto !important',
-                      padding: '24px !important',
-                      fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-                      fontSize: '14px',
-                      lineHeight: 1.6,
-                      color: '#333',
-                      '&::placeholder': {
-                        color: '#999',
-                        opacity: 0.7,
-                      },
-                    },
-                  },
-                }}
-              />
-            ) : (
-              // Preview Mode - Formatted display
-              <Box
-                sx={{
-                  flex: 1,
-                  p: 3,
-                  bgcolor: '#ffffff',
-                  overflow: 'auto',
-                  cursor: 'text',
-                  minHeight: '100%',
-                  '&::-webkit-scrollbar': {
-                    width: '8px',
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    backgroundColor: '#f1f1f1',
-                    borderRadius: '4px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: '#c1c1c1',
-                    borderRadius: '4px',
-                    '&:hover': {
-                      backgroundColor: '#a8a8a8',
-                    },
-                  },
-                }}
-                onClick={() => setIsEditing(true)}
-              >
-                {generatedContract ? (
-                  <Box
-                    sx={{
-                      textAlign: 'left',
-                      fontSize: '14px',
-                      lineHeight: 1.6,
-                      color: '#333',
-                      '& strong': {
-                        fontWeight: 700,
-                        color: '#1976d2',
-                      },
-                      '& br': {
-                        marginBottom: '8px',
-                      },
-                    }}
-                    dangerouslySetInnerHTML={{
-                      __html: formatContractContent(generatedContract)
-                    }}
-                  />
-                ) : (
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    height: '100%',
-                    flexDirection: 'column',
-                    color: '#999',
-                    textAlign: 'center'
-                  }}>
-                    <Typography variant="body1" sx={{ mb: 1 }}>
-                      {isCreateFromTemplate ? "Template content will appear here..." : "Generated contract will appear here..."}
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontSize: '12px', opacity: 0.7 }}>
-                      Click here to start typing or use the Generate button
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-            )}
-          </Box>
-
-          {/* Action Buttons */}
-          <Box sx={{ p: 3, borderTop: '1px solid #e0e0e0', display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
             {isEditMode ? (
               // Edit mode - Show Update and Export PDF buttons
               <>
@@ -842,12 +668,11 @@ const AIContractGenerator = ({ onBack = null }) => {
     // Empty state
     return (
       <Box sx={{ 
-        height: '100%',
         display: 'flex', 
         flexDirection: 'column', 
         alignItems: 'center', 
         justifyContent: 'center',
-        p: 4
+        minHeight: '400px'
       }}>
         {/* Document Icon */}
         <Box sx={{ 
@@ -859,7 +684,7 @@ const AIContractGenerator = ({ onBack = null }) => {
           <DescriptionIcon sx={{ fontSize: 64, color: '#90caf9' }} />
         </Box>
         
-        <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600, textAlign: 'center' }}>
+        <Typography variant="h6" sx={{ mb: 1, color: '#999', fontWeight: 600 }}>
           {isEditMode ? 'Contract Content' : 
            isCreateFromTemplate ? 'Template Content' : 
            'No Contract Generated'}
@@ -868,11 +693,10 @@ const AIContractGenerator = ({ onBack = null }) => {
           variant="body1" 
           sx={{ 
             mb: 3, 
-            color: '#666', 
-            maxWidth: 400,
+            color: '#999', 
+            maxWidth: 300,
             textAlign: 'center',
-            lineHeight: 1.6,
-            fontSize: '14px'
+            //lineHeight: 1.6
           }}
         >
           {isEditMode 
@@ -882,21 +706,6 @@ const AIContractGenerator = ({ onBack = null }) => {
             : 'Fill in the contract name and description, then click "Generate AI Contract" to create your contract.'
           }
         </Typography>
-        
-        {!isCreateFromTemplate && (
-          <Box sx={{ 
-            p: 3, 
-            bgcolor: '#f8f9fa', 
-            borderRadius: 2, 
-            border: '1px dashed #ccc',
-            textAlign: 'center',
-            maxWidth: 300
-          }}>
-            <Typography variant="body2" sx={{ color: '#666', fontSize: '13px' }}>
-              💡 Tip: Be specific in your description to get better AI-generated contracts
-            </Typography>
-          </Box>
-        )}
       </Box>
     );
   };
@@ -962,15 +771,12 @@ const AIContractGenerator = ({ onBack = null }) => {
 
           {/* Main Content */}
           <Box sx={{ padding: '24px' }}>
-            <Grid container spacing={3} sx={{ height: 'calc(100vh - 200px)' }}>
+            <Grid container spacing={3}>
               {/* Left Panel - Contract Details Form */}
-              <Grid size={{ md: 5 }}>
-                <Card sx={{ 
-                  borderRadius: 3, 
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                  height: '100%'
-                }}>
-                  <CardContent sx={{ p: 4, height: '100%' }}>
+              
+              <Grid size={{ md: 6 }}>
+                <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+                  <CardContent sx={{ p: 4, minHeight:'445px' }}>
                     {/* Template Info (if creating from template) */}
                     {isCreateFromTemplate && templateData && (
                       <Box sx={{ mb: 3, p: 2, bgcolor: '#e8f5e8', borderRadius: 2 }}>
@@ -1088,17 +894,16 @@ const AIContractGenerator = ({ onBack = null }) => {
               </Grid>
 
               {/* Right Panel - Generated Contract Display */}
-              <Grid size={{ md: 7 }}>
+              <Grid size={{ md: 6 }}>
                 <Card 
                   sx={{ 
                     borderRadius: 3, 
                     boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column'
+                    height: 'fit-content',
+                    minHeight: '500px'
                   }}
                 >
-                  <CardContent sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <CardContent sx={{ p: 4, textAlign: 'center' }}>
                     {renderRightPanel()}
                   </CardContent>
                 </Card>
