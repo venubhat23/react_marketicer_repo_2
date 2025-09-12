@@ -230,7 +230,7 @@ useEffect(() => {
   }
 
 // Show "No Analytics Found" modal
-if (showNoAnalyticsModal) {
+if (false) {
   return (
     <Modal
       open={showNoAnalyticsModal}
