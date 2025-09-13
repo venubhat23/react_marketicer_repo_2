@@ -21,6 +21,8 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import SendIcon from '@mui/icons-material/Send';
 import MoreVert from "@mui/icons-material/MoreVert";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 import Repeat from "@mui/icons-material/Repeat";
 import ThumbUp from "@mui/icons-material/ThumbUp";
 import MessageCircle from "@mui/icons-material/Star"; // Placeholder for MessageCircle
@@ -105,6 +107,11 @@ const CreatePost = () => {
   const [showMentions, setShowMentions] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
   const [mentionPosition, setMentionPosition] = useState(0);
+  const [publishingResults, setPublishingResults] = useState(null);
+  const [showResultsModal, setShowResultsModal] = useState(false);
+  const [showPublishingLoader, setShowPublishingLoader] = useState(false);
+  const [publishingProgress, setPublishingProgress] = useState(0);
+  const [publishingStep, setPublishingStep] = useState('');
 
   console.log('hereree', selectUser)
 
@@ -424,79 +431,215 @@ Would you like me to create this as a short handwritten-style note (suitable for
       alert("Please make sure all fields are filled out!");
       return;
     }
+
+    // Show enhanced loader and start progress
+    setShowPublishingLoader(true);
+    setPublishingProgress(0);
+    setPublishingStep('Validating your content...');
     setPosting(true);
-    const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
-    const payloadData = {
-      social_page_ids: selectedPages,  // Only sending the first selected page for now
-      post: {
-        s3_url: uploadedImageUrl,
-        comments: stripHtmlTags(postContent),
-        brand_name: brandName,
-        status: "publish"
-      },
+
+    // Simulate progress steps
+    const updateProgress = (progress, step) => {
+      setPublishingProgress(progress);
+      setPublishingStep(step);
     };
-    console.log('papapa', payloadData)
 
     try {
+      // Step 1: Preparing content
+      await new Promise(resolve => setTimeout(resolve, 500));
+      updateProgress(20, 'Preparing your content...');
+
+      const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
+      const payloadData = {
+        social_page_ids: selectedPages,
+        post: {
+          s3_url: uploadedImageUrl,
+          comments: stripHtmlTags(postContent),
+          brand_name: brandName,
+          status: "publish"
+        },
+      };
+
+      // Step 2: Uploading to platforms
+      updateProgress(40, 'Connecting to social platforms...');
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Step 3: Publishing
+      updateProgress(60, 'Publishing your post...');
       const token = localStorage.getItem("token");
-      await axios.post("https://api.marketincer.com/api/v1/posts", payloadData, {
+
+      const response = await axios.post("http://localhost:3002/api/v1/posts", payloadData, {
         headers: {
-          Authorization: `Bearer ${token}`, // <-- use backticks here
+          Authorization: `Bearer ${token}`,
         }
       });
-      alert("Post published successfully!");
-      // Optionally, clear form states
-      setSelectedPages([]);
-      setPostContent("");
-      setUploadedImageUrl("");
+
+      // Step 4: Processing response
+      updateProgress(80, 'Processing results...');
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Step 5: Complete
+      updateProgress(100, 'Publishing complete!');
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Handle the response data and show results modal
+      const responseData = response.data;
+      setPublishingResults(responseData);
+      setShowResultsModal(true);
+
+      // Hide loader and reset states
+      setShowPublishingLoader(false);
       setPosting(false);
-      setUploadedFileName('');
-      setOpen(false);
-      window.location.reload();
+      setPublishingProgress(0);
+      setPublishingStep('');
+
     } catch (error) {
       console.error("Error publishing post:", error);
-      alert("Failed to publish post");
+
+      // Hide loader and reset states on error
+      setShowPublishingLoader(false);
+      setPosting(false);
+      setPublishingProgress(0);
+      setPublishingStep('');
+
+      // Check if the error response contains specific error information
+      if (error.response && error.response.data) {
+        const responseData = error.response.data;
+
+        // Set the error response for display in modal
+        setPublishingResults(responseData);
+        setShowResultsModal(true);
+
+        // Legacy alert handling (can be removed if modal is preferred)
+        // Handle the Instagram business account error specifically
+        if (responseData.errors && responseData.errors.length > 0) {
+          const firstError = responseData.errors[0];
+          if (firstError.error_message) {
+            return;
+          } else if (firstError.error) {
+            return;
+          }
+        }
+
+        // Fallback to general message if available
+        if (responseData.message) {
+          return;
+        }
+      } else {
+        // Handle network errors or other issues
+        setPublishingResults({
+          status: "error",
+          message: "Failed to publish post. Please check your connection and try again.",
+          errors: []
+        });
+        setShowResultsModal(true);
+      }
     }
   };
 
   const draftHandler = async () => {
-
-    if ( !uploadedImageUrl || !postContent) {
+    if (!uploadedImageUrl || !postContent) {
       alert("Please make sure all fields are filled out!");
       return;
     }
+
+    // Show enhanced loader and start progress
+    setShowPublishingLoader(true);
+    setPublishingProgress(0);
+    setPublishingStep(`Preparing to ${createPostMode} your post...`);
     setPosting(true);
-    const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
-    const payloadData = {
-      social_page_ids: selectedPages,  // Only sending the first selected page for now
-      post: {
-        s3_url: uploadedImageUrl,
-        comments: stripHtmlTags(postContent),  // Use the postContent for comments as well
-        brand_name: brandName,
-        status: createPostMode,
-        scheduled_at: selectedDateTime
-      },
+
+    // Simulate progress steps
+    const updateProgress = (progress, step) => {
+      setPublishingProgress(progress);
+      setPublishingStep(step);
     };
 
     try {
+      // Step 1: Preparing content
+      await new Promise(resolve => setTimeout(resolve, 400));
+      updateProgress(25, 'Validating your content...');
+
+      const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
+      const payloadData = {
+        social_page_ids: selectedPages,
+        post: {
+          s3_url: uploadedImageUrl,
+          comments: stripHtmlTags(postContent),
+          brand_name: brandName,
+          status: createPostMode,
+          scheduled_at: selectedDateTime
+        },
+      };
+
+      // Step 2: Processing schedule
+      updateProgress(50, createPostMode === 'schedule' ? 'Setting up schedule...' : 'Saving draft...');
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Step 3: Uploading
+      updateProgress(75, `${createPostMode === 'schedule' ? 'Scheduling' : 'Saving'} your post...`);
+
       const token = localStorage.getItem("token");
-      await axios.post("https://api.marketincer.com/api/v1/posts/schedule", payloadData, {
+      await axios.post("http://localhost:3002/api/v1/posts/schedule", payloadData, {
         headers: {
-          Authorization: `Bearer ${token}`, // <-- use backticks here
+          Authorization: `Bearer ${token}`,
         }
       });
+
+      // Step 4: Complete
+      updateProgress(100, `Post ${createPostMode} successfully!`);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       alert(`Post ${createPostMode} successfully!`);
-      // Optionally, clear form states
+
+      // Clear form states
       setSelectedPages([]);
       setPostContent("");
       setUploadedImageUrl("");
-      setPosting(false);
       setOpenDateTimePicker(false);
       setUploadedFileName('');
       setOpen(false);
+
+      // Hide loader and reset states
+      setShowPublishingLoader(false);
+      setPosting(false);
+      setPublishingProgress(0);
+      setPublishingStep('');
+
       window.location.reload();
     } catch (error) {
       console.error(`Error ${createPostMode} post:`, error);
+
+      // Hide loader and reset states on error
+      setShowPublishingLoader(false);
+      setPosting(false);
+      setPublishingProgress(0);
+      setPublishingStep('');
+
+      // Check if the error response contains specific error information
+      if (error.response && error.response.data) {
+        const responseData = error.response.data;
+
+        // Handle the Instagram business account error specifically
+        if (responseData.errors && responseData.errors.length > 0) {
+          const firstError = responseData.errors[0];
+          if (firstError.error_message) {
+            alert(firstError.error_message);
+            return;
+          } else if (firstError.error) {
+            alert(firstError.error);
+            return;
+          }
+        }
+
+        // Fallback to general message if available
+        if (responseData.message) {
+          alert(responseData.message);
+          return;
+        }
+      }
+
+      // Default fallback message
       alert(`Failed to ${createPostMode} post`);
     }
   };
@@ -507,7 +650,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
       const token = localStorage.getItem("token"); // Retrieve token from local storage (or state)
 
       return axios.post(
-        "https://api.marketincer.com/api/v1/posts",
+        "http://localhost:3002/api/v1/posts",
         payloadData,
         {
           headers: {
@@ -526,7 +669,26 @@ Would you like me to create this as a short handwritten-style note (suitable for
       setPostContent("");
     },
     onError: (error) => {
-      toast.error("Failed to Create Post", {
+      let errorMessage = "Failed to Create Post";
+
+      // Check if the error response contains specific error information
+      if (error.response && error.response.data) {
+        const responseData = error.response.data;
+
+        // Handle the Instagram business account error specifically
+        if (responseData.errors && responseData.errors.length > 0) {
+          const firstError = responseData.errors[0];
+          if (firstError.error_message) {
+            errorMessage = firstError.error_message;
+          } else if (firstError.error) {
+            errorMessage = firstError.error;
+          }
+        } else if (responseData.message) {
+          errorMessage = responseData.message;
+        }
+      }
+
+      toast.error(errorMessage, {
         position: "top-right",
         autoClose: 5000,
       });
@@ -562,6 +724,398 @@ Would you like me to create this as a short handwritten-style note (suitable for
     setSelectedUsers(selectedUserObjects);
     handleAvatarClick(socialId)
 
+  };
+
+  // Handle closing the results modal and clearing form if successful
+  const handleCloseResultsModal = () => {
+    setShowResultsModal(false);
+
+    // If the posting was successful (either full success or partial success), clear the form
+    if (publishingResults && (publishingResults.status === "success" || publishingResults.status === "partial_success")) {
+      setSelectedPages([]);
+      setPostContent("");
+      setUploadedImageUrl("");
+      setUploadedFileName('');
+      setBrandName("");
+      setSelectedUsers([]);
+      setSelectUser('');
+      setFile(null);
+    }
+
+    setPublishingResults(null);
+  };
+
+  // Publishing Results Modal Component
+  const PublishingResultsModal = () => {
+    if (!publishingResults) return null;
+
+    const isSuccess = publishingResults.status === "success";
+    const isPartialSuccess = publishingResults.status === "partial_success";
+    const hasSuccessfulPosts = publishingResults.posts && publishingResults.posts.length > 0;
+    const hasErrors = publishingResults.errors && publishingResults.errors.length > 0;
+
+    return (
+      <Modal
+        open={showResultsModal}
+        onClose={handleCloseResultsModal}
+        aria-labelledby="publishing-results-title"
+        aria-describedby="publishing-results-description"
+      >
+        <Paper
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: { xs: '90%', sm: 500 },
+            maxHeight: '80vh',
+            overflow: 'auto',
+            bgcolor: 'background.paper',
+            border: 'none',
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          {/* Modal Header */}
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+            <Typography id="publishing-results-title" variant="h6" component="h2">
+              Publishing Results
+            </Typography>
+            <IconButton onClick={handleCloseResultsModal}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          {/* Success Section */}
+          {hasSuccessfulPosts && (
+            <Box mb={3}>
+              <Box display="flex" alignItems="center" mb={2}>
+                <CheckCircleIcon sx={{ color: '#4caf50', mr: 1 }} />
+                <Typography variant="h6" sx={{ color: '#4caf50', fontWeight: 600 }}>
+                  Successfully Published ({publishingResults.posts.length})
+                </Typography>
+              </Box>
+
+              {publishingResults.posts.map((post, index) => (
+                <Card key={index} sx={{ mb: 2, border: '1px solid #4caf50', borderLeft: '4px solid #4caf50' }}>
+                  <CardContent>
+                    <Box display="flex" align="center" mb={1}>
+                      <CheckCircleIcon sx={{ color: '#4caf50', mr: 1, fontSize: 20 }} />
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        Post Published Successfully
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      Status: <span style={{ color: '#4caf50', fontWeight: 600 }}>{post.post.status}</span>
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      Created: {new Date(post.post.created_at).toLocaleString()}
+                    </Typography>
+                    {post.post.brand_name && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        Brand: {post.post.brand_name}
+                      </Typography>
+                    )}
+                    {post.publish_log && (
+                      <Box sx={{ mt: 2, p: 2, bgcolor: '#f8f9fa', borderRadius: 1 }}>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-line' }}>
+                          {post.publish_log}
+                        </Typography>
+                      </Box>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          )}
+
+          {/* Errors Section */}
+          {hasErrors && (
+            <Box mb={3}>
+              <Box display="flex" alignItems="center" mb={2}>
+                <ErrorIcon sx={{ color: '#f44336', mr: 1 }} />
+                <Typography variant="h6" sx={{ color: '#f44336', fontWeight: 600 }}>
+                  Failed to Publish ({publishingResults.errors.length})
+                </Typography>
+              </Box>
+
+              {publishingResults.errors.map((error, index) => (
+                <Card key={index} sx={{ mb: 2, border: '1px solid #f44336', borderLeft: '4px solid #f44336' }}>
+                  <CardContent>
+                    <Box display="flex" align="center" mb={1}>
+                      <ErrorIcon sx={{ color: '#f44336', mr: 1, fontSize: 20 }} />
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#f44336' }}>
+                        Publishing Failed
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      Social Page ID: {error.social_page_id}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1, color: '#f44336' }}>
+                      Error: {error.error || error.error_message || 'Unknown error'}
+                    </Typography>
+                    {error.post && (
+                      <>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          Status: <span style={{ color: '#f44336', fontWeight: 600 }}>{error.post.status}</span>
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Created: {new Date(error.post.created_at).toLocaleString()}
+                        </Typography>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          )}
+
+          {/* Overall Status Message */}
+          <Box sx={{ mt: 3, p: 2, bgcolor: isSuccess ? '#e8f5e8' : isPartialSuccess ? '#fff3e0' : '#ffebee', borderRadius: 1 }}>
+            <Typography variant="body2" sx={{
+              color: isSuccess ? '#2e7d32' : isPartialSuccess ? '#f57c00' : '#c62828',
+              fontWeight: 600,
+              textAlign: 'center'
+            }}>
+              {isSuccess && "All posts were published successfully!"}
+              {isPartialSuccess && "Some posts were published successfully, others failed."}
+              {!isSuccess && !isPartialSuccess && "Publishing failed. Please try again."}
+            </Typography>
+          </Box>
+
+          {/* Action Button */}
+          <Box display="flex" justifyContent="center" mt={3}>
+            <Button
+              variant="contained"
+              onClick={handleCloseResultsModal}
+              sx={{
+                bgcolor: isSuccess ? '#4caf50' : isPartialSuccess ? '#ff9800' : '#f44336',
+                '&:hover': {
+                  bgcolor: isSuccess ? '#45a049' : isPartialSuccess ? '#e68900' : '#d32f2f'
+                }
+              }}
+            >
+              Close
+            </Button>
+          </Box>
+        </Paper>
+      </Modal>
+    );
+  };
+
+  // Enhanced Publishing Loader Component
+  const PublishingLoader = () => {
+    return (
+      <Modal
+        open={showPublishingLoader}
+        aria-labelledby="publishing-loader-title"
+        aria-describedby="publishing-loader-description"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(4px)',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        }}
+      >
+        <Paper
+          sx={{
+            position: 'relative',
+            width: { xs: '90%', sm: 400 },
+            bgcolor: 'background.paper',
+            borderRadius: 3,
+            boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+            p: 4,
+            textAlign: 'center',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Animated Background Gradient */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(45deg, rgba(136, 42, 255, 0.03), rgba(94, 191, 166, 0.03))',
+              animation: 'gradient-shift 3s ease-in-out infinite',
+              '@keyframes gradient-shift': {
+                '0%, 100%': {
+                  background: 'linear-gradient(45deg, rgba(136, 42, 255, 0.03), rgba(94, 191, 166, 0.03))'
+                },
+                '50%': {
+                  background: 'linear-gradient(45deg, rgba(94, 191, 166, 0.03), rgba(136, 42, 255, 0.03))'
+                }
+              }
+            }}
+          />
+
+          {/* Content */}
+          <Box sx={{ position: 'relative', zIndex: 1 }}>
+            {/* Animated Logo/Icon */}
+            <Box
+              sx={{
+                position: 'relative',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #882AFF, #5ebfa6)',
+                mb: 3,
+                animation: 'pulse-glow 2s ease-in-out infinite',
+                '@keyframes pulse-glow': {
+                  '0%, 100%': {
+                    transform: 'scale(1)',
+                    boxShadow: '0 0 0 0 rgba(136, 42, 255, 0.7)'
+                  },
+                  '50%': {
+                    transform: 'scale(1.05)',
+                    boxShadow: '0 0 0 15px rgba(136, 42, 255, 0)'
+                  }
+                }
+              }}
+            >
+              <Box
+                sx={{
+                  animation: 'spin 2s linear infinite',
+                  '@keyframes spin': {
+                    '0%': { transform: 'rotate(0deg)' },
+                    '100%': { transform: 'rotate(360deg)' }
+                  }
+                }}
+              >
+                <img
+                  src={MarketincerIcon}
+                  alt="Marketincer"
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: '#fff',
+                    padding: '2px'
+                  }}
+                />
+              </Box>
+            </Box>
+
+            {/* Title */}
+            <Typography
+              variant="h6"
+              sx={{
+                mb: 2,
+                fontWeight: 600,
+                color: '#2c2c2c',
+                fontSize: '1.25rem'
+              }}
+            >
+              Publishing Your Post
+            </Typography>
+
+            {/* Current Step */}
+            <Typography
+              variant="body1"
+              sx={{
+                mb: 3,
+                color: '#666',
+                minHeight: 24,
+                fontSize: '0.95rem'
+              }}
+            >
+              {publishingStep || 'Preparing your content...'}
+            </Typography>
+
+            {/* Progress Bar */}
+            <Box sx={{ width: '100%', mb: 3 }}>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: 6,
+                  backgroundColor: '#f0f0f0',
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}
+              >
+                <Box
+                  sx={{
+                    width: `${publishingProgress}%`,
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #882AFF, #5ebfa6)',
+                    borderRadius: 3,
+                    transition: 'width 0.5s ease-in-out',
+                    position: 'relative',
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                      animation: 'shimmer 1.5s infinite',
+                      '@keyframes shimmer': {
+                        '0%': { transform: 'translateX(-100%)' },
+                        '100%': { transform: 'translateX(100%)' }
+                      }
+                    }
+                  }}
+                />
+              </Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  mt: 1,
+                  color: '#888',
+                  fontSize: '0.8rem'
+                }}
+              >
+                {Math.round(publishingProgress)}% Complete
+              </Typography>
+            </Box>
+
+            {/* Floating Dots Animation */}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 0.5,
+                '& > div': {
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  backgroundColor: '#882AFF',
+                  animation: 'bounce 1.4s infinite ease-in-out both'
+                },
+                '& > div:nth-of-type(1)': {
+                  animationDelay: '-0.32s'
+                },
+                '& > div:nth-of-type(2)': {
+                  animationDelay: '-0.16s'
+                },
+                '@keyframes bounce': {
+                  '0%, 80%, 100%': {
+                    transform: 'scale(0)',
+                    opacity: 0.5
+                  },
+                  '40%': {
+                    transform: 'scale(1)',
+                    opacity: 1
+                  }
+                }
+              }}
+            >
+              <div></div>
+              <div></div>
+              <div></div>
+            </Box>
+          </Box>
+        </Paper>
+      </Modal>
+    );
   };
 
   // LinkedIn Preview Component
@@ -1042,7 +1596,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
 
 
   return (
-
+    <>
       <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} > 
       <Grid container>
       <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
@@ -1608,14 +2162,18 @@ Would you like me to create this as a short handwritten-style note (suitable for
                 </TabPanel>
           </Grid>
         </Grid>
-          
+
       </Box>
       </Grid>
-        
-      
     </Grid>
-      </Box>
-  
+    </Box>
+
+    {/* Publishing Results Modal */}
+    <PublishingResultsModal />
+
+    {/* Enhanced Publishing Loader */}
+    <PublishingLoader />
+    </>
   );
 };
 
