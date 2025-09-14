@@ -999,28 +999,51 @@ const MarketplaceModule = () => {
         
         {/* View Toggle Switch */}
         <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'left', 
-          mb: 2 
+          // display: 'flex', 
+          // justifyContent: 'left', 
+          // mb: 2  
+          display: 'flex',
+          alignItems: 'center',
+          bgcolor: 'rgba(255,255,255,0.9)',
+          borderRadius: '50px',
+          padding: '2px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          //mx: 'auto',
+          width:'21%',
         }}>
           <Tabs
+            className="market_tab"
             value={influencerView}
             onChange={(e, newValue) => setInfluencerView(newValue)}
             sx={{
-              backgroundColor: 'white',
-              '& .MuiTabs-indicator': {
-                backgroundColor: '#882AFF',
-                //height: '2px',
+              borderRadius: '50px',
+              px: 1,
+              py: 1,
+              textTransform: 'none',
+              //fontWeight: 600,
+              minWidth: 'auto',
+              bgcolor:'#1a237e',
+              color: '#1a237e',
+              '&:hover': {
+                bgcolor: 'rgba(26,35,126,0.1)',
+                color:'#fff'
               },
-              '& .MuiTab-root': {
-                minWidth:'150px',
-                minHeight: '50px !important',
-                color: '#666',
-                '&.Mui-selected': {
-                  color: '#882AFF'
-                }
-              }
             }}
+            // sx={{
+            //   backgroundColor: 'white',
+            //   '& .MuiTabs-indicator': {
+            //     backgroundColor: '#882AFF',
+            //     //height: '2px',
+            //   },
+            //   '& .MuiTab-root': {
+            //     minWidth:'150px',
+            //     minHeight: '50px !important',
+            //     color: '#666',
+            //     '&.Mui-selected': {
+            //       color: '#882AFF'
+            //     }
+            //   }
+            // }}
           >
             <Tab 
               label="Feed" 
@@ -1079,18 +1102,18 @@ const MarketplaceModule = () => {
         
         {/* Feed Container */}
         <Box >
-        <Grid size={{ md: 8 }} sx={{margin:'auto'}}>
+        <Grid size={{ md: 7 }} sx={{margin:'auto'}}>
           {postsLoading ? (
             // Loading skeleton cards
             [...Array(3)].map((_, index) => (
               <Card key={index} sx={{ 
-                mb: 3,
-                borderRadius: 3, 
+                mb: 1,
+                borderRadius: 2, 
                 boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
                 border: '1px solid #e1e7ff',
                 backgroundColor: 'white'
               }}>
-                <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Skeleton variant="circular" width={40} height={40} />
                   <Box sx={{ flex: 1 }}>
                     <Skeleton variant="text" width="60%" />
@@ -1098,7 +1121,7 @@ const MarketplaceModule = () => {
                   </Box>
                 </Box>
                 <Skeleton variant="rectangular" height={300} />
-                <Box sx={{ p: 2 }}>
+                <Box sx={{ p: 1 }}>
                   <Skeleton variant="text" width="80%" />
                   <Skeleton variant="text" width="100%" />
                   <Skeleton variant="text" width="60%" />
@@ -1106,9 +1129,9 @@ const MarketplaceModule = () => {
               </Card>
             ))
           ) : filteredPosts.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 8 }}>
-              <SearchIcon sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
-              <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
+            <Box sx={{ textAlign: 'center', py: 5 }}>
+              <SearchIcon sx={{ fontSize: 64, color: '#ccc', mb: 1 }} />
+              <Typography variant="h5" color="text.secondary" sx={{ mb: 1 }}>
                 No opportunities found
               </Typography>
               <Typography variant="body1" color="text.secondary">
@@ -1118,7 +1141,7 @@ const MarketplaceModule = () => {
           ) : (
             filteredPosts.map((post, index) => (
             <Card key={post.id} sx={{ 
-              mb: 3,
+              mb: 2,
               borderRadius: 3, 
               boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
               border: '1px solid #e1e7ff',
@@ -1132,7 +1155,7 @@ const MarketplaceModule = () => {
             }}>
               {/* Post Header */}
               <Box sx={{ 
-                p: 2, 
+                p: 1, 
                 borderBottom: '1px solid #f0f0f0',
                 display: 'flex',
                 alignItems: 'center',
@@ -1143,13 +1166,13 @@ const MarketplaceModule = () => {
                     bgcolor: '#882AFF', 
                     width: 40, 
                     height: 40,
-                    fontSize: '14px',
-                    fontWeight: 'bold'
+                    // fontSize: '14px',
+                    // fontWeight: 'bold'
                   }}>
                     {post.brand.charAt(0).toUpperCase()}
                   </Avatar>
                   <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#333' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: '500', color: '#333' }}>
                       {post.brand}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -1164,7 +1187,7 @@ const MarketplaceModule = () => {
                     sx={{ 
                       bgcolor: '#e3f2fd', 
                       color: '#1976d2',
-                      fontWeight: 'bold',
+                      //fontWeight: 'bold',
                       fontSize: '11px'
                     }} 
                   />
@@ -1174,7 +1197,7 @@ const MarketplaceModule = () => {
                     sx={{ 
                       bgcolor: '#f3e5f5', 
                       color: '#7b1fa2',
-                      fontWeight: 'bold',
+                      //fontWeight: 'bold',
                       fontSize: '11px'
                     }} 
                   />
@@ -1198,10 +1221,10 @@ const MarketplaceModule = () => {
                 {/* Content Body */}
                 <CardContent sx={{ p: 2 }}>
                   <Typography variant="h6" sx={{ 
-                    fontWeight: 'bold', 
+                    //fontWeight: 'bold', 
                     mb: 1,
                     color: '#333',
-                    fontSize: '18px'
+                    //fontSize: '18px'
                   }}>
                     {post.title}
                   </Typography>
@@ -1220,7 +1243,7 @@ const MarketplaceModule = () => {
                     justifyContent: 'space-between', 
                     alignItems: 'center', 
                     mb: 2,
-                    p: 1.5,
+                    p: 1,
                     bgcolor: '#f8f9ff',
                     borderRadius: 2,
                     border: '1px solid #e1e7ff'
@@ -1248,7 +1271,7 @@ const MarketplaceModule = () => {
                   </Box>
                   
                   {/* Location */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb:1 }}>
                     <LocationOnIcon fontSize="small" sx={{ color: '#882AFF' }} />
                     <Typography variant="body2" color="text.secondary">
                       {post.location}
@@ -1259,7 +1282,7 @@ const MarketplaceModule = () => {
 
               {/* Action Buttons */}
               <Box sx={{ 
-                p: 2, 
+                p: 1, 
                 borderTop: '1px solid #f0f0f0',
                 bgcolor: '#fafbff'
               }}>
