@@ -13,10 +13,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import Sidebar from '../../components/Sidebar';
 import axios from 'axios';
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart,RadialBarChart,
-  RadialBar, Pie, Cell, BarChart, Bar,Tooltip, Legend, CartesianGrid,AreaChart,
-  Area,
-} from 'recharts';
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import {Link} from 'react-router-dom'
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
@@ -44,9 +41,8 @@ function TabPanel(props) {
   );
 }
 
-const COLORS = ["#8B5CF6", "#A78BFA", "#C4B5FD"];
 
-const InstagramAnalytics = () => {
+const LinkedinAnalytics = () => {
   const [instagramData, setInstagramData] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState('');
   const [selectedAccountData, setSelectedAccountData] = useState(null);
@@ -57,8 +53,7 @@ const InstagramAnalytics = () => {
   const [influencer, setInfluencer] = useState('');
   const [postType, setPostType] = useState('');
   const [value, setValue] = useState(0);
-  // const [recentPosts, setRecentPosts] = useState([]);
-  // const [audienceGender, setAudienceGender] = useState([]);
+  const [recentPosts, setRecentPosts] = useState([]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -84,7 +79,7 @@ const InstagramAnalytics = () => {
       }
 
       console.log('Fetching Instagram analytics...');
-      const response = await axios.get('https://api.marketincer.com/api/v1/instagram_analytics', {
+      const response = await axios.get('https://api.marketincer.com/api/v1/linkedin_analytics', {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -100,11 +95,10 @@ const InstagramAnalytics = () => {
         setSelectedAccountData(firstAccount);
 
 
-        // const posts = response.data?.data?.[0]?.analytics?.recent_posts ?? [];
-        // const genders = response.data?.data?.[0]?.analytics?.audience_demographics?.gender ?? [];
-        
-        // setRecentPosts(posts);
-        // setAudienceGender(genders) 
+        const posts = response.data?.data?.[0]?.analytics?.recent_posts ?? [];
+
+        //const posts = accountsArray.map((account) => account.analytics?.recent_posts || []);
+        setRecentPosts(posts);
 
         
 
@@ -154,11 +148,25 @@ const InstagramAnalytics = () => {
     { day: 'Sun', value: 59 }
   ];
 
-  
+  const audienceEngagementData = [
+    { name: 'Likes', value: 60, color: '#8B5CF6' },
+    { name: 'Comments', value: 35, color: '#A78BFA' },
+    { name: 'Shares', value: 5, color: '#C4B5FD' }
+  ];
 
-  
+  const audienceReachabilityData = [
+    { name: 'Real & Active Followers', value: 76, color: '#8B5CF6' },
+    { name: 'Ghost/Inactive Followers', value: 18, color: '#A78BFA' },
+    { name: 'Suspicious/Bot Accounts', value: 6, color: '#E5E7EB' }
+  ];
 
- 
+  const audienceLocationData = [
+    { country: 'United States', percentage: 85 },
+    { country: 'India', percentage: 70 },
+    { country: 'Germany', percentage: 60 },
+    { country: 'Russia', percentage: 35 },
+    { country: 'Dubai', percentage: 30 }
+  ];
 
   const notableFollowers = [
     { name: 'Alice', percentage: '12.3%', avatar: '/api/placeholder/32/32' },
@@ -170,7 +178,7 @@ const InstagramAnalytics = () => {
 
   // Campaign Analytics cards
   const getCampaignAnalytics = (selectedAccountData) => {
-
+    debugger
     if (!selectedAccountData) return [];
     
     const totalLikes = selectedAccountData.analytics?.engagement_stats?.total_likes || 24300;
@@ -189,61 +197,6 @@ const InstagramAnalytics = () => {
       { value: formatNumber(829), label: "Profile Visits", key: "visits" }
     ];
   };
-
-  const audiGender = selectedAccountData?.analytics?.audience_demographics?.gender ?? []
-
-  const genderData = Object.entries(audiGender).map(([key, value]) => ({
-    name: key,  
-    value: value 
-  }));
-
-  const audiReach = selectedAccountData?.analytics?.audience_demographics.reachability  ?? []
-
-  const audienceReachabilityData =  Object.entries(audiReach).map(([key, value]) => ({
-    name: key,  
-    value: value
-  }));
-
-  const audiEngagement = selectedAccountData?.analytics?.engagement_breakdown  ?? []
-
-  const audienceEngagementData =  Object.entries(audiEngagement).map(([key, value]) => ({
-    name: key,  
-    value: value.count
-  }));
-
-  const audiLocation = selectedAccountData?.analytics?.audience_demographics?.locations?.countries  ?? []
-
-  const audienceLocationData = Object.entries(audiLocation).map(([key, value]) => ({
-    name: key,  
-    value: value
-  }));
-
-  const audiage = selectedAccountData?.analytics?.audience_demographics?.age_groups  ?? []
-
-  const audienceAge = Object.entries(audiage).map(([key, value]) => ({
-    name: key,  
-    value: value
-  }));
-
-  const audiEngage = selectedAccountData?.analytics?.engagement_over_time  ?? []
-
-  const audiEngagementOver = Object.entries(audiEngage).map(([day, values]) => ({
-    day,
-    ...values
-  }));
-
-  const audiCities = selectedAccountData?.analytics?.audience_demographics?.locations?.cities  ?? []
-
-  const audiLang = selectedAccountData?.analytics?.audience_demographics?.languages  ?? []
-
-  const audiInterest = selectedAccountData?.analytics?.audience_demographics?.interests  ?? []
-
-  const audiBrand = selectedAccountData?.analytics?.audience_demographics?.brand_affinity  ?? []
-  
-
-  
-
-
 
   // Show loading state
   if (loading) {
@@ -285,7 +238,7 @@ const InstagramAnalytics = () => {
                 >
                   <ArrowLeftIcon />
                 </IconButton>
-                Influencers Analytics
+                LinkenIn Analytics
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <IconButton size="large" sx={{ color: '#fff' }}>
@@ -672,18 +625,22 @@ const InstagramAnalytics = () => {
                       </FormControl>
                     </Box>
                     <Box sx={{ height: 160 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={audiEngagementOver} syncId="weekChart" margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="day" /> {/* 👈 X axis shows only week days */}
-                        <YAxis />
-                        <Tooltip />
-                        <Area type="monotone" dataKey="engagement" stroke="#8884d8" fill="#8884d8" />
-                        <Area type="monotone" dataKey="reach" stroke="#82ca9d" fill="#82ca9d" />
-                        <Area type="monotone" dataKey="impressions" stroke="#ffc658" fill="#ffc658" />
-                        <Area type="monotone" dataKey="profile_views" stroke="#ff7300" fill="#ff7300" />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={engagementData}>
+                          <XAxis
+                            dataKey="day"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fontSize: 12, fill: '#666' }} />
+                          <YAxis hide />
+                          <Line
+                            type="monotone"
+                            dataKey="value"
+                            stroke="#8B5CF6"
+                            strokeWidth={3}
+                            dot={false} />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </Box>
                   </Card>
                 </Box>
@@ -755,36 +712,22 @@ const InstagramAnalytics = () => {
                   <Card sx={{ p: 2, mb: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
                     <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>Audience Age</Typography>
                     <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2, mr:1 }}>
-                    <ResponsiveContainer width="100%" height={150}>
-                      <RadialBarChart
-                        cx="50%"
-                        cy="50%"
-                        innerRadius="20%"
-                        outerRadius="100%"
-                        barSize={20}
-                        data={audienceAge}
-                      >
-                        <RadialBar
-                          minAngle={15}
-                          clockWise
-                          background
-                          dataKey="value"
-                          label={{ position: "insideStart", fill: "#fff" }}
-                        >
-                          {audienceAge.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </RadialBar>
-                        
-                      </RadialBarChart>
-                    </ResponsiveContainer>
-
+                      <Box sx={{
+                        width: 100,
+                        height: 100,
+                        borderRadius: '50%',
+                        border: '4px solid #8B5CF6',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>1,000</Typography>
+                      </Box>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
-                      {audienceAge.map((age)=>(
-                        <Typography variant="body2" sx={{ fontSize: '11px' }}>{age.name} : {age.value}</Typography>
-                      ))}
-                    
+                      <Typography variant="body2" sx={{ fontSize: '11px' }}>18-24</Typography>
+                      <Typography variant="body2" sx={{ fontSize: '11px' }}>24-30</Typography>
+                      <Typography variant="body2" sx={{ fontSize: '11px' }}>More than 30</Typography>
                     </Box>
                   </Card>
 
@@ -796,10 +739,13 @@ const InstagramAnalytics = () => {
                         <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
                             <Pie
-                              data={genderData}
+                              data={[
+                                { value: 95, color: '#8B5CF6' },
+                                { value: 5, color: '#E5E7EB' }
+                              ]}
                               cx="50%"
                               cy="50%"
-                              innerRadius={15}
+                              innerRadius={12}
                               outerRadius={25}
                               dataKey="value"
                             >
@@ -810,13 +756,12 @@ const InstagramAnalytics = () => {
                         </ResponsiveContainer>
                       </Box>
                       <Box sx={{ ml: 2 }}>
-                        {genderData?.map((gender)=>(
-                           <Typography variant="body2" sx={{ fontSize: '11px' }}>
-                            • {gender.name} {gender.value}
-                            
-                          </Typography>
-                        ))}
-                       
+                        <Typography variant="body2" sx={{ fontSize: '11px' }}>
+                          • Female 95%
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '11px' }}>
+                          • Male 5%
+                        </Typography>
                       </Box>
                     </Box>
                   </Card>
@@ -837,9 +782,8 @@ const InstagramAnalytics = () => {
                               outerRadius={35}
                               dataKey="value"
                             >
-  
                               {audienceReachabilityData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                <Cell key={`cell-${index}`} fill={entry.color} />
                               ))}
                             </Pie>
                           </PieChart>
@@ -861,7 +805,7 @@ const InstagramAnalytics = () => {
                     {audienceLocationData.map((location, index) => (
                       <Box key={index} sx={{ mb: 1 }}>
                         <Typography variant="body2" sx={{  mb: 0.5 }}>
-                          {location.name}
+                          {location.country}
                         </Typography>
                         <Box sx={{
                           width: '100%',
@@ -870,7 +814,7 @@ const InstagramAnalytics = () => {
                           borderRadius: 2
                         }}>
                           <Box sx={{
-                            width: `${location.value}%`,
+                            width: `${location.percentage}%`,
                             height: '100%',
                             backgroundColor: '#8B5CF6',
                             borderRadius: 2
@@ -910,16 +854,16 @@ const InstagramAnalytics = () => {
                   <Box sx={{ mt: 2 }}>
                   <Card sx={{ p: 2, mt: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
                   <Typography variant="body2" sx={{  color: 'text.secondary', mb: 1 }}>
-                      <strong>Audience Cities:</strong> {audiCities.map((city)=>(<span> {city}, </span>))}
+                      <strong>Audience Cities:</strong> Indore, Mumbai, Delhi, Noida
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                      <strong>Audience Language:</strong> {audiLang.map((lang)=>(<span>{lang}, </span>))}
+                      <strong>Audience Language:</strong> Hindi, English
                     </Typography>
                     <Typography variant="body2" sx={{  color: 'text.secondary', mb:1 }}>
-                      <strong>Audience Interests:</strong> {audiInterest.map((int)=>(<span>{int}, </span>))}
+                      <strong>Audience Interests:</strong> Beauty, Fashion, Lifestyle
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      <strong>Audience Brand Affinity:</strong> {audiBrand.map((brand)=>(<span>{brand}, </span>))}
+                      <strong>Audience Brand Affinity:</strong> Nykaa, Sephora, Apple
                     </Typography>
                   </Card>
                     
@@ -1052,4 +996,4 @@ const InstagramAnalytics = () => {
   );
 };
 
-export default InstagramAnalytics;
+export default LinkedinAnalytics;
