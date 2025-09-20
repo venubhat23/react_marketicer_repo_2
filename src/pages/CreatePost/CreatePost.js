@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 
 import {
   Box, Typography, Button,
@@ -32,7 +32,7 @@ import InstagramPost from "../../components/InstagramPost"
 import Layout from "../../components/Layout";
 import axios from 'axios';
 import { useMutation } from "@tanstack/react-query";
-import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
+import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, PlayArrow, Pause } from '@mui/icons-material';
 import { toast } from "react-toastify";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/material_green.css";
@@ -48,6 +48,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import Sidebar from '../../components/Sidebar';
 import MarketincerIcon from '../../assets/images/marketincerlogo.png';
 import { Link } from "react-router-dom";
+import SimpleImageEditor from '../../components/SimpleImageEditor';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -83,6 +84,11 @@ const CreatePost = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploadedMedia, setUploadedMedia] = useState([]);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [previewMediaIndex, setPreviewMediaIndex] = useState(0);
+  const [imageEditorOpen, setImageEditorOpen] = useState(false);
+  const [editingMediaIndex, setEditingMediaIndex] = useState(null);
   const [selectedPages, setSelectedPages] = useState([]);
   const [brandName, setBrandName] = useState("");
   const fileInputRef = useRef(null);
@@ -112,8 +118,110 @@ const CreatePost = () => {
   const [showPublishingLoader, setShowPublishingLoader] = useState(false);
   const [publishingProgress, setPublishingProgress] = useState(0);
   const [publishingStep, setPublishingStep] = useState('');
+  const [instagramPostType, setInstagramPostType] = useState('post'); // 'post', 'reel', 'story'
+  const [isVideoFile, setIsVideoFile] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [videoLoadingProgress, setVideoLoadingProgress] = useState(0);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [showVideoPopup, setShowVideoPopup] = useState(false);
+  const [popupVideoType, setPopupVideoType] = useState(''); // 'reel' or 'story'
+  const videoRef = useRef(null);
+  const storyVideoRef = useRef(null);
+  const popupVideoRef = useRef(null);
+  const loadingTimeoutRef = useRef(null);
+
+  // Function to check if current media is video
+  const isCurrentMediaVideo = () => {
+    if (isVideoFile) return true;
+    if (!uploadedImageUrl) return false;
+    
+    const videoExtensions = ['.mp4', '.mov', '.avi', '.webm', '.mkv', '.flv', '.wmv'];
+    return videoExtensions.some(ext => uploadedImageUrl.toLowerCase().includes(ext.toLowerCase()));
+  };
 
   console.log('hereree', selectUser)
+  console.log('isVideoFile:', isVideoFile, 'uploadedImageUrl:', uploadedImageUrl)
+  console.log('isCurrentMediaVideo():', isCurrentMediaVideo())
+
+  // Simplified video loading completion handlers
+  const completeVideoLoading = useCallback(() => {
+    setIsVideoLoading(false);
+    setVideoLoadingProgress(100);
+    // Clear timeout when video loads
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+  }, []);
+
+
+  // Reset video loading state when new video is uploaded
+  const resetVideoLoadingState = () => {
+    setVideoLoadingProgress(0);
+    setIsVideoLoading(true);
+    setIsPlaying(false);
+    
+    // Clear any existing timeout
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+    }
+    
+    // Set a timeout to prevent infinite loading (10 seconds)
+    loadingTimeoutRef.current = setTimeout(() => {
+      console.log('Video loading timeout reached');
+      setIsVideoLoading(false);
+      setVideoLoadingProgress(100);
+    }, 10000);
+  };
+
+  // Handle opening video popup
+  const openVideoPopup = (type) => {
+    setPopupVideoType(type);
+    setShowVideoPopup(true);
+  };
+
+  // Handle closing video popup
+  const closeVideoPopup = () => {
+    setShowVideoPopup(false);
+    setPopupVideoType('');
+    if (popupVideoRef.current) {
+      popupVideoRef.current.pause();
+    }
+  };
+
+  // Removed unused toggle functions since we're using popup modal now
+
+  // Handle video loading when new media is uploaded
+  useEffect(() => {
+    if (uploadedImageUrl && isVideoFile) {
+      // Reset loading state for videos directly in useEffect
+      setVideoLoadingProgress(0);
+      setIsVideoLoading(true);
+      setIsPlaying(false);
+      
+      console.log('Starting video load for both reel and story');
+      
+      // Clear any existing timeout
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+      
+      // Set a shorter timeout to prevent infinite loading (5 seconds)
+      loadingTimeoutRef.current = setTimeout(() => {
+        console.log('Video loading timeout reached - completing all loading states');
+        completeVideoLoading();
+      }, 5000);
+    }
+  }, [uploadedImageUrl, isVideoFile, completeVideoLoading]);
+
+  // Cleanup effect for timeouts
+  useEffect(() => {
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Function to process mentions in content
   const processMentions = (content) => {
@@ -350,7 +458,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
   }, []);
 
   const draftModelOpen = async (action) => {
-    if (!uploadedImageUrl || !postContent) {
+    if ((!uploadedImageUrl && uploadedMedia.length === 0) || !postContent) {
       alert("Please make sure all fields are filled out!");
       return;
     }
@@ -370,6 +478,16 @@ Would you like me to create this as a short handwritten-style note (suitable for
       setFile(droppedFile);
       setUploadedFileName(droppedFile.name);
       console.log('imgggg', uploadedImageUrl)
+
+      // Check if the file is a video
+      const isVideo = droppedFile.type.startsWith('video/');
+      console.log('Dropped file type:', droppedFile.type, 'Is video:', isVideo);
+      setIsVideoFile(isVideo);
+      
+      // Reset video loading state for videos
+      if (isVideo) {
+        resetVideoLoadingState();
+      }
 
       //  Auto-upload the file after drop
       handleFileUpload(droppedFile);
@@ -395,7 +513,24 @@ Would you like me to create this as a short handwritten-style note (suitable for
       const data = await response.json();
 
       if (data.url) {
-        setUploadedImageUrl(data.url); //  Store uploaded file URL
+        // Create media object
+        const mediaItem = {
+          id: Date.now() + Math.random(),
+          url: data.url,
+          file: file,
+          name: file.name,
+          type: file.type.startsWith('video/') ? 'video' : 'image'
+        };
+
+        // Add to uploaded media array
+        setUploadedMedia(prev => [...prev, mediaItem]);
+        
+        // Set as primary if it's the first upload
+        if (uploadedMedia.length === 0) {
+          setUploadedImageUrl(data.url);
+          setCurrentMediaIndex(0);
+          setPreviewMediaIndex(0);
+        }
 
         toast.success("File uploaded successfully!", {
           position: "top-right",
@@ -416,18 +551,91 @@ Would you like me to create this as a short handwritten-style note (suitable for
   };
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      console.log('11111', file)
-      setUploadedFileName(selectedFile.name);
-      //  Auto-upload the file after selection
-      handleFileUpload(selectedFile);
+    const selectedFiles = Array.from(e.target.files);
+    
+    selectedFiles.forEach(selectedFile => {
+      if (selectedFile) {
+        setFile(selectedFile);
+        setUploadedFileName(selectedFile.name);
+        
+        // Check if the file is a video
+        const isVideo = selectedFile.type.startsWith('video/');
+        console.log('File type:', selectedFile.type, 'Is video:', isVideo);
+        setIsVideoFile(isVideo);
+        
+        // Reset video loading state for videos
+        if (isVideo) {
+          resetVideoLoadingState();
+        }
+        
+        // Auto-upload the file after selection
+        handleFileUpload(selectedFile);
+      }
+    });
+  };
+
+  // Function to remove media from the array
+  const handleRemoveMedia = (mediaId) => {
+    setUploadedMedia(prev => {
+      const filtered = prev.filter(media => media.id !== mediaId);
+      
+      // Update current media if needed
+      if (filtered.length === 0) {
+        setUploadedImageUrl("");
+        setCurrentMediaIndex(0);
+        setPreviewMediaIndex(0);
+      } else if (currentMediaIndex >= filtered.length) {
+        const newIndex = filtered.length - 1;
+        setCurrentMediaIndex(newIndex);
+        setUploadedImageUrl(filtered[newIndex].url);
+        setPreviewMediaIndex(Math.min(previewMediaIndex, newIndex));
+      } else if (previewMediaIndex >= filtered.length) {
+        setPreviewMediaIndex(filtered.length - 1);
+      }
+      
+      return filtered;
+    });
+  };
+
+  // Function to select a media as primary
+  const handleSelectMedia = (mediaIndex) => {
+    if (uploadedMedia[mediaIndex]) {
+      setCurrentMediaIndex(mediaIndex);
+      setUploadedImageUrl(uploadedMedia[mediaIndex].url);
+      setIsVideoFile(uploadedMedia[mediaIndex].type === 'video');
     }
   };
 
+  const handleOpenImageEditor = (mediaIndex) => {
+    if (uploadedMedia[mediaIndex] && uploadedMedia[mediaIndex].type === 'image') {
+      setEditingMediaIndex(mediaIndex);
+      setImageEditorOpen(true);
+    }
+  };
+
+  const handleSaveEditedImage = (editedImageDataURL) => {
+    if (editingMediaIndex !== null) {
+      setUploadedMedia(prev => {
+        const updated = [...prev];
+        updated[editingMediaIndex] = {
+          ...updated[editingMediaIndex],
+          url: editedImageDataURL,
+          edited: true
+        };
+        return updated;
+      });
+
+      // Update main image URL if this is the current media
+      if (editingMediaIndex === currentMediaIndex) {
+        setUploadedImageUrl(editedImageDataURL);
+      }
+    }
+    setImageEditorOpen(false);
+    setEditingMediaIndex(null);
+  };
+
   const handlePublish = async () => {
-    if (!postContent) {
+    if ((!uploadedImageUrl && uploadedMedia.length === 0) || !postContent) {
       alert("Please make sure all fields are filled out!");
       return;
     }
@@ -444,21 +652,41 @@ Would you like me to create this as a short handwritten-style note (suitable for
       setPublishingStep(step);
     };
 
+    const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
+    
+    // Determine post type and platform-specific data
+    const isInstagram = selectedUsers.some(user => user.page_type === 'instagram');
+    const postType = isInstagram ? instagramPostType : 'post';
+    
+    // Prepare media data - use multiple media if available, fallback to single image
+    const mediaData = uploadedMedia.length > 0 ? {
+      media_urls: uploadedMedia.map(media => media.url),
+      media_types: uploadedMedia.map(media => media.type),
+      primary_media_url: uploadedImageUrl || uploadedMedia[0]?.url
+    } : {
+      s3_url: uploadedImageUrl
+    };
+    
+    const payloadData = {
+      social_page_ids: selectedPages,
+      post: {
+        ...mediaData,
+        comments: stripHtmlTags(postContent),
+        brand_name: brandName,
+        status: "publish",
+        post_type: postType,
+        platform_data: isInstagram ? {
+          instagram_type: instagramPostType
+        } : {}
+      },
+    };
+    console.log('Publishing with multiple media:', payloadData)
+
     try {
       // Step 1: Preparing content
       await new Promise(resolve => setTimeout(resolve, 500));
       updateProgress(20, 'Preparing your content...');
 
-      const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
-      const payloadData = {
-        social_page_ids: selectedPages,
-        post: {
-          s3_url: uploadedImageUrl,
-          comments: stripHtmlTags(postContent),
-          brand_name: brandName,
-          status: "publish"
-        },
-      };
 
       // Step 2: Uploading to platforms
       updateProgress(40, 'Connecting to social platforms...');
@@ -489,6 +717,14 @@ Would you like me to create this as a short handwritten-style note (suitable for
 
       // Hide loader and reset states
       setShowPublishingLoader(false);
+      
+      // Clear form states
+      setSelectedPages([]);
+      setPostContent("");
+      setUploadedImageUrl("");
+      setUploadedMedia([]);
+      setCurrentMediaIndex(0);
+      setPreviewMediaIndex(0);
       setPosting(false);
       setPublishingProgress(0);
       setPublishingStep('');
@@ -538,7 +774,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
   };
 
   const draftHandler = async () => {
-    if (!uploadedImageUrl || !postContent) {
+    if ((!uploadedImageUrl && uploadedMedia.length === 0) || !postContent) {
       alert("Please make sure all fields are filled out!");
       return;
     }
@@ -555,22 +791,41 @@ Would you like me to create this as a short handwritten-style note (suitable for
       setPublishingStep(step);
     };
 
+    const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
+    
+    // Determine post type and platform-specific data
+    const isInstagram = selectedUsers.some(user => user.page_type === 'instagram');
+    const postType = isInstagram ? instagramPostType : 'post';
+    
+    // Prepare media data - use multiple media if available, fallback to single image
+    const mediaData = uploadedMedia.length > 0 ? {
+      media_urls: uploadedMedia.map(media => media.url),
+      media_types: uploadedMedia.map(media => media.type),
+      primary_media_url: uploadedImageUrl || uploadedMedia[0]?.url
+    } : {
+      s3_url: uploadedImageUrl
+    };
+    
+    const payloadData = {
+      social_page_ids: selectedPages,
+      post: {
+        ...mediaData,
+        comments: stripHtmlTags(postContent),
+        brand_name: brandName,
+        status: createPostMode,
+        scheduled_at: selectedDateTime,
+        post_type: postType,
+        platform_data: isInstagram ? {
+          instagram_type: instagramPostType
+        } : {}
+      },
+    };
+
     try {
       // Step 1: Preparing content
       await new Promise(resolve => setTimeout(resolve, 400));
       updateProgress(25, 'Validating your content...');
 
-      const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
-      const payloadData = {
-        social_page_ids: selectedPages,
-        post: {
-          s3_url: uploadedImageUrl,
-          comments: stripHtmlTags(postContent),
-          brand_name: brandName,
-          status: createPostMode,
-          scheduled_at: selectedDateTime
-        },
-      };
 
       // Step 2: Processing schedule
       updateProgress(50, createPostMode === 'schedule' ? 'Setting up schedule...' : 'Saving draft...');
@@ -596,6 +851,10 @@ Would you like me to create this as a short handwritten-style note (suitable for
       setSelectedPages([]);
       setPostContent("");
       setUploadedImageUrl("");
+      setUploadedMedia([]);
+      setCurrentMediaIndex(0);
+      setPreviewMediaIndex(0);
+      setPosting(false);
       setOpenDateTimePicker(false);
       setUploadedFileName('');
       setOpen(false);
@@ -1127,6 +1386,17 @@ Would you like me to create this as a short handwritten-style note (suitable for
       { icon: <SendIcon />, text: "Send", color: "#666" },
     ];
 
+    const mediaToShow = uploadedMedia.length > 0 ? uploadedMedia : (uploadedImageUrl ? [{ url: uploadedImageUrl, type: 'image' }] : []);
+    const currentPreviewMedia = mediaToShow[previewMediaIndex] || mediaToShow[0];
+
+    const handlePrevImage = () => {
+      setPreviewMediaIndex(prev => prev > 0 ? prev - 1 : mediaToShow.length - 1);
+    };
+
+    const handleNextImage = () => {
+      setPreviewMediaIndex(prev => prev < mediaToShow.length - 1 ? prev + 1 : 0);
+    };
+
     return (
       <Card sx={{ 
         borderRadius: 2, 
@@ -1165,8 +1435,8 @@ Would you like me to create this as a short handwritten-style note (suitable for
             </Box>
           )}
 
-          {/* Post Image or PDF Document */}
-          {uploadedImageUrl ? (
+          {/* Post Image/Media or PDF Document */}
+          {mediaToShow.length > 0 ? (
             isPdfMode ? (
               /* PDF Document Preview */
               <Box sx={{ mb: 2 }}>
@@ -1224,7 +1494,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
                   }}
                 >
                   <img 
-                    src={uploadedImageUrl} 
+                    src={currentPreviewMedia?.url} 
                     alt="PDF document preview" 
                     style={{ 
                       width: '100%', 
@@ -1238,26 +1508,102 @@ Would you like me to create this as a short handwritten-style note (suitable for
                 </Box>
               </Box>
             ) : (
-              /* Regular Image Preview */
+              /* Regular Media Preview with Navigation */
               <Box 
                 sx={{ 
                   width: '100%', 
                   borderRadius: 1, 
                   overflow: 'hidden',
-                  mb: 2
+                  mb: 2,
+                  position: 'relative'
                 }}
               >
-                <img 
-                  src={uploadedImageUrl} 
-                  alt="LinkedIn post" 
-                  style={{ 
-                    width: '100%', 
-                    height: 'auto',
-                    maxHeight: '300px',
-                    objectFit: 'cover',
-                    display: 'block'
-                  }} 
-                />
+                {currentPreviewMedia?.type === 'video' ? (
+                  <video 
+                    src={currentPreviewMedia.url} 
+                    style={{ 
+                      width: '100%', 
+                      height: 'auto',
+                      maxHeight: '300px',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                    controls={false}
+                    muted
+                  />
+                ) : (
+                  <img 
+                    src={currentPreviewMedia?.url} 
+                    alt="LinkedIn post" 
+                    style={{ 
+                      width: '100%', 
+                      height: 'auto',
+                      maxHeight: '300px',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }} 
+                  />
+                )}
+
+                {/* Multiple Media Navigation */}
+                {mediaToShow.length > 1 && (
+                  <>
+                    {/* Navigation Arrows */}
+                    {previewMediaIndex > 0 && (
+                      <IconButton
+                        onClick={handlePrevImage}
+                        sx={{
+                          position: 'absolute',
+                          left: 8,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          bgcolor: 'rgba(0,0,0,0.6)',
+                          color: 'white',
+                          width: 32,
+                          height: 32,
+                          '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' }
+                        }}
+                      >
+                        <ArrowLeftIcon sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    )}
+                    
+                    {previewMediaIndex < mediaToShow.length - 1 && (
+                      <IconButton
+                        onClick={handleNextImage}
+                        sx={{
+                          position: 'absolute',
+                          right: 8,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          bgcolor: 'rgba(0,0,0,0.6)',
+                          color: 'white',
+                          width: 32,
+                          height: 32,
+                          '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' }
+                        }}
+                      >
+                        <ArrowLeftIcon sx={{ fontSize: 16, transform: 'rotate(180deg)' }} />
+                      </IconButton>
+                    )}
+
+                    {/* Multiple photos indicator */}
+                    <Box sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      bgcolor: 'rgba(0,0,0,0.7)',
+                      color: 'white',
+                      borderRadius: 1,
+                      px: 1,
+                      py: 0.5
+                    }}>
+                      <Typography variant="caption" sx={{ fontSize: 10 }}>
+                        {previewMediaIndex + 1}/{mediaToShow.length}
+                      </Typography>
+                    </Box>
+                  </>
+                )}
               </Box>
             )
           ) : (
@@ -1268,6 +1614,25 @@ Would you like me to create this as a short handwritten-style note (suitable for
               height={200} 
               sx={{ borderRadius: 1, mb: 2 }} 
             />
+          )}
+
+          {/* Dots indicator for multiple images below content */}
+          {mediaToShow.length > 1 && !isPdfMode && (
+            <Box display="flex" justifyContent="center" gap={0.5} mb={2}>
+              {mediaToShow.map((_, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    bgcolor: index === previewMediaIndex ? '#0a66c2' : '#c7c7c7',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setPreviewMediaIndex(index)}
+                />
+              ))}
+            </Box>
           )}
 
           {/* Engagement Stats */}
@@ -1320,8 +1685,19 @@ Would you like me to create this as a short handwritten-style note (suitable for
     );
   };
 
-  // Instagram Preview Component
-  const InstagramPreview = () => {
+  // Instagram Post Preview Component
+  const InstagramPostPreview = () => {
+    const mediaToShow = uploadedMedia.length > 0 ? uploadedMedia : (uploadedImageUrl ? [{ url: uploadedImageUrl, type: 'image' }] : []);
+    const currentPreviewMedia = mediaToShow[previewMediaIndex] || mediaToShow[0];
+
+    const handlePrevImage = () => {
+      setPreviewMediaIndex(prev => prev > 0 ? prev - 1 : mediaToShow.length - 1);
+    };
+
+    const handleNextImage = () => {
+      setPreviewMediaIndex(prev => prev < mediaToShow.length - 1 ? prev + 1 : 0);
+    };
+
     return (
       <Card sx={{ 
         borderRadius: 2, 
@@ -1350,19 +1726,119 @@ Would you like me to create this as a short handwritten-style note (suitable for
             </Box>
           </Box>
 
-          {/* Post Image */}
-          {uploadedImageUrl ? (
-            <Box sx={{ width: '100%', aspectRatio: '1/1', overflow: 'hidden' }}>
-              <img 
-                src={uploadedImageUrl} 
-                alt="Instagram post" 
-                style={{ 
-                  width: '100%', 
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block'
-                }} 
-              />
+          {/* Post Image/Video with Navigation */}
+          {mediaToShow.length > 0 ? (
+            <Box sx={{ width: '100%', aspectRatio: '1/1', position: 'relative', overflow: 'hidden' }}>
+              {currentPreviewMedia?.type === 'video' ? (
+                <video 
+                  src={currentPreviewMedia.url} 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                  controls={false}
+                  muted
+                />
+              ) : (
+                <img 
+                  src={currentPreviewMedia?.url} 
+                  alt="Instagram post" 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }} 
+                />
+              )}
+
+              {/* Multiple Image Indicator */}
+              {mediaToShow.length > 1 && (
+                <>
+                  {/* Navigation Arrows */}
+                  {previewMediaIndex > 0 && (
+                    <IconButton
+                      onClick={handlePrevImage}
+                      sx={{
+                        position: 'absolute',
+                        left: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        bgcolor: 'rgba(0,0,0,0.5)',
+                        color: 'white',
+                        width: 32,
+                        height: 32,
+                        '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' }
+                      }}
+                    >
+                      <ArrowLeftIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  )}
+                  
+                  {previewMediaIndex < mediaToShow.length - 1 && (
+                    <IconButton
+                      onClick={handleNextImage}
+                      sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        bgcolor: 'rgba(0,0,0,0.5)',
+                        color: 'white',
+                        width: 32,
+                        height: 32,
+                        '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' }
+                      }}
+                    >
+                      <ArrowLeftIcon sx={{ fontSize: 16, transform: 'rotate(180deg)' }} />
+                    </IconButton>
+                  )}
+
+                  {/* Dots Indicator */}
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    display: 'flex',
+                    gap: 0.5,
+                    bgcolor: 'rgba(0,0,0,0.5)',
+                    borderRadius: 2,
+                    p: 0.5
+                  }}>
+                    {mediaToShow.map((_, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%',
+                          bgcolor: index === previewMediaIndex ? 'white' : 'rgba(255,255,255,0.5)',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setPreviewMediaIndex(index)}
+                      />
+                    ))}
+                  </Box>
+
+                  {/* Multiple photos indicator */}
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 8,
+                    left: 8,
+                    bgcolor: 'rgba(0,0,0,0.7)',
+                    color: 'white',
+                    borderRadius: 1,
+                    px: 1,
+                    py: 0.5
+                  }}>
+                    <Typography variant="caption" sx={{ fontSize: 10 }}>
+                      {previewMediaIndex + 1}/{mediaToShow.length}
+                    </Typography>
+                  </Box>
+                </>
+              )}
             </Box>
           ) : (
             <Skeleton 
@@ -1383,6 +1859,25 @@ Would you like me to create this as a short handwritten-style note (suitable for
               </Box>
               <BookmarkBorderIcon sx={{ fontSize: 24, color: '#262626', cursor: 'pointer' }} />
             </Box>
+            
+            {/* Dots indicator for multiple images */}
+            {mediaToShow.length > 1 && (
+              <Box display="flex" justifyContent="center" gap={0.5} mb={1}>
+                {mediaToShow.map((_, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      bgcolor: index === previewMediaIndex ? '#0095f6' : '#c7c7c7',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setPreviewMediaIndex(index)}
+                  />
+                ))}
+              </Box>
+            )}
             
             <Typography variant="body2" fontWeight="600" color="#000" mb={0.5}>
               127 likes
@@ -1410,8 +1905,530 @@ Would you like me to create this as a short handwritten-style note (suitable for
     );
   };
 
+  // Instagram Reel Preview Component
+  const InstagramReelPreview = () => {
+    console.log('Rendering InstagramReelPreview, isVideoLoading:', isVideoLoading, 'uploadedImageUrl:', uploadedImageUrl, 'isVideoFile:', isVideoFile);
+    return (
+      <Card sx={{ 
+        borderRadius: 2, 
+        backgroundColor: '#000',
+        maxWidth: 280,
+        margin: '0 auto',
+        aspectRatio: '9/16',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Reel Video/Image */}
+        {uploadedImageUrl ? (
+          isCurrentMediaVideo() ? (
+            // Rendering Reel Video
+            <Box sx={{ 
+              width: '100%', 
+              height: '100%', 
+              position: 'relative'
+            }}>
+              <video
+                ref={videoRef}
+                src={uploadedImageUrl}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+                controls={false}
+                loop
+                playsInline
+                muted
+                onError={(e) => {
+                  console.log('Video error:', e.target.error);
+                  completeVideoLoading();
+                }}
+                onLoadedData={() => {
+                  console.log('Video loaded successfully');
+                  completeVideoLoading();
+                }}
+                onCanPlay={() => {
+                  console.log('Video can play');
+                  completeVideoLoading();
+                }}
+              />
+              
+              {/* Centered Play Button */}
+              {!isVideoLoading && (
+                <Box
+                  onClick={() => openVideoPopup('reel')}
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 80,
+                    height: 80,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(0,0,0,0.6)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0,0,0,0.8)',
+                      transform: 'translate(-50%, -50%) scale(1.1)'
+                    }
+                  }}
+                >
+                  <PlayArrow sx={{ fontSize: 40, color: 'white', ml: 0.5 }} />
+                </Box>
+              )}
+              
+              {/* Video Loading Progress Overlay */}
+              {isVideoLoading && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    zIndex: 10
+                  }}
+                >
+                  <CircularProgress 
+                    variant="indeterminate"
+                    size={80}
+                    thickness={4}
+                    sx={{ 
+                      color: '#fff',
+                      mb: 2
+                    }}
+                  />
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    Loading Reel...
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
+                    Preparing video...
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          ) : (
+            console.log('Rendering Reel Image') ||
+            <Box sx={{ 
+              width: '100%', 
+              height: '100%', 
+              position: 'relative',
+              background: `url(${uploadedImageUrl}) center/cover`
+            }}>
+              {/* Play button overlay for video effect */}
+              <Box sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 60,
+                height: 60,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}>
+                <Box sx={{
+                  width: 0,
+                  height: 0,
+                  borderLeft: '20px solid #000',
+                  borderTop: '12px solid transparent',
+                  borderBottom: '12px solid transparent',
+                  ml: '4px'
+                }} />
+              </Box>
+            </Box>
+          )
+        ) : (
+          <Box sx={{ 
+            width: '100%', 
+            height: '100%', 
+            backgroundColor: '#333',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <VideoLibraryIcon sx={{ fontSize: 48, color: '#666' }} />
+          </Box>
+        )}
+
+        {/* Reel UI Overlay */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          p: 2
+        }}>
+          {/* Top section with username */}
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Typography variant="body2" color="white" fontWeight="600">
+              Reels
+            </Typography>
+            <MoreVert sx={{ color: 'white', fontSize: 24 }} />
+          </Box>
+
+          {/* Bottom section */}
+          <Box>
+            {/* Right side actions */}
+            <Box sx={{ 
+              position: 'absolute', 
+              right: 16, 
+              bottom: 100,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 3,
+              alignItems: 'center'
+            }}>
+              <Box sx={{ textAlign: 'center' }}>
+                <FavoriteBorderIcon sx={{ fontSize: 28, color: 'white', cursor: 'pointer' }} />
+                <Typography variant="caption" color="white" display="block">487</Typography>
+              </Box>
+              <Box sx={{ textAlign: 'center' }}>
+                <ChatBubbleOutlineIcon sx={{ fontSize: 28, color: 'white', cursor: 'pointer' }} />
+                <Typography variant="caption" color="white" display="block">23</Typography>
+              </Box>
+              <Box sx={{ textAlign: 'center' }}>
+                <SendIcon sx={{ fontSize: 28, color: 'white', cursor: 'pointer' }} />
+              </Box>
+              <Box sx={{ textAlign: 'center' }}>
+                <BookmarkBorderIcon sx={{ fontSize: 28, color: 'white', cursor: 'pointer' }} />
+              </Box>
+              <Box sx={{ textAlign: 'center' }}>
+                <MoreVert sx={{ fontSize: 28, color: 'white', cursor: 'pointer' }} />
+              </Box>
+            </Box>
+
+            {/* Bottom user info and caption */}
+            <Box display="flex" alignItems="center" mb={1}>
+              <Avatar 
+                src={selectUser?.picture_url || "https://via.placeholder.com/40"} 
+                sx={{ width: 32, height: 32, mr: 1.5 }}
+              />
+              <Typography variant="body2" fontWeight="600" color="white">
+                {selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
+              </Typography>
+            </Box>
+            
+            {/* Caption */}
+            {postContent && (
+              <Typography variant="body2" color="white" sx={{ 
+                lineHeight: 1.4,
+                maxHeight: '60px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
+                <span dangerouslySetInnerHTML={{ __html: processMentions(postContent) }} />
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      </Card>
+    );
+  };
+
+  // Instagram Story Preview Component
+  const InstagramStoryPreview = () => {
+    console.log('Rendering InstagramStoryPreview, isVideoLoading:', isVideoLoading, 'uploadedImageUrl:', uploadedImageUrl, 'isVideoFile:', isVideoFile);
+    return (
+      <Card sx={{ 
+        borderRadius: 3, 
+        backgroundColor: '#000',
+        maxWidth: 280,
+        margin: '0 auto',
+        aspectRatio: '9/16',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Story progress bar */}
+        <Box sx={{
+          position: 'absolute',
+          top: 12,
+          left: 12,
+          right: 12,
+          zIndex: 10,
+          display: 'flex',
+          gap: 0.5
+        }}>
+          <Box sx={{
+            flex: 1,
+            height: 3,
+            backgroundColor: 'white',
+            borderRadius: 1.5,
+            opacity: 0.9
+          }} />
+          <Box sx={{
+            flex: 1,
+            height: 3,
+            backgroundColor: 'rgba(255,255,255,0.3)',
+            borderRadius: 1.5
+          }} />
+          <Box sx={{
+            flex: 1,
+            height: 3,
+            backgroundColor: 'rgba(255,255,255,0.3)',
+            borderRadius: 1.5
+          }} />
+        </Box>
+
+        {/* Story header */}
+        <Box sx={{
+          position: 'absolute',
+          top: 24,
+          left: 12,
+          right: 12,
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mt: 2
+        }}>
+          <Box display="flex" alignItems="center">
+            <Avatar 
+              src={selectUser?.picture_url || "https://via.placeholder.com/40"} 
+              sx={{ width: 32, height: 32, mr: 1, border: '2px solid white' }}
+            />
+            <Typography variant="body2" fontWeight="600" color="white">
+              {selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
+            </Typography>
+            <Typography variant="body2" color="rgba(255,255,255,0.7)" sx={{ ml: 1 }}>
+              2h
+            </Typography>
+          </Box>
+          <MoreVert sx={{ color: 'white', fontSize: 24 }} />
+        </Box>
+
+        {/* Story content */}
+        {uploadedImageUrl ? (
+          isCurrentMediaVideo() ? (
+            // Rendering Story Video
+            <Box sx={{ 
+              width: '100%', 
+              height: '100%', 
+              position: 'relative'
+            }}>
+              <video
+                ref={storyVideoRef}
+                src={uploadedImageUrl}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+                controls={false}
+                loop
+                playsInline
+                muted
+                onError={(e) => {
+                  console.log('Video error:', e.target.error);
+                  completeVideoLoading();
+                }}
+                onLoadedData={() => {
+                  console.log('Video loaded successfully');
+                  completeVideoLoading();
+                }}
+                onCanPlay={() => {
+                  console.log('Video can play');
+                  completeVideoLoading();
+                }}
+              />
+              
+              {/* Centered Play Button */}
+              {!isVideoLoading && (
+                <Box
+                  onClick={() => openVideoPopup('story')}
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 70,
+                    height: 70,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(0,0,0,0.6)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0,0,0,0.8)',
+                      transform: 'translate(-50%, -50%) scale(1.1)'
+                    }
+                  }}
+                >
+                  <PlayArrow sx={{ fontSize: 35, color: 'white', ml: 0.5 }} />
+                </Box>
+              )}
+              
+              {/* Video Loading Progress Overlay */}
+              {isVideoLoading && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    zIndex: 10
+                  }}
+                >
+                  <CircularProgress 
+                    variant="indeterminate"
+                    size={60}
+                    thickness={4}
+                    sx={{ 
+                      color: '#fff',
+                      mb: 1
+                    }}
+                  />
+                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                    Loading Story...
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 0.5, opacity: 0.8, fontSize: '12px' }}>
+                    Preparing...
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          ) : (
+            console.log('Rendering Story Image') ||
+            <Box sx={{ 
+              width: '100%', 
+              height: '100%', 
+              background: `url(${uploadedImageUrl}) center/cover`
+            }} />
+          )
+        ) : (
+          <Box sx={{ 
+            width: '100%', 
+            height: '100%', 
+            backgroundColor: '#333',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <ImageIcon sx={{ fontSize: 48, color: '#666' }} />
+          </Box>
+        )}
+
+        {/* Story text overlay */}
+        {postContent && (
+          <Box sx={{
+            position: 'absolute',
+            bottom: 100,
+            left: 12,
+            right: 12,
+            textAlign: 'center'
+          }}>
+            <Typography variant="h6" color="white" sx={{ 
+              fontWeight: 'bold',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+              fontSize: '18px'
+            }}>
+              <span dangerouslySetInnerHTML={{ __html: processMentions(postContent) }} />
+            </Typography>
+          </Box>
+        )}
+
+        {/* Story bottom actions */}
+        <Box sx={{
+          position: 'absolute',
+          bottom: 12,
+          left: 12,
+          right: 12,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <Box sx={{
+            flex: 1,
+            height: 44,
+            border: '2px solid white',
+            borderRadius: 22,
+            display: 'flex',
+            alignItems: 'center',
+            px: 2
+          }}>
+            <Typography variant="body2" color="white" sx={{ opacity: 0.7 }}>
+              Send message
+            </Typography>
+          </Box>
+          <Box sx={{
+            width: 44,
+            height: 44,
+            border: '2px solid white',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <FavoriteBorderIcon sx={{ fontSize: 20, color: 'white' }} />
+          </Box>
+          <Box sx={{
+            width: 44,
+            height: 44,
+            border: '2px solid white',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <SendIcon sx={{ fontSize: 20, color: 'white' }} />
+          </Box>
+        </Box>
+      </Card>
+    );
+  };
+
+  // Main Instagram Preview Component
+  const InstagramPreview = () => {
+    return (
+      <Box>
+        {/* Render appropriate preview based on selected type */}
+        {instagramPostType === 'post' && <InstagramPostPreview key="instagram-post" />}
+        {instagramPostType === 'reel' && <InstagramReelPreview key="instagram-reel" />}
+        {instagramPostType === 'story' && <InstagramStoryPreview key="instagram-story" />}
+      </Box>
+    );
+  };
+
   // Facebook Preview Component  
   const FacebookPreview = () => {
+    const mediaToShow = uploadedMedia.length > 0 ? uploadedMedia : (uploadedImageUrl ? [{ url: uploadedImageUrl, type: 'image' }] : []);
+    const currentPreviewMedia = mediaToShow[previewMediaIndex] || mediaToShow[0];
+
+    const handlePrevImage = () => {
+      setPreviewMediaIndex(prev => prev > 0 ? prev - 1 : mediaToShow.length - 1);
+    };
+
+    const handleNextImage = () => {
+      setPreviewMediaIndex(prev => prev < mediaToShow.length - 1 ? prev + 1 : 0);
+    };
+
     return (
       <Card sx={{ 
         borderRadius: 2, 
@@ -1449,20 +2466,97 @@ Would you like me to create this as a short handwritten-style note (suitable for
             </Box>
           )}
 
-          {/* Post Image */}
-          {uploadedImageUrl ? (
-            <Box sx={{ width: '100%', overflow: 'hidden' }}>
-              <img 
-                src={uploadedImageUrl} 
-                alt="Facebook post" 
-                style={{ 
-                  width: '100%', 
-                  height: 'auto',
-                  maxHeight: '400px',
-                  objectFit: 'cover',
-                  display: 'block'
-                }} 
-              />
+          {/* Post Image/Video with Navigation */}
+          {mediaToShow.length > 0 ? (
+            <Box sx={{ width: '100%', overflow: 'hidden', position: 'relative' }}>
+              {currentPreviewMedia?.type === 'video' ? (
+                <video 
+                  src={currentPreviewMedia.url} 
+                  style={{ 
+                    width: '100%', 
+                    height: 'auto',
+                    maxHeight: '400px',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                  controls={false}
+                  muted
+                />
+              ) : (
+                <img 
+                  src={currentPreviewMedia?.url} 
+                  alt="Facebook post" 
+                  style={{ 
+                    width: '100%', 
+                    height: 'auto',
+                    maxHeight: '400px',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }} 
+                />
+              )}
+
+              {/* Multiple Media Navigation */}
+              {mediaToShow.length > 1 && (
+                <>
+                  {/* Navigation Arrows */}
+                  {previewMediaIndex > 0 && (
+                    <IconButton
+                      onClick={handlePrevImage}
+                      sx={{
+                        position: 'absolute',
+                        left: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        bgcolor: 'rgba(255,255,255,0.9)',
+                        color: '#1c1e21',
+                        width: 32,
+                        height: 32,
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
+                      }}
+                    >
+                      <ArrowLeftIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  )}
+                  
+                  {previewMediaIndex < mediaToShow.length - 1 && (
+                    <IconButton
+                      onClick={handleNextImage}
+                      sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        bgcolor: 'rgba(255,255,255,0.9)',
+                        color: '#1c1e21',
+                        width: 32,
+                        height: 32,
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
+                      }}
+                    >
+                      <ArrowLeftIcon sx={{ fontSize: 16, transform: 'rotate(180deg)' }} />
+                    </IconButton>
+                  )}
+
+                  {/* Multiple photos indicator */}
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    bgcolor: 'rgba(0,0,0,0.7)',
+                    color: 'white',
+                    borderRadius: 1,
+                    px: 1,
+                    py: 0.5
+                  }}>
+                    <Typography variant="caption" sx={{ fontSize: 10 }}>
+                      {previewMediaIndex + 1}/{mediaToShow.length}
+                    </Typography>
+                  </Box>
+                </>
+              )}
             </Box>
           ) : (
             <Skeleton 
@@ -1471,6 +2565,25 @@ Would you like me to create this as a short handwritten-style note (suitable for
               width="100%" 
               height={250} 
             />
+          )}
+
+          {/* Dots indicator for multiple images below content */}
+          {mediaToShow.length > 1 && (
+            <Box display="flex" justifyContent="center" gap={0.5} p={1}>
+              {mediaToShow.map((_, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    bgcolor: index === previewMediaIndex ? '#1877f2' : '#c7c7c7',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setPreviewMediaIndex(index)}
+                />
+              ))}
+            </Box>
           )}
 
           {/* Engagement Stats */}
@@ -1646,7 +2759,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
         </Paper>
         <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'20px'}}>
         <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
-          <Grid size={{ xs: 12, sm: 8, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%' }}>
+          <Grid size={{ xs: 12, sm: 8, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%', overflowY: 'auto' }}>
               {/* Dropdowns */}
               <Box display="flex" gap={2} mb={2} >
                 <FormControl fullWidth>
@@ -1860,6 +2973,80 @@ Would you like me to create this as a short handwritten-style note (suitable for
 
               </Box>
 
+              {/* Instagram Post Type Tabs - Only show when Instagram is selected */}
+              {selectedUsers.some(user => user.page_type === 'instagram') && (
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  mb: 2,
+                  width: 'fit-content'
+                }}>
+                  {/* Instagram Icon */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    mr: 0.5
+                  }}>
+                    <img src={InstaIcon} alt="Instagram" width="16" height="16" />
+                  </Box>
+                  
+                  {/* Tab Buttons */}
+                  <Box sx={{ display: 'flex', gap: 0, width: 'fit-content' }}>
+                    {[
+                      { type: 'post', label: 'Post' },
+                      { type: 'reel', label: 'Reel' },
+                      { type: 'story', label: 'Story' }
+                    ].map((item) => (
+                      <Button
+                        key={item.type}
+                        onClick={() => setInstagramPostType(item.type)}
+                        sx={{
+                          minWidth: '20px',
+                          maxWidth: '22px',
+                          px: 0,
+                          py: 0.25,
+                          borderRadius: 0,
+                          textTransform: 'none',
+                          fontSize: '8px',
+                          fontWeight: 'normal !important',
+                          height: '22px',
+                          color: instagramPostType === item.type ? '#882AFF !important' : '#999 !important',
+                          backgroundColor: 'transparent !important',
+                          border: 'none',
+                          borderBottom: instagramPostType === item.type ? '2px solid #882AFF' : '2px solid transparent',
+                          boxShadow: 'none !important',
+                          '&:hover': {
+                            backgroundColor: 'transparent !important',
+                            color: instagramPostType === item.type ? '#882AFF !important' : '#999 !important',
+                            border: 'none',
+                            borderBottom: instagramPostType === item.type ? '2px solid #882AFF' : '2px solid transparent',
+                            boxShadow: 'none !important'
+                          },
+                          '&:focus': {
+                            outline: 'none',
+                            backgroundColor: 'transparent !important',
+                            color: instagramPostType === item.type ? '#882AFF !important' : '#999 !important',
+                            boxShadow: 'none !important'
+                          },
+                          '&:active': {
+                            backgroundColor: 'transparent !important',
+                            color: instagramPostType === item.type ? '#882AFF !important' : '#999 !important',
+                            boxShadow: 'none !important'
+                          },
+                          '&.Mui-focusVisible': {
+                            backgroundColor: 'transparent !important',
+                            color: instagramPostType === item.type ? '#882AFF !important' : '#999 !important',
+                            boxShadow: 'none !important'
+                          }
+                        }}
+                      >
+                        {item.label}
+                      </Button>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
               {/* Text Field with Generate AI Button */}
 <Box sx={{ 
   position: 'relative', 
@@ -2020,75 +3207,255 @@ Would you like me to create this as a short handwritten-style note (suitable for
                 </Typography>
               </Box>
 
-              {/* Uploaded Images */}
-              <Box display="flex" gap={1} mb={1}>
-                {uploadedImageUrl && (
-                  <Box position="relative">
-                    <Avatar
-                      variant="rounded"
-                      src={uploadedImageUrl}
-                      sx={{ width: 120, height: 120 }}
-                    />
-                    <IconButton
-                      size="small"
-                      sx={{
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        bgcolor: 'white',
-                      }}
-                      onClick={() => {
-                        setUploadedImageUrl("");
-                        setUploadedFileName("");
-                        setFile(null);
-                      }}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                )}
-
-              </Box>
-
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                flexDirection="column"
-                sx={{
-                  //width: "100%",
-                  padding: "12px",
-                  border: "1px solid #f0f0f0",
-                  borderRadius: "8px",
-                  backgroundColor: "#fff",
-                  textAlign: "center",
-                  cursor: "pointer",
-                  my: 1,
-                  //margin: "10px",
-                  marginLeft: "0px",
-                  boxShadow: '0px 2px 1px -1px rgb(247 247 247 / 12%), 0px 1px 1px 0px rgb(247 247 247 / 12%), 0px 1px 3px 0px rgb(247 247 247 / 12%)'
-                }}
-                onClick={handleBoxClick}
-                onDrop={handleDrop} // ✅ Handles dropped files
-                onDragOver={(e) => e.preventDefault()} // ✅ Prevents default drag behavior
-              >
-
-
-                <Typography variant="body2" sx={{ color: "#000", padding:'0px'}}>
-                  +  Upload Media
+              {/* Multiple Media Upload Grid */}
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                  Upload Media
                 </Typography>
+                
+                {/* Horizontal scrolling container */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 2, 
+                  overflowX: 'auto',
+                  pb: 1,
+                  maxWidth: '100%',
+                  '&::-webkit-scrollbar': {
+                    height: '6px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    backgroundColor: '#f1f1f1',
+                    borderRadius: '3px',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: '#c1c1c1',
+                    borderRadius: '3px',
+                    '&:hover': {
+                      backgroundColor: '#a1a1a1',
+                    }
+                  }
+                }}>
+                  {/* Display uploaded media */}
+                  {uploadedMedia.map((media, index) => (
+                    <Box 
+                      key={media.id}
+                      position="relative" 
+                      sx={{
+                        cursor: 'pointer',
+                        minWidth: '120px',
+                        width: '120px',
+                        height: '120px',
+                        border: currentMediaIndex === index ? '3px solid #882AFF' : '1px solid #e0e0e0',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        flexShrink: 0,
+                        '&:hover': {
+                          transform: 'scale(1.02)',
+                          transition: 'transform 0.2s ease',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                        },
+                        boxShadow: currentMediaIndex === index ? '0 0 0 1px #882AFF' : 'none'
+                      }}
+                      onClick={() => handleSelectMedia(index)}
+                    >
+                      {media.type === 'video' ? (
+                        <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+                          <video
+                            src={media.url}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          <Box 
+                            sx={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              transform: 'translate(-50%, -50%)',
+                              bgcolor: 'rgba(0,0,0,0.6)',
+                              borderRadius: '50%',
+                              p: 0.5,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <PlayArrow sx={{ color: 'white', fontSize: 20 }} />
+                          </Box>
+                        </Box>
+                      ) : (
+                        <img
+                          src={media.url}
+                          alt={media.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      )}
+                      
+                      {/* Overlay icons */}
+                      <Box 
+                        sx={{
+                          position: 'absolute',
+                          bottom: 6,
+                          left: 6,
+                          display: 'flex',
+                          gap: 0.5
+                        }}
+                      >
+                        <Box 
+                          sx={{
+                            bgcolor: 'rgba(255,255,255,0.9)',
+                            borderRadius: '50%',
+                            p: 0.3,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 20,
+                            height: 20,
+                            cursor: 'pointer',
+                            '&:hover': {
+                              bgcolor: 'rgba(136, 42, 255, 0.9)',
+                              '& svg': { color: 'white' }
+                            }
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenImageEditor(index);
+                          }}
+                          title="Edit Image"
+                        >
+                          <ImageIcon sx={{ fontSize: 12, color: '#666' }} />
+                        </Box>
+                        <Box 
+                          sx={{
+                            bgcolor: 'rgba(255,255,255,0.9)',
+                            borderRadius: '50%',
+                            p: 0.3,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 20,
+                            height: 20
+                          }}
+                        >
+                          <ChatBubbleOutlineIcon sx={{ fontSize: 12, color: '#666' }} />
+                        </Box>
+                      </Box>
 
-                {uploadedFileName && (
-                  <Typography variant="body2" sx={{
-                    color: "#444", mt: 1, whiteSpace: "nowrap", // ✅ Ensures text does not wrap
-                    overflow: "hidden", // ✅ Hides overflow text
-                    textOverflow: "ellipsis", maxWidth: "400px",
-                  }}>
-                    Selected File: {uploadedFileName}
+                      {/* Remove button */}
+                      <IconButton
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          top: 2,
+                          right: 2,
+                          bgcolor: 'rgba(0,0,0,0.7)',
+                          color: 'white',
+                          width: 20,
+                          height: 20,
+                          '&:hover': {
+                            bgcolor: 'rgba(0,0,0,0.9)'
+                          }
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveMedia(media.id);
+                        }}
+                      >
+                        <CloseIcon sx={{ fontSize: 14 }} />
+                      </IconButton>
+
+                      {/* Current media indicator */}
+                      {currentMediaIndex === index && (
+                        <Box 
+                          sx={{
+                            position: 'absolute',
+                            top: 2,
+                            left: 2,
+                            bgcolor: '#882AFF',
+                            color: 'white',
+                            borderRadius: '50%',
+                            width: 20,
+                            height: 20,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 10,
+                            fontWeight: 600,
+                            border: '1px solid white'
+                          }}
+                        >
+                          {index + 1}
+                        </Box>
+                      )}
+                    </Box>
+                  ))}
+
+                  {/* Add new media button - only show if less than 12 media items */}
+                  {uploadedMedia.length < 12 && (
+                    <Box
+                      sx={{
+                        minWidth: '120px',
+                        width: '120px',
+                        height: '120px',
+                        border: '2px dashed #ccc',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        backgroundColor: '#fafafa',
+                        '&:hover': {
+                          borderColor: '#882AFF',
+                          backgroundColor: '#f5f0ff'
+                        },
+                        transition: 'all 0.2s ease',
+                        flexShrink: 0
+                      }}
+                      onClick={handleBoxClick}
+                      onDrop={handleDrop}
+                      onDragOver={(e) => e.preventDefault()}
+                    >
+                      <Box 
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '50%',
+                          bgcolor: '#e0e0e0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mb: 0.5
+                        }}
+                      >
+                        <Typography variant="h6" sx={{ color: '#666', fontWeight: 300, fontSize: 16 }}>
+                          +
+                        </Typography>
+                      </Box>
+                      {uploading ? (
+                        <CircularProgress size={12} sx={{ color: '#882AFF' }} />
+                      ) : (
+                        <Typography variant="caption" sx={{ color: '#666', textAlign: 'center', fontSize: 10 }}>
+                          Add Media
+                        </Typography>
+                      )}
+                    </Box>
+                  )}
+                </Box>
+
+                {/* Media count info */}
+                {uploadedMedia.length > 0 && (
+                  <Typography variant="body2" sx={{ mt: 2, color: '#666' }}>
+                    {uploadedMedia.length} media file{uploadedMedia.length !== 1 ? 's' : ''} uploaded
+                    {uploadedMedia.length > 1 && ` • Currently showing: ${currentMediaIndex + 1}`}
                   </Typography>
                 )}
-
-                {uploading && <Typography variant="body2">Uploading...</Typography>}
               </Box>
 
                   {/* Hidden File Input */}
@@ -2096,6 +3463,8 @@ Would you like me to create this as a short handwritten-style note (suitable for
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
+                    accept="image/*,video/*"
+                    multiple
                     style={{ display: "none" }}
                   />
 
@@ -2138,7 +3507,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
                   </Button>
           </Grid>
 
-          <Grid  size={{ xs: 12, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height:'100%' }}>
+          <Grid  size={{ xs: 12, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height:'100%', overflowY: 'auto' }}>
           <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
                   <Tab label="Instagram" />
                   <Tab label="Linkedin" />
@@ -2173,6 +3542,101 @@ Would you like me to create this as a short handwritten-style note (suitable for
 
     {/* Enhanced Publishing Loader */}
     <PublishingLoader />
+
+    {/* Video Popup Modal */}
+    <Modal
+      open={showVideoPopup}
+      onClose={closeVideoPopup}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backdropFilter: 'blur(5px)',
+      }}
+    >
+      <Box
+        sx={{
+          position: 'relative',
+          width: popupVideoType === 'story' ? 350 : 500,
+          height: popupVideoType === 'story' ? 600 : 700,
+          maxWidth: '90vw',
+          maxHeight: '90vh',
+          backgroundColor: '#000',
+          borderRadius: 2,
+          overflow: 'hidden',
+          outline: 'none',
+        }}
+      >
+        {/* Close Button */}
+        <IconButton
+          onClick={closeVideoPopup}
+          sx={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            zIndex: 20,
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,1)',
+            }
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+
+        {/* Popup Video */}
+        {uploadedImageUrl && isCurrentMediaVideo() && (
+          <video
+            ref={popupVideoRef}
+            src={uploadedImageUrl}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+            controls={true}
+            loop
+            playsInline
+            autoPlay
+            onLoadedData={() => {
+              if (popupVideoRef.current) {
+                popupVideoRef.current.play();
+              }
+            }}
+          />
+        )}
+
+        {/* Video Title Overlay */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+            color: 'white',
+            p: 2,
+            zIndex: 10
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            {popupVideoType === 'story' ? 'Instagram Story Preview' : 'Instagram Reel Preview'}
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.8 }}>
+            {uploadedFileName}
+          </Typography>
+        </Box>
+      </Box>
+    </Modal>
+
+    {/* Simple Image Editor Modal */}
+    <SimpleImageEditor
+      open={imageEditorOpen}
+      onClose={() => setImageEditorOpen(false)}
+      imageUrl={editingMediaIndex !== null ? uploadedMedia[editingMediaIndex]?.url : ''}
+      originalFile={editingMediaIndex !== null ? uploadedMedia[editingMediaIndex]?.file : null}
+      onSave={handleSaveEditedImage}
+    />
     </>
   );
 };

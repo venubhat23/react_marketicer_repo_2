@@ -116,13 +116,15 @@ const Sidebar = () => {
     <Box sx={{ bgcolor: "#091a48", flexDirection: "column", width:"100%", minHeight: "800px" }}>
       {/* Logo */}
       <Box sx={{ p: 2, pt: 4, pb: 2 }}>
-        <img
-          src="https://c.animaapp.com/mayvvv0wua9Y41/img/marketincer-logo-1.svg"
-          alt="Marketincer logo"
-          width={29}
-          height={21}
-          style={{display:'block', margin:'auto'}}
-        />
+        <Link to="/createPost" style={{ display: 'block' }}>
+          <img
+            src="https://c.animaapp.com/mayvvv0wua9Y41/img/marketincer-logo-1.svg"
+            alt="Marketincer logo"
+            width={29}
+            height={21}
+            style={{display:'block', margin:'auto', cursor: 'pointer'}}
+          />
+        </Link>
       </Box>
 
       {/* Navigation Icons */}
