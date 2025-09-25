@@ -276,13 +276,49 @@ const CreatePost = () => {
 
   // Generate with AI function
   const handleGenerateWithAI = async () => {
+  const stripHtmlTags = (postContent) =>
+  postContent
+    .replace(/<[^>]*>/g, '')         // remove HTML tags
+    .replace(/\[\/?B_INST\]/g, '')   // remove [B_INST] and [/B_INST]
+    .replace(/~+/g, '')              // remove stray ~ (markdown strike)
+    .replace(/[ \t]+/g, ' ')         // collapse spaces
+    .replace(/\n\s*\n/g, '\n\n')     // collapse multiple blank lines
+    .trim();
+
+    console.log(stripHtmlTags)
+    const payloadData = {
+        comments: stripHtmlTags(postContent),
+    };
+    const description = payloadData.comments
+    const cleanAIResponse = (text) => {
+    let cleaned = text
+      .replace(/<[^>]*>/g, '')        // remove HTML tags
+      .replace(/~~+/g, '')            // remove markdown strikethrough
+      .replace(/<<[^>]+>>/g, '')      // remove AI markers
+      .replace(/\[\/?B_INST\]/g, '')  // remove [B_INST]
+      .replace(/\[\/?OUT\]/g, '');    // remove [OUT]
+
+    // Extract hashtags
+    const hashtags = cleaned.match(/#\w+/g);
+    cleaned = cleaned.replace(/#\w+/g, '').trim(); // remove hashtags from text
+
+    const hashtagsLine = hashtags ? hashtags.join(' ') : '';
+
+    // One blank line between paragraph and hashtags
+    let result = cleaned;
+    if (hashtagsLine) {
+      result += '\n\n' + hashtagsLine;
+    }
+
+    return result;
+  };
     setGeneratingContent(true);
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
         "https://api.marketincer.com/api/v1/generate-content", // Replace with your actual endpoint
         {
-          description: "generate note on social media"
+          description: description
         },
         {
           headers: {
@@ -293,7 +329,8 @@ const CreatePost = () => {
       );
       
       // Insert the generated content into the editor
-      const generatedContent = response.data.content || response.data.message || response.data;
+      const generatedContent = cleanAIResponse(response.data.content || response.data.message || response.data);
+      console.log("API Response:", generatedContent);
       setPostContent(generatedContent);
       
       toast.success("Content generated successfully!", {

@@ -25,8 +25,13 @@ const MyEditor = ({ value, onChange }) => {
         content_style: `
           body { 
             color:#882AFF; 
+            white-space: pre-wrap;   /* preserves \n and wraps text */
+            word-break: break-word;  /* prevents overflow */
           }
         `,
+        forced_root_block: false,   // prevents wrapping everything in <p>
+        force_br_newlines: true,    // use <br> on Enter
+        force_p_newlines: false,    // don’t auto-wrap in <p>
         // Adding custome AI 
         setup: (editor) => {
           editor.ui.registry.addButton('generate_ai_button', {
