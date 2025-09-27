@@ -696,7 +696,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
       updateProgress(60, 'Publishing your post...');
       const token = localStorage.getItem("token");
 
-      const response = await axios.post("http://localhost:3002/api/v1/posts", payloadData, {
+      const response = await axios.post("https://api.marketincer.com/api/v1/posts", payloadData, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -835,7 +835,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
       updateProgress(75, `${createPostMode === 'schedule' ? 'Scheduling' : 'Saving'} your post...`);
 
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:3002/api/v1/posts/schedule", payloadData, {
+      await axios.post("https://api.marketincer.com/api/v1/posts/schedule", payloadData, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -909,7 +909,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
       const token = localStorage.getItem("token"); // Retrieve token from local storage (or state)
 
       return axios.post(
-        "http://localhost:3002/api/v1/posts",
+        "https://api.marketincer.com/api/v1/posts",
         payloadData,
         {
           headers: {
