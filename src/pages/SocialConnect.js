@@ -727,12 +727,16 @@ const InstagramComponent = (
                                                     objectFit: "cover"
                                                 }}
                                                 onError={(e) => {
-                                                    console.log('Image failed to load for:', account.name, account.user.picture.data.url);
+                                                    console.error('❌ Instagram image failed to load:', {
+                                                        account: account.name,
+                                                        url: account.user.picture.data.url,
+                                                        error: e.type
+                                                    });
                                                     e.target.style.display = 'none';
-                                                    e.target.parentNode.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color: white; font-weight: bold; font-size: 14px;">${account.name ? account.name.charAt(0).toUpperCase() : 'P'}</div>`;
+                                                    e.target.parentNode.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color: white; font-weight: bold; font-size: 16px;">${account.name ? account.name.charAt(0).toUpperCase() : 'P'}</div>`;
                                                 }}
                                                 onLoad={() => {
-                                                    console.log('Image loaded successfully for:', account.name);
+                                                    console.log('✅ Instagram image loaded successfully for:', account.name);
                                                 }}
                                             />
                                         ) : (
@@ -746,7 +750,7 @@ const InstagramComponent = (
                                                     alignItems: "center",
                                                     justifyContent: "center",
                                                     fontWeight: "bold",
-                                                    fontSize: "14px"
+                                                    fontSize: "18px"
                                                 }}
                                             >
                                                 {account.name ? account.name.charAt(0).toUpperCase() : 'P'}
