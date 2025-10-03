@@ -44,6 +44,7 @@ const InvoiceForm = () => {
   const isEdit = Boolean(id);
 
   const [formData, setFormData] = useState({
+    invoice_number: `INV-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
     company_name: '',
     customer: '',
     gst_number: '',
@@ -52,6 +53,9 @@ const InvoiceForm = () => {
     company_website: '',
     job_title: '',
     work_email: '',
+    client_address: '',
+    client_gstin: '',
+    client_pan: '',
     gst_percentage: 18,
     total_amount: 0,
     status: 'Draft',
@@ -144,8 +148,37 @@ const InvoiceForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    await handleSaveAndContinue();
+  };
 
+  const handleSaveAsDraft = async () => {
+    setLoading(true);
+    try {
+      const submitData = {
+        ...formData,
+        status: 'Draft',
+        due_date: formData.due_date.format('YYYY-MM-DD')
+      };
+
+      if (isEdit) {
+        await InvoiceAPI.updateInvoice(id, submitData);
+        toast.success('Invoice draft updated successfully');
+      } else {
+        await InvoiceAPI.createInvoice(submitData);
+        toast.success('Invoice saved as draft successfully');
+      }
+      
+      navigate('/invoices');
+    } catch (error) {
+      toast.error(`Failed to save invoice as draft`);
+      console.error(`Error saving invoice as draft:`, error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAndContinue = async () => {
+    setLoading(true);
     try {
       const submitData = {
         ...formData,
@@ -184,18 +217,18 @@ const InvoiceForm = () => {
   }
 
   return (
-    <><Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100vh' }}>
+    <Box sx={{ flexGrow: 1, bgcolor: '#f8fafc', minHeight: '100vh' }}>
       <Grid container>
         <Grid size={{ md: 1 }} className="side_section"> <Sidebar /></Grid>
         <Grid size={{ md: 11 }}>
+          {/* Header */}
           <Paper
             elevation={0}
             sx={{
               display: { xs: 'none', md: 'block' },
-              p: 1,
-              backgroundColor: '#091a48',
-              borderBottom: '1px solid',
-              borderColor: 'divider',
+              p: 2,
+              backgroundColor: '#ffffff',
+              borderBottom: '1px solid #e2e8f0',
               borderRadius: 0
             }}
           >
@@ -204,301 +237,476 @@ const InvoiceForm = () => {
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <Typography variant="h6" sx={{ color: '#fff' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <IconButton
                   edge="start"
-                  color="inherit"
-                  aria-label="back"
-                  sx={{ mr: 2, color: '#fff' }}
+                  sx={{ mr: 2, color: '#475569' }}
                   onClick={() => navigate('/invoices')}
                 >
                   <ArrowLeftIcon />
                 </IconButton>
-                
+                <Typography variant="h5" sx={{ color: '#1e293b', fontWeight: 600 }}>
                   {isEdit ? 'Edit Invoice' : 'Create Invoice'}
                 </Typography>
-              
-             
-            
+              </Box>
 
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <IconButton size="large" sx={{ color: '#fff' }}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <IconButton size="large" sx={{ color: '#64748b' }}>
                   <NotificationsIcon />
                 </IconButton>
-
                 <Link to="/SettingPage">
-                  <IconButton size="large" sx={{ color: '#fff' }}>
+                  <IconButton size="large" sx={{ color: '#64748b' }}>
                     <AccountCircleIcon />
                   </IconButton>
                 </Link>
-
-
               </Box>
             </Box>
           </Paper>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Box sx={{ p: 3 }}>
-          <form onSubmit={handleSubmit}>
-              <Grid item xs={12} md={6} sx={{mb:2}} >
-                <Card elevation={3}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom sx={{ color: '#882AFF' }}>
-                      Company Information
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12}>
+            <Box sx={{ maxWidth: 1000, mx: 'auto', px: 6, py: 4 }}>
+              <form onSubmit={handleSubmit}>
+                {/* Invoice Header */}
+                <Paper 
+                  elevation={0} 
+                  sx={{ 
+                    p: 5, 
+                    mb: 4, 
+                    mx: 2,
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 2
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
+                    <Box>
+                      <Typography variant="h4" sx={{ color: '#1e293b', fontWeight: 700, mb: 1 }}>
+                        Invoice
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#64748b' }}>
+                        {isEdit ? 'Edit invoice details' : 'Create a new invoice'}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'right' }}>
+                      <TextField
+                        label="Invoice No *"
+                        value={formData.invoice_number}
+                        onChange={(e) => handleInputChange('invoice_number', e.target.value)}
+                        required
+                        size="small"
+                        sx={{ 
+                          mb: 2,
+                          '& .MuiOutlinedInput-root': { borderRadius: 2 }
+                        }}
+                      />
+                      <Typography variant="body2" sx={{ color: '#64748b' }}>
+                        Date: {dayjs().format('MMM DD, YYYY')}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Grid container spacing={4}>
+                    <Grid item xs={12} md={6}>
+                      <DatePicker
+                        label="Due Date"
+                        value={formData.due_date}
+                        onChange={(value) => handleInputChange('due_date', value)}
+                        renderInput={(params) => (
+                          <TextField 
+                            {...params} 
+                            fullWidth 
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                              }
+                            }}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                          value={formData.status}
+                          label="Status"
+                          onChange={(e) => handleInputChange('status', e.target.value)}
+                          sx={{ borderRadius: 2 }}
+                        >
+                          <MenuItem value="Draft">Draft</MenuItem>
+                          <MenuItem value="Pending">Pending</MenuItem>
+                          <MenuItem value="Paid">Paid</MenuItem>
+                          <MenuItem value="Cancelled">Cancelled</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                </Paper>
+
+                {/* Billed By & Billed To */}
+                <Grid container spacing={4} sx={{ mb: 4, mx: 2 }}>
+                  <Grid item xs={12} md={6}>
+                    <Paper 
+                      elevation={0} 
+                      sx={{ 
+                        p: 4, 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 2,
+                        height: 'fit-content'
+                      }}
+                    >
+                      <Typography variant="h6" sx={{ color: '#1e293b', fontWeight: 600, mb: 3 }}>
+                        Billed By
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#64748b', mb: 2 }}>
+                        Your Details
+                      </Typography>
+                      
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <TextField
                           fullWidth
-                          size="small"
                           label="Company Name *"
                           value={formData.company_name}
                           onChange={(e) => handleInputChange('company_name', e.target.value)}
-                          required />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="GST Number"
-                          size="small"
-                          value={formData.gst_number}
-                          onChange={(e) => handleInputChange('gst_number', e.target.value)} />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Phone Number"
-                          size="small"
-                          value={formData.phone_number}
-                          onChange={(e) => handleInputChange('phone_number', e.target.value)} />
-                      </Grid>
-                      
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Company Website"
-                          size="small"
-                          value={formData.company_website}
-                          onChange={(e) => handleInputChange('company_website', e.target.value)} />
-                      </Grid>
-                      <Grid item xs={12}>
+                          required
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
                         <TextField
                           fullWidth
                           multiline
-                          rows={2}
+                          rows={3}
                           label="Address"
                           value={formData.address}
-                          onChange={(e) => handleInputChange('address', e.target.value)} />
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12} md={6} sx={{mb:2}}>
-                <Card elevation={3}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom sx={{ color: '#882AFF' }}>
-                      Customer Information
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12}>
+                          onChange={(e) => handleInputChange('address', e.target.value)}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              label="GST Number"
+                              value={formData.gst_number}
+                              onChange={(e) => handleInputChange('gst_number', e.target.value)}
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              label="Phone Number"
+                              value={formData.phone_number}
+                              onChange={(e) => handleInputChange('phone_number', e.target.value)}
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                            />
+                          </Grid>
+                        </Grid>
                         <TextField
                           fullWidth
-                          size="small"
-                          label="Customer Name *"
+                          label="Company Website"
+                          value={formData.company_website}
+                          onChange={(e) => handleInputChange('company_website', e.target.value)}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                      </Box>
+                    </Paper>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <Paper 
+                      elevation={0} 
+                      sx={{ 
+                        p: 4, 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 2,
+                        height: 'fit-content'
+                      }}
+                    >
+                      <Typography variant="h6" sx={{ color: '#1e293b', fontWeight: 600, mb: 3 }}>
+                        Billed To
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#64748b', mb: 3 }}>
+                        Client's Details
+                      </Typography>
+                      
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <TextField
+                          fullWidth
+                          label="Business Name *"
                           value={formData.customer}
                           onChange={(e) => handleInputChange('customer', e.target.value)}
-                          required />
-                      </Grid>
-                      <Grid item xs={12}>
+                          required
+                          placeholder="Sri Suparna Marketing Solutions Private Limited"
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
                         <TextField
                           fullWidth
-                          size="small"
-                          label="Job Title"
-                          value={formData.job_title}
-                          onChange={(e) => handleInputChange('job_title', e.target.value)} />
-                      </Grid>
-                      <Grid item xs={12}>
+                          multiline
+                          rows={3}
+                          label="Address"
+                          value={formData.client_address || ''}
+                          onChange={(e) => handleInputChange('client_address', e.target.value)}
+                          placeholder="#47 Sri Garuda 2nd cross, 4th main Vittal Nagar, Kumaraswamy Layout, Bangalore South, Bangalore- 560078, Karnataka, Bengaluru, Karnataka, India"
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              label="GSTIN"
+                              value={formData.client_gstin || ''}
+                              onChange={(e) => handleInputChange('client_gstin', e.target.value)}
+                              placeholder="29ABPCS0851C1Z8"
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              label="PAN"
+                              value={formData.client_pan || ''}
+                              onChange={(e) => handleInputChange('client_pan', e.target.value)}
+                              placeholder="ABPCS0851C"
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                            />
+                          </Grid>
+                        </Grid>
                         <TextField
                           fullWidth
                           label="Work Email"
                           type="email"
-                          size="small"
                           value={formData.work_email}
-                          onChange={(e) => handleInputChange('work_email', e.target.value)} />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <FormControl fullWidth>
-                          <InputLabel>Status</InputLabel>
-                          <Select
-                            value={formData.status}
-                            label="Status"
-                            size="small"
-                            onChange={(e) => handleInputChange('status', e.target.value)}
-                          >
-                            <MenuItem value="Draft">Draft</MenuItem>
-                            <MenuItem value="Pending">Pending</MenuItem>
-                            <MenuItem value="Paid">Paid</MenuItem>
-                            <MenuItem value="Cancelled">Cancelled</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <DatePicker
-                          label="Due Date"
-                          size="small"
-                          value={formData.due_date}
-                          onChange={(value) => handleInputChange('due_date', value)}
-                          renderInput={(params) => <TextField {...params} fullWidth />} />
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
+                          onChange={(e) => handleInputChange('work_email', e.target.value)}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                      </Box>
+                    </Paper>
+                  </Grid>
+                </Grid>
 
-              <Grid item xs={12} sx={{mb:2}}>
-                <Card elevation={3}>
-                  <CardContent>
-                    <Box display="flex" justifyContent="between" alignItems="center" mb={2}>
-                      <Typography variant="h6" sx={{ color: '#882AFF' }}>
-                        Line Items
-                      </Typography>
-                      <Button
-                        startIcon={<AddIcon />}
-                        onClick={addLineItem}
-                        sx={{ color: '#882AFF' }}
-                      >
-                        Add Item
-                      </Button>
-                    </Box>
+                {/* Items Section */}
+                <Paper 
+                  elevation={0} 
+                  sx={{ 
+                    p: 4, 
+                    mb: 4,
+                    mx: 2,
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 2
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Typography variant="h6" sx={{ color: '#1e293b', fontWeight: 600 }}>
+                      Items
+                    </Typography>
+                    <Button
+                      startIcon={<AddIcon />}
+                      onClick={addLineItem}
+                      variant="outlined"
+                      sx={{ 
+                        borderRadius: 2,
+                        borderColor: '#3b82f6',
+                        color: '#3b82f6',
+                        '&:hover': {
+                          borderColor: '#2563eb',
+                          backgroundColor: '#eff6ff'
+                        }
+                      }}
+                    >
+                      Add New Line
+                    </Button>
+                  </Box>
 
-                    <TableContainer>
-                      <Table>
-                        <TableHead>
-                          <TableRow sx={{ bgcolor: '#B1C6FF', color:'#fff' }}>
-                            <TableCell sx={{ color: '#fff' }}><strong>Description</strong></TableCell>
-                            <TableCell sx={{ color: '#fff' }}><strong>Quantity</strong></TableCell>
-                            <TableCell sx={{ color: '#fff' }}><strong>Unit Price</strong></TableCell>
-                            <TableCell sx={{ color: '#fff' }}><strong>Total</strong></TableCell>
-                            <TableCell sx={{ color: '#fff' }}><strong>Actions</strong></TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {formData.line_items.map((item, index) => (
-                            <TableRow key={index}>
-                              <TableCell>
+                  <TableContainer sx={{ border: '1px solid #e2e8f0', borderRadius: 2 }}>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ bgcolor: '#f8fafc' }}>
+                          <TableCell sx={{ fontWeight: 600, color: '#374151', borderBottom: '1px solid #e2e8f0' }}>
+                            Item
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: '#374151', borderBottom: '1px solid #e2e8f0' }}>
+                            Quantity
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: '#374151', borderBottom: '1px solid #e2e8f0' }}>
+                            Rate
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: '#374151', borderBottom: '1px solid #e2e8f0' }}>
+                            Amount
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: '#374151', borderBottom: '1px solid #e2e8f0' }}>
+                            
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {formData.line_items.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell sx={{ borderBottom: '1px solid #e2e8f0', py: 2 }}>
+                              <TextField
+                                fullWidth
+                                variant="standard"
+                                placeholder="Name/SKU Id (Required)"
+                                value={item.description}
+                                onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
+                                InputProps={{ disableUnderline: true }}
+                                sx={{ 
+                                  '& input': { 
+                                    fontSize: '14px',
+                                    p: 0
+                                  }
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell sx={{ borderBottom: '1px solid #e2e8f0', py: 2 }}>
+                              <TextField
+                                type="number"
+                                variant="standard"
+                                value={item.quantity}
+                                onChange={(e) => handleLineItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
+                                inputProps={{ min: 0, style: { textAlign: 'center' } }}
+                                InputProps={{ disableUnderline: true }}
+                                sx={{ 
+                                  width: 80,
+                                  '& input': { 
+                                    fontSize: '14px',
+                                    p: 0
+                                  }
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell sx={{ borderBottom: '1px solid #e2e8f0', py: 2 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Typography sx={{ mr: 1, color: '#64748b' }}>₹</Typography>
                                 <TextField
-                                  fullWidth
-                                  size="small"
-                                  value={item.description}
-                                  onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
-                                  placeholder="Item description" />
-                              </TableCell>
-                              <TableCell>
-                                <TextField
-                                  fullWidth
-                                  size="small"
                                   type="number"
-                                  value={item.quantity}
-                                  onChange={(e) => handleLineItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
-                                  inputProps={{ min: 0 }}
-                                  sx={{ width: 100 }} />
-                              </TableCell>
-                              <TableCell>
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  type="number"
+                                  variant="standard"
                                   value={item.unit_price}
                                   onChange={(e) => handleLineItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)}
-                                  inputProps={{ min: 0, step: 0.01 }}
-                                  sx={{ width: 120 }} />
-                              </TableCell>
-                              <TableCell>
-                                ${((parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0)).toFixed(2)}
-                              </TableCell>
-                              <TableCell>
-                                <IconButton
-                                  onClick={() => removeLineItem(index)}
-                                  disabled={formData.line_items.length === 1}
-                                  size="small"
-                                  color="error"
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
+                                  inputProps={{ min: 0, step: 0.01, style: { textAlign: 'right' } }}
+                                  InputProps={{ disableUnderline: true }}
+                                  sx={{ 
+                                    width: 100,
+                                    '& input': { 
+                                      fontSize: '14px',
+                                      p: 0
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            </TableCell>
+                            <TableCell sx={{ borderBottom: '1px solid #e2e8f0', py: 2 }}>
+                              <Typography sx={{ fontWeight: 500, color: '#1e293b' }}>
+                                ₹{((parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0)).toFixed(2)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell sx={{ borderBottom: '1px solid #e2e8f0', py: 2 }}>
+                              <IconButton
+                                onClick={() => removeLineItem(index)}
+                                disabled={formData.line_items.length === 1}
+                                size="small"
+                                sx={{ color: '#ef4444' }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
 
-                    <Box mt={3}>
-                      <Grid container spacing={2} justifyContent="flex-end">
-                        <Grid item xs={12} md={4}>
-                          <Box p={2} bgcolor="#F5F5F5" borderRadius={1}>
-                            <Grid container spacing={1}>
-                              <Grid item xs={6}>
-                                <TextField
-                                  label="GST %"
-                                  type="number"
-                                  size="small"
-                                  value={formData.gst_percentage}
-                                  onChange={(e) => handleInputChange('gst_percentage', parseFloat(e.target.value) || 0)}
-                                  inputProps={{ min: 0, max: 100 }} />
-                              </Grid>
-                            </Grid>
-                            <Divider sx={{ my: 1 }} />
-                            <Box display="flex" justifyContent="between" mb={1}>
-                              <Typography>Subtotal:</Typography>
-                              <Typography>${subtotal.toFixed(2)}</Typography>
-                            </Box>
-                            <Box display="flex" justifyContent="between" mb={1}>
-                              <Typography>GST ({formData.gst_percentage}%):</Typography>
-                              <Typography>${gstAmount.toFixed(2)}</Typography>
-                            </Box>
-                            <Divider />
-                            <Box display="flex" justifyContent="between" mt={1}>
-                              <Typography variant="h6"><strong>Total:</strong></Typography>
-                              <Typography variant="h6"><strong>${formData.total_amount.toFixed(2)}</strong></Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
-                      </Grid>
+                  {/* Summary Section */}
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+                    <Box sx={{ minWidth: 300 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                        <Typography sx={{ color: '#64748b' }}>Total</Typography>
+                        <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>
+                          ₹{subtotal.toFixed(2)}
+                        </Typography>
+                      </Box>
+                      
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <TextField
+                          label="GST %"
+                          type="number"
+                          size="small"
+                          value={formData.gst_percentage}
+                          onChange={(e) => handleInputChange('gst_percentage', parseFloat(e.target.value) || 0)}
+                          inputProps={{ min: 0, max: 100 }}
+                          sx={{ 
+                            width: 120,
+                            '& .MuiOutlinedInput-root': { borderRadius: 2 }
+                          }}
+                        />
+                        <Typography sx={{ fontWeight: 500, color: '#1e293b' }}>
+                          ₹{gstAmount.toFixed(2)}
+                        </Typography>
+                      </Box>
+                      
+                      <Divider sx={{ my: 2 }} />
+                      
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                          Total (INR)
+                        </Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                          ₹{formData.total_amount.toFixed(2)}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+                  </Box>
+                </Paper>
 
-              <Grid item xs={12} sx={{mb:2}}>
-                <Box display="flex" justifyContent="space-between">
+                {/* Action Buttons */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 6, mx: 2 }}>
                   <Button
                     variant="outlined"
                     onClick={() => navigate('/invoices')}
+                    sx={{ 
+                      borderRadius: 2,
+                      px: 4,
+                      py: 1.5,
+                      borderColor: '#d1d5db',
+                      color: '#6b7280'
+                    }}
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    startIcon={<SaveIcon />}
-                    disabled={loading}
-                    sx={{ bgcolor: '#882AFF', '&:hover': { bgcolor: '#7020CC' } }}
-                  >
-                    {loading ? 'Saving...' : (isEdit ? 'Update Invoice' : 'Create Invoice')}
-                  </Button>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button
+                      variant="outlined"
+                      onClick={handleSaveAsDraft}
+                      disabled={loading}
+                      sx={{ 
+                        borderRadius: 2,
+                        px: 4,
+                        py: 1.5,
+                        borderColor: '#3b82f6',
+                        color: '#3b82f6'
+                      }}
+                    >
+                      {loading ? 'Saving...' : 'Save As Draft'}
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={loading}
+                      sx={{ 
+                        borderRadius: 2,
+                        px: 4,
+                        py: 1.5,
+                        bgcolor: '#3b82f6',
+                        '&:hover': { bgcolor: '#2563eb' }
+                      }}
+                    >
+                      {loading ? 'Saving...' : 'Save & Continue'}
+                    </Button>
+                  </Box>
                 </Box>
-              </Grid>
-            
-          </form>
-        </Box>
-      </LocalizationProvider>
-
+              </form>
+            </Box>
+          </LocalizationProvider>
         </Grid>
       </Grid>
     </Box>
-    </>
   );
 };
 

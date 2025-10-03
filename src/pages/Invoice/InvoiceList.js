@@ -162,23 +162,21 @@ const InvoiceList = () => {
                 </IconButton>
                   Invoices
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => navigate('/invoices/create')}
-                sx={{
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  lineHeight:0,
-                }}
-              >
-                Create Invoice
-              </Button>
-              </Box>
 
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => navigate('/invoices/create')}
+                  sx={{
+                    px: 3,
+                    py: 1,
+                    borderRadius: 2,
+                    lineHeight:0,
+                  }}
+                >
+                  Create Invoice
+                </Button>
                 <IconButton size="large" sx={{ color: '#fff' }}>
                   <NotificationsIcon />
                 </IconButton>
@@ -257,7 +255,7 @@ const InvoiceList = () => {
                       <TableCell>#{invoice.id}</TableCell>
                       <TableCell>{invoice.company_name}</TableCell>
                       <TableCell>{invoice.customer}</TableCell>
-                      <TableCell>${invoice.total_amount?.toFixed(2) || '0.00'}</TableCell>
+                      <TableCell>${typeof invoice.total_amount === 'number' ? invoice.total_amount.toFixed(2) : (parseFloat(invoice.total_amount) || 0).toFixed(2)}</TableCell>
                       <TableCell>
                         <FormControl size="small" sx={{ minWidth: 100 }}>
                           <Select

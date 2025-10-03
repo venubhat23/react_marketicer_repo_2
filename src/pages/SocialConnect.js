@@ -378,16 +378,55 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                                             "&:hover": { backgroundColor: "#f1f1f1" }
                                         }}
                                     >
-                                        <img
-                                            src={account?.user?.logoV2?.original || account?.logoV2?.original || ""}
-                                            alt={account.name || account.localizedName}
-                                            style={{
-                                                borderRadius: "50%",
+                                        <Box
+                                            sx={{
                                                 width: "40px",
                                                 height: "40px",
+                                                borderRadius: "50%",
                                                 marginRight: "15px",
+                                                backgroundColor: "#f0f0f0",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                overflow: "hidden"
                                             }}
-                                        />
+                                        >
+                                            {(account?.user?.logoV2?.original || account?.logoV2?.original) ? (
+                                                <img
+                                                    src={account?.user?.logoV2?.original || account?.logoV2?.original}
+                                                    alt={account.name || account.localizedName}
+                                                    style={{
+                                                        width: "100%",
+                                                        height: "100%",
+                                                        objectFit: "cover"
+                                                    }}
+                                                    onError={(e) => {
+                                                        console.log('LinkedIn image failed to load for:', account.name || account.localizedName, account?.user?.logoV2?.original || account?.logoV2?.original);
+                                                        e.target.style.display = 'none';
+                                                        e.target.parentNode.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background-color: #0077b5; color: white; font-weight: bold; font-size: 14px;">${(account.name || account.localizedName || 'L').charAt(0).toUpperCase()}</div>`;
+                                                    }}
+                                                    onLoad={() => {
+                                                        console.log('LinkedIn image loaded successfully for:', account.name || account.localizedName);
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Box
+                                                    sx={{
+                                                        width: "100%",
+                                                        height: "100%",
+                                                        backgroundColor: "#0077b5",
+                                                        color: "white",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        fontWeight: "bold",
+                                                        fontSize: "14px"
+                                                    }}
+                                                >
+                                                    {(account.name || account.localizedName || 'L').charAt(0).toUpperCase()}
+                                                </Box>
+                                            )}
+                                        </Box>
                                         <Box sx={{ flexGrow: 1 }}>
                                             <Typography variant="body1" fontWeight="bold" sx={{
                                                 fontSize: "14px",
@@ -665,16 +704,55 @@ const InstagramComponent = (
                                         "&:hover": { backgroundColor: "#f1f1f1" }
                                     }}
                                 >
-                                    <img
-                                        src={account?.user?.picture?.data?.url}
-                                        alt={account.name}
-                                        style={{
-                                            borderRadius: "50%",
+                                    <Box
+                                        sx={{
                                             width: "40px",
                                             height: "40px",
+                                            borderRadius: "50%",
                                             marginRight: "15px",
+                                            backgroundColor: "#f0f0f0",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            overflow: "hidden"
                                         }}
-                                    />
+                                    >
+                                        {account?.user?.picture?.data?.url ? (
+                                            <img
+                                                src={account.user.picture.data.url}
+                                                alt={account.name}
+                                                style={{
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    objectFit: "cover"
+                                                }}
+                                                onError={(e) => {
+                                                    console.log('Image failed to load for:', account.name, account.user.picture.data.url);
+                                                    e.target.style.display = 'none';
+                                                    e.target.parentNode.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color: white; font-weight: bold; font-size: 14px;">${account.name ? account.name.charAt(0).toUpperCase() : 'P'}</div>`;
+                                                }}
+                                                onLoad={() => {
+                                                    console.log('Image loaded successfully for:', account.name);
+                                                }}
+                                            />
+                                        ) : (
+                                            <Box
+                                                sx={{
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    background: "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
+                                                    color: "white",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    fontWeight: "bold",
+                                                    fontSize: "14px"
+                                                }}
+                                            >
+                                                {account.name ? account.name.charAt(0).toUpperCase() : 'P'}
+                                            </Box>
+                                        )}
+                                    </Box>
                                     <Box sx={{ flexGrow: 1 }}>
                                         <Typography variant="body1" fontWeight="bold" sx={{
                                             fontSize: "14px",
