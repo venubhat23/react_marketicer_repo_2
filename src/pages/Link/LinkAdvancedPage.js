@@ -261,328 +261,560 @@ const LinkAdvancedPage = () => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh' }}>
-      {/* Header */}
+    <Box sx={{ 
+      minHeight: '100vh', 
+      bgcolor: '#f8fafc', 
+      p: 1.5
+    }}>
 
-        <Card sx={{ mb: 4, boxShadow: 4, borderRadius: 1 }}>
-          <CardContent sx={{ p: 2 }}>
-            {/* Tab Switcher */}
-            
-            {/* API Error Display */}
-            {apiError && (
+      <Card sx={{ 
+        mb: 1, 
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        borderRadius: 2,
+        border: '1px solid #e2e8f0',
+        overflow: 'hidden'
+      }}>
+        <CardContent sx={{ p: 0 }}>
+          {/* API Error Display */}
+          {apiError && (
+            <Box sx={{ p: 1.5, pb: 0 }}>
               <Alert 
                 severity="error" 
-                sx={{ mb: 3 }}
+                sx={{ 
+                  mb: 0,
+                  borderRadius: 1,
+                  py: 1,
+                  '& .MuiAlert-message': {
+                    fontSize: '12px'
+                  }
+                }}
                 onClose={() => setApiError('')}
               >
                 {apiError}
               </Alert>
-            )}
+            </Box>
+          )}
             
-            <Grid container spacing={4}>
+          <Box sx={{ p: 2 }}>
+            <Grid container spacing={2}>
               {/* Left Column - Form */}
               <Grid size={{ xs: 12, sm: 12, md: 7 }}>
-                {/* Destination */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" sx={{ mb: 1, color: '#882AFF' }}>
-                    Destination
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    placeholder="https://example.com/my-long-url"
-                    value={longUrl}
-                    onChange={(e) => setLongUrl(e.target.value)}
-                    variant="outlined"
-                    size='small'
-                    error={!longUrl.trim() && apiError.includes('required')}
-                    helperText={!longUrl.trim() && apiError.includes('required') ? 'Destination URL is required' : ''}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        '&:hover fieldset': {
-                          borderColor: '#882AFF',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#882AFF',
-                        }
-                      }
+                {/* Basic Information Section */}
+                <Box sx={{ 
+                  mb: 1.5,
+                  p: 3,
+                  bgcolor: 'white',
+                  borderRadius: 2,
+                  border: '1px solid #f1f5f9',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                }}>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      mb: 1.5, 
+                      color: '#1e293b',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5
                     }}
-                    InputProps={{
-                      startAdornment: <LinkIcon sx={{ mr: 1, color: '#882AFF' }} />
-                    }}
-                  />
-                </Box>
-
-                {/* Title */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" sx={{ mb: 1, color: '#882AFF' }}>
-                    Title (optional)
+                  >
+                    <LinkIcon sx={{ color: '#882AFF', fontSize: 16 }} />
+                    Basic Information
                   </Typography>
-                  <TextField
-                    fullWidth
-                    placeholder="Enter a title for your link"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    variant="outlined"
-                    size='small'
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        '&:hover fieldset': {
-                          borderColor: '#882AFF',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#882AFF',
-                        }
-                      }
-                    }}
-                  />
-                </Box>
-
-                {/* Short Link */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" sx={{ mb: 1, color: '#882AFF'}}>
-                    Short link
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FormControl sx={{ minWidth: 200 }}>
-                      <InputLabel>Domain</InputLabel>
-                      <Select
-                        value={domain}
-                        label="Domain"
-                        disabled
-                        size='small'
-                        sx={{
-                          borderRadius: 2,
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#882AFF',
-                          }
-                        }}
-                      >
-                        <MenuItem value="marketincer.com">marketincer.com</MenuItem>
-                      </Select>
-                    </FormControl>
-                    <Typography variant="body2" sx={{ mx: 1 }}>/</Typography>
+                  
+                  {/* Destination */}
+                  <Box sx={{ mb: 1.5 }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        mb: 0.5, 
+                        color: '#374151',
+                        fontWeight: 500,
+                        fontSize: '12px'
+                      }}
+                    >
+                      Destination URL *
+                    </Typography>
                     <TextField
                       fullWidth
-                      placeholder="custom-back-half (optional)"
-                      value={customBackHalf}
-                      onChange={(e) => setCustomBackHalf(e.target.value)}
+                      placeholder="https://example.com/my-long-url"
+                      value={longUrl}
+                      onChange={(e) => setLongUrl(e.target.value)}
                       variant="outlined"
-                      size="small"
-                      error={apiError.includes('already taken') || apiError.includes('characters')}
-                      helperText={
-                        apiError.includes('already taken') ? 'This custom back-half is already taken' :
-                        apiError.includes('characters') ? 'Must be 3-50 characters, letters/numbers/hyphens/underscores only' : 
-                        customBackHalf.length > 0 ? `${customBackHalf.length}/50 characters` : ''
-                      }
+                      error={!longUrl.trim() && apiError.includes('required')}
+                      helperText={!longUrl.trim() && apiError.includes('required') ? 'Destination URL is required' : ''}
+                      size="medium"
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
+                          borderRadius: 1.5,
+                          fontSize: '14px',
                           '&:hover fieldset': {
                             borderColor: '#882AFF',
                           },
                           '&.Mui-focused fieldset': {
                             borderColor: '#882AFF',
                           }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: '#882AFF',
+                        },
+                        '& .MuiFormHelperText-root': {
+                          fontSize: '10px',
+                          mt: 0.25
                         }
                       }}
                     />
                   </Box>
-                </Box>
 
-                <Divider sx={{ my: 1 }} />
+                  {/* Title */}
+                  <Box sx={{ mb: 1.5 }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        mb: 0.5, 
+                        color: '#374151',
+                        fontWeight: 500,
+                        fontSize: '12px'
+                      }}
+                    >
+                      Title (Optional)
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      placeholder="Enter a descriptive title for your link"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      variant="outlined"
+                      size="medium"
+                      helperText=""
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 1.5,
+                          fontSize: '14px',
+                          '&:hover fieldset': {
+                            borderColor: '#882AFF',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#882AFF',
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: '#882AFF',
+                        },
+                        '& .MuiFormHelperText-root': {
+                          fontSize: '10px',
+                          mt: 0.25
+                        }
+                      }}
+                    />
+                  </Box>
 
-                {/* UTM Parameters Section */}
-                <Typography variant="body2" sx={{ mb: 2, color: '#882AFF' }}>
-                  Advanced features
-                </Typography>
-
-                <Card sx={{ mb: 2, bgcolor: '#f8fff8', border: '1px solid #e0ffe0' }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <SettingsIcon sx={{ color: '#882AFF' }} />
-                        <Typography variant="body2" sx={{ color: '#091A48', fontWeight: 'bold' }}>
-                          UTM parameters
+                  {/* Short Link */}
+                  <Box sx={{ mb: 0 }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        mb: 0.5, 
+                        color: '#374151',
+                        fontWeight: 500,
+                        fontSize: '12px'
+                      }}
+                    >
+                      Custom Short URL
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        bgcolor: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 2,
+                        px: 2,
+                        py: 1.5,
+                        minWidth: 140
+                      }}>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            color: '#64748b',
+                            fontWeight: 500,
+                            fontSize: '13px'
+                          }}
+                        >
+                          {domain}
                         </Typography>
                       </Box>
-                      <Switch
-                        checked={enableUTM}
-                        onChange={(e) => setEnableUTM(e.target.checked)}
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          color: '#64748b',
+                          alignSelf: 'center',
+                          fontSize: '14px'
+                        }}
+                      >
+                        /
+                      </Typography>
+                      <Box sx={{ flex: 1 }}>
+                        <TextField
+                          fullWidth
+                          placeholder="custom-back-half"
+                          value={customBackHalf}
+                          onChange={(e) => setCustomBackHalf(e.target.value)}
+                          variant="outlined"
+                          error={apiError.includes('already taken') || apiError.includes('characters')}
+                          helperText={
+                            apiError.includes('already taken') ? 'This custom back-half is already taken' :
+                            apiError.includes('characters') ? 'Must be 3-50 characters, letters/numbers/hyphens/underscores only' : 
+                            customBackHalf.length > 0 ? `${customBackHalf.length}/50 characters` : ''
+                          }
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              fontSize: '14px',
+                              '&:hover fieldset': {
+                                borderColor: '#882AFF',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#882AFF',
+                                borderWidth: 2,
+                              }
+                            },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '12px',
+                              mt: 1
+                            }
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* UTM Parameters Section */}
+                <Box sx={{ 
+                  mb: 4,
+                  p: 3,
+                  bgcolor: 'white',
+                  borderRadius: 3,
+                  border: '1px solid #f1f5f9',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Box>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          color: '#1e293b',
+                          fontWeight: 600,
+                          fontSize: '18px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          mb: 1
+                        }}
+                      >
+                        <SettingsIcon sx={{ color: '#882AFF' }} />
+                        UTM Parameters
+                      </Typography>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: '#64748b',
+                          fontSize: '14px',
+                          lineHeight: 1.5
+                        }}
+                      >
+                        Track campaign performance with Google Analytics and other tools
+                      </Typography>
+                    </Box>
+                    <Switch
+                      checked={enableUTM}
+                      onChange={(e) => setEnableUTM(e.target.checked)}
+                      sx={{
+                        '& .MuiSwitch-switchBase.Mui-checked': {
+                          color: '#882AFF',
+                        },
+                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                          backgroundColor: '#882AFF',
+                        },
+                        '& .MuiSwitch-track': {
+                          borderRadius: 12,
+                        },
+                        '& .MuiSwitch-thumb': {
+                          borderRadius: 10,
+                        }
+                      }}
+                    />
+                  </Box>
+
+                  {enableUTM && (
+                    <Box 
+                      sx={{ 
+                        display: 'grid',
+                        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                        gap: 3,
+                        pt: 2,
+                        borderTop: '1px solid #f1f5f9'
+                      }}
+                    >
+                      <TextField
+                        label="UTM Source"
+                        placeholder="e.g., google, newsletter, facebook"
+                        value={utmSource}
+                        onChange={(e) => setUtmSource(e.target.value)}
+                        variant="outlined"
+                        helperText="Identify the advertiser, site, publication, etc."
                         sx={{
-                          '& .MuiSwitch-switchBase.Mui-checked': {
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 3,
+                            fontSize: '14px',
+                            '&:hover fieldset': {
+                              borderColor: '#882AFF',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#882AFF',
+                              borderWidth: 2,
+                            }
+                          },
+                          '& .MuiInputLabel-root.Mui-focused': {
                             color: '#882AFF',
                           },
-                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                            backgroundColor: '#882AFF',
-                          },
+                          '& .MuiFormHelperText-root': {
+                            fontSize: '12px',
+                            mt: 1
+                          }
                         }}
                       />
-                    </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                      Add UTMs to track web traffic in analytics tools
-                    </Typography>
-
-                    {enableUTM && (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <TextField
-                          fullWidth
-                          label="Source"
-                          placeholder="e.g., google, newsletter"
-                          value={utmSource}
-                          onChange={(e) => setUtmSource(e.target.value)}
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              '&:hover fieldset': {
-                                borderColor: '#882AFF',
-                              },
-                              '&.Mui-focused fieldset': {
-                                borderColor: '#882AFF',
-                              }
+                      <TextField
+                        label="UTM Medium"
+                        placeholder="e.g., cpc, email, social"
+                        value={utmMedium}
+                        onChange={(e) => setUtmMedium(e.target.value)}
+                        variant="outlined"
+                        helperText="Identify the marketing medium"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 3,
+                            fontSize: '14px',
+                            '&:hover fieldset': {
+                              borderColor: '#882AFF',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#882AFF',
+                              borderWidth: 2,
                             }
-                          }}
-                        />
-                        <TextField
-                          fullWidth
-                          label="Medium"
-                          placeholder="e.g., cpc, email"
-                          value={utmMedium}
-                          onChange={(e) => setUtmMedium(e.target.value)}
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              '&:hover fieldset': {
-                                borderColor: '#882AFF',
-                              },
-                              '&.Mui-focused fieldset': {
-                                borderColor: '#882AFF',
-                              }
+                          },
+                          '& .MuiInputLabel-root.Mui-focused': {
+                            color: '#882AFF',
+                          },
+                          '& .MuiFormHelperText-root': {
+                            fontSize: '12px',
+                            mt: 1
+                          }
+                        }}
+                      />
+                      <TextField
+                        label="UTM Campaign"
+                        placeholder="e.g., spring_sale, product_launch"
+                        value={utmCampaign}
+                        onChange={(e) => setUtmCampaign(e.target.value)}
+                        variant="outlined"
+                        helperText="Identify the specific campaign"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 3,
+                            fontSize: '14px',
+                            '&:hover fieldset': {
+                              borderColor: '#882AFF',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#882AFF',
+                              borderWidth: 2,
                             }
-                          }}
-                        />
-                        <TextField
-                          fullWidth
-                          label="Campaign"
-                          placeholder="e.g., spring_sale"
-                          value={utmCampaign}
-                          onChange={(e) => setUtmCampaign(e.target.value)}
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              '&:hover fieldset': {
-                                borderColor: '#882AFF',
-                              },
-                              '&.Mui-focused fieldset': {
-                                borderColor: '#882AFF',
-                              }
+                          },
+                          '& .MuiInputLabel-root.Mui-focused': {
+                            color: '#882AFF',
+                          },
+                          '& .MuiFormHelperText-root': {
+                            fontSize: '12px',
+                            mt: 1
+                          }
+                        }}
+                      />
+                      <TextField
+                        label="UTM Term"
+                        placeholder="e.g., running+shoes, blue+widget"
+                        value={utmTerm}
+                        onChange={(e) => setUtmTerm(e.target.value)}
+                        variant="outlined"
+                        helperText="Identify paid search keywords"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 3,
+                            fontSize: '14px',
+                            '&:hover fieldset': {
+                              borderColor: '#882AFF',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#882AFF',
+                              borderWidth: 2,
                             }
-                          }}
-                        />
+                          },
+                          '& .MuiInputLabel-root.Mui-focused': {
+                            color: '#882AFF',
+                          },
+                          '& .MuiFormHelperText-root': {
+                            fontSize: '12px',
+                            mt: 1
+                          }
+                        }}
+                      />
+                      <Box sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}>
                         <TextField
                           fullWidth
-                          label="Term"
-                          placeholder="e.g., running+shoes"
-                          value={utmTerm}
-                          onChange={(e) => setUtmTerm(e.target.value)}
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              '&:hover fieldset': {
-                                borderColor: '#882AFF',
-                              },
-                              '&.Mui-focused fieldset': {
-                                borderColor: '#882AFF',
-                              }
-                            }
-                          }}
-                        />
-                        <TextField
-                          fullWidth
-                          label="Content"
-                          placeholder="e.g., logolink, textlink"
+                          label="UTM Content"
+                          placeholder="e.g., logolink, textlink, sidebar_ad"
                           value={utmContent}
                           onChange={(e) => setUtmContent(e.target.value)}
                           variant="outlined"
-                          size="small"
+                          helperText="Differentiate ads or links that point to the same URL"
                           sx={{
                             '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              fontSize: '14px',
                               '&:hover fieldset': {
                                 borderColor: '#882AFF',
                               },
                               '&.Mui-focused fieldset': {
                                 borderColor: '#882AFF',
+                                borderWidth: 2,
                               }
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': {
+                              color: '#882AFF',
+                            },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '12px',
+                              mt: 1
                             }
                           }}
                         />
                       </Box>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Divider sx={{ my: 2}} />
-
-                {/* Ways to Share Section */}
-                <Typography variant="body2" sx={{ mb: 1, color: '#882AFF' }}>
-                  Ways to share
-                </Typography>
+                    </Box>
+                  )}
+                </Box>
 
                 {/* QR Code Section */}
-                <Card sx={{ mb: 2, bgcolor: '#f6edf8', border: '1px solid #f6edf8' }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <QrCodeIcon sx={{ color: '#882AFF' }} />
-                        <Typography variant="body2" sx={{ color: '#882AFF' }}>
-                          QR Code
-                        </Typography>
-                      </Box>
-                      <Switch
-                        checked={enableQR}
-                        onChange={(e) => setEnableQR(e.target.checked)}
-                        sx={{
-                          '& .MuiSwitch-switchBase.Mui-checked': {
-                            color: '#882AFF',
-                          },
-                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                            backgroundColor: '#882AFF',
-                          },
+                <Box sx={{ 
+                  mb: 4,
+                  p: 3,
+                  bgcolor: 'white',
+                  borderRadius: 3,
+                  border: '1px solid #f1f5f9',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Box>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          color: '#1e293b',
+                          fontWeight: 600,
+                          fontSize: '18px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          mb: 1
                         }}
-                      />
+                      >
+                        <QrCodeIcon sx={{ color: '#882AFF' }} />
+                        QR Code
+                      </Typography>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: '#64748b',
+                          fontSize: '14px',
+                          lineHeight: 1.5
+                        }}
+                      >
+                        Generate a scannable QR code for your short link
+                      </Typography>
                     </Box>
+                    <Switch
+                      checked={enableQR}
+                      onChange={(e) => setEnableQR(e.target.checked)}
+                      sx={{
+                        '& .MuiSwitch-switchBase.Mui-checked': {
+                          color: '#882AFF',
+                        },
+                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                          backgroundColor: '#882AFF',
+                        },
+                        '& .MuiSwitch-track': {
+                          borderRadius: 12,
+                        },
+                        '& .MuiSwitch-thumb': {
+                          borderRadius: 10,
+                        }
+                      }}
+                    />
+                  </Box>
 
-                    {enableQR && (
-                      <Grid container spacing={3}>
-                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                          <Typography variant="body2" sx={{ mb: 1, }}>
-                            Code color
+                  {enableQR && (
+                    <Box 
+                      sx={{ 
+                        pt: 2,
+                        borderTop: '1px solid #f1f5f9'
+                      }}
+                    >
+                      <Grid container spacing={4}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              mb: 2, 
+                              color: '#374151',
+                              fontWeight: 500,
+                              fontSize: '14px'
+                            }}
+                          >
+                            QR Code Color
                           </Typography>
-                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1}}>
+                          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 3}}>
                             {qrColors.map((color) => (
-                              <IconButton
+                              <Box
                                 key={color}
                                 onClick={() => setQrColor(color)}
                                 sx={{
-                                  width: 40,
-                                  height: 40,
+                                  width: 36,
+                                  height: 36,
                                   bgcolor: color,
-                                  border: qrColor === color ? '3px solid #882AFF' : '2px solid #ccc',
+                                  borderRadius: 2,
+                                  border: qrColor === color ? '3px solid #882AFF' : '2px solid #e2e8f0',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
                                   '&:hover': {
                                     transform: 'scale(1.1)',
+                                    boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
                                   }
                                 }}
                               />
                             ))}
                           </Box>
 
-                          <Typography variant="body2" sx={{ mb: 2, fontWeight: 'bold' }}>
-                            Logo
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              mb: 2, 
+                              color: '#374151',
+                              fontWeight: 500,
+                              fontSize: '14px'
+                            }}
+                          >
+                            Logo (Optional)
                           </Typography>
                           <Button
                             variant="outlined"
@@ -591,13 +823,18 @@ const LinkAdvancedPage = () => {
                             sx={{
                               borderColor: '#882AFF',
                               color: '#882AFF',
+                              borderRadius: 3,
+                              textTransform: 'none',
+                              fontWeight: 500,
+                              py: 1.5,
+                              px: 3,
                               '&:hover': {
-                                borderColor: '#882AFF',
-                                bgcolor: 'rgba(136, 42, 255, 0.04)',
+                                borderColor: '#7C3AED',
+                                backgroundColor: 'rgba(136, 42, 255, 0.04)',
                               }
                             }}
                           >
-                            Choose logo
+                            Choose Logo
                             <input
                               type="file"
                               hidden
@@ -606,57 +843,100 @@ const LinkAdvancedPage = () => {
                             />
                           </Button>
                           {logoPreview && (
-                            <Box sx={{ mt: 2 }}>
+                            <Box sx={{ 
+                              mt: 2,
+                              p: 2,
+                              border: '1px solid #e2e8f0',
+                              borderRadius: 2,
+                              bgcolor: '#f8fafc',
+                              display: 'inline-block'
+                            }}>
                               <img
                                 src={logoPreview}
                                 alt="Logo preview"
-                                style={{ width: 60, height: 60, objectFit: 'contain', border: '1px solid #ccc', borderRadius: 4 }}
+                                style={{ 
+                                  width: 48, 
+                                  height: 48, 
+                                  objectFit: 'contain',
+                                  borderRadius: 4 
+                                }}
                               />
                             </Box>
                           )}
                         </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                          <Typography variant="body2" sx={{ mb: 2, fontWeight: 'bold' }}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              mb: 2, 
+                              color: '#374151',
+                              fontWeight: 500,
+                              fontSize: '14px'
+                            }}
+                          >
                             Preview
                           </Typography>
                           <Box sx={{ 
-                            p: 2, 
-                            bgcolor: 'white', 
-                            borderRadius: 2, 
-                            border: '1px solid #e0e0e0',
+                            p: 3, 
+                            bgcolor: '#f8fafc', 
+                            borderRadius: 3, 
+                            border: '1px solid #e2e8f0',
                             display: 'flex',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            minHeight: 180
                           }}>
                             <img
                               src={generateQRCode()}
                               alt="QR Code Preview"
-                              style={{ width: 150, height: 150 }}
+                              style={{ 
+                                width: 120, 
+                                height: 120,
+                                borderRadius: 8,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              }}
                             />
                           </Box>
-                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                            More customizations are available after creating
+                          <Typography 
+                            variant="caption" 
+                            sx={{ 
+                              mt: 2, 
+                              display: 'block',
+                              color: '#64748b',
+                              fontSize: '12px',
+                              textAlign: 'center'
+                            }}
+                          >
+                            More customizations available after creating
                           </Typography>
                         </Grid>
                       </Grid>
-                    )}
-                  </CardContent>
-                </Card>
-
-                
+                    </Box>
+                  )}
+                </Box>
 
                 {/* Action Buttons */}
-                <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 3, 
+                  mt: 4,
+                  pt: 3,
+                  borderTop: '1px solid #f1f5f9'
+                }}>
                   <Button
                     variant="outlined"
-                    size="small"
                     sx={{
-                      py: 1.5,
-                      px: 2,
-                      borderColor: '#882AFF',
-                      color: '#882AFF',
+                      py: 2,
+                      px: 4,
+                      borderColor: '#e2e8f0',
+                      color: '#64748b',
+                      borderRadius: 3,
+                      textTransform: 'none',
+                      fontWeight: 500,
                       '&:hover': {
-                        borderColor: '#091A48',
-                        bgcolor: 'rgba(136, 42, 255, 0.04)',
+                        borderColor: '#882AFF',
+                        backgroundColor: 'rgba(136, 42, 255, 0.04)',
+                        color: '#882AFF'
                       }
                     }}
                   >
@@ -664,149 +944,340 @@ const LinkAdvancedPage = () => {
                   </Button>
                   <Button
                     variant="contained"
-                    size="small"
                     onClick={handleCreateLink}
                     disabled={loading}
-                    startIcon={loading ? <CircularProgress size={20} /> : <AddIcon />}
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <AddIcon />}
                     sx={{
-                      py: 1.5,
-                      px: 2,
-                      background: '#882AFF',
+                      py: 2,
+                      px: 4,
+                      backgroundColor: '#882AFF',
+                      borderRadius: 3,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      boxShadow: '0 4px 6px -1px rgba(136, 42, 255, 0.3)',
                       '&:hover': {
-                        boxShadow: '0px 2px 4px -1px rgba(0,0,0,0.2),0px 4px 5px 0px rgba(0,0,0,0.14),0px 1px 10px 0px rgba(0,0,0,0.12)',
-                      }
+                        backgroundColor: '#7C3AED',
+                        boxShadow: '0 6px 12px -1px rgba(136, 42, 255, 0.4)',
+                        transform: 'translateY(-1px)'
+                      },
+                      '&:disabled': {
+                        backgroundColor: '#e2e8f0',
+                        color: '#64748b',
+                        boxShadow: 'none'
+                      },
+                      transition: 'all 0.2s ease'
                     }}
                   >
-                    {loading ? 'Creating your link...' : 'Create your link'}
+                    {loading ? 'Creating Link...' : 'Create Short Link'}
                   </Button>
                 </Box>
               </Grid>
 
               {/* Right Column - Preview */}
               <Grid size={{ xs: 12, sm: 6, md: 5 }}>
-                <Card sx={{ position: 'sticky', top: 20, boxShadow: 3 }}>
-                  <CardContent>
-                    <Typography variant="body2" sx={{ mb: 2, color: '#882AFF' }}>
-                      Preview
+                <Box sx={{ 
+                  position: 'sticky', 
+                  top: 20,
+                  p: 3,
+                  bgcolor: 'white',
+                  borderRadius: 3,
+                  border: '1px solid #f1f5f9',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                }}>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      mb: 3, 
+                      color: '#1e293b',
+                      fontWeight: 600,
+                      fontSize: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}
+                  >
+                    <PreviewIcon sx={{ color: '#882AFF' }} />
+                    Live Preview
+                  </Typography>
+                  
+                  {/* Short URL Preview */}
+                  <Box sx={{ 
+                    mb: 3, 
+                    p: 3, 
+                    bgcolor: '#f8fafc', 
+                    borderRadius: 3,
+                    border: '1px solid #e2e8f0'
+                  }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        mb: 2, 
+                        color: '#64748b',
+                        fontWeight: 500,
+                        fontSize: '12px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}
+                    >
+                      Short URL Preview
                     </Typography>
-                    
-                    {/* Short URL Preview */}
-                    <Box sx={{ mb: 3, p: 2, bgcolor: '#f6edf8', borderRadius: 2 }}>
-                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                        Short URL:
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#882AFF' }}>
-                        {getShortUrlPreview()}
-                      </Typography>
-                    </Box>
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        fontWeight: 600, 
+                        color: '#882AFF',
+                        fontSize: '16px',
+                        wordBreak: 'break-all'
+                      }}
+                    >
+                      {getShortUrlPreview()}
+                    </Typography>
+                  </Box>
 
-                    {/* UTM Tags Preview */}
-                    {enableUTM && (
-                      <Box sx={{ mb: 3, p: 2, bgcolor: '#f8fff8', borderRadius: 2 }}>
-                        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-                          UTM Tags:
-                        </Typography>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                          {utmSource && (
-                            <Typography variant="body2" sx={{ color: '#091A48', fontSize: '0.85rem' }}>
-                              <strong>Source:</strong> {utmSource}
+                  {/* UTM Tags Preview */}
+                  {enableUTM && (
+                    <Box sx={{ 
+                      mb: 3, 
+                      p: 3, 
+                      bgcolor: '#f8fafc', 
+                      borderRadius: 3,
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          mb: 2, 
+                          color: '#64748b',
+                          fontWeight: 500,
+                          fontSize: '12px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}
+                      >
+                        UTM Parameters
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {utmSource && (
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '13px', fontWeight: 500 }}>
+                              Source:
                             </Typography>
-                          )}
-                          {utmMedium && (
-                            <Typography variant="body2" sx={{ color: '#091A48', fontSize: '0.85rem' }}>
-                              <strong>Medium:</strong> {utmMedium}
+                            <Typography variant="body2" sx={{ color: '#1e293b', fontSize: '13px', fontWeight: 600 }}>
+                              {utmSource}
                             </Typography>
-                          )}
-                          {utmCampaign && (
-                            <Typography variant="body2" sx={{ color: '#091A48', fontSize: '0.85rem' }}>
-                              <strong>Campaign:</strong> {utmCampaign}
+                          </Box>
+                        )}
+                        {utmMedium && (
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '13px', fontWeight: 500 }}>
+                              Medium:
                             </Typography>
-                          )}
-                          {utmTerm && (
-                            <Typography variant="body2" sx={{ color: '#091A48', fontSize: '0.85rem' }}>
-                              <strong>Term:</strong> {utmTerm}
+                            <Typography variant="body2" sx={{ color: '#1e293b', fontSize: '13px', fontWeight: 600 }}>
+                              {utmMedium}
                             </Typography>
-                          )}
-                          {utmContent && (
-                            <Typography variant="body2" sx={{ color: '#091A48', fontSize: '0.85rem' }}>
-                              <strong>Content:</strong> {utmContent}
+                          </Box>
+                        )}
+                        {utmCampaign && (
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '13px', fontWeight: 500 }}>
+                              Campaign:
                             </Typography>
-                          )}
-                          
-                          {(utmSource || utmMedium || utmCampaign || utmTerm || utmContent) && (
-                            <Box sx={{ mt: 2, p: 1, bgcolor: '#fff', borderRadius: 1, border: '1px solid #e0e0e0' }}>
-                              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                                Final URL with UTM:
-                              </Typography>
-                              <Typography 
-                                variant="body2" 
-                                sx={{ 
-                                  wordBreak: 'break-all', 
-                                  color: '#091A48',
-                                  fontSize: '0.75rem',
-                                  lineHeight: 1.3
-                                }}
-                              >
-                                {generatePreviewUrl()}
-                              </Typography>
-                            </Box>
-                          )}
-                        </Box>
+                            <Typography variant="body2" sx={{ color: '#1e293b', fontSize: '13px', fontWeight: 600 }}>
+                              {utmCampaign}
+                            </Typography>
+                          </Box>
+                        )}
+                        {utmTerm && (
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '13px', fontWeight: 500 }}>
+                              Term:
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#1e293b', fontSize: '13px', fontWeight: 600 }}>
+                              {utmTerm}
+                            </Typography>
+                          </Box>
+                        )}
+                        {utmContent && (
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '13px', fontWeight: 500 }}>
+                              Content:
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#1e293b', fontSize: '13px', fontWeight: 600 }}>
+                              {utmContent}
+                            </Typography>
+                          </Box>
+                        )}
+                        
+                        {(utmSource || utmMedium || utmCampaign || utmTerm || utmContent) && (
+                          <Box sx={{ 
+                            mt: 2, 
+                            p: 2, 
+                            bgcolor: 'white', 
+                            borderRadius: 2, 
+                            border: '1px solid #e2e8f0',
+                            borderLeft: '3px solid #882AFF'
+                          }}>
+                            <Typography 
+                              variant="caption" 
+                              sx={{ 
+                                mb: 1, 
+                                display: 'block',
+                                color: '#64748b',
+                                fontSize: '11px',
+                                fontWeight: 500,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}
+                            >
+                              Final URL with UTM
+                            </Typography>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                wordBreak: 'break-all', 
+                                color: '#1e293b',
+                                fontSize: '12px',
+                                lineHeight: 1.4,
+                                fontFamily: 'monospace'
+                              }}
+                            >
+                              {generatePreviewUrl()}
+                            </Typography>
+                          </Box>
+                        )}
                       </Box>
-                    )}
+                    </Box>
+                  )}
 
-                    {/* QR Code Preview */}
-                    {enableQR && (
-                      <Box sx={{ mb: 3, p: 2, bgcolor: '#fff', borderRadius: 2, border: '1px solid #e0e0e0', textAlign: 'center' }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                          QR Code Preview:
-                        </Typography>
+                  {/* QR Code Preview */}
+                  {enableQR && (
+                    <Box sx={{ 
+                      mb: 3, 
+                      p: 3, 
+                      bgcolor: '#f8fafc', 
+                      borderRadius: 3,
+                      border: '1px solid #e2e8f0',
+                      textAlign: 'center' 
+                    }}>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          mb: 2, 
+                          color: '#64748b',
+                          fontWeight: 500,
+                          fontSize: '12px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}
+                      >
+                        QR Code Preview
+                      </Typography>
+                      <Box sx={{
+                        display: 'inline-block',
+                        p: 2,
+                        bgcolor: 'white',
+                        borderRadius: 2,
+                        border: '1px solid #e2e8f0'
+                      }}>
                         <img
                           src={generateQRCode()}
                           alt="QR Code Preview"
-                          style={{ width: 120, height: 120 }}
+                          style={{ 
+                            width: 100, 
+                            height: 100,
+                            borderRadius: 4
+                          }}
                         />
-                      </Box>
-                    )}
-
-                    {/* Features Summary */}
-                    <Box sx={{ mt: 3 }}>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        Enabled Features:
-                      </Typography>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Chip 
-                          label="Short Link" 
-                          size="small" 
-                          sx={{ bgcolor: '#e3f2fd', color: '#1976d2' }}
-                        />
-                        {enableQR && (
-                          <Chip 
-                            label="QR Code" 
-                            size="small" 
-                            sx={{ bgcolor: '#f3e5f5', color: '#882AFF' }}
-                          />
-                        )}
-                        {enableUTM && (
-                          <Chip 
-                            label="UTM Parameters" 
-                            size="small" 
-                            sx={{ bgcolor: '#e8f5e8', color: '#4caf50' }}
-                          />
-                        )}
                       </Box>
                     </Box>
-                  </CardContent>
-                </Card>
+                  )}
+
+                  {/* Features Summary */}
+                  <Box>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        mb: 2, 
+                        color: '#64748b',
+                        fontWeight: 500,
+                        fontSize: '12px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}
+                    >
+                      Enabled Features
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      <Chip 
+                        label="🔗 Short Link" 
+                        size="small" 
+                        sx={{ 
+                          bgcolor: '#e3f2fd', 
+                          color: '#1976d2',
+                          fontWeight: 500,
+                          borderRadius: 2,
+                          justifyContent: 'flex-start'
+                        }}
+                      />
+                      {enableQR && (
+                        <Chip 
+                          label="📱 QR Code" 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: '#f3e5f5', 
+                            color: '#882AFF',
+                            fontWeight: 500,
+                            borderRadius: 2,
+                            justifyContent: 'flex-start'
+                          }}
+                        />
+                      )}
+                      {enableUTM && (
+                        <Chip 
+                          label="📊 UTM Tracking" 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: '#e8f5e8', 
+                            color: '#4caf50',
+                            fontWeight: 500,
+                            borderRadius: 2,
+                            justifyContent: 'flex-start'
+                          }}
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
               </Grid>
             </Grid>
 
-            {/* Generated URL Display */}
-            {generatedUrl && (
-              <Box sx={{ mt: 4, p: 4, bgcolor: '#f0f7ff', borderRadius: 3, border: '2px solid #e3f2fd' }}>
-                <Typography variant="body2" sx={{ mb: 3, color: '#882AFF', fontWeight: 'bold' }}>
-                  ✅ Link Created Successfully!
-                </Typography>
+          </Box>
+
+          {/* Generated URL Display */}
+          {generatedUrl && (
+            <Box sx={{ 
+              mt: 4, 
+              p: 4, 
+              bgcolor: 'white', 
+              borderRadius: 3, 
+              border: '2px solid #882AFF',
+              boxShadow: '0 4px 6px -1px rgba(136, 42, 255, 0.1)'
+            }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  mb: 3, 
+                  color: '#882AFF', 
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  fontSize: '18px'
+                }}
+              >
+                ✅ Link Created Successfully!
+              </Typography>
                 
                 <Grid container spacing={3}>
                   <Grid item xs={12} md={8}>
