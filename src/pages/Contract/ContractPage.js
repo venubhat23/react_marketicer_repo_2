@@ -365,7 +365,7 @@ const ContractPage = () => {
   const renderTableHeaders = () => {
     if (showTemplates) {
       return (
-        <TableRow sx={{ bgcolor: '#882AFF', padding:'0 20px' }}>
+        <TableRow sx={{ bgcolor: '#B1C6FF', padding:'0 20px' }}>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Template Name</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Type</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Date Created</TableCell>
@@ -374,7 +374,7 @@ const ContractPage = () => {
       );
     } else {
       return (
-        <TableRow sx={{ bgcolor: '#882AFF', padding:'0 20px'}}>
+        <TableRow sx={{ bgcolor: '#B1C6FF', padding:'0 20px'}}>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Contract Name</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Type</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Status</TableCell>
