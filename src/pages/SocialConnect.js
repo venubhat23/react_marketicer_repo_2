@@ -380,8 +380,8 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                                     >
                                         <Box
                                             sx={{
-                                                width: "40px",
-                                                height: "40px",
+                                                width: "50px",
+                                                height: "50px",
                                                 borderRadius: "50%",
                                                 marginRight: "15px",
                                                 backgroundColor: "#f0f0f0",
@@ -526,8 +526,8 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
                                             src={item.icon} 
                                             alt={item.label}
                                             style={{
-                                                width: "40px",
-                                                height: "40px",
+                                                width: "50px",
+                                                height: "50px",
                                                 objectFit: "contain"
                                             }}
                                         />
