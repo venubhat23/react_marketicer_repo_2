@@ -624,11 +624,11 @@ const ContractPage = () => {
                 onClick={() => setShowTemplates(false)}
                 sx={{
                   borderRadius: '50px',
-                  px: 2,
-                  py: 0.5,
+                  px: 1.5,
+                  py: 0.4,
                   textTransform: 'none',
                   fontWeight: 600,
-                  fontSize: '13px',
+                  fontSize: '12px',
                   minWidth: 'auto',
                   bgcolor: !showTemplates ? '#882AFF' : 'transparent',
                   color: !showTemplates ? '#fff' : '#882AFF',
@@ -647,11 +647,11 @@ const ContractPage = () => {
                 onClick={() => setShowTemplates(true)}
                 sx={{
                   borderRadius: '50px',
-                  px: 2,
-                  py: 0.5,
+                  px: 1.5,
+                  py: 0.4,
                   textTransform: 'none',
                   fontWeight: 600,
-                  fontSize: '13px',
+                  fontSize: '12px',
                   minWidth: 'auto',
                   bgcolor: showTemplates ? '#882AFF' : 'transparent',
                   color: showTemplates ? '#fff' : '#882AFF',
@@ -673,12 +673,12 @@ const ContractPage = () => {
                 startIcon={<AddIcon />}
                 onClick={handleCreateContract}
                 sx={{
-                  px: 2,
-                  py: 0.6,
+                  px: 1.5,
+                  py: 0.4,
                   borderRadius: 2,
                   textTransform: 'none',
                   fontWeight: 600,
-                  fontSize: '13px',
+                  fontSize: '12px',
                   bgcolor: '#882AFF',
                   '&:hover': {
                     bgcolor: '#7625e6',
