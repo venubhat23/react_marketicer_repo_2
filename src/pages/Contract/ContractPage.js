@@ -524,7 +524,7 @@ const ContractPage = () => {
           elevation={0}
           sx={{
             p: 1,
-            backgroundColor: '#882AFF', // Standard purple theme color
+            backgroundColor: '#091a48', // Updated header background color
             borderRadius: 0,
             color: 'white'
           }}
