@@ -365,7 +365,7 @@ const ContractPage = () => {
   const renderTableHeaders = () => {
     if (showTemplates) {
       return (
-        <TableRow sx={{ bgcolor: '#B1C6FF', padding:'0 20px' }}>
+        <TableRow sx={{ bgcolor: '#882AFF', padding:'0 20px' }}>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Template Name</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Type</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Date Created</TableCell>
@@ -374,7 +374,7 @@ const ContractPage = () => {
       );
     } else {
       return (
-        <TableRow sx={{ bgcolor: '#B1C6FF', padding:'0 20px'}}>
+        <TableRow sx={{ bgcolor: '#882AFF', padding:'0 20px'}}>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Contract Name</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Type</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Status</TableCell>
@@ -404,7 +404,7 @@ const ContractPage = () => {
             <Typography
               component="span"
               sx={{
-                color: '#7c4dff',
+                color: '#882AFF',
                 cursor: 'pointer',
                 fontWeight: 500,
                 '&:hover': {
@@ -515,7 +515,7 @@ const ContractPage = () => {
 
   return (
     
-      <Box sx={{ flexGrow: 1, minHeight: '100vh' }}>
+      <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: '#f5edf8' }}>
         <Grid container>
           <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
             <Grid size={{ md: 11 }}>
@@ -524,7 +524,7 @@ const ContractPage = () => {
           elevation={0}
           sx={{
             p: 1,
-            backgroundColor: '#091a48', // Updated header background color
+            backgroundColor: '#882AFF', // Standard purple theme color
             borderRadius: 0,
             color: 'white'
           }}
@@ -568,7 +568,7 @@ const ContractPage = () => {
           {/* Controls Bar */}
           <Box
             sx={{
-              bgcolor: '#B1C6FF',
+              bgcolor: '#f3e5f5',
               padding: '4px 12px',
               display: 'flex',
               alignItems: 'center',
@@ -630,11 +630,11 @@ const ContractPage = () => {
                   fontWeight: 600,
                   fontSize: '13px',
                   minWidth: 'auto',
-                  bgcolor: !showTemplates ? '#1a237e' : 'transparent',
-                  color: !showTemplates ? '#fff' : '#1a237e',
+                  bgcolor: !showTemplates ? '#882AFF' : 'transparent',
+                  color: !showTemplates ? '#fff' : '#882AFF',
                   '&:hover': {
-                    bgcolor: !showTemplates ? '#1a237e' : 'rgba(26,35,126,0.1)',
-                    color: !showTemplates ? '#fff' : '#1a237e'
+                    bgcolor: !showTemplates ? '#882AFF' : 'rgba(136,42,255,0.1)',
+                    color: !showTemplates ? '#fff' : '#882AFF'
                   },
                 }}
                 startIcon={<CreatedIcon sx={{ fontSize: 14 }} />}
@@ -653,11 +653,11 @@ const ContractPage = () => {
                   fontWeight: 600,
                   fontSize: '13px',
                   minWidth: 'auto',
-                  bgcolor: showTemplates ? '#1a237e' : 'transparent',
-                  color: showTemplates ? '#fff' : '#1a237e',
+                  bgcolor: showTemplates ? '#882AFF' : 'transparent',
+                  color: showTemplates ? '#fff' : '#882AFF',
                   '&:hover': {
-                    bgcolor: showTemplates ? '#1a237e' : 'rgba(26,35,126,0.1)',
-                    color: showTemplates ? '#fff' : '#1a237e'
+                    bgcolor: showTemplates ? '#882AFF' : 'rgba(136,42,255,0.1)',
+                    color: showTemplates ? '#fff' : '#882AFF'
                   },
                 }}
                 startIcon={<TemplateIcon sx={{ fontSize: 14 }} />}
@@ -679,9 +679,9 @@ const ContractPage = () => {
                   textTransform: 'none',
                   fontWeight: 600,
                   fontSize: '13px',
-                  bgcolor: '#1a237e',
+                  bgcolor: '#882AFF',
                   '&:hover': {
-                    bgcolor: '#0d1942',
+                    bgcolor: '#7625e6',
                   },
                 }}
               >
