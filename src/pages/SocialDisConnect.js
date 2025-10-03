@@ -20,11 +20,11 @@ const handleDisConnect = async (account, onClose, getAccounts) => {
     });
 
     const data = await response.json();
-    console.log("Connect API Response:", data);
+    console.log("Disconnect API Response:", data);
     onClose()
     if (data.status) {
-      getAccounts()
-      window.location.reload();
+      // Refresh accounts without page reload
+      getAccounts();
       // alert(`${account.name} disconnected successfully!`);
     } else {
       alert(`Failed to disconnect ${account.name}`);

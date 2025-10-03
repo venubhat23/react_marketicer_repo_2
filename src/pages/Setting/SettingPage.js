@@ -24,10 +24,12 @@ import {
     Security,
     AccessTime,
     Delete,
+    Edit as EditIcon,
+    Close as CloseIcon,
+    Check as CheckIcon,
   } from '@mui/icons-material';
 
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
-import CloseIcon from '@mui/icons-material/Close';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import SendIcon from '@mui/icons-material/Send';
@@ -103,6 +105,7 @@ const SettingPage = () => {
     const [selectedTab, setSelectedTab] = useState(0);
     const [personalEditMode, setPersonalEditMode] = useState(false);
     const [companyEditMode, setCompanyEditMode] = useState(false);
+    const fileInputRef = useRef(null);
     
     // API hooks
     const { data: settingsData, isLoading: settingsLoading, error: settingsError } = useGetSettings();
@@ -249,7 +252,7 @@ const SettingPage = () => {
             new_password: '',
             confirm_password: '',
           });
-          toast.success('Password updated successfully');
+          // Success message is handled by the hook
         } catch (error) {
           // Error is handled by the hook
           console.error('Failed to change password:', error);
@@ -285,6 +288,38 @@ const SettingPage = () => {
           // Error is handled by the hook
           console.error('Failed to delete account:', error);
         }
+      };
+
+      const handlePhotoChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          // Check file type
+          if (!file.type.startsWith('image/')) {
+            toast.error('Please select a valid image file');
+            return;
+          }
+          
+          // Check file size (max 5MB)
+          if (file.size > 5 * 1024 * 1024) {
+            toast.error('File size should be less than 5MB');
+            return;
+          }
+
+          // Create file reader to preview image
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            setPersonalFormData(prev => ({
+              ...prev,
+              avatar_url: e.target.result
+            }));
+            toast.success('Photo selected successfully');
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+
+      const handleChangePhotoClick = () => {
+        fileInputRef.current?.click();
       };
 
 
@@ -449,10 +484,74 @@ const SettingPage = () => {
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
               border: '1px solid #f3f4f6'
             }}>
-              <Grid container spacing={2} alignItems="center">
+              {/* Edit Profile Button at Top */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.5 }}>
+                {!personalEditMode ? (
+                  <IconButton 
+                    onClick={() => setPersonalEditMode(true)}
+                    size="small"
+                    sx={{
+                      backgroundColor: '#882AFF',
+                      color: 'white',
+                      width: 32,
+                      height: 32,
+                      '&:hover': {
+                        backgroundColor: '#7C3AED'
+                      }
+                    }}
+                  >
+                    <EditIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                ) : (
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <IconButton 
+                      onClick={() => setPersonalEditMode(false)}
+                      size="small"
+                      sx={{
+                        backgroundColor: '#f3f4f6',
+                        color: '#6b7280',
+                        width: 32,
+                        height: 32,
+                        '&:hover': {
+                          backgroundColor: '#e5e7eb',
+                          color: '#374151'
+                        }
+                      }}
+                    >
+                      <CloseIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                    <IconButton 
+                      onClick={handlePersonalSave}
+                      disabled={updatePersonalInfo.isPending}
+                      size="small"
+                      sx={{
+                        backgroundColor: '#10b981',
+                        color: 'white',
+                        width: 32,
+                        height: 32,
+                        '&:hover': {
+                          backgroundColor: '#059669'
+                        },
+                        '&:disabled': {
+                          backgroundColor: '#d1d5db',
+                          color: '#9ca3af'
+                        }
+                      }}
+                    >
+                      {updatePersonalInfo.isPending ? (
+                        <CircularProgress size={14} sx={{ color: 'white' }} />
+                      ) : (
+                        <CheckIcon sx={{ fontSize: 16 }} />
+                      )}
+                    </IconButton>
+                  </Box>
+                )}
+              </Box>
+
+              <Grid container spacing={2} alignItems="flex-start">
                 {/* Avatar Section */}
                 <Grid size={{ xs: 12, sm: 12, md: 12 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 3, mb: 2 }}>
                     <Avatar
                       alt="Profile"
                       src={personalFormData.avatar_url || "https://randomuser.me/api/portraits/women/65.jpg"}
@@ -463,16 +562,36 @@ const SettingPage = () => {
                       }}
                     />
                     <Box>
-                      <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, color: '#374151' }}>
                         Profile Picture
                       </Typography>
+                      <Typography variant="body2" sx={{ color: '#6b7280', mb: 1.5, fontSize: '13px' }}>
+                        Choose a profile picture that represents you
+                      </Typography>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handlePhotoChange}
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                      />
                       <Button 
                         variant="outlined" 
-                            disabled={!personalEditMode}
+                        size="small"
+                        disabled={!personalEditMode}
+                        onClick={handleChangePhotoClick}
                         sx={{ 
                           textTransform: 'none',
-                          borderRadius: 1,
-                          fontSize: '12px'
+                          borderRadius: 2,
+                          fontSize: '12px',
+                          px: 2,
+                          py: 0.75,
+                          borderColor: personalEditMode ? '#882AFF' : '#d1d5db',
+                          color: personalEditMode ? '#882AFF' : '#9ca3af',
+                          '&:hover': {
+                            borderColor: personalEditMode ? '#7C3AED' : '#d1d5db',
+                            backgroundColor: personalEditMode ? 'rgba(136, 42, 255, 0.05)' : 'transparent'
+                          }
                         }}
                       >
                         Change Photo
@@ -610,65 +729,6 @@ const SettingPage = () => {
                       },
                     }}
                   />
-                </Grid>
-
-                {/* Action Buttons */}
-                <Grid size={{ xs: 12 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, pt: 2 }}>
-                    {!personalEditMode ? (
-                      <Button 
-                        variant="contained" 
-                        onClick={() => setPersonalEditMode(true)}
-                        sx={{
-                          textTransform: 'none',
-                          borderRadius: 3,
-                          px: 3,
-                          backgroundColor: '#882AFF',
-                          '&:hover': {
-                            backgroundColor: '#7C3AED'
-                          }
-                        }}
-                      >
-                        Edit Profile
-                      </Button>
-                    ) : (
-                      <>
-                        <Button 
-                          variant="outlined"
-                          onClick={() => setPersonalEditMode(false)}
-                          sx={{
-                            textTransform: 'none',
-                            borderRadius: 3,
-                            px: 3,
-                            borderColor: '#d1d5db',
-                            color: '#6b7280',
-                            '&:hover': {
-                              borderColor: '#9ca3af',
-                              backgroundColor: '#f9fafb'
-                            }
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          variant="contained" 
-                          onClick={handlePersonalSave}
-                          disabled={updatePersonalInfo.isPending}
-                          sx={{
-                            textTransform: 'none',
-                            borderRadius: 3,
-                            px: 3,
-                            backgroundColor: '#882AFF',
-                            '&:hover': {
-                              backgroundColor: '#7C3AED'
-                            }
-                          }}
-                        >
-                          {updatePersonalInfo.isPending ? 'Saving...' : 'Save Changes'}
-                        </Button>
-                      </>
-                    )}
-                  </Box>
                 </Grid>
               </Grid>
             </Card>

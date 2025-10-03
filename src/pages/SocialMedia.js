@@ -161,7 +161,7 @@ const SocialMedia =()=>{
         }]
         return new_account;
       });
-      setSocialAccounts(socialAccounts => [...socialAccounts, ...accounts]);
+      setSocialAccounts(accounts);
       console.log("Mapped accounts:", accounts);
       // navigate('/dashboard');
       
