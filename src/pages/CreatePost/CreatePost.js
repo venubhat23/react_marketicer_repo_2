@@ -2913,6 +2913,20 @@ Would you like me to create this as a short handwritten-style note (suitable for
                         <Checkbox className="custom-checkbox"
                         sx={{bgcolor:'#cbaef7', width:'10px', height:'10px', color:'#cbaef7'}}
                           checked={selectedUsers.some((selected) => selected.id === user.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              // Add user to selection
+                              setSelectedUsers(prev => [...prev, user]);
+                            } else {
+                              // Remove user from selection
+                              setSelectedUsers(prev => prev.filter(u => u.id !== user.id));
+                              // Also clear from preview if it was the selected user
+                              if (selectedChipId === user.social_id) {
+                                setSelectedChipId(null);
+                                setSelectUser('');
+                              }
+                            }
+                          }}
                         />
                       </MenuItem>
                     ))}
