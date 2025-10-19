@@ -907,7 +907,7 @@ const InstagramAnalytics = () => {
                 </Box>
               </Grid>
 
-              <Grid size={{ xs: 2, sm: 4, md: 12 }}>
+              <Grid size={{ xs: 2, sm: 4, md: 12 }} style={{ display: platform === "LinkedIn" ? "none" : "block" }}>
                 <Box sx={{ width: "100%" }}>
                   {/* Tabs Header */}
                   <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -1126,7 +1126,7 @@ const InstagramAnalytics = () => {
                 </Box>
               </Grid>
 
-              <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }}>
+              <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }} style={{ display: platform === "LinkedIn" ? "none" : "block" }}>
                 <Typography variant="body1" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
                   All Brand - Tagged Posts
                 </Typography>
