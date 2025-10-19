@@ -203,17 +203,6 @@ const Sidebar = () => {
 
         <ListItem disablePadding>
           <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Link to="/LinkedinAnalytics">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
-                <TrendingUpIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Linkedin<br></br> Analytics</Typography>
-              </Box>
-            </Link>
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding>
-          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
             <Link to="/socialMedia">
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <People fontSize="medium" />

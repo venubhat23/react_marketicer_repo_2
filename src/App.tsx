@@ -33,7 +33,7 @@ import Calendar from './pages/Calendar/Calendar';
 import { InvoiceList, InvoiceForm, InvoiceDetail, InvoiceDashboard } from './pages/Invoice';
 import { PurchaseOrderList, PurchaseOrderForm, PurchaseOrderDetail, PurchaseOrderDashboard } from './pages/PurchaseOrder';
 import SystemSettings from './pages/SystemSettings';
-import LinkedinAnalytics from './pages/Profile/LinkedinAnalytics'
+
 
 // Component that renders routes based on user role
 const AppRoutes = () => {
@@ -156,7 +156,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<InstagramAnalytics />} />
-      <Route path="/" element={<LinkedinAnalytics />} />
+      
       
       <Route path="/dashboard" element={
           <ProtectedRoute>
@@ -179,21 +179,17 @@ const AppRoutes = () => {
           <InstagramAnalytics />
         </ProtectedRoute>
       } />
-      <Route path="/LinkedinAnalytics" element={
-        <ProtectedRoute>
-          <LinkedinAnalytics />
-        </ProtectedRoute>
-      } />
       <Route path="/socialMedia" element={
         <ProtectedRoute>
         <SocialMedia />
         </ProtectedRoute>
       } />
-      <Route path="/fullAnalytics" element={
+      <Route path="/fullAnalytics/:id" element={
         <ProtectedRoute>
         <FullAnalytics />
         </ProtectedRoute>
       } />
+      
       <Route path="/discover" element={
         <ProtectedRoute>
         <Discover />
