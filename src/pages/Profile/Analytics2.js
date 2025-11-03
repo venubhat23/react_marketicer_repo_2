@@ -17,28 +17,21 @@ const Analytics2 = () => {
   const [platformOption, setPlatformOption] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Sample data matching image 1 figma design
-  const sampleData = {
-    name: "Alice",
-    profileImage: "https://c.animaapp.com/mavezxjciUNcPR/img/ellipse-121-1.png",
-    category: "Beauty & Lifestyle",
-    followers: "32.8K",
-    following: "30K",
-    bio: "Bio: Lorem Ipsum dolor sit",
-    location: "USA",
-    engagement_rate: "3.1%",
-    earned_media: "249",
-    average_interactions: "3.1%",
-    campaign_analytics: [
-      { value: "24.3K", label: "Total Likes" },
-      { value: "403", label: "Total Comments" },
-      { value: "1.3%", label: "Total Engagement" },
-      { value: "32.8K", label: "Total Reach" },
-      { value: "12.1K", label: "Total Shares" },
-      { value: "428", label: "Total Saves" },
-      { value: "829", label: "Total Clicks" },
-      { value: "829", label: "Profile Visits" },
-    ]
+  // Helper function to format API data
+  const formatApiData = (apiData) => {
+    return apiData.map(item => ({
+      page_name: item.page_name || 'N/A',
+      name: item.profile?.name || 'N/A',
+      profileImage: item.profile?.profile_picture_url || '',
+      biography: item.profile?.biography || 'N/A',
+      followers_count: item.profile?.followers_count || 0,
+      follows_count: item.profile?.follows_count || 0,
+      media_count: item.profile?.media_count || 0,
+      engagement_rate: item.profile?.engagement_rate || 0,
+      total_posts: item.analytics?.total_posts || 0,
+      // For dropdown selection
+      displayName: item.page_name || item.profile?.name || 'N/A'
+    }));
   };
 
   useEffect(() => {
@@ -52,24 +45,25 @@ const Analytics2 = () => {
       const response = await axios.get('https://api.marketincer.com/api/v1/influencer/analytics', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      const data = response?.data?.data || [];
-      if (data.length > 0) {
-        setProfileData(data);
-        setSelectedUser(data[0]);
-        setPlatformOption(data[0].name);
+
+      const rawData = response?.data?.data || [];
+      if (rawData.length > 0) {
+        const formattedData = formatApiData(rawData);
+        setProfileData(formattedData);
+        setSelectedUser(formattedData[0]);
+        setPlatformOption(formattedData[0].displayName);
       } else {
-        // Use sample data if no API data
-        setProfileData([sampleData]);
-        setSelectedUser(sampleData);
-        setPlatformOption(sampleData.name);
+        // No data available
+        setProfileData([]);
+        setSelectedUser(null);
+        setPlatformOption('');
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
-      // Use sample data on error
-      setProfileData([sampleData]);
-      setSelectedUser(sampleData);
-      setPlatformOption(sampleData.name);
+      // No data on error
+      setProfileData([]);
+      setSelectedUser(null);
+      setPlatformOption('');
     } finally {
       setLoading(false);
     }
@@ -78,9 +72,9 @@ const Analytics2 = () => {
   const handleProfileChange = (e) => {
     const name = e.target.value;
     if (!name) return;
-    
+
     setPlatformOption(name);
-    const user = profileData.find(item => item.name === name);
+    const user = profileData.find(item => item.displayName === name);
     setSelectedUser(user);
   };
 
@@ -98,8 +92,8 @@ const Analytics2 = () => {
       {/* Profile Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <Avatar
-          src={data.profileImage || data.image_url}
-          alt={data.name}
+          src={data.profileImage}
+          alt={data.page_name}
           sx={{
             width: 60,
             height: 60,
@@ -116,7 +110,7 @@ const Analytics2 = () => {
               fontSize: '18px'
             }}
           >
-            {data.name}
+            {data.page_name}
           </Typography>
           <Typography
             variant="body2"
@@ -131,7 +125,7 @@ const Analytics2 = () => {
               display: 'inline-block'
             }}
           >
-            {data.category || 'Beauty & Lifestyle'}
+            {data.name}
           </Typography>
         </Box>
       </Box>
@@ -147,7 +141,7 @@ const Analytics2 = () => {
               fontSize: '16px'
             }}
           >
-            {data.followers || '32.8K'} Followers
+            {data.followers_count !== undefined ? data.followers_count : 'N/A'} followers
           </Typography>
         </Box>
         <Box sx={{ textAlign: 'right' }}>
@@ -159,7 +153,7 @@ const Analytics2 = () => {
               fontSize: '16px'
             }}
           >
-            {data.following || '30K'} Following
+            {data.follows_count !== undefined ? data.follows_count : 'N/A'} following
           </Typography>
         </Box>
       </Box>
@@ -169,24 +163,13 @@ const Analytics2 = () => {
         variant="body2"
         sx={{
           color: '#666',
-          mb: 1,
-          fontSize: '14px',
-          lineHeight: 1.4
-        }}
-      >
-        {data.bio || 'Bio: Lorem Ipsum dolor sit'}
-      </Typography>
-
-      {/* Location */}
-      <Typography
-        variant="body2"
-        sx={{
-          color: '#999',
           mb: 2,
-          fontSize: '14px'
+          fontSize: '14px',
+          lineHeight: 1.4,
+          whiteSpace: 'pre-line'
         }}
       >
-        {data.location || 'USA'}
+        {data.biography}
       </Typography>
 
       <Divider sx={{ my: 2 }} />
@@ -199,23 +182,23 @@ const Analytics2 = () => {
               Engagement Rate:
             </Typography>
             <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '14px' }}>
-              {data.engagement_rate || '3.1%'}
+              {data.engagement_rate !== undefined ? `${data.engagement_rate}%` : 'N/A'}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="body2" sx={{ color: '#666', fontSize: '14px' }}>
-              Earned Media:
+              Media Count:
             </Typography>
             <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '14px' }}>
-              {data.earned_media || '249'}
+              {data.media_count !== undefined ? data.media_count : 'N/A'}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="body2" sx={{ color: '#666', fontSize: '14px' }}>
-              Average Interactions:
+              Total Posts:
             </Typography>
             <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '14px' }}>
-              {data.average_interactions || '3.1%'}
+              {data.total_posts !== undefined ? data.total_posts : 'N/A'}
             </Typography>
           </Box>
         </Stack>
@@ -378,8 +361,8 @@ const Analytics2 = () => {
                   >
                     <MenuItem value=""><em>Influencer</em></MenuItem>
                     {profileData.map((item, index) => (
-                      <MenuItem key={index} value={item.name}>
-                        {item.name}
+                      <MenuItem key={index} value={item.displayName}>
+                        {item.displayName}
                       </MenuItem>
                     ))}
                   </Select>
@@ -409,37 +392,64 @@ const Analytics2 = () => {
 
         {/* Main Content */}
         <Container maxWidth="lg" sx={{ py: 3 }}>
-          <Grid container spacing={3}>
-            {/* Profile Section */}
-            <Grid item xs={12} md={4}>
-              {selectedUser && <ProfileCard data={selectedUser} />}
-            </Grid>
-
-            {/* Campaign Analytics Section */}
-            <Grid item xs={12} md={8}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  color: '#1a1a1a',
-                  mb: 2,
-                  fontSize: '18px'
-                }}
-              >
-                Campaign Analytics
+          {profileData.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="h6" sx={{ color: '#666', mb: 2 }}>
+                No Analytics Data Available
               </Typography>
-              <Grid container spacing={2}>
-                {selectedUser?.campaign_analytics?.map((analytics, index) => (
-                  <Grid item xs={12} sm={6} md={6} lg={3} key={index}>
+              <Typography variant="body2" sx={{ color: '#999' }}>
+                Please connect your social media accounts to view analytics.
+              </Typography>
+            </Box>
+          ) : (
+            <Grid container spacing={3}>
+              {/* Profile Section */}
+              <Grid item xs={12} md={4}>
+                {selectedUser && <ProfileCard data={selectedUser} />}
+              </Grid>
+
+              {/* Campaign Analytics Section */}
+              <Grid item xs={12} md={8}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    color: '#1a1a1a',
+                    mb: 2,
+                    fontSize: '18px'
+                  }}
+                >
+                  Campaign Analytics
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={6} lg={3}>
                     <AnalyticsCard
-                      value={analytics.value}
-                      label={analytics.label}
+                      value={selectedUser?.followers_count || 'N/A'}
+                      label="Followers"
                     />
                   </Grid>
-                ))}
+                  <Grid item xs={12} sm={6} md={6} lg={3}>
+                    <AnalyticsCard
+                      value={selectedUser?.follows_count || 'N/A'}
+                      label="Following"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={6} lg={3}>
+                    <AnalyticsCard
+                      value={selectedUser?.media_count || 'N/A'}
+                      label="Media Count"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={6} lg={3}>
+                    <AnalyticsCard
+                      value={selectedUser?.total_posts || 'N/A'}
+                      label="Total Posts"
+                    />
+                  </Grid>
+                </Grid>
               </Grid>
             </Grid>
-          </Grid>
+          )}
         </Container>
       </Box>
     </Layout>

@@ -75,6 +75,22 @@ const InstagramAnalytics = () => {
     fetchInstagramAnalytics();
   }, [platform]);
 
+  // Force refresh function to fetch fresh API data
+  const forceRefresh = () => {
+    // Clear all cached data
+    setSelectedAccountData(null);
+    setInstagramData([]);
+    setSelectedAccount('');
+    setError('');
+    // Clear any potential localStorage cache
+    Object.keys(localStorage).forEach(key => {
+      if (key.includes('instagram') || key.includes('analytics')) {
+        localStorage.removeItem(key);
+      }
+    });
+    fetchInstagramAnalytics();
+  };
+
   const platformApiMap = {
     Instagram: "instagram_analytics",
     facebook: "facebook_analytics",
@@ -111,6 +127,10 @@ const InstagramAnalytics = () => {
   //handle dropdown change
   const handlePlatformChange = (event) => {
     setPlatform(event.target.value);
+    // Clear existing data to prevent stale data display
+    setSelectedAccountData(null);
+    setInstagramData([]);
+    setSelectedAccount('');
   };
 
   const fetchInstagramAnalytics = async () => {
@@ -130,13 +150,15 @@ const InstagramAnalytics = () => {
       }
 
       console.log('Fetching Instagram analytics...');
-      const response = await axios.get(`https://api.marketincer.com/api/v1/${apiEndpoint}`, {
+      const response = await axios.get(`https://api.marketincer.com/api/v1/${apiEndpoint}?t=${Date.now()}`, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Cache-Control': 'no-cache',
         }
       });
 
       console.log('API Response:', response.data);
+      console.log('First account audience_demographics:', response.data?.data?.[0]?.analytics?.audience_demographics);
 
 
       if (response.data.success && response.data.data && response.data.data.length > 0) {
@@ -144,12 +166,10 @@ const InstagramAnalytics = () => {
         const firstAccount = response.data.data[0];
         setSelectedAccount(firstAccount.username);
         setSelectedAccountData(firstAccount);
-
-        setSelectedAccountData((prev) => ({
-          ...prev,
-          [platform]: firstAccount, // store by platform name
-        }));
         setSearchParams({ type: platform });
+
+        console.log('Set selectedAccountData to:', firstAccount);
+        console.log('Account audience_demographics:', firstAccount?.analytics?.audience_demographics);
 
         // const posts = response.data?.data?.[0]?.analytics?.recent_posts ?? [];
         // const genders = response.data?.data?.[0]?.analytics?.audience_demographics?.gender ?? [];
@@ -192,55 +212,40 @@ const InstagramAnalytics = () => {
     return num?.toString() || '0';
   };
 
-  // Sample data for charts (replace with real API data)
-  const engagementData = [
-    { day: 'Mon', value: 45 },
-    { day: 'Tue', value: 52 },
-    { day: 'Wed', value: 48 },
-    { day: 'Thu', value: 61 },
-    { day: 'Fri', value: 55 },
-    { day: 'Sat', value: 67 },
-    { day: 'Sun', value: 59 }
-  ];
+  // This sample data is no longer used - all data comes from API
 
-  const notableFollowers = [
-    { name: 'Alice', percentage: '12.3%', avatar: '/api/placeholder/32/32' },
-    { name: 'Sophia', percentage: '9.8%', avatar: '/api/placeholder/32/32' },
-    { name: 'Alana', percentage: '8.1%', avatar: '/api/placeholder/32/32' },
-    { name: 'Sam', percentage: '7.2%', avatar: '/api/placeholder/32/32' },
-    { name: 'Julia', percentage: '6.8%', avatar: '/api/placeholder/32/32' }
-  ];
+  // Get notable followers from API, with fallback to empty array
+  const notableFollowers = selectedAccountData?.analytics?.audience_demographics?.notable_followers || [];
 
   // Campaign Analytics cards
   const getCampaignAnalytics = (selectedAccountData) => {
 
     if (!selectedAccountData) return [];
 
-    const totalLikes = selectedAccountData.analytics?.engagement_stats?.total_likes || 24300;
-    const totalComments = selectedAccountData.analytics?.engagement_stats?.total_comments || 403;
-    const engagementRate = selectedAccountData.analytics?.engagement_stats?.total_engagement || '1.3%';
-    const followers = selectedAccountData.profile?.followers_count || 32800;
+    const engagement_stats = selectedAccountData.analytics?.engagement_stats || {};
+    const profile_stats = selectedAccountData.profile || {};
+    const analytics = selectedAccountData.analytics || {};
 
     return [
-      { value: formatNumber(totalLikes), label: "Total Likes", key: "likes" },
-      { value: formatNumber(totalComments), label: "Total Comments", key: "comments" },
-      { value: formatNumber(engagementRate), label: "Total Engagement", key: "engagement" },
-      { value: formatNumber(followers), label: "Total Reach", key: "reach" },
-      { value: formatNumber(12100), label: "Total Shares", key: "shares" },
-      { value: formatNumber(428), label: "Total Saves", key: "saves" },
-      { value: formatNumber(829), label: "Total Clicks", key: "clicks" },
-      { value: formatNumber(829), label: "Profile Visits", key: "visits" }
+      { value: formatNumber(engagement_stats.total_likes || 0), label: "Total Likes", key: "likes" },
+      { value: formatNumber(engagement_stats.total_comments || 0), label: "Total Comments", key: "comments" },
+      { value: formatNumber(engagement_stats.total_engagement || 0), label: "Total Engagement", key: "engagement" },
+      { value: formatNumber(analytics.total_reach || 0), label: "Total Reach", key: "reach" },
+      { value: formatNumber(engagement_stats.total_shares || 0), label: "Total Shares", key: "shares" },
+      { value: formatNumber(engagement_stats.total_saves || 0), label: "Total Saves", key: "saves" },
+      { value: formatNumber(engagement_stats.total_clicks || 0), label: "Total Clicks", key: "clicks" },
+      { value: formatNumber(analytics.total_profile_visits || 0), label: "Profile Visits", key: "visits" }
     ];
   };
 
-  const audiGender = selectedAccountData?.analytics?.audience_demographics?.gender ?? []
+  const audiGender = selectedAccountData?.analytics?.audience_demographics?.gender ?? {}
 
   const genderData = Object.entries(audiGender).map(([key, value]) => ({
     name: key,
     value: value
   }));
 
-  const engOverTime = selectedAccountData?.analytics?.engagement_over_time ?? []
+  const engOverTime = selectedAccountData?.analytics?.engagement_over_time ?? {}
 
   const engOverData = Object.keys(engOverTime).map((day) => ({
     day,
@@ -250,41 +255,52 @@ const InstagramAnalytics = () => {
     profile_views: engOverTime[day].profile_views,
   }));
 
-  console.log('engg', engOverData)
-  const audiReach = selectedAccountData?.analytics?.audience_demographics.reachability ?? []
+  console.log('Raw engagement_over_time:', engOverTime)
+  console.log('Processed engOverData:', engOverData)
+  const audiReach = selectedAccountData?.analytics?.audience_demographics?.reachability ?? {}
 
   const audienceReachabilityData = Object.entries(audiReach).map(([key, value]) => ({
     name: key,
     value: value
   }));
 
-  const audiEngagement = selectedAccountData?.analytics?.engagement_breakdown ?? []
+  // Try engagement_breakdown first, fallback to engagement_stats
+  const audiEngagement = selectedAccountData?.analytics?.engagement_breakdown || {};
+  const engagementStats = selectedAccountData?.analytics?.engagement_stats || {};
 
-  const audienceEngagementData = Object.entries(audiEngagement).map(([key, value]) => ({
-    name: key,
-    value: value.count
-  }));
+  // Create engagement data from available sources
+  const audienceEngagementData = Object.keys(audiEngagement).length > 0
+    ? Object.entries(audiEngagement).map(([key, value]) => ({
+        name: key,
+        value: value.percentage || 0,
+        color: key === 'likes' ? '#8B5CF6' : key === 'comments' ? '#A78BFA' : '#C4B5FD'
+      })).filter(item => item.value > 0) // Only show items with values
+    : [
+        { name: 'likes', value: engagementStats.likes_percentage || 0, color: '#8B5CF6' },
+        { name: 'comments', value: engagementStats.comments_percentage || 0, color: '#A78BFA' },
+        { name: 'shares', value: engagementStats.shares_percentage || 0, color: '#C4B5FD' }
+      ].filter(item => item.value > 0); // Only show items with values
 
 
-  console.log('sas', audienceEngagementData)
-  const audiLocation = selectedAccountData?.analytics?.audience_demographics?.locations?.countries ?? []
+  console.log('Audience Engagement Data:', audienceEngagementData)
+
+  const audiLocation = selectedAccountData?.analytics?.audience_demographics?.locations?.countries ?? {}
 
   const audienceLocationData = Object.entries(audiLocation).map(([key, value]) => ({
     name: key,
     value: value
   }));
 
-  const audiage = selectedAccountData?.analytics?.audience_demographics?.age_groups ?? []
+  const audiage = selectedAccountData?.analytics?.audience_demographics?.age_groups ?? {}
 
   const audienceAge = Object.entries(audiage).map(([key, value]) => ({
     name: key,
     value: value
   }));
-  // const ageData = audienceAge && audienceAge.length > 0 &&
-  // audiEngagementOver.some((item) => item.value !== 0);
 
 
-  const audiEngage = selectedAccountData?.analytics?.engagement_over_time ?? []
+
+  const audiEngage = selectedAccountData?.analytics?.engagement_over_time ?? {}
 
   const audiEngagementOver = Object.entries(audiEngage).map(([day, values]) => ({
     day,
@@ -302,6 +318,7 @@ const InstagramAnalytics = () => {
   const audiInterest = selectedAccountData?.analytics?.audience_demographics?.interests ?? []
 
   const audiBrand = selectedAccountData?.analytics?.audience_demographics?.brand_affinity ?? []
+
 
 
 
@@ -351,6 +368,17 @@ const InstagramAnalytics = () => {
                 Influencers Analytics
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  onClick={forceRefresh}
+                  sx={{
+                    color: '#fff',
+                    borderColor: '#fff',
+                    '&:hover': { borderColor: '#fff', backgroundColor: 'rgba(255,255,255,0.1)' }
+                  }}
+                >
+                  Refresh Data
+                </Button>
                 <IconButton size="large" sx={{ color: '#fff' }}>
                   <NotificationsIcon />
                 </IconButton>
@@ -600,58 +628,33 @@ const InstagramAnalytics = () => {
 
                       <Box sx={{ flex: 1 }}>
                         {platform === "Instagram" ? (<Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '18px' }}>
-                          {selectedAccountData.page_name || 'Alice'}
+                          {selectedAccountData.page_name || 'N/A'}
                         </Typography>
                         ) : (
                           <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '18px' }}>
-                            {selectedAccountData?.profile?.name || 'Alice link'}
+                            {selectedAccountData?.page_name || 'N/A'}
                           </Typography>
                         )}
 
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontSize: '13px' }}>
-                          Beauty & Lifestyle
+                          {selectedAccountData?.profile?.name || 'N/A'}
                         </Typography>
 
                         <Typography variant="body2" sx={{ fontSize: '13px', lineHeight: 1.3 }}>
-                          {platform === "Instagram" ? (
-                            <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                              {formatNumber(selectedAccountData.profile?.followers_count || 32800)} <span style={{ color: "gray" }}>followers</span>
-
-                            </Box>
-
-                          ) : (
-                            <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                              {formatNumber(selectedAccountData.profile?.followers_count || 32800)} <span style={{ color: "gray" }}>followers</span>
-
-                            </Box>
-
-                          )}
-
-
-                          {platform === "Instagram" ? (
-                            <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                              {formatNumber(selectedAccountData.profile?.follows_count || 30000)} <span style={{ color: "gray" }}>followers</span>
-
-                            </Box>
-
-                          ) : (
-                            <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                              {formatNumber(selectedAccountData.profile?.follows_count || 30000)} <span style={{ color: "gray" }}>followers</span>
-
-                            </Box>
-
-                          )}
-
+                          <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+                            {formatNumber(selectedAccountData.profile?.followers_count || 0)} <span style={{ color: "gray" }}>followers</span>
+                          </Box>
+                          <br />
+                          <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+                            {formatNumber(selectedAccountData.profile?.follows_count || 0)} <span style={{ color: "gray" }}>following</span>
+                          </Box>
                         </Typography>
                       </Box>
                     </Box>
 
                     {/* Bio */}
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, lineHeight: 1.4, fontSize: '13px' }}>
-                      {selectedAccountData.profile?.biography || 'Bio: Lorem ipsum dolor sit'}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.6, fontSize: '13px' }}>
-                      USA
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.6, lineHeight: 1.4, fontSize: '13px' }}>
+                      {selectedAccountData.profile?.biography || 'N/A'}
                     </Typography>
 
                     <hr></hr>
@@ -662,7 +665,7 @@ const InstagramAnalytics = () => {
                           Engagement Rate:
                         </Typography>
                         <Typography variant="body2">
-                          {selectedAccountData.summary?.engagement_rate || '3.1%'}
+                          {selectedAccountData.profile?.engagement_rate || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -670,7 +673,7 @@ const InstagramAnalytics = () => {
                           Earned Media:
                         </Typography>
                         <Typography variant="body2">
-                          249
+                          {selectedAccountData.profile?.media_count || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -678,7 +681,7 @@ const InstagramAnalytics = () => {
                           Average Interactions:
                         </Typography>
                         <Typography variant="body2">
-                          3.1%
+                          {selectedAccountData.analytics?.total_posts || 'N/A'}
                         </Typography>
                       </Box>
                     </Box>
@@ -756,11 +759,11 @@ const InstagramAnalytics = () => {
                   {/* Engagement Over Time */}
                   <Box sx={{ flex: 1 }}>
                     <Card sx={{ p: 2.5, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
-                      {platform === "Instagram" ? (<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px' }}>
+                      {platform === "Instagram" ? (<Box>
+                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px', mb: 2 }}>
                           Engagement Over Time
                         </Typography>
-                        <ResponsiveContainer>
+                        <ResponsiveContainer width="100%" height={150}>
                           <AreaChart data={engOverData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                             <defs>
                               <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
@@ -768,49 +771,57 @@ const InstagramAnalytics = () => {
                                 <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
                               </linearGradient>
                             </defs>
-                            <XAxis dataKey="day" />
-                            <YAxis />
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <Tooltip />
+                            <XAxis dataKey="day" fontSize={12} />
+                            <YAxis domain={[0, 'dataMax + 1']} fontSize={12} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                            <Tooltip
+                              formatter={(value) => [value, 'Engagement']}
+                              labelFormatter={(label) => `Day: ${label}`}
+                            />
                             <Area
                               type="monotone"
                               dataKey="engagement"
                               stroke="#8884d8"
-                              fillOpacity={1}
+                              strokeWidth={2}
+                              fillOpacity={0.6}
                               fill="url(#colorEngagement)"
                             />
                           </AreaChart>
                         </ResponsiveContainer>
                       </Box>) : (
 
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px' }}>
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px', mb: 2 }}>
                             Engagement Over Time
                           </Typography>
                             {engOverData.length > 0 ? (
-                          <ResponsiveContainer>
+                          <ResponsiveContainer width="100%" height={150}>
                             <AreaChart data={engOverData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                               <defs>
-                                <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
+                                <linearGradient id="colorEngagement2" x1="0" y1="0" x2="0" y2="1">
                                   <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
                                   <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
                                 </linearGradient>
                               </defs>
-                              <XAxis dataKey="day" />
-                              <YAxis />
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <Tooltip />
+                              <XAxis dataKey="day" fontSize={12} />
+                              <YAxis domain={[0, 'dataMax + 1']} fontSize={12} />
+                              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                              <Tooltip
+                                formatter={(value) => [value, 'Engagement']}
+                                labelFormatter={(label) => `Day: ${label}`}
+                              />
                               <Area
                                 type="monotone"
                                 dataKey="engagement"
                                 stroke="#8884d8"
-                                fillOpacity={1}
-                                fill="url(#colorEngagement)"
+                                strokeWidth={2}
+                                fillOpacity={0.6}
+                                fill="url(#colorEngagement2)"
                               />
                             </AreaChart>
                           </ResponsiveContainer>
                           ) : (
-                              <h2>No data available</h2>
+                              <Typography variant="h6" sx={{ textAlign: 'center', color: 'text.secondary', mt: 4 }}>No data available</Typography>
                               )
                           }
                         </Box>
@@ -951,8 +962,8 @@ const InstagramAnalytics = () => {
                             </ResponsiveContainer>
                           </Box>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
-                            {audienceAge.map((age) => (
-                              <Typography variant="body2" sx={{ fontSize: '11px' }}>{age.name} : {age.value}</Typography>
+                            {audienceAge.map((age, index) => (
+                              <Typography key={index} variant="body2" sx={{ fontSize: '11px' }}>{age.name} : {age.value}</Typography>
                             ))}
 
                           </Box>
@@ -980,8 +991,8 @@ const InstagramAnalytics = () => {
                               </ResponsiveContainer>
                             </Box>
                             <Box>
-                              {genderData?.map((gender) => (
-                                <Typography variant="body2">
+                              {genderData?.map((gender, index) => (
+                                <Typography key={index} variant="body2">
                                   • {gender.name} {gender.value}
 
                                 </Typography>
@@ -1055,24 +1066,30 @@ const InstagramAnalytics = () => {
                         {/* Notable Followers */}
                         <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, }}>
-                            <Typography variant="subtitle2" sx={{ fontSize: '14px', fontWeight: 600 }}>Notable Followers: 132</Typography>
+                            <Typography variant="subtitle2" sx={{ fontSize: '14px', fontWeight: 600 }}>Notable Followers: {notableFollowers.length}</Typography>
                             <IconButton size="small">
                               <TrendingUpIcon sx={{ fontSize: 16 }} />
                             </IconButton>
                           </Box>
 
                           <Box sx={{ display: 'flex', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                            {notableFollowers.map((follower, index) => (
-                              <Box key={index} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 1 }}>
-                                <Avatar sx={{ width: 28, height: 28, mb: 0.5 }} />
-                                <Typography variant="body2" sx={{ fontSize: '12px', fontWeight: 600 }}>
-                                  {follower.name}
-                                </Typography>
-                                <Typography variant="body2" sx={{ fontSize: '9px', color: 'text.secondary' }}>
-                                  {follower.percentage}
-                                </Typography>
-                              </Box>
-                            ))}
+                            {notableFollowers.length > 0 ? (
+                              notableFollowers.map((follower, index) => (
+                                <Box key={index} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 1 }}>
+                                  <Avatar sx={{ width: 28, height: 28, mb: 0.5 }} />
+                                  <Typography variant="body2" sx={{ fontSize: '12px', fontWeight: 600 }}>
+                                    {follower.name}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ fontSize: '9px', color: 'text.secondary' }}>
+                                    {follower.percentage}
+                                  </Typography>
+                                </Box>
+                              ))
+                            ) : (
+                              <Typography variant="body2" sx={{ textAlign: 'center', color: 'text.secondary', width: '100%', mt: 2 }}>
+                                No notable followers data available
+                              </Typography>
+                            )}
                           </Box>
                         </Card>
 
@@ -1080,16 +1097,16 @@ const InstagramAnalytics = () => {
                         <Box sx={{ mt: 2 }}>
                           <Card sx={{ p: 2, mt: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
                             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                              <strong>Audience Cities:</strong> {audiCities.map((city) => (<span> {city}, </span>))}
+                              <strong>Audience Cities:</strong> {audiCities.map((city, index) => (<span key={index}> {city}, </span>))}
                             </Typography>
                             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                              <strong>Audience Language:</strong> {audiLang.map((lang) => (<span>{lang}, </span>))}
+                              <strong>Audience Language:</strong> {audiLang.map((lang, index) => (<span key={index}>{lang}, </span>))}
                             </Typography>
                             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                              <strong>Audience Interests:</strong> {audiInterest.map((int) => (<span>{int}, </span>))}
+                              <strong>Audience Interests:</strong> {audiInterest.map((int, index) => (<span key={index}>{int}, </span>))}
                             </Typography>
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                              <strong>Audience Brand Affinity:</strong> {audiBrand.map((brand) => (<span>{brand}, </span>))}
+                              <strong>Audience Brand Affinity:</strong> {audiBrand.map((brand, index) => (<span key={index}>{brand}, </span>))}
                             </Typography>
                           </Card>
 
@@ -1131,9 +1148,10 @@ const InstagramAnalytics = () => {
                   All Brand - Tagged Posts
                 </Typography>
 
-                {selectedAccountData?.analytics?.recent_posts.length > 0 ? (selectedAccountData?.analytics?.recent_posts.map((post) => (
+                {selectedAccountData?.analytics?.recent_posts.length > 0 ? (selectedAccountData?.analytics?.recent_posts.map((post, index) => (
 
                   <Card
+                    key={post.id || index}
                     variant="outlined"
                     sx={{
                       display: "flex",
@@ -1148,39 +1166,41 @@ const InstagramAnalytics = () => {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <CardMedia
                         component="img"
-                        image={post.url}
+                        image={post.media_url || post.url || '/api/placeholder/100/100'}
                         alt={post.caption || "Post image"}
-                        sx={{ width: 100, height: 100, borderRadius: 2 }}
+                        sx={{ width: 100, height: 100, borderRadius: 2, objectFit: 'cover' }}
                       />
                       <Box>
                         <Typography variant="subtitle1" fontWeight="bold">
-                          {post.caption}
+                          {post.caption || post.full_caption || 'No caption'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          @name
+                          @{selectedAccountData?.username || selectedAccountData?.page_name || 'Unknown'}
                         </Typography>
                         <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                          Lorem ipsum dolor sit...
+                          {post.full_caption && post.full_caption.length > 50
+                            ? `${post.full_caption.substring(0, 50)}...`
+                            : post.full_caption || 'No description available'}
                         </Typography>
 
                         {/* Stats */}
                         <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                             <FavoriteBorderIcon fontSize="small" />{" "}
-                            <Typography variant="body2">{post.likes}</Typography>
+                            <Typography variant="body2">{post.likes || 0}</Typography>
                           </Box>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                             <ChatBubbleOutlineIcon fontSize="small" />{" "}
-                            <Typography variant="body2">{post.comments}</Typography>
+                            <Typography variant="body2">{post.comments || 0}</Typography>
                           </Box>
-                          {/* <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                          <SendIcon fontSize="small" />{" "}
-                          <Typography variant="body2">234</Typography>
-                        </Box>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                          <ShareIcon fontSize="small" />{" "}
-                          <Typography variant="body2">122</Typography>
-                        </Box> */}
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                            <SendIcon fontSize="small" />{" "}
+                            <Typography variant="body2">{post.shares || 0}</Typography>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                            <ShareIcon fontSize="small" />{" "}
+                            <Typography variant="body2">{post.saved || 0}</Typography>
+                          </Box>
                         </Box>
                       </Box>
                     </Box>
