@@ -21,6 +21,7 @@
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.126",
     "axios": "^1.9.0",
+    "caniuse-lite": "^1.0.30001753",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "fabric": "^6.7.1",
