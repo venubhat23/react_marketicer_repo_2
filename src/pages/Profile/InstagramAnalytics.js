@@ -13,6 +13,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import Sidebar from '../../components/Sidebar';
 import axios from 'axios';
+
 import {
   LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart, RadialBarChart,
   RadialBar, Pie, Cell, BarChart, Bar, Tooltip, Legend, CartesianGrid, AreaChart,
@@ -204,151 +205,98 @@ const InstagramAnalytics = () => {
   };
 
   const formatNumber = (num) => {
-    if (num === null || num === undefined || isNaN(num)) {
-      return '0';
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
     }
-    const numValue = Number(num);
-    if (numValue >= 1000000) {
-      return (numValue / 1000000).toFixed(1) + 'M';
-    } else if (numValue >= 1000) {
-      return (numValue / 1000).toFixed(1) + 'K';
-    }
-    return numValue.toString();
+    return num?.toString() || '0';
   };
 
   // This sample data is no longer used - all data comes from API
 
   // Get notable followers from API, with fallback to empty array
-  const notableFollowers = platform === "LinkedIn"
-    ? selectedAccountData?.insights?.content_performance?.top_performing_posts?.slice(0, 3) || []
-    : selectedAccountData?.analytics?.audience_demographics?.notable_followers || [];
+  const notableFollowers = selectedAccountData?.analytics?.audience_demographics?.notable_followers || [];
 
   // Campaign Analytics cards
   const getCampaignAnalytics = (selectedAccountData) => {
 
     if (!selectedAccountData) return [];
 
-    if (platform === "LinkedIn") {
-      const analytics = selectedAccountData.analytics || {};
-      const profile = selectedAccountData.profile || {};
-      const visitor_highlights = analytics.visitor_highlights || {};
-      const follower_highlights = analytics.follower_highlights || {};
+    const engagement_stats = selectedAccountData.analytics?.engagement_stats || {};
+    const profile_stats = selectedAccountData.profile || {};
+    const analytics = selectedAccountData.analytics || {};
 
-      return [
-        { value: formatNumber(analytics.total_likes || 0), label: "Total Likes", key: "likes" },
-        { value: formatNumber(analytics.total_comments || 0), label: "Total Comments", key: "comments" },
-        { value: formatNumber(analytics.total_engagement || 0), label: "Total Engagement", key: "engagement" },
-        { value: formatNumber(analytics.total_reach || 0), label: "Total Reach", key: "reach" },
-        { value: formatNumber(analytics.total_shares || 0), label: "Total Shares", key: "shares" },
-        { value: formatNumber(analytics.total_saves || 0), label: "Total Saves", key: "saves" },
-        { value: formatNumber(analytics.total_clicks || 0), label: "Total Clicks", key: "clicks" },
-        { value: formatNumber(visitor_highlights.page_views || 0), label: "Page Views", key: "page_views" },
-        { value: formatNumber(visitor_highlights.unique_visitors || 0), label: "Unique Visitors", key: "unique_visitors" },
-        { value: formatNumber(follower_highlights.total_followers || profile.followers_count || 0), label: "Total Followers", key: "followers" },
-        { value: formatNumber(analytics.total_posts || 0), label: "Total Posts", key: "posts" },
-        { value: `${(analytics.average_engagement_per_post || 0).toFixed ? (analytics.average_engagement_per_post || 0).toFixed(1) : 0}`, label: "Avg Engagement/Post", key: "avg_engagement" }
-      ];
-    } else {
-      const engagement_stats = selectedAccountData.analytics?.engagement_stats || {};
-      const profile_stats = selectedAccountData.profile || {};
-      const analytics = selectedAccountData.analytics || {};
-
-      return [
-        { value: formatNumber(engagement_stats.total_likes || 0), label: "Total Likes", key: "likes" },
-        { value: formatNumber(engagement_stats.total_comments || 0), label: "Total Comments", key: "comments" },
-        { value: formatNumber(engagement_stats.total_engagement || 0), label: "Total Engagement", key: "engagement" },
-        { value: formatNumber(analytics.total_reach || 0), label: "Total Reach", key: "reach" },
-        { value: formatNumber(engagement_stats.total_shares || 0), label: "Total Shares", key: "shares" },
-        { value: formatNumber(engagement_stats.total_saves || 0), label: "Total Saves", key: "saves" },
-        { value: formatNumber(engagement_stats.total_clicks || 0), label: "Total Clicks", key: "clicks" },
-        { value: formatNumber(analytics.total_profile_visits || 0), label: "Profile Visits", key: "visits" }
-      ];
-    }
+    return [
+      { value: formatNumber(engagement_stats.total_likes || 0), label: "Total Likes", key: "likes" },
+      { value: formatNumber(engagement_stats.total_comments || 0), label: "Total Comments", key: "comments" },
+      { value: formatNumber(engagement_stats.total_engagement || 0), label: "Total Engagement", key: "engagement" },
+      { value: formatNumber(analytics.total_reach || 0), label: "Total Reach", key: "reach" },
+      { value: formatNumber(engagement_stats.total_shares || 0), label: "Total Shares", key: "shares" },
+      { value: formatNumber(engagement_stats.total_saves || 0), label: "Total Saves", key: "saves" },
+      { value: formatNumber(engagement_stats.total_clicks || 0), label: "Total Clicks", key: "clicks" },
+      { value: formatNumber(analytics.total_profile_visits || 0), label: "Profile Visits", key: "visits" }
+    ];
   };
 
-  const audiGender = platform === "LinkedIn"
-    ? selectedAccountData?.demographics?.seniorities ?? {}
-    : selectedAccountData?.analytics?.audience_demographics?.gender ?? {}
+  const audiGender = selectedAccountData?.analytics?.audience_demographics?.gender ?? {}
 
   const genderData = Object.entries(audiGender).map(([key, value]) => ({
-    name: platform === "LinkedIn" ? (key || '').toString().replace('urn:li:seniority:', 'Level ') : key,
-    value: platform === "LinkedIn" ? value?.total_count || 0 : value
+    name: key,
+    value: value
   }));
 
-  const engOverTime = platform === "LinkedIn"
-    ? selectedAccountData?.insights?.content_performance?.engagement_trends ?? []
-    : selectedAccountData?.analytics?.engagement_over_time ?? {}
+  const engOverTime = selectedAccountData?.analytics?.engagement_over_time ?? {}
 
-  const engOverData = platform === "LinkedIn"
-    ? (Array.isArray(engOverTime) ? engOverTime.map((trend) => ({
-        day: trend?.week_starting || '',
-        engagement: trend?.total_engagement || 0,
-        posts: trend?.posts_count || 0,
-        average_engagement: trend?.average_engagement || 0,
-      })) : [])
-    : (engOverTime && typeof engOverTime === 'object' ? Object.keys(engOverTime).map((day) => ({
-        day,
-        engagement: engOverTime[day]?.engagement || 0,
-        reach: engOverTime[day]?.reach || 0,
-        impressions: engOverTime[day]?.impressions || 0,
-        profile_views: engOverTime[day]?.profile_views || 0,
-      })) : []);
+  const engOverData = Object.keys(engOverTime).map((day) => ({
+    day,
+    engagement: engOverTime[day].engagement,
+    reach: engOverTime[day].reach,
+    impressions: engOverTime[day].impressions,
+    profile_views: engOverTime[day].profile_views,
+  }));
 
   console.log('Raw engagement_over_time:', engOverTime)
   console.log('Processed engOverData:', engOverData)
-  const audiReach = platform === "LinkedIn"
-    ? selectedAccountData?.demographics?.job_functions ?? {}
-    : selectedAccountData?.analytics?.audience_demographics?.reachability ?? {}
+  const audiReach = selectedAccountData?.analytics?.audience_demographics?.reachability ?? {}
 
-  const audienceReachabilityData = Object.entries(audiReach).slice(0, 5).map(([key, value]) => ({
-    name: platform === "LinkedIn" ? (key || '').toString().replace('urn:li:function:', 'Function ') : key,
-    value: platform === "LinkedIn" ? value?.total_count || 0 : value
+  const audienceReachabilityData = Object.entries(audiReach).map(([key, value]) => ({
+    name: key,
+    value: value
   }));
 
-  // LinkedIn vs Instagram engagement data
-  const audiEngagement = platform === "LinkedIn"
-    ? selectedAccountData?.analytics?.engagement_stats || {}
-    : selectedAccountData?.analytics?.engagement_breakdown || {};
+  // Try engagement_breakdown first, fallback to engagement_stats
+  const audiEngagement = selectedAccountData?.analytics?.engagement_breakdown || {};
   const engagementStats = selectedAccountData?.analytics?.engagement_stats || {};
 
   // Create engagement data from available sources
-  const audienceEngagementData = platform === "LinkedIn"
-    ? [
-        { name: 'Likes', value: engagementStats.likes_percentage || 0, color: '#0077B5' },
-        { name: 'Comments', value: engagementStats.comments_percentage || 0, color: '#00A0DC' },
-        { name: 'Shares', value: engagementStats.shares_percentage || 0, color: '#005885' }
-      ].filter(item => item.value > 0)
-    : Object.keys(audiEngagement).length > 0
-      ? Object.entries(audiEngagement).map(([key, value]) => ({
-          name: key,
-          value: value.percentage || 0,
-          color: key === 'likes' ? '#8B5CF6' : key === 'comments' ? '#A78BFA' : '#C4B5FD'
-        })).filter(item => item.value > 0)
-      : [
-          { name: 'likes', value: engagementStats.likes_percentage || 0, color: '#8B5CF6' },
-          { name: 'comments', value: engagementStats.comments_percentage || 0, color: '#A78BFA' },
-          { name: 'shares', value: engagementStats.shares_percentage || 0, color: '#C4B5FD' }
-        ].filter(item => item.value > 0);
+  const audienceEngagementData = Object.keys(audiEngagement).length > 0
+    ? Object.entries(audiEngagement).map(([key, value]) => ({
+        name: key,
+        value: value.percentage || 0,
+        color: key === 'likes' ? '#8B5CF6' : key === 'comments' ? '#A78BFA' : '#C4B5FD'
+      })).filter(item => item.value > 0) // Only show items with values
+    : [
+        { name: 'likes', value: engagementStats.likes_percentage || 0, color: '#8B5CF6' },
+        { name: 'comments', value: engagementStats.comments_percentage || 0, color: '#A78BFA' },
+        { name: 'shares', value: engagementStats.shares_percentage || 0, color: '#C4B5FD' }
+      ].filter(item => item.value > 0); // Only show items with values
 
 
   console.log('Audience Engagement Data:', audienceEngagementData)
 
-  const audiLocation = platform === "LinkedIn"
-    ? selectedAccountData?.demographics?.industries ?? {}
-    : selectedAccountData?.analytics?.audience_demographics?.locations?.countries ?? {}
+  const audiLocation = selectedAccountData?.analytics?.audience_demographics?.locations?.countries ?? {}
 
   const audienceLocationData = Object.entries(audiLocation).map(([key, value]) => ({
-    name: platform === "LinkedIn" ? (key || '').toString().replace('urn:li:industry:', 'Industry ') : key,
-    value: platform === "LinkedIn" ? value?.total_count || 0 : value
+    name: key,
+    value: value
   }));
 
-  const audiage = platform === "LinkedIn"
-    ? selectedAccountData?.demographics?.company_sizes ?? {}
-    : selectedAccountData?.analytics?.audience_demographics?.age_groups ?? {}
+  const audiage = selectedAccountData?.analytics?.audience_demographics?.age_groups ?? {}
 
   const audienceAge = Object.entries(audiage).map(([key, value]) => ({
-    name: platform === "LinkedIn" ? (key || '').toString().replace('SIZE_', '').replace('_OR_MORE', '+').replace('_TO_', '-') : key,
-    value: platform === "LinkedIn" ? value?.total_count || 0 : value
+    name: key,
+    value: value
   }));
 
 
@@ -364,21 +312,13 @@ const InstagramAnalytics = () => {
   // audiEngagementOver.some((item) => item.value !== 0);
 
 
-  const audiCities = platform === "LinkedIn"
-    ? selectedAccountData?.profile?.locations?.map(loc => loc?.address?.city).filter(Boolean) ?? []
-    : selectedAccountData?.analytics?.audience_demographics?.locations?.cities ?? []
+  const audiCities = selectedAccountData?.analytics?.audience_demographics?.locations?.cities ?? []
 
-  const audiLang = platform === "LinkedIn"
-    ? selectedAccountData?.profile?.specialities ?? []
-    : selectedAccountData?.analytics?.audience_demographics?.languages ?? []
+  const audiLang = selectedAccountData?.analytics?.audience_demographics?.languages ?? []
 
-  const audiInterest = platform === "LinkedIn"
-    ? selectedAccountData?.profile?.industries?.map(ind => (ind || '').toString().replace('urn:li:industry:', 'Industry ')) ?? []
-    : selectedAccountData?.analytics?.audience_demographics?.interests ?? []
+  const audiInterest = selectedAccountData?.analytics?.audience_demographics?.interests ?? []
 
-  const audiBrand = platform === "LinkedIn"
-    ? (Array.isArray(selectedAccountData?.insights?.content_recommendations) ? selectedAccountData.insights.content_recommendations : [])
-    : selectedAccountData?.analytics?.audience_demographics?.brand_affinity ?? []
+  const audiBrand = selectedAccountData?.analytics?.audience_demographics?.brand_affinity ?? []
 
 
 
@@ -662,51 +602,44 @@ const InstagramAnalytics = () => {
               </FormControl>
             </Box>
           </Paper>
-          <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '16px 16px 8px 16px', background: '#f6edf8' }}>
-            <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
+          <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '20px', background: '#f6edf8' }}>
+            <Grid container spacing={2}>
               <Grid size={{ xs: 2, sm: 4, md: 4 }}>
 
                 {selectedAccountData && (
                   <Card sx={{
                     borderRadius: 3,
                     p: 2.5,
-                    height: platform === 'LinkedIn' ? '300px' : 'fit-content',
-                    boxShadow: platform === 'LinkedIn' ? '0 4px 12px rgba(0,119,181,0.15)' : '0 1px 3px rgba(0,0,0,0.1)',
-                    border: platform === 'LinkedIn' ? '2px solid #0077B5' : '1px solid #e0e0e0',
-                    minHeight: platform === 'LinkedIn' ? '300px' : '250px',
-                    background: platform === 'LinkedIn' ? 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)' : '#ffffff'
+                    height: 'fit-content',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    border: '1px solid #e0e0e0',
+                    minHeight: '250px'
                   }}>
                     {/* Profile Header */}
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                      <Avatar
-                        src={selectedAccountData.profile?.profile_picture_url || '/api/placeholder/100/100'}
-                        sx={{
-                          width: 100,
-                          height: 100,
-                          mr: 2,
-                          border: platform === 'LinkedIn' ? '3px solid #0077B5' : 'none',
-                          boxShadow: platform === 'LinkedIn' ? '0 4px 8px rgba(0,119,181,0.2)' : 'none'
-                        }}
-                      />
+                      {platform === "Instagram" ? (
+                        <Avatar
+                          src={selectedAccountData.profile?.profile_picture_url || '/api/placeholder/48/48'}
+                          sx={{ width: 100, height: 100, mr: 2 }} />
+                      ) : (
+                        <Avatar
+                          src={selectedAccountData.profile?.profile_picture_url || '/api/placeholder/48/48'}
+                          sx={{ width: 100, height: 100, mr: 2 }} />
+                      )}
 
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="h6" sx={{
-                          fontWeight: 700,
-                          mb: 0.5,
-                          fontSize: '20px',
-                          color: platform === 'LinkedIn' ? '#0077B5' : '#1a1a1a'
-                        }}>
-                          {selectedAccountData?.page_name || 'N/A'}
+                        {platform === "Instagram" ? (<Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '18px' }}>
+                          {selectedAccountData.page_name || 'N/A'}
                         </Typography>
-
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontSize: '14px', fontWeight: 500 }}>
-                          @{selectedAccountData?.username || selectedAccountData?.profile?.username || 'N/A'}
-                        </Typography>
-                        {platform === 'LinkedIn' && (
-                          <Typography variant="body2" sx={{ mb: 0.5, fontSize: '13px', color: '#666' }}>
-                            Company Type: {selectedAccountData?.profile?.company_type || 'N/A'}
+                        ) : (
+                          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '18px' }}>
+                            {selectedAccountData?.page_name || 'N/A'}
                           </Typography>
                         )}
+
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontSize: '13px' }}>
+                          {selectedAccountData?.profile?.name || 'N/A'}
+                        </Typography>
 
                         <Typography variant="body2" sx={{ fontSize: '13px', lineHeight: 1.3 }}>
                           <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
@@ -721,280 +654,112 @@ const InstagramAnalytics = () => {
                     </Box>
 
                     {/* Bio */}
-                    <Typography variant="body2" color="text.secondary" sx={{
-                      mb: 1.6,
-                      lineHeight: 1.4,
-                      fontSize: '13px',
-                      maxHeight: platform === 'LinkedIn' ? '80px' : 'auto',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.6, lineHeight: 1.4, fontSize: '13px' }}>
                       {selectedAccountData.profile?.biography || 'N/A'}
                     </Typography>
-                    {platform === 'LinkedIn' && selectedAccountData.profile?.website && (
-                      <Typography variant="body2" sx={{ mb: 1, fontSize: '12px', color: '#0077B5' }}>
-                        🌐 {selectedAccountData.profile.website}
-                      </Typography>
-                    )}
 
-                    <Divider sx={{ my: 2, bgcolor: platform === 'LinkedIn' ? '#0077B5' : '#e0e0e0' }} />
+                    <hr></hr>
                     {/* Stats */}
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
                           Engagement Rate:
                         </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: platform === 'LinkedIn' ? '#0077B5' : 'inherit' }}>
+                        <Typography variant="body2">
                           {selectedAccountData.profile?.engagement_rate || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
-                          {platform === 'LinkedIn' ? 'Media Count:' : 'Earned Media:'}
+                          Earned Media:
                         </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: platform === 'LinkedIn' ? '#0077B5' : 'inherit' }}>
+                        <Typography variant="body2">
                           {selectedAccountData.profile?.media_count || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
-                          {platform === 'LinkedIn' ? 'Total Posts:' : 'Average Interactions:'}
+                          Average Interactions:
                         </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: platform === 'LinkedIn' ? '#0077B5' : 'inherit' }}>
+                        <Typography variant="body2">
                           {selectedAccountData.analytics?.total_posts || 'N/A'}
                         </Typography>
                       </Box>
-                      {platform === 'LinkedIn' && (
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
-                            Staff Count:
-                          </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#0077B5' }}>
-                            {(selectedAccountData.profile?.staff_count_range || '').toString().replace('SIZE_', '').replace('_', '-') || 'N/A'}
-                          </Typography>
-                        </Box>
-                      )}
                     </Box>
                   </Card>
                 )}
               </Grid>
               <Grid size={{ xs: 2, sm: 4, md: 8 }}>
                 {/* Campaign Analytics */}
-                <Typography variant="h6" sx={{
-                  mb: 1,
-                  fontWeight: 700,
-                  fontSize: '22px',
-                  color: platform === 'LinkedIn' ? '#0077B5' : '#1a1a1a',
-                  mt: 0
-                }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, fontSize: '20px' }}>
                   Campaign Analytics
                 </Typography>
 
                 {selectedAccountData && (
-                  <Box sx={{ height: 'fit-content', overflow: 'hidden' }}>
-                    {/* Analytics Cards - Dynamic Rows for LinkedIn */}
-                    {platform === "LinkedIn" ? (
-                      <>
-                        {/* First Row - 4 cards */}
-                        <Box sx={{ display: 'flex', gap: 1.5, mb: 1.5 }}>
-                          {getCampaignAnalytics(selectedAccountData).slice(0, 4).map((card, index) => (
-                            <Box key={index} sx={{ flex: 1 }}>
-                              <Card sx={{
-                                p: 2,
-                                textAlign: 'center',
-                                borderRadius: 2,
-                                boxShadow: '0 2px 8px rgba(0,119,181,0.1)',
-                                border: '1px solid #0077B5',
-                                height: '90px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                background: 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)'
-                              }}>
-                                <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, color: '#0077B5' }}>
-                                  {card.value}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '11px', fontWeight: 500 }}>
-                                  {card.label}
-                                </Typography>
-                              </Card>
-                            </Box>
-                          ))}
+                  <>
+                    {/* Analytics Cards - First Row */}
+                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                      {getCampaignAnalytics(selectedAccountData).slice(0, 4).map((card, index) => (
+                        <Box key={index} sx={{ flex: 1 }}>
+                          <Card sx={{
+                            p: 2,
+                            textAlign: 'center',
+                            borderRadius: 2,
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                            border: '1px solid #e0e0e0',
+                            height: '80px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center'
+                          }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                              {card.value}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>
+                              {card.label}
+                            </Typography>
+                          </Card>
                         </Box>
-                        {/* Second Row - 4 cards */}
-                        <Box sx={{ display: 'flex', gap: 1.5, mb: 1.5 }}>
-                          {getCampaignAnalytics(selectedAccountData).slice(4, 8).map((card, index) => (
-                            <Box key={index + 4} sx={{ flex: 1 }}>
-                              <Card sx={{
-                                p: 2,
-                                textAlign: 'center',
-                                borderRadius: 2,
-                                boxShadow: '0 2px 8px rgba(0,119,181,0.1)',
-                                border: '1px solid #0077B5',
-                                height: '90px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                background: 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)'
-                              }}>
-                                <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, color: '#0077B5' }}>
-                                  {card.value}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '11px', fontWeight: 500 }}>
-                                  {card.label}
-                                </Typography>
-                              </Card>
-                            </Box>
-                          ))}
+                      ))}
+                    </Box>
+
+                    {/* Analytics Cards - Second Row */}
+                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                      {getCampaignAnalytics(selectedAccountData).slice(4, 8).map((card, index) => (
+                        <Box key={index + 4} sx={{ flex: 1 }}>
+                          <Card sx={{
+                            p: 2,
+                            textAlign: 'center',
+                            borderRadius: 2,
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                            border: '1px solid #e0e0e0',
+                            height: '80px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center'
+                          }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                              {card.value}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>
+                              {card.label}
+                            </Typography>
+                          </Card>
                         </Box>
-                        {/* Third Row - 4 cards */}
-                        <Box sx={{ display: 'flex', gap: 1.5, mb: 0 }}>
-                          {getCampaignAnalytics(selectedAccountData).slice(8, 12).map((card, index) => (
-                            <Box key={index + 8} sx={{ flex: 1 }}>
-                              <Card sx={{
-                                p: 2,
-                                textAlign: 'center',
-                                borderRadius: 2,
-                                boxShadow: '0 2px 8px rgba(0,119,181,0.1)',
-                                border: '1px solid #0077B5',
-                                height: '90px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                background: 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)'
-                              }}>
-                                <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, color: '#0077B5' }}>
-                                  {card.value}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '11px', fontWeight: 500 }}>
-                                  {card.label}
-                                </Typography>
-                              </Card>
-                            </Box>
-                          ))}
-                        </Box>
-                      </>
-                    ) : (
-                      <>
-                        {/* Instagram Cards - Original Layout */}
-                        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                          {getCampaignAnalytics(selectedAccountData).slice(0, 4).map((card, index) => (
-                            <Box key={index} sx={{ flex: 1 }}>
-                              <Card sx={{
-                                p: 2,
-                                textAlign: 'center',
-                                borderRadius: 2,
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                                border: '1px solid #e0e0e0',
-                                height: '80px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center'
-                              }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                  {card.value}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>
-                                  {card.label}
-                                </Typography>
-                              </Card>
-                            </Box>
-                          ))}
-                        </Box>
-                        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                          {getCampaignAnalytics(selectedAccountData).slice(4, 8).map((card, index) => (
-                            <Box key={index + 4} sx={{ flex: 1 }}>
-                              <Card sx={{
-                                p: 2,
-                                textAlign: 'center',
-                                borderRadius: 2,
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                                border: '1px solid #e0e0e0',
-                                height: '80px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center'
-                              }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                  {card.value}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>
-                                  {card.label}
-                                </Typography>
-                              </Card>
-                            </Box>
-                          ))}
-                        </Box>
-                      </>
-                    ) : (
-                      <>
-                        {/* Instagram Cards - Original Layout */}
-                        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                          {getCampaignAnalytics(selectedAccountData).slice(0, 4).map((card, index) => (
-                            <Box key={index} sx={{ flex: 1 }}>
-                              <Card sx={{
-                                p: 2,
-                                textAlign: 'center',
-                                borderRadius: 2,
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                                border: '1px solid #e0e0e0',
-                                height: '80px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center'
-                              }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                  {card.value}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>
-                                  {card.label}
-                                </Typography>
-                              </Card>
-                            </Box>
-                          ))}
-                        </Box>
-                        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                          {getCampaignAnalytics(selectedAccountData).slice(4, 8).map((card, index) => (
-                            <Box key={index + 4} sx={{ flex: 1 }}>
-                              <Card sx={{
-                                p: 2,
-                                textAlign: 'center',
-                                borderRadius: 2,
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                                border: '1px solid #e0e0e0',
-                                height: '80px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center'
-                              }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                  {card.value}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>
-                                  {card.label}
-                                </Typography>
-                              </Card>
-                            </Box>
-                          ))}
-                        </Box>
-                      </>
-                    )}
-                  </Box>
+                      ))}
+                    </Box>
+
+
+                  </>
                 )}
               </Grid>
-              <Grid size={{ xs: 2, sm: 4, md: 12 }} sx={{ mt: 0.5 }}>
+
+              <Grid size={{ xs: 2, sm: 4, md: 12 }}>
                 {/* Charts Row */}
-                <Box sx={{ display: 'flex', gap: 2, mb: 0 }}>
+                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                   {/* Engagement Over Time */}
                   <Box sx={{ flex: 1 }}>
-                    <Card sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      boxShadow: platform === 'LinkedIn' ? '0 2px 8px rgba(0,119,181,0.1)' : '0 1px 3px rgba(0,0,0,0.1)',
-                      border: platform === 'LinkedIn' ? '1px solid #0077B5' : '1px solid #e0e0e0',
-                      minHeight: '120px',
-                      background: platform === 'LinkedIn' ? 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)' : '#ffffff'
-                    }}>
+                    <Card sx={{ p: 2.5, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
                       {platform === "Instagram" ? (<Box>
                         <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px', mb: 2 }}>
                           Engagement Over Time
@@ -1027,74 +792,39 @@ const InstagramAnalytics = () => {
                       </Box>) : (
 
                         <Box>
-                          <Typography variant="h6" sx={{
-                            fontWeight: 600,
-                            fontSize: '16px',
-                            mb: 2,
-                            color: platform === 'LinkedIn' ? '#0077B5' : 'inherit'
-                          }}>
-                            {platform === 'LinkedIn' ? 'Weekly Engagement Trends' : 'Engagement Over Time'}
+                          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px', mb: 2 }}>
+                            Engagement Over Time
                           </Typography>
-                          {engOverData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height={150}>
-                              <AreaChart data={engOverData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                <defs>
-                                  <linearGradient id="colorEngagementLinkedIn" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor={platform === 'LinkedIn' ? '#0077B5' : '#8884d8'} stopOpacity={0.8}/>
-                                    <stop offset="95%" stopColor={platform === 'LinkedIn' ? '#0077B5' : '#8884d8'} stopOpacity={0}/>
-                                  </linearGradient>
-                                </defs>
-                                <XAxis
-                                  dataKey="day"
-                                  fontSize={11}
-                                  tick={{ fill: platform === 'LinkedIn' ? '#0077B5' : '#666' }}
-                                  tickFormatter={(value) => platform === 'LinkedIn' ? value.substring(5) : value}
-                                />
-                                <YAxis
-                                  domain={[0, 'dataMax + 1']}
-                                  fontSize={11}
-                                  tick={{ fill: platform === 'LinkedIn' ? '#0077B5' : '#666' }}
-                                />
-                                <CartesianGrid strokeDasharray="3 3" stroke={platform === 'LinkedIn' ? '#E8F4FD' : '#f0f0f0'} />
-                                <Tooltip
-                                  formatter={(value, name) => [
-                                    value,
-                                    platform === 'LinkedIn' ? (name === 'engagement' ? 'Total Engagement' : name) : 'Engagement'
-                                  ]}
-                                  labelFormatter={(label) => platform === 'LinkedIn' ? `Week: ${label}` : `Day: ${label}`}
-                                  contentStyle={{
-                                    backgroundColor: platform === 'LinkedIn' ? '#f8fbff' : '#fff',
-                                    border: platform === 'LinkedIn' ? '1px solid #0077B5' : '1px solid #ccc',
-                                    borderRadius: '8px'
-                                  }}
-                                />
-                                <Area
-                                  type="monotone"
-                                  dataKey="engagement"
-                                  stroke={platform === 'LinkedIn' ? '#0077B5' : '#8884d8'}
-                                  strokeWidth={2}
-                                  fillOpacity={0.6}
-                                  fill="url(#colorEngagementLinkedIn)"
-                                />
-                                {platform === 'LinkedIn' && (
-                                  <Area
-                                    type="monotone"
-                                    dataKey="posts"
-                                    stroke="#00A0DC"
-                                    strokeWidth={1}
-                                    fillOpacity={0.2}
-                                    fill="#00A0DC"
-                                  />
-                                )}
-                              </AreaChart>
-                            </ResponsiveContainer>
+                            {engOverData.length > 0 ? (
+                          <ResponsiveContainer width="100%" height={150}>
+                            <AreaChart data={engOverData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                              <defs>
+                                <linearGradient id="colorEngagement2" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                                  <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <XAxis dataKey="day" fontSize={12} />
+                              <YAxis domain={[0, 'dataMax + 1']} fontSize={12} />
+                              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                              <Tooltip
+                                formatter={(value) => [value, 'Engagement']}
+                                labelFormatter={(label) => `Day: ${label}`}
+                              />
+                              <Area
+                                type="monotone"
+                                dataKey="engagement"
+                                stroke="#8884d8"
+                                strokeWidth={2}
+                                fillOpacity={0.6}
+                                fill="url(#colorEngagement2)"
+                              />
+                            </AreaChart>
+                          </ResponsiveContainer>
                           ) : (
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80px' }}>
-                              <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', fontSize: '14px' }}>
-                                No {platform === 'LinkedIn' ? 'engagement trends' : 'data'} available
-                              </Typography>
-                            </Box>
-                          )}
+                              <Typography variant="h6" sx={{ textAlign: 'center', color: 'text.secondary', mt: 4 }}>No data available</Typography>
+                              )
+                          }
                         </Box>
                       )}
                     </Card>
@@ -1102,74 +832,87 @@ const InstagramAnalytics = () => {
 
                   {/* Audience Engagement */}
                   <Box sx={{ flex: 1 }}>
-                    <Card sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      boxShadow: platform === 'LinkedIn' ? '0 2px 8px rgba(0,119,181,0.1)' : '0 1px 3px rgba(0,0,0,0.1)',
-                      border: platform === 'LinkedIn' ? '1px solid #0077B5' : '1px solid #e0e0e0',
-                      minHeight: '120px',
-                      background: platform === 'LinkedIn' ? 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)' : '#ffffff'
-                    }}>
-                      <Typography variant="h6" sx={{
-                        fontWeight: 600,
-                        mb: 2,
-                        fontSize: '16px',
-                        color: platform === 'LinkedIn' ? '#0077B5' : 'inherit'
-                      }}>
-                        {platform === 'LinkedIn' ? 'Engagement Breakdown' : 'Audience Engagement'}
+                    <Card sx={{ p: 2.5, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
+                        Audience Engagement
                       </Typography>
-                      <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: audienceEngagementData.length > 0 ? 'flex-start' : 'center',
-                        height: audienceEngagementData.length > 0 ? 'auto' : '80px',
-                        flex: 1
-                      }}>
-                        {audienceEngagementData.length > 0 ? (
-                          <>
-                            <Box sx={{ width: 100, height: 100 }}>
-                              <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                  <Pie
-                                    data={audienceEngagementData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={25}
-                                    outerRadius={50}
-                                    dataKey="value"
-                                  >
-                                    {audienceEngagementData.map((entry, index) => (
-                                      <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                  </Pie>
-                                </PieChart>
-                              </ResponsiveContainer>
-                            </Box>
-                            <Box sx={{ ml: 2 }}>
-                              {audienceEngagementData.map((item, index) => (
-                                <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                                  <Box
-                                    sx={{
-                                      width: 8,
-                                      height: 8,
-                                      borderRadius: '50%',
-                                      backgroundColor: item.color,
-                                      mr: 1
-                                    }} />
-                                  <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                                    {item.name} {item.value}%
-                                  </Typography>
-                                </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      {platform === "Instagram" ? (
+                         <><Box sx={{ width: 100, height: 100 }}>
+
+                         <ResponsiveContainer width="100%" height="100%">
+                           <PieChart>
+                             <Pie
+                               data={audienceEngagementData}
+                               cx="50%"
+                               cy="50%"
+                               innerRadius={25}
+                               outerRadius={50}
+                               dataKey="value"
+                             >
+                               {audienceEngagementData.map((entry, index) => (
+                                 <Cell key={`cell-${index}`} fill={entry.color} />
+                               ))}
+                             </Pie>
+                           </PieChart>
+                         </ResponsiveContainer>
+
+                       </Box><Box sx={{ ml: 2 }}>
+                           {audienceEngagementData.map((item, index) => (
+                             <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                               <Box
+                                 sx={{
+                                   width: 8,
+                                   height: 8,
+                                   borderRadius: '50%',
+                                   backgroundColor: item.color,
+                                   mr: 1
+                                 }} />
+                               <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                                 {item.name} {item.value}%
+                               </Typography>
+                             </Box>
+                           ))}
+                         </Box></>
+                      ):(
+                        <><Box sx={{ width: 100, height: 100 }}>
+
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={audienceEngagementData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={25}
+                              outerRadius={50}
+                              dataKey="value"
+                            >
+                              {audienceEngagementData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
                               ))}
+                            </Pie>
+                          </PieChart>
+                        </ResponsiveContainer>
+
+                      </Box><Box sx={{ ml: 2 }}>
+                          {audienceEngagementData.map((item, index) => (
+                            <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                              <Box
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: '50%',
+                                  backgroundColor: item.color,
+                                  mr: 1
+                                }} />
+                              <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                                {item.name} {item.value}%
+                              </Typography>
                             </Box>
-                          </>
-                        ) : (
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80px' }}>
-                            <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', fontSize: '14px' }}>
-                              No engagement data available
-                            </Typography>
-                          </Box>
-                        )}
+                          ))}
+                        </Box></>
+                      )}
+                       
                       </Box>
                     </Card>
                   </Box>
@@ -1193,9 +936,7 @@ const InstagramAnalytics = () => {
                       <Grid spacing={2} size={{ xs: 2, sm: 4, md: 3 }}>
                         {/* Audience Age */}
                         <Card sx={{ p: 2, mb: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
-                          <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>
-                            {platform === 'LinkedIn' ? 'Company Sizes' : 'Audience Age'}
-                          </Typography>
+                          <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>Audience Age</Typography>
                           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2, mr: 1 }}>
                             <ResponsiveContainer width="100%" height={150}>
                               <RadialBarChart
@@ -1230,10 +971,8 @@ const InstagramAnalytics = () => {
                         </Card>
 
                         {/* Audience Gender */}
-                        <Card sx={{ p: 2, borderRadius: 2, boxShadow: platform === 'LinkedIn' ? '0 2px 8px rgba(0,119,181,0.1)' : '0 1px 3px rgba(0,0,0,0.1)', border: platform === 'LinkedIn' ? '1px solid #0077B5' : '1px solid #e0e0e0', minHeight: '215px' }}>
-                          <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>
-                            {platform === 'LinkedIn' ? 'Seniority Levels' : 'Audience Gender'}
-                          </Typography>
+                        <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
+                          <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>Audience Gender</Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2, mr: 1 }}>
                               <ResponsiveContainer width="100%" height="100%">
@@ -1266,10 +1005,8 @@ const InstagramAnalytics = () => {
                       </Grid>
 
                       <Grid spacing={2} size={{ xs: 2, sm: 4, md: 4 }}>
-                        <Card sx={{ p: 2, borderRadius: 2, boxShadow: platform === 'LinkedIn' ? '0 2px 8px rgba(0,119,181,0.1)' : '0 1px 3px rgba(0,0,0,0.1)', border: platform === 'LinkedIn' ? '1px solid #0077B5' : '1px solid #e0e0e0', minHeight: '215px' }}>
-                          <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>
-                            {platform === 'LinkedIn' ? 'Job Functions' : 'Audience Reachability'}
-                          </Typography>
+                        <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
+                          <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>Audience Reachability</Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box sx={{ width: 100, height: 100 }}>
                               <ResponsiveContainer width="100%" height="100%">
@@ -1302,9 +1039,7 @@ const InstagramAnalytics = () => {
 
                         {/* Audience Location */}
                         <Card sx={{ p: 2, mt: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
-                          <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>
-                            {platform === 'LinkedIn' ? 'Industries' : 'Audience Location'}
-                          </Typography>
+                          <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>Audience Location</Typography>
                           {audienceLocationData.map((location, index) => (
                             <Box key={index} sx={{ mb: 1 }}>
                               <Typography variant="body2" sx={{ mb: 0.5 }}>
@@ -1330,11 +1065,9 @@ const InstagramAnalytics = () => {
 
                       <Grid spacing={2} size={{ xs: 2, sm: 4, md: 5 }}>
                         {/* Notable Followers */}
-                        <Card sx={{ p: 2, borderRadius: 2, boxShadow: platform === 'LinkedIn' ? '0 2px 8px rgba(0,119,181,0.1)' : '0 1px 3px rgba(0,0,0,0.1)', border: platform === 'LinkedIn' ? '1px solid #0077B5' : '1px solid #e0e0e0', minHeight: '215px' }}>
+                        <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, }}>
-                            <Typography variant="subtitle2" sx={{ fontSize: '14px', fontWeight: 600 }}>
-                              {platform === 'LinkedIn' ? `Top Posts: ${notableFollowers.length}` : `Notable Followers: ${notableFollowers.length}`}
-                            </Typography>
+                            <Typography variant="subtitle2" sx={{ fontSize: '14px', fontWeight: 600 }}>Notable Followers: {notableFollowers.length}</Typography>
                             <IconButton size="small">
                               <TrendingUpIcon sx={{ fontSize: 16 }} />
                             </IconButton>
@@ -1342,36 +1075,20 @@ const InstagramAnalytics = () => {
 
                           <Box sx={{ display: 'flex', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
                             {notableFollowers.length > 0 ? (
-                              platform === 'LinkedIn' ? (
-                                notableFollowers.map((post, index) => (
-                                  <Box key={index} sx={{ display: 'flex', flexDirection: 'column', p: 1, border: '1px solid #e0e0e0', borderRadius: 1, mb: 1 }}>
-                                    <Typography variant="body2" sx={{ fontSize: '11px', fontWeight: 600, mb: 0.5 }}>
-                                      {post.content_preview?.substring(0, 40)}...
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ fontSize: '9px', color: 'text.secondary' }}>
-                                      {post.engagement} engagements
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ fontSize: '9px', color: 'text.secondary' }}>
-                                      {new Date(post.timestamp).toLocaleDateString()}
-                                    </Typography>
-                                  </Box>
-                                ))
-                              ) : (
-                                notableFollowers.map((follower, index) => (
-                                  <Box key={index} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 1 }}>
-                                    <Avatar sx={{ width: 28, height: 28, mb: 0.5 }} />
-                                    <Typography variant="body2" sx={{ fontSize: '12px', fontWeight: 600 }}>
-                                      {follower.name}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ fontSize: '9px', color: 'text.secondary' }}>
-                                      {follower.percentage}
-                                    </Typography>
-                                  </Box>
-                                ))
-                              )
+                              notableFollowers.map((follower, index) => (
+                                <Box key={index} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 1 }}>
+                                  <Avatar sx={{ width: 28, height: 28, mb: 0.5 }} />
+                                  <Typography variant="body2" sx={{ fontSize: '12px', fontWeight: 600 }}>
+                                    {follower.name}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ fontSize: '9px', color: 'text.secondary' }}>
+                                    {follower.percentage}
+                                  </Typography>
+                                </Box>
+                              ))
                             ) : (
                               <Typography variant="body2" sx={{ textAlign: 'center', color: 'text.secondary', width: '100%', mt: 2 }}>
-                                {platform === 'LinkedIn' ? 'No top posts data available' : 'No notable followers data available'}
+                                No notable followers data available
                               </Typography>
                             )}
                           </Box>
@@ -1380,37 +1097,18 @@ const InstagramAnalytics = () => {
                         {/* Additional Insights */}
                         <Box sx={{ mt: 2 }}>
                           <Card sx={{ p: 2, mt: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
-                            {platform === 'LinkedIn' ? (
-                              <>
-                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                                  <strong>Company Locations:</strong> {audiCities.map((city, index) => (<span key={index}> {city}, </span>))}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                                  <strong>Specialities:</strong> {audiLang.map((spec, index) => (<span key={index}>{spec}, </span>))}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                                  <strong>Industries:</strong> {audiInterest.map((ind, index) => (<span key={index}>{ind}, </span>))}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                  <strong>Content Recommendations:</strong> {audiBrand.map((rec, index) => (<span key={index}>{rec}, </span>))}
-                                </Typography>
-                              </>
-                            ) : (
-                              <>
-                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                                  <strong>Audience Cities:</strong> {audiCities.map((city, index) => (<span key={index}> {city}, </span>))}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                                  <strong>Audience Language:</strong> {audiLang.map((lang, index) => (<span key={index}>{lang}, </span>))}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                                  <strong>Audience Interests:</strong> {audiInterest.map((int, index) => (<span key={index}>{int}, </span>))}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                  <strong>Audience Brand Affinity:</strong> {audiBrand.map((brand, index) => (<span key={index}>{brand}, </span>))}
-                                </Typography>
-                              </>
-                            )}
+                            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                              <strong>Audience Cities:</strong> {audiCities.map((city, index) => (<span key={index}> {city}, </span>))}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                              <strong>Audience Language:</strong> {audiLang.map((lang, index) => (<span key={index}>{lang}, </span>))}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                              <strong>Audience Interests:</strong> {audiInterest.map((int, index) => (<span key={index}>{int}, </span>))}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                              <strong>Audience Brand Affinity:</strong> {audiBrand.map((brand, index) => (<span key={index}>{brand}, </span>))}
+                            </Typography>
                           </Card>
 
                         </Box>
@@ -1446,22 +1144,12 @@ const InstagramAnalytics = () => {
                 </Box>
               </Grid>
 
-              <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }}>
-                <Typography variant="body1" sx={{
-                  fontWeight: 700,
-                  mb: 2,
-                  fontSize: '18px',
-                  color: platform === 'LinkedIn' ? '#0077B5' : '#1a1a1a'
-                }}>
-                  {platform === 'LinkedIn' ? 'Recent LinkedIn Posts' : 'All Brand - Tagged Posts'}
+              <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }} style={{ display: platform === "LinkedIn" ? "none" : "block" }}>
+                <Typography variant="body1" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
+                  All Brand - Tagged Posts
                 </Typography>
 
-                {/* Debug info */}
-                {console.log('Platform:', platform)}
-                {console.log('selectedAccountData:', selectedAccountData)}
-                {console.log('recent_posts:', selectedAccountData?.analytics?.recent_posts)}
-
-                {selectedAccountData?.analytics?.recent_posts && selectedAccountData.analytics.recent_posts.length > 0 ? (selectedAccountData.analytics.recent_posts.map((post, index) => (
+                {selectedAccountData?.analytics?.recent_posts.length > 0 ? (selectedAccountData?.analytics?.recent_posts.map((post, index) => (
 
                   <Card
                     key={post.id || index}
@@ -1473,14 +1161,6 @@ const InstagramAnalytics = () => {
                       p: 2,
                       mb: 2,
                       borderRadius: 2,
-                      border: platform === 'LinkedIn' ? '1px solid #0077B5' : '1px solid #e0e0e0',
-                      boxShadow: platform === 'LinkedIn' ? '0 2px 8px rgba(0,119,181,0.1)' : 'none',
-                      background: platform === 'LinkedIn' ? 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)' : '#ffffff',
-                      '&:hover': {
-                        boxShadow: platform === 'LinkedIn' ? '0 4px 12px rgba(0,119,181,0.15)' : '0 2px 8px rgba(0,0,0,0.1)',
-                        transform: 'translateY(-2px)',
-                        transition: 'all 0.3s ease'
-                      }
                     }}
                   >
                     {/* Left Side: Avatar + Post Info */}
@@ -1492,15 +1172,10 @@ const InstagramAnalytics = () => {
                         sx={{ width: 100, height: 100, borderRadius: 2, objectFit: 'cover' }}
                       />
                       <Box>
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{
-                          color: platform === 'LinkedIn' ? '#0077B5' : 'inherit'
-                        }}>
+                        <Typography variant="subtitle1" fontWeight="bold">
                           {post.caption || post.full_caption || 'No caption'}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{
-                          fontWeight: 500,
-                          color: platform === 'LinkedIn' ? '#0077B5' : 'text.secondary'
-                        }}>
+                        <Typography variant="body2" color="text.secondary">
                           @{selectedAccountData?.username || selectedAccountData?.page_name || 'Unknown'}
                         </Typography>
                         <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
@@ -1512,79 +1187,42 @@ const InstagramAnalytics = () => {
                         {/* Stats */}
                         <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <FavoriteBorderIcon
-                              fontSize="small"
-                              sx={{ color: platform === 'LinkedIn' ? '#0077B5' : 'inherit' }}
-                            />
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {post.likes || 0}
-                            </Typography>
+                            <FavoriteBorderIcon fontSize="small" />{" "}
+                            <Typography variant="body2">{post.likes || 0}</Typography>
                           </Box>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <ChatBubbleOutlineIcon
-                              fontSize="small"
-                              sx={{ color: platform === 'LinkedIn' ? '#0077B5' : 'inherit' }}
-                            />
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {post.comments || 0}
-                            </Typography>
+                            <ChatBubbleOutlineIcon fontSize="small" />{" "}
+                            <Typography variant="body2">{post.comments || 0}</Typography>
                           </Box>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <SendIcon
-                              fontSize="small"
-                              sx={{ color: platform === 'LinkedIn' ? '#0077B5' : 'inherit' }}
-                            />
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {post.shares || 0}
-                            </Typography>
+                            <SendIcon fontSize="small" />{" "}
+                            <Typography variant="body2">{post.shares || 0}</Typography>
                           </Box>
-                          {platform !== 'LinkedIn' && (
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                              <ShareIcon fontSize="small" />
-                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                {post.saved || 0}
-                              </Typography>
-                            </Box>
-                          )}
-                          {platform === 'LinkedIn' && (
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                              <Typography variant="body2" sx={{ fontWeight: 500, color: '#0077B5' }}>
-                                {post.engagement_rate?.toFixed(1) || 0}% rate
-                              </Typography>
-                            </Box>
-                          )}
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                            <ShareIcon fontSize="small" />{" "}
+                            <Typography variant="body2">{post.saved || 0}</Typography>
+                          </Box>
                         </Box>
                       </Box>
                     </Box>
 
                     {/* Right Side: Date + Link */}
                     <Box sx={{ textAlign: "right" }}>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
                         {new Date(post.timestamp).toLocaleDateString("en-US", {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
                         })}
+
                       </Typography>
-                      {platform === 'LinkedIn' && (
-                        <Typography variant="body2" sx={{ fontSize: '11px', color: '#0077B5', fontWeight: 500, mb: 1 }}>
-                          {post.media_type || 'UNKNOWN'} POST
-                        </Typography>
-                      )}
-                      {platform === 'LinkedIn' && post.content_length && (
-                        <Typography variant="body2" sx={{ fontSize: '10px', color: 'text.secondary' }}>
-                          {post.content_length} chars
-                        </Typography>
-                      )}
-                      {platform === "Instagram" && (
-                        <Link
-                          to={`/FullAnalytics/${post.id}`}
-                          underline="hover"
-                          sx={{ fontWeight: "bold", color: "purple" }}
-                        >
-                          View full Analytics →
-                        </Link>
-                      )}
+                      <Link
+                        to={`/FullAnalytics/${post.id}`}
+                        underline="hover"
+                        sx={{ fontWeight: "bold", color: "purple" }}
+                      >
+                        View full Analytics →
+                      </Link>
                     </Box>
                   </Card>
                 ))
