@@ -1,14 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import { 
-    Button, 
-    IconButton, 
-    Box, 
-    Typography, 
+import {
+    Button,
+    IconButton,
+    Box,
+    Typography,
     TextField,
     Divider,
     Snackbar,
     Alert,
-    CircularProgress
+    CircularProgress,
+    Modal,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions
 } from "@mui/material";
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -31,6 +37,7 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
     const [gettingPage, setGettingPage] = useState(false);
     const [successSB, setSuccessSB] = useState(false);
     const [showAccountsList, setShowAccountsList] = useState(false);
+    const [errorModal, setErrorModal] = useState({ open: false, title: '', message: '' });
 
     const openSuccessSB = () => setSuccessSB(true);
     const closeSuccessSB = () => setSuccessSB(false);
@@ -68,6 +75,16 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
             return data;
         } catch (error) {
             console.error('Failed to fetch LinkedIn access token:', error);
+
+            // Handle 422 error specifically
+            if (error.response && error.response.status === 422) {
+                const errorMessage = error.response.data?.error || 'No approved administrator organizations found';
+                setErrorModal({
+                    open: true,
+                    title: 'LinkedIn',
+                    message: errorMessage
+                });
+            }
             throw error;
         }
     }
@@ -119,6 +136,10 @@ const SocialConnect = ({onClose, authCode, authState, socialMediaType}) => {
             }
         } catch (error) {
             console.error("Error fetching access token:", error);
+            // For LinkedIn 422 errors, don't set loading to false to keep the modal state
+            if (error.response && error.response.status === 422 && authState === LINKEDIN_CRED.state) {
+                // Error modal will be shown, keep loading false
+            }
         } finally {
             setLoading(false);
         }
@@ -993,10 +1014,88 @@ const InstagramComponent = (
         )}
     </Box>
 );
+    // Error modal component
+    const ErrorModal = (
+        <Dialog
+            open={errorModal.open}
+            onClose={() => setErrorModal({ open: false, title: '', message: '' })}
+            PaperProps={{
+                sx: {
+                    borderRadius: 2,
+                    padding: 2,
+                    maxWidth: 450,
+                    width: '90%'
+                }
+            }}
+        >
+            <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 2, pb: 1 }}>
+                <Box
+                    sx={{
+                        width: 40,
+                        height: 40,
+                        backgroundColor: "#0077b5",
+                        borderRadius: "12px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }}
+                >
+                    <LinkedInIcon sx={{ color: "white", fontSize: 28 }} />
+                </Box>
+                <Typography variant="h6" fontWeight="600" sx={{ color: "#333" }}>
+                    {errorModal.title}
+                </Typography>
+                <IconButton
+                    onClick={() => setErrorModal({ open: false, title: '', message: '' })}
+                    sx={{
+                        ml: 'auto',
+                        color: "#666",
+                        '&:hover': { backgroundColor: '#f5f5f5' }
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent sx={{ pt: 2 }}>
+                <DialogContentText sx={{ color: '#333', fontSize: '16px', textAlign: 'center' }}>
+                    {errorModal.message}
+                </DialogContentText>
+                <Typography sx={{
+                    color: "#666",
+                    fontSize: "14px",
+                    mt: 2,
+                    textAlign: 'center',
+                    lineHeight: 1.5
+                }}>
+                    If you need to add another LinkedIn account, simply log out of or switch LinkedIn accounts first.
+                </Typography>
+            </DialogContent>
+            <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
+                <Button
+                    variant="contained"
+                    sx={{
+                        backgroundColor: "#00BCD4",
+                        color: "white",
+                        borderRadius: "8px",
+                        padding: "8px 24px",
+                        textTransform: "none",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                        "&:hover": { backgroundColor: "#00ACC1" }
+                    }}
+                    onClick={() => setErrorModal({ open: false, title: '', message: '' })}
+                >
+                    Continue
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+
     return (
         <>
             {socialMediaType === "Linkedin" ? LinkedInComponent : InstagramComponent}
             {renderSuccessSB}
+            {ErrorModal}
             {gettingPage && (
                 <Box
                     sx={{
