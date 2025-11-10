@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Typography, FormControl, Avatar,
-  Grid, Select, MenuItem, Card, CardContent, 
+  Box, Typography, FormControl, Avatar, Grid,
+  Select, MenuItem, Card, CardContent,
   Paper, IconButton, CircularProgress,
-  Divider, Container, Stack
+  Divider, Container, Stack, SelectChangeEvent
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -11,24 +11,93 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Layout from '../../components/Layout';
 import axios from 'axios';
 
+// Type definitions
+interface ProfileData {
+  page_name: string;
+  name: string;
+  username: string;
+  profileImage: string;
+  biography: string;
+  followers_count: number;
+  follows_count: number;
+  media_count: number;
+  website: string;
+  staff_count_range: string;
+  company_type: string;
+  vanity_name: string;
+  industries: string[];
+  locations: any[];
+  total_posts: number;
+  total_likes: number;
+  total_comments: number;
+  total_shares: number;
+  total_saves: number;
+  displayName: string;
+}
+
+interface ApiItem {
+  page_name?: string;
+  profile?: {
+    name?: string;
+    username?: string;
+    profile_picture_url?: string;
+    biography?: string;
+    followers_count?: number;
+    follows_count?: number;
+    media_count?: number;
+    website?: string;
+    staff_count_range?: string;
+    company_type?: string;
+    vanity_name?: string;
+    industries?: string[];
+    locations?: any[];
+  };
+  analytics?: {
+    total_posts?: number;
+    total_likes?: number;
+    total_comments?: number;
+    total_shares?: number;
+    total_saves?: number;
+  };
+}
+
+interface ProfileCardProps {
+  data: ProfileData;
+}
+
+interface AnalyticsCardProps {
+  value: number | string;
+  label: string;
+}
+
 const Analytics2 = () => {
-  const [profileData, setProfileData] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [platformOption, setPlatformOption] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [profileData, setProfileData] = useState<ProfileData[]>([]);
+  const [selectedUser, setSelectedUser] = useState<ProfileData | null>(null);
+  const [platformOption, setPlatformOption] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Helper function to format API data
-  const formatApiData = (apiData) => {
-    return apiData.map(item => ({
+  const formatApiData = (apiData: ApiItem[]): ProfileData[] => {
+    return apiData.map((item: ApiItem) => ({
       page_name: item.page_name || 'N/A',
       name: item.profile?.name || 'N/A',
+      username: item.profile?.username || 'N/A',
       profileImage: item.profile?.profile_picture_url || '',
       biography: item.profile?.biography || 'N/A',
       followers_count: item.profile?.followers_count || 0,
       follows_count: item.profile?.follows_count || 0,
       media_count: item.profile?.media_count || 0,
-      engagement_rate: item.profile?.engagement_rate || 0,
+      website: item.profile?.website || 'N/A',
+      staff_count_range: item.profile?.staff_count_range || 'N/A',
+      company_type: item.profile?.company_type || 'N/A',
+      vanity_name: item.profile?.vanity_name || 'N/A',
+      industries: item.profile?.industries || [],
+      locations: item.profile?.locations || [],
       total_posts: item.analytics?.total_posts || 0,
+      total_likes: item.analytics?.total_likes || 0,
+      total_comments: item.analytics?.total_comments || 0,
+      total_shares: item.analytics?.total_shares || 0,
+      total_saves: item.analytics?.total_saves || 0,
       // For dropdown selection
       displayName: item.page_name || item.profile?.name || 'N/A'
     }));
@@ -69,16 +138,73 @@ const Analytics2 = () => {
     }
   };
 
-  const handleProfileChange = (e) => {
+  const handleProfileChange = (e: SelectChangeEvent<string>) => {
     const name = e.target.value;
     if (!name) return;
 
     setPlatformOption(name);
     const user = profileData.find(item => item.displayName === name);
-    setSelectedUser(user);
+    setSelectedUser(user || null);
   };
 
-  const ProfileCard = ({ data }) => (
+  // Helper function to format staff count range
+  const formatStaffCountRange = (range: string) => {
+    if (!range || range === 'N/A') return 'N/A';
+    const rangeMap = {
+      'SIZE_2_TO_10': '2-10 employees',
+      'SIZE_11_TO_50': '11-50 employees',
+      'SIZE_51_TO_200': '51-200 employees',
+      'SIZE_201_TO_500': '201-500 employees',
+      'SIZE_501_TO_1000': '501-1000 employees',
+      'SIZE_1001_TO_5000': '1001-5000 employees',
+      'SIZE_5001_TO_10000': '5001-10000 employees',
+      'SIZE_10001_OR_MORE': '10000+ employees'
+    };
+    return rangeMap[range as keyof typeof rangeMap] || range;
+  };
+
+  // Helper function to format location
+  const formatLocation = (locations: any[]) => {
+    if (!locations || locations.length === 0) return 'N/A';
+    const location = locations[0];
+    if (!location.address) return 'N/A';
+
+    const { line1, city, geographicArea, country, postalCode } = location.address;
+    const parts = [line1, city, geographicArea, country, postalCode].filter(Boolean);
+    return parts.join(', ');
+  };
+
+  // Helper function to format company type
+  const formatCompanyType = (companyType: string) => {
+    if (!companyType || companyType === 'N/A') return 'N/A';
+    const typeMap = {
+      'PUBLIC_COMPANY': 'Public Company',
+      'EDUCATIONAL_INSTITUTION': 'Educational Institution',
+      'SELF_EMPLOYED': 'Self Employed',
+      'GOVERNMENT_AGENCY': 'Government Agency',
+      'NON_PROFIT': 'Non Profit',
+      'SELF_OWNED': 'Self Owned',
+      'PRIVATELY_HELD': 'Privately Held',
+      'PARTNERSHIP': 'Partnership'
+    };
+    return typeMap[companyType as keyof typeof typeMap] || companyType;
+  };
+
+  // Helper function to format industries
+  const formatIndustries = (industries: string[]) => {
+    if (!industries || industries.length === 0) return 'N/A';
+    // Extract industry names from URN format if needed
+    const industryNames = industries.map((industry: string) => {
+      if (typeof industry === 'string' && industry.includes('urn:li:industry:')) {
+        // You might want to map these to actual industry names
+        return industry.replace('urn:li:industry:', 'Industry ');
+      }
+      return industry;
+    });
+    return industryNames.join(', ');
+  };
+
+  const ProfileCard = ({ data }: ProfileCardProps) => (
     <Card
       elevation={0}
       sx={{
@@ -93,7 +219,7 @@ const Analytics2 = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <Avatar
           src={data.profileImage}
-          alt={data.page_name}
+          alt={data.name}
           sx={{
             width: 60,
             height: 60,
@@ -110,7 +236,7 @@ const Analytics2 = () => {
               fontSize: '18px'
             }}
           >
-            {data.page_name}
+            {data.name}
           </Typography>
           <Typography
             variant="body2"
@@ -125,7 +251,7 @@ const Analytics2 = () => {
               display: 'inline-block'
             }}
           >
-            {data.name}
+            {data.username}
           </Typography>
         </Box>
       </Box>
@@ -174,20 +300,74 @@ const Analytics2 = () => {
 
       <Divider sx={{ my: 2 }} />
 
-      {/* Metrics */}
-      <Box sx={{ mt: 2 }}>
-        <Stack spacing={1.5}>
+      {/* Professional Company Profile - Only show if LinkedIn data is available */}
+      {(data.website !== 'N/A' || data.vanity_name !== 'N/A' || data.company_type !== 'N/A' ||
+        data.staff_count_range !== 'N/A' || (data.industries && data.industries.length > 0)) && (
+        <>
+          <Typography
+            variant="body2"
+            sx={{
+              color: '#666',
+              mb: 2,
+              fontSize: '14px',
+              fontWeight: 500
+            }}
+          >
+            Professional company profile
+          </Typography>
+
+          {/* Company Details */}
+          <Box sx={{ mt: 2 }}>
+            <Stack spacing={1.5}>
+          {data.website && data.website !== 'N/A' && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2" sx={{ color: '#666', fontSize: '14px' }}>
+                Website:
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '14px' }}>
+                {data.website}
+              </Typography>
+            </Box>
+          )}
+          {data.vanity_name && data.vanity_name !== 'N/A' && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2" sx={{ color: '#666', fontSize: '14px' }}>
+                Vanity Name:
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '14px' }}>
+                {data.vanity_name}
+              </Typography>
+            </Box>
+          )}
+          {data.industries && data.industries.length > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2" sx={{ color: '#666', fontSize: '14px' }}>
+                Industries:
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '14px' }}>
+                {formatIndustries(data.industries)}
+              </Typography>
+            </Box>
+          )}
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="body2" sx={{ color: '#666', fontSize: '14px' }}>
-              Engagement Rate:
+              Staff Count Range:
             </Typography>
             <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '14px' }}>
-              {data.engagement_rate !== undefined ? `${data.engagement_rate}%` : 'N/A'}
+              {formatStaffCountRange(data.staff_count_range)}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="body2" sx={{ color: '#666', fontSize: '14px' }}>
-              Media Count:
+              Company Type:
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '14px' }}>
+              {formatCompanyType(data.company_type)}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="body2" sx={{ color: '#666', fontSize: '14px' }}>
+              Earned Media:
             </Typography>
             <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '14px' }}>
               {data.media_count !== undefined ? data.media_count : 'N/A'}
@@ -195,18 +375,20 @@ const Analytics2 = () => {
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="body2" sx={{ color: '#666', fontSize: '14px' }}>
-              Total Posts:
+              Average Interactions:
             </Typography>
             <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '14px' }}>
-              {data.total_posts !== undefined ? data.total_posts : 'N/A'}
+              {data.media_count !== undefined ? data.media_count : 'N/A'}
             </Typography>
           </Box>
-        </Stack>
-      </Box>
+            </Stack>
+          </Box>
+        </>
+      )}
     </Card>
   );
 
-  const AnalyticsCard = ({ value, label }) => (
+  const AnalyticsCard = ({ value, label }: AnalyticsCardProps) => (
     <Card
       elevation={0}
       sx={{
@@ -292,7 +474,7 @@ const Analytics2 = () => {
         <Box sx={{ backgroundColor: '#e3f2fd', p: 2 }}>
           <Container maxWidth="lg">
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} md={2.4}>
+              <Grid size={{ xs: 12, md: 2.4 }}>
                 <Box
                   sx={{
                     display: 'flex',
@@ -308,7 +490,7 @@ const Analytics2 = () => {
                   <Typography sx={{ color: '#999', fontSize: '14px' }}>Search</Typography>
                 </Box>
               </Grid>
-              <Grid item xs={12} md={2.4}>
+              <Grid size={{ xs: 12, md: 2.4 }}>
                 <FormControl fullWidth>
                   <Select
                     displayEmpty
@@ -326,7 +508,7 @@ const Analytics2 = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={2.4}>
+              <Grid size={{ xs: 12, md: 2.4 }}>
                 <FormControl fullWidth>
                   <Select
                     displayEmpty
@@ -344,7 +526,7 @@ const Analytics2 = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={2.4}>
+              <Grid size={{ xs: 12, md: 2.4 }}>
                 <FormControl fullWidth>
                   <Select
                     value={platformOption}
@@ -368,7 +550,7 @@ const Analytics2 = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={2.4}>
+              <Grid size={{ xs: 12, md: 2.4 }}>
                 <FormControl fullWidth>
                   <Select
                     displayEmpty
@@ -404,12 +586,12 @@ const Analytics2 = () => {
           ) : (
             <Grid container spacing={3}>
               {/* Profile Section */}
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 {selectedUser && <ProfileCard data={selectedUser} />}
               </Grid>
 
               {/* Campaign Analytics Section */}
-              <Grid item xs={12} md={8}>
+              <Grid size={{ xs: 12, md: 8 }}>
                 <Typography
                   variant="h6"
                   sx={{
@@ -422,28 +604,28 @@ const Analytics2 = () => {
                   Campaign Analytics
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={6} lg={3}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6, lg: 3 }}>
                     <AnalyticsCard
-                      value={selectedUser?.followers_count || 'N/A'}
-                      label="Followers"
+                      value={selectedUser?.total_likes || 0}
+                      label="Total Likes"
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={6} lg={3}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6, lg: 3 }}>
                     <AnalyticsCard
-                      value={selectedUser?.follows_count || 'N/A'}
-                      label="Following"
+                      value={selectedUser?.total_comments || 0}
+                      label="Total Comments"
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={6} lg={3}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6, lg: 3 }}>
                     <AnalyticsCard
-                      value={selectedUser?.media_count || 'N/A'}
-                      label="Media Count"
+                      value={selectedUser?.total_shares || 0}
+                      label="Total Shares"
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={6} lg={3}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6, lg: 3 }}>
                     <AnalyticsCard
-                      value={selectedUser?.total_posts || 'N/A'}
-                      label="Total Posts"
+                      value={selectedUser?.total_saves || 0}
+                      label="Total Saves"
                     />
                   </Grid>
                 </Grid>

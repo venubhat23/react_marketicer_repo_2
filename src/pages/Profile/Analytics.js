@@ -76,7 +76,9 @@ const Analytics = () => {
 useEffect(() => {
     setLoading(true);
     const token = localStorage.getItem("token");
-    axios.get('https://api.marketincer.com/api/v1/influencer/analytics', {
+
+    // First try LinkedIn analytics API
+    axios.get('https://api.marketincer.com/api/v1/linkedin/analytics', {
       headers: {
         Authorization: `Bearer ${token}`,
       }
@@ -85,34 +87,200 @@ useEffect(() => {
         const profileRes = response?.data?.data || []
         // Show modal if backend returns nil or empty array
         if (!profileRes || profileRes.length === 0) {
+          // Fallback to influencer analytics API
+          return axios.get('https://api.marketincer.com/api/v1/influencer/analytics', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
+          });
+        }
+        return { data: response.data };
+      })
+      .then((response) => {
+        const profileRes = response?.data?.data || []
+
+        if (!profileRes || profileRes.length === 0) {
           setShowNoAnalyticsModal(true);
           setLoading(false);
           return;
         }
-        setProfileData(profileRes);
-        if (profileRes.length > 0) {
-          const firstUser = profileRes[0];
+
+        // Transform data to expected format (handles both LinkedIn and Instagram data)
+        const transformedData = profileRes.map(profileData => {
+          const profile = profileData.profile || {};
+          const analytics = profileData.analytics || {};
+          const insights = profileData.insights || {};
+
+          // Detect platform - LinkedIn data will have page_id, Instagram will have different structure
+          const isLinkedIn = profileData.page_id !== undefined || profileData.insights !== undefined;
+
+          // Transform engagement trends for chart (LinkedIn specific)
+          const engagementTrends = isLinkedIn ? insights?.content_performance?.engagement_trends || [] : [];
+          const engagementOverTime = {};
+
+          if (isLinkedIn && engagementTrends.length > 0) {
+            engagementTrends.forEach((trend, index) => {
+              const weekDate = new Date(trend.week_starting);
+              const weekName = `Week ${index + 1}`;
+              engagementOverTime[weekName.toLowerCase()] = trend.average_engagement || 0;
+            });
+          } else if (isLinkedIn) {
+            // Create default weekly data for LinkedIn if no trends available
+            ['Week 1', 'Week 2', 'Week 3', 'Week 4'].forEach((week, index) => {
+              engagementOverTime[week.toLowerCase()] = 0;
+            });
+          } else {
+            // For Instagram, preserve existing engagement_over_time structure if it exists
+            if (profileData.engagement_over_time?.daily) {
+              Object.assign(engagementOverTime, profileData.engagement_over_time.daily);
+            }
+          }
+
+          // Transform audience engagement for pie chart
+          let audienceEngagement = {};
+
+          if (isLinkedIn) {
+            // LinkedIn-specific audience engagement logic
+            const likesPerc = analytics?.engagement_stats?.likes_percentage || 0;
+            const commentsPerc = analytics?.engagement_stats?.comments_percentage || 0;
+            const sharesPerc = analytics?.engagement_stats?.shares_percentage || 0;
+
+            if (likesPerc > 0 || commentsPerc > 0 || sharesPerc > 0) {
+              audienceEngagement = {
+                likes: `${likesPerc}%`,
+                comments: `${commentsPerc}%`,
+                shares: `${sharesPerc}%`
+              };
+            } else {
+              // If no engagement stats, try to calculate from recent posts
+              const recentPosts = analytics?.recent_posts || [];
+              if (recentPosts.length > 0) {
+                const totalLikes = recentPosts.reduce((sum, post) => sum + (post.likes || 0), 0);
+                const totalComments = recentPosts.reduce((sum, post) => sum + (post.comments || 0), 0);
+                const totalShares = recentPosts.reduce((sum, post) => sum + (post.shares || 0), 0);
+                const totalEngagement = totalLikes + totalComments + totalShares;
+
+                if (totalEngagement > 0) {
+                  audienceEngagement = {
+                    likes: `${Math.round((totalLikes / totalEngagement) * 100)}%`,
+                    comments: `${Math.round((totalComments / totalEngagement) * 100)}%`,
+                    shares: `${Math.round((totalShares / totalEngagement) * 100)}%`
+                  };
+                }
+              }
+            }
+          } else {
+            // For Instagram, preserve existing audience_engagement structure
+            if (profileData.audience_engagement) {
+              Object.assign(audienceEngagement, profileData.audience_engagement);
+            }
+          }
+
+          // Transform campaign analytics cards
+          let campaignAnalytics = [];
+
+          if (isLinkedIn) {
+            // LinkedIn-specific campaign analytics
+            campaignAnalytics = [
+              { value: analytics?.total_likes?.toString() || '0', label: 'Total Likes' },
+              { value: analytics?.total_comments?.toString() || '0', label: 'Total Comments' },
+              { value: `${analytics?.total_engagement || 0}`, label: 'Total Engagement' },
+              { value: analytics?.total_reach?.toString() || '0', label: 'Total Reach' },
+              { value: analytics?.total_shares?.toString() || '0', label: 'Total Shares' },
+              { value: analytics?.total_saves?.toString() || '0', label: 'Total Saves' },
+              { value: analytics?.total_clicks?.toString() || '0', label: 'Total Clicks' },
+              { value: analytics?.visitor_highlights?.page_views?.toString() || '0', label: 'Profile Visits' },
+              { value: analytics?.posting_frequency?.average_posts_per_month?.toString() || '0', label: 'Avg Posts/Month' },
+              { value: profile?.engagement_rate?.toString() || '0%', label: 'Engagement Rate' },
+              { value: profile?.followers_count?.toString() || '0', label: 'Followers' },
+              { value: analytics?.content_analysis?.total_posts?.toString() || '0', label: 'Total Posts' }
+            ];
+          } else {
+            // For Instagram, preserve existing campaign_analytics structure
+            campaignAnalytics = profileData.campaign_analytics || [];
+          }
+
+          // Transform recent posts
+          let recentPosts = [];
+          if (isLinkedIn) {
+            // LinkedIn-specific recent posts transformation
+            recentPosts = analytics?.recent_posts?.map(post => ({
+              platform: 'LinkedIn',
+              brand: profile.name || 'LinkedIn Profile',
+              content: post.caption || post.full_caption || 'No content available',
+              date: post.timestamp,
+              likes: post.likes || 0,
+              comments: post.comments || 0,
+              shares: post.shares || 0,
+              views: 0, // LinkedIn doesn't provide views in this API
+              thumbnail_url: null // LinkedIn doesn't provide thumbnail in this format
+            })) || [];
+          } else {
+            // For Instagram, preserve existing recent_posts structure
+            recentPosts = profileData.recent_posts || [];
+          }
+
+          return {
+            name: profile.name || (isLinkedIn ? 'LinkedIn Profile' : profileData.name),
+            username: profile.username || profileData.username || '@unknown',
+            page_id: profileData.page_id,
+            platform: isLinkedIn ? 'linkedin' : 'instagram', // Add platform indicator
+            profile: profile,
+            analytics: analytics, // Keep original analytics data
+            insights: insights,   // Keep original insights data
+            engagement_over_time: {
+              daily: engagementOverTime
+            },
+            audience_engagement: audienceEngagement,
+            campaign_analytics: campaignAnalytics,
+            recent_posts: recentPosts,
+            // Demographics data (LinkedIn specific)
+            audience_age: isLinkedIn ? profileData.demographics?.seniorities || [] : profileData.audience_age || [],
+            audience_gender: isLinkedIn ? profileData.demographics?.job_functions || [] : profileData.audience_gender || [],
+            audience_location: isLinkedIn ? {
+              countries: profileData.demographics?.industries || []
+            } : profileData.audience_location || {},
+            audience_reachability: isLinkedIn ? {
+              notable_followers: [],
+              notable_followers_count: insights?.audience_growth?.current_followers || 0
+            } : profileData.audience_reachability || {},
+            audience_details: isLinkedIn ? {
+              languages: [],
+              interests: [],
+              brand_affinity: []
+            } : profileData.audience_details || {}
+          };
+        });
+
+        setProfileData(transformedData);
+
+        if (transformedData.length > 0) {
+          const firstUser = transformedData[0];
           setPlatformOption(firstUser.name);
           setSelectedUser(firstUser);
-          // Extract engagement data from the first user
+
+          // Set engagement data
           if (firstUser.engagement_over_time?.daily) {
             setEngagementData(firstUser.engagement_over_time.daily);
           } else {
             setEngagementData({});
           }
-          // Extract audience engagement data
+
+          // Set audience engagement data
           if (firstUser.audience_engagement) {
             setAudienceEngagement(firstUser.audience_engagement);
           } else {
             setAudienceEngagement({});
           }
-          // Extract recent posts
+
+          // Set recent posts
           if (firstUser.recent_posts) {
             setBrandData(firstUser.recent_posts);
           } else {
             setBrandData([]);
           }
-          // Extract other audience data (if available in API response)
+
+          // Set other audience data
           if (firstUser.audience_age) {
             setAudienceAge(firstUser.audience_age);
           }
@@ -144,12 +312,12 @@ useEffect(() => {
 
   const handleProfileChange = (e) => {
     const name = e.target.value;
-    
+
     // Don't proceed if empty value is selected
     if (!name) {
       return;
     }
-    
+
     setPlatformOption(name);
     const user = profileData.find(item => item.name === name);
     setSelectedUser(user);
@@ -230,7 +398,7 @@ useEffect(() => {
   }
 
 // Show "No Analytics Found" modal
-if (false) {
+if (showNoAnalyticsModal) {
   return (
     <Modal
       open={showNoAnalyticsModal}
@@ -476,8 +644,8 @@ if (false) {
 
 
               <Grid size={{ xs: 2, sm: 4, md: 6 }} spacing={2} >
-                <Engagement 
-                  engagement={engagementData} 
+                <Engagement
+                  engagement={engagementData}
                   selectedUser={selectedUser}
                 />
               </Grid>
