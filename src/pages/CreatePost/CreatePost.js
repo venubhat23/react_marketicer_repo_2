@@ -226,9 +226,17 @@ const CreatePost = () => {
   // Function to process mentions in content
   const processMentions = (content) => {
     if (!content) return content;
-    
+
+    // First decode any HTML entities that might be present
+    const decodedContent = content
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+
     // Replace @mentions with styled spans
-    return content.replace(/@(\w+(?:\s+\w+)*)/g, (match, name) => {
+    return decodedContent.replace(/@(\w+(?:\s+\w+)*)/g, (match, name) => {
       return `<span style="color: #0a66c2; font-weight: 600;">${match}</span>`;
     });
   };
