@@ -19,7 +19,7 @@ import {
   RadialBar, Pie, Cell, BarChart, Bar, Tooltip, Legend, CartesianGrid, AreaChart,
   Area,
 } from 'recharts';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import SendIcon from "@mui/icons-material/Send";
@@ -63,6 +63,7 @@ const InstagramAnalytics = () => {
   const [value, setValue] = useState(0);
   const [platformData, setPlatformData] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // const [recentPosts, setRecentPosts] = useState([]);
   // const [audienceGender, setAudienceGender] = useState([]);
@@ -109,7 +110,7 @@ const InstagramAnalytics = () => {
   //       setLoading(true);
   //       const apiEndpoint = platformApiMap[platform.toLowerCase()];
 
-  //       const res = await axios.get(`https://api.marketincer.com/api/v1/${apiEndpoint}`, {
+  //       const res = await axios.get(`http://localhost:3001/api/v1/${apiEndpoint}`, {
   //         headers: {
   //           Authorization: `Bearer ${token}`,
   //         }
@@ -127,7 +128,20 @@ const InstagramAnalytics = () => {
 
   //handle dropdown change
   const handlePlatformChange = (event) => {
-    setPlatform(event.target.value);
+    const selectedPlatform = event.target.value;
+    setPlatform(selectedPlatform);
+
+    // Navigate to the appropriate route based on platform selection
+    if (selectedPlatform === 'LinkedIn') {
+      navigate('/linkedin-analytics');
+    } else if (selectedPlatform === 'Instagram') {
+      navigate('/instagram-analytics');
+    } else if (selectedPlatform === 'Facebook') {
+      // You can add Facebook analytics route here if needed
+      // navigate('/facebook-analytics');
+      console.log('Facebook analytics not implemented yet');
+    }
+
     // Clear existing data to prevent stale data display
     setSelectedAccountData(null);
     setInstagramData([]);

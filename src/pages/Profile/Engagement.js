@@ -23,33 +23,21 @@ const Engagement = ({ engagement, selectedUser }) => {
   // Function to prepare chart data
   const prepareChartData = () => {
     console.log('🔍 ENGAGEMENT CHART DEBUG:');
-    console.log('selectedUser received:', selectedUser);
-    console.log('engagement prop received:', engagement);
+    console.log('selectedUser:', selectedUser);
     console.log('platform:', selectedUser?.platform);
-    console.log('name:', selectedUser?.name);
     console.log('insights:', selectedUser?.insights);
-    console.log('engagement_trends:', selectedUser?.insights?.content_performance?.engagement_trends);
     console.log('recent_posts:', selectedUser?.recent_posts);
-
-    // Check if this is LinkedIn first
-    const isLinkedInUser = selectedUser?.platform === 'linkedin' || selectedUser?.name?.toLowerCase().includes('stealth');
-    console.log('🎯 Is LinkedIn User:', isLinkedInUser);
 
     // PRIORITY 1: Check if we have LinkedIn insights data (only for LinkedIn platform)
     if (selectedUser?.platform === 'linkedin' && selectedUser?.insights?.content_performance?.engagement_trends) {
-      console.log('✅ Found LinkedIn engagement trends:', selectedUser.insights.content_performance.engagement_trends);
       const trends = selectedUser.insights.content_performance.engagement_trends;
       const chartData = trends.map((trend, index) => {
-        // Extract week from week_starting date or use index
-        const weekLabel = trend.week_starting ?
-          `Week ${new Date(trend.week_starting).getDate()}` :
-          `Week ${index + 1}`;
+        const weekLabel = `Week ${index + 1}`;
         return {
           day: weekLabel,
-          engagement: trend.average_engagement || trend.total_engagement || 0,
+          engagement: trend.average_engagement || 0,
         };
       });
-      console.log('📊 Chart data created from API trends:', chartData);
       return chartData;
     }
 
@@ -87,6 +75,17 @@ const Engagement = ({ engagement, selectedUser }) => {
       ];
     }
 
+    // LINKEDIN DUMMY DATA: If no real data, show dummy data for LinkedIn
+    if (selectedUser?.platform === 'linkedin' || selectedUser?.name?.toLowerCase().includes('linkedin') || selectedUser?.name?.toLowerCase().includes('stealth')) {
+      console.log('✅ Showing LinkedIn dummy data');
+      return [
+        { day: 'Week 1', engagement: 16 },
+        { day: 'Week 2', engagement: 10 },
+        { day: 'Week 3', engagement: 9 },
+        { day: 'Week 4', engagement: 13 },
+      ];
+    }
+
     // PRIORITY 2: Check if we have engagement_over_time data from selectedUser (transformed data)
     if (selectedUser?.engagement_over_time?.daily && Object.keys(selectedUser.engagement_over_time.daily).length > 0) {
       const dailyData = selectedUser.engagement_over_time.daily;
@@ -94,22 +93,7 @@ const Engagement = ({ engagement, selectedUser }) => {
         day: day.charAt(0).toUpperCase() + day.slice(1), // Capitalize first letter
         engagement: value,
       }));
-
-      // If we have actual data, return it
-      if (chartData.length > 0 && chartData.some(item => item.engagement > 0)) {
-        return chartData;
-      }
-    }
-
-    // LINKEDIN DUMMY DATA: Always show dummy data for LinkedIn if no real trends data
-    if (selectedUser?.platform === 'linkedin' || selectedUser?.name?.toLowerCase().includes('linkedin') || selectedUser?.name?.toLowerCase().includes('stealth')) {
-      console.log('✅ Showing LinkedIn dummy data as fallback');
-      return [
-        { day: 'Week 1', engagement: 25 },
-        { day: 'Week 2', engagement: 18 },
-        { day: 'Week 3', engagement: 30 },
-        { day: 'Week 4', engagement: 22 },
-      ];
+      return chartData;
     }
 
     // PRIORITY 3: Check if engagement prop has data
@@ -147,14 +131,15 @@ const Engagement = ({ engagement, selectedUser }) => {
       }
     }
 
-    // Final fallback for LinkedIn - show realistic sample data based on API structure
+    // Default data with zeros for all days
     if (selectedUser?.platform === 'linkedin' || selectedUser?.name?.toLowerCase().includes('stealth')) {
-      console.log('🎯 Using LinkedIn final fallback sample data');
+      // Even as default, LinkedIn should show some data
+      console.log('🎯 Using LinkedIn default data');
       return [
-        { day: 'Week 13', engagement: 16 }, // matches API: average_engagement: 16.0
-        { day: 'Week 20', engagement: 10 }, // matches API: average_engagement: 10.0
-        { day: 'Week 27', engagement: 9 },  // matches API: average_engagement: 9.0
-        { day: 'Week 3', engagement: 13 },  // matches API: average_engagement: 13.0
+        { day: 'Week 1', engagement: 25 },
+        { day: 'Week 2', engagement: 18 },
+        { day: 'Week 3', engagement: 30 },
+        { day: 'Week 4', engagement: 22 },
       ];
     }
 
@@ -166,14 +151,6 @@ const Engagement = ({ engagement, selectedUser }) => {
   };
 
   const engageData = prepareChartData();
-
-  // Debug: Log the chart data being generated
-  console.log('📊 ENGAGEMENT CHART DATA DEBUG:');
-  console.log('engageData:', engageData);
-  console.log('engageData length:', engageData.length);
-  console.log('has engagement > 0:', engageData.some(item => item.engagement > 0));
-  console.log('selectedUser platform:', selectedUser?.platform);
-  console.log('is LinkedIn detected:', selectedUser?.platform === 'linkedin' || selectedUser?.name?.toLowerCase().includes('stealth'));
 
   // Calculate total engagement for display
   const totalEngagement = engageData.reduce((sum, item) => sum + item.engagement, 0);
@@ -260,23 +237,10 @@ const Engagement = ({ engagement, selectedUser }) => {
           )}
         </Box>
 
-        <Box sx={{ mt: 2, height: 218, minHeight: 218, width: '100%', minWidth: 300 }}>
-          {(() => {
-            const isLinkedInPlatform = selectedUser?.platform === 'linkedin' || selectedUser?.name?.toLowerCase().includes('stealth');
-            const hasValidData = engageData.length > 0 && engageData.some(item => item.engagement > 0);
-            const shouldShowChart = isLinkedInPlatform || hasValidData;
-
-            console.log('📊 Chart Display Decision:', {
-              isLinkedInPlatform,
-              hasValidData,
-              shouldShowChart,
-              engageDataLength: engageData.length
-            });
-
-            return shouldShowChart;
-          })() ? (
-            <Box sx={{ position: "relative", height: "100%", minHeight: 200, width: '100%', minWidth: 300 }}>
-              <ResponsiveContainer width="100%" height={200} minHeight={200}>
+        <Box sx={{ mt: 2, height: 218 }}>
+          {(engageData.length > 0 && engageData.some(item => item.engagement > 0)) || selectedUser?.platform === 'linkedin' || selectedUser?.name?.toLowerCase().includes('stealth') ? (
+            <Box sx={{ position: "relative", height: "100%" }}>
+              <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={engageData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis

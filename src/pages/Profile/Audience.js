@@ -48,19 +48,19 @@ const Audience = ({ audienceData }) => {
           boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
           position: "relative",
           bgcolor: "#fffdfd",
-          height: "370px",
-          padding: "20px",
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
+          p: 3,
+          textAlign: "center",
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 700, color: "#882AFF", mb: 2 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
           Audience Engagement
         </Typography>
-        <Typography variant="body2" color="text.secondary" align="center">
-          No audience engagement data available
+        <Typography variant="body2" color="text.secondary">
+          No engagement data available
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          No engagement data available for analysis.
+          Start engaging with your audience to see metrics here.
         </Typography>
       </Card>
     );
@@ -74,37 +74,50 @@ const Audience = ({ audienceData }) => {
         boxShadow: "0px 2px 6px rgba(123, 123, 123, 0.25)",
         position: "relative",
         bgcolor: "#fffdfd",
-        height: "370px",
-        padding: "20px"
       }}
     >
-      <CardContent sx={{ padding: "0px !important" }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: "#882AFF", mb: 2 }}>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
           Audience Engagement
         </Typography>
 
-        <Box sx={{ height: "280px", width: "100%", minHeight: 280, minWidth: 300 }}>
-          <ResponsiveContainer width="100%" height="100%" minHeight={280}>
-            <PieChart>
-              <Pie
-                data={audData}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                labelLine={false}
-                label={({value}) => `${value}%`}
-              >
-                {audData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+        {/* Display engagement summary */}
+        <Box sx={{ mb: 2 }}>
+          {audData.map((item, index) => (
+            <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
+              {item.name}: {item.value}%
+            </Typography>
+          ))}
         </Box>
+
+        <ResponsiveContainer width="100%" height={200}>
+          <PieChart>
+            <Pie
+              data={audData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={70}
+              innerRadius={45}
+              paddingAngle={5}
+              label={({ value }) => `${value}%`}
+            >
+              {audData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
+              ))}
+            </Pie>
+            <Tooltip formatter={(value) => [`${value}%`, 'Engagement']} />
+            <Legend
+              verticalAlign="bottom"
+              height={36}
+              formatter={(value) => value}
+            />
+          </PieChart>
+        </ResponsiveContainer>
       </CardContent>
     </Card>
   );

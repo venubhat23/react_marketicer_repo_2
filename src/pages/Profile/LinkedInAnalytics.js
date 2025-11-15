@@ -14,11 +14,12 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import Sidebar from '../../components/Sidebar';
 import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
-import {Link} from 'react-router-dom'
+import {Link, useNavigate, useLocation} from 'react-router-dom'
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import SendIcon from "@mui/icons-material/Send";
 import ShareIcon from "@mui/icons-material/Share";
+import BrandProfile from "./BrandProfile";
 
 
 function TabPanel(props) {
@@ -43,13 +44,16 @@ function TabPanel(props) {
 
 
 const LinkedinAnalytics = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [instagramData, setInstagramData] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState('');
   const [selectedAccountData, setSelectedAccountData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [error, setError] = useState('');
   const [dateRange, setDateRange] = useState('Last 7 days');
-  const [platform, setPlatform] = useState('Instagram');
+  const [platform, setPlatform] = useState('LinkedIn');
   const [influencer, setInfluencer] = useState('');
   const [postType, setPostType] = useState('');
   const [value, setValue] = useState(0);
@@ -66,7 +70,19 @@ const LinkedinAnalytics = () => {
   const fetchInstagramAnalytics = async () => {
 
     setLoading(true);
+    setLoadingProgress(0);
     setError('');
+
+    // Simulate loading progress
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return 90;
+        }
+        return prev + 10;
+      });
+    }, 200);
 
     try {
       const token = localStorage.getItem("token");
@@ -111,7 +127,10 @@ const LinkedinAnalytics = () => {
       setError(`API Error: ${error.response?.data?.message || error.message}`);
       setInstagramData([]);
     } finally {
-      setLoading(false);
+      setLoadingProgress(100);
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
     }
   };
 
@@ -176,33 +195,79 @@ const LinkedinAnalytics = () => {
     { name: 'Julia', percentage: '6.8%', avatar: '/api/placeholder/32/32' }
   ];
 
-  // Campaign Analytics cards
+  // Campaign Analytics cards - showing 8 fields from analytics data
   const getCampaignAnalytics = (selectedAccountData) => {
-    debugger
     if (!selectedAccountData) return [];
 
-    const totalLikes = selectedAccountData.analytics?.engagement_stats?.total_likes || 24300;
-    const totalComments = selectedAccountData.analytics?.engagement_stats?.total_comments || 403;
-    const engagementRate = selectedAccountData.analytics?.engagement_stats?.total_engagement || '1.3%';
-    const followers = selectedAccountData.profile?.followers_count || 32800;
+    const analytics = selectedAccountData.analytics || {};
 
     return [
-      { value: formatNumber(totalLikes), label: "Total Likes", key: "likes" },
-      { value: formatNumber(totalComments), label: "Total Comments", key: "comments" },
-      { value: formatNumber(engagementRate), label: "Total Engagement", key: "engagement" },
-      { value: formatNumber(followers), label: "Total Reach", key: "reach" },
-      { value: formatNumber(12100), label: "Total Shares", key: "shares" },
-      { value: formatNumber(428), label: "Total Saves", key: "saves" },
-      { value: formatNumber(829), label: "Total Clicks", key: "clicks" },
-      { value: formatNumber(829), label: "Profile Visits", key: "visits" }
+      { value: formatNumber(analytics.total_posts || 0), label: "Total Posts", key: "posts" },
+      { value: formatNumber(analytics.total_engagement || 0), label: "Total Engagement", key: "engagement" },
+      { value: formatNumber(analytics.total_likes || 0), label: "Total Likes", key: "likes" },
+      { value: formatNumber(analytics.total_comments || 0), label: "Total Comments", key: "comments" },
+      { value: formatNumber(analytics.total_shares || 0), label: "Total Shares", key: "shares" },
+      { value: formatNumber(analytics.total_saves || 0), label: "Total Saves", key: "saves" },
+      { value: formatNumber(analytics.total_clicks || 0), label: "Total Clicks", key: "clicks" },
+      { value: analytics.average_engagement_per_post?.toFixed(2) || '0.00', label: "Avg Engagement/Post", key: "avg_engagement" }
     ];
+  };
+
+  const handlePlatformChange = (event) => {
+    const selectedPlatform = event.target.value;
+    setPlatform(selectedPlatform);
+
+    if (selectedPlatform === 'Instagram') {
+      navigate('/instagram-analytics?type=Instagram');
+    } else if (selectedPlatform === 'LinkedIn') {
+      navigate('/linkedin-analytics');
+    }
   };
 
   // Show loading state
   if (loading) {
     return (
-      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress sx={{ color: '#8B5CF6' }} />
+      <Box sx={{
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        bgcolor: '#f5edf8'
+      }}>
+        <Box sx={{ textAlign: 'center', mb: 2 }}>
+          <Typography variant="h6" sx={{ color: '#8B5CF6', mb: 1 }}>
+            Marketincer
+          </Typography>
+          <Typography variant="body1" sx={{ color: '#666', mb: 2 }}>
+            Analytics Loading...
+          </Typography>
+        </Box>
+        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+          <CircularProgress
+            variant="determinate"
+            value={loadingProgress}
+            size={60}
+            sx={{ color: '#8B5CF6' }}
+          />
+          <Box
+            sx={{
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+              position: 'absolute',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Typography variant="caption" component="div" color="text.secondary">
+              {`${Math.round(loadingProgress)}%`}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
     );
   }
@@ -339,7 +404,7 @@ const LinkedinAnalytics = () => {
               <FormControl size="small" sx={{ minWidth: 250 }}>
                 <Select
                   value={platform}
-                  onChange={(e) => setPlatform(e.target.value)}
+                  onChange={handlePlatformChange}
                   sx={{
                     height: '36px',
                     fontSize: '14px',
@@ -610,7 +675,7 @@ const LinkedinAnalytics = () => {
                   <Card sx={{ p: 2.5, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                       <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px' }}>
-                        Engagement Over Time
+                        Engagement Over 
                       </Typography>
                       <FormControl size="small">
                         <Select
@@ -901,87 +966,7 @@ const LinkedinAnalytics = () => {
               </Grid>
 
               <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }}>
-                <Typography variant="body1" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
-                    All Brand - Tagged Posts
-                </Typography>
-
-                {selectedAccountData?.analytics?.recent_posts.length > 0 ? (selectedAccountData?.analytics?.recent_posts.map((post) => (
-
-                  <Card
-                  variant="outlined"
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    p: 2,
-                    mb: 2,
-                    borderRadius: 2,
-                  }}
-                >
-                  {/* Left Side: Avatar + Post Info */}
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <CardMedia
-                          component="img"
-                          image={post.media_url}
-                          alt={post.caption || "Post image"}
-                          sx={{ width: 100, height: 100, borderRadius: 2 }}
-                  />
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        {post.caption}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        @name
-                      </Typography>
-                      <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                        Lorem ipsum dolor sit...
-                      </Typography>
-
-                      {/* Stats */}
-                      <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                          <FavoriteBorderIcon fontSize="small" />{" "}
-                          <Typography variant="body2">{post.likes}</Typography>
-                        </Box>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                          <ChatBubbleOutlineIcon fontSize="small" />{" "}
-                          <Typography variant="body2">{post.comments}</Typography>
-                        </Box>
-                        {/* <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                          <SendIcon fontSize="small" />{" "}
-                          <Typography variant="body2">234</Typography>
-                        </Box>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                          <ShareIcon fontSize="small" />{" "}
-                          <Typography variant="body2">122</Typography>
-                        </Box> */}
-                      </Box>
-                    </Box>
-                  </Box>
-
-                  {/* Right Side: Date + Link */}
-                  <Box sx={{ textAlign: "right" }}>
-                    <Typography variant="body2" color="text.secondary">
-                    {new Date(post.timestamp).toLocaleDateString("en-US", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-
-                    </Typography>
-                    <Link
-                      to="/FullAnalytics"
-                      underline="hover"
-                      sx={{ fontWeight: "bold", color: "purple" }}
-                    >
-                      View full Analytics →
-                    </Link>
-                  </Box>
-                </Card>
-                  ))
-                ) : (
-                  <p>No posts available</p>
-                )}
+                <BrandProfile brand={selectedAccountData?.analytics?.recent_posts || []} />
               </Grid>
 
 
