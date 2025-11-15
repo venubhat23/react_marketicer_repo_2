@@ -16,6 +16,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import CreatePost from './pages/CreatePost/CreatePost';
 import Analytics  from './pages/Profile/Analytics';
 import InstagramAnalytics from './pages/Profile/InstagramAnalytics';
+import LinkedInAnalytics from './pages/Profile/LinkedInAnalytics';
 import SocialMedia from './pages/SocialMedia';
 import FullAnalytics from './pages/Profile/FullAnalytics';
 import ContractPage from './pages/Contract/ContractPage'
@@ -176,6 +177,11 @@ const AppRoutes = () => {
       <Route path="/instagram-analytics" element={
         <ProtectedRoute>
           <InstagramAnalytics />
+        </ProtectedRoute>
+      } />
+      <Route path="/linkedin-analytics" element={
+        <ProtectedRoute>
+          <LinkedInAnalytics />
         </ProtectedRoute>
       } />
       <Route path="/socialMedia" element={
