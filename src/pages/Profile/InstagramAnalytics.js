@@ -223,38 +223,20 @@ const InstagramAnalytics = () => {
 
     if (!selectedAccountData) return [];
 
-    const analytics = selectedAccountData.analytics || {};
-    const profile_stats = selectedAccountData.profile || {};
     const engagement_stats = selectedAccountData.analytics?.engagement_stats || {};
+    const profile_stats = selectedAccountData.profile || {};
+    const analytics = selectedAccountData.analytics || {};
 
-    // Check if this is LinkedIn data (has visitor_highlights or insights)
-    const isLinkedIn = platform === 'LinkedIn' || selectedAccountData?.insights || analytics.visitor_highlights;
-
-    if (isLinkedIn) {
-      // LinkedIn data structure
-      return [
-        { value: formatNumber(analytics.total_likes || 0), label: "Total Likes", key: "likes" },
-        { value: formatNumber(analytics.total_comments || 0), label: "Total Comments", key: "comments" },
-        { value: formatNumber(analytics.total_engagement || 0), label: "Total Engagement", key: "engagement" },
-        { value: formatNumber(analytics.total_reach || 0), label: "Total Reach", key: "reach" },
-        { value: formatNumber(analytics.total_shares || 0), label: "Total Shares", key: "shares" },
-        { value: formatNumber(analytics.total_saves || 0), label: "Total Saves", key: "saves" },
-        { value: formatNumber(analytics.total_clicks || 0), label: "Total Clicks", key: "clicks" },
-        { value: formatNumber(analytics.visitor_highlights?.page_views || 0), label: "Profile Visits", key: "visits" }
-      ];
-    } else {
-      // Instagram data structure (original)
-      return [
-        { value: formatNumber(engagement_stats.total_likes || 0), label: "Total Likes", key: "likes" },
-        { value: formatNumber(engagement_stats.total_comments || 0), label: "Total Comments", key: "comments" },
-        { value: formatNumber(engagement_stats.total_engagement || 0), label: "Total Engagement", key: "engagement" },
-        { value: formatNumber(analytics.total_reach || 0), label: "Total Reach", key: "reach" },
-        { value: formatNumber(engagement_stats.total_shares || 0), label: "Total Shares", key: "shares" },
-        { value: formatNumber(engagement_stats.total_saves || 0), label: "Total Saves", key: "saves" },
-        { value: formatNumber(engagement_stats.total_clicks || 0), label: "Total Clicks", key: "clicks" },
-        { value: formatNumber(analytics.total_profile_visits || 0), label: "Profile Visits", key: "visits" }
-      ];
-    }
+    return [
+      { value: formatNumber(engagement_stats.total_likes || 0), label: "Total Likes", key: "likes" },
+      { value: formatNumber(engagement_stats.total_comments || 0), label: "Total Comments", key: "comments" },
+      { value: formatNumber(engagement_stats.total_engagement || 0), label: "Total Engagement", key: "engagement" },
+      { value: formatNumber(analytics.total_reach || 0), label: "Total Reach", key: "reach" },
+      { value: formatNumber(engagement_stats.total_shares || 0), label: "Total Shares", key: "shares" },
+      { value: formatNumber(engagement_stats.total_saves || 0), label: "Total Saves", key: "saves" },
+      { value: formatNumber(engagement_stats.total_clicks || 0), label: "Total Clicks", key: "clicks" },
+      { value: formatNumber(analytics.total_profile_visits || 0), label: "Profile Visits", key: "visits" }
+    ];
   };
 
   const audiGender = selectedAccountData?.analytics?.audience_demographics?.gender ?? {}
@@ -264,30 +246,15 @@ const InstagramAnalytics = () => {
     value: value
   }));
 
-  // Handle both Instagram and LinkedIn engagement over time data
   const engOverTime = selectedAccountData?.analytics?.engagement_over_time ?? {}
-  const linkedinEngagementTrends = selectedAccountData?.insights?.content_performance?.engagement_trends ?? []
 
-  // Check if this is LinkedIn data
-  const isLinkedInData = platform === 'LinkedIn' || selectedAccountData?.insights || selectedAccountData?.analytics?.visitor_highlights;
-
-  const engOverData = isLinkedInData && linkedinEngagementTrends.length > 0 ?
-    // LinkedIn engagement trends data
-    linkedinEngagementTrends.map((trend) => ({
-      day: new Date(trend.week_starting).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      engagement: trend.average_engagement || 0,
-      reach: trend.total_engagement || 0,
-      impressions: trend.posts_count || 0,
-      profile_views: trend.total_engagement || 0,
-    })) :
-    // Instagram engagement over time data (original)
-    engOverTime ? Object.keys(engOverTime).map((day) => ({
-      day,
-      engagement: engOverTime[day].engagement,
-      reach: engOverTime[day].reach,
-      impressions: engOverTime[day].impressions,
-      profile_views: engOverTime[day].profile_views,
-    })) : [];
+  const engOverData = Object.keys(engOverTime).map((day) => ({
+    day,
+    engagement: engOverTime[day].engagement,
+    reach: engOverTime[day].reach,
+    impressions: engOverTime[day].impressions,
+    profile_views: engOverTime[day].profile_views,
+  }));
 
   console.log('Raw engagement_over_time:', engOverTime)
   console.log('Processed engOverData:', engOverData)
@@ -303,7 +270,7 @@ const InstagramAnalytics = () => {
   const engagementStats = selectedAccountData?.analytics?.engagement_stats || {};
 
   // Create engagement data from available sources
-  const audienceEngagementData = audiEngagement && Object.keys(audiEngagement).length > 0
+  const audienceEngagementData = Object.keys(audiEngagement).length > 0
     ? Object.entries(audiEngagement).map(([key, value]) => ({
         name: key,
         value: value.percentage || 0,
@@ -828,7 +795,7 @@ const InstagramAnalytics = () => {
                           <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px', mb: 2 }}>
                             Engagement Over Time
                           </Typography>
-                            {engOverData && engOverData.length > 0 ? (
+                            {engOverData.length > 0 ? (
                           <ResponsiveContainer width="100%" height={150}>
                             <AreaChart data={engOverData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                               <defs>
@@ -1177,106 +1144,12 @@ const InstagramAnalytics = () => {
                 </Box>
               </Grid>
 
-              {platform === 'LinkedIn' && selectedAccountData?.insights?.content_performance?.top_performing_posts && (
-                <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }} sx={{ mb: 3 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
-                    Top Performing Posts
-                  </Typography>
-
-                  {selectedAccountData.insights.content_performance.top_performing_posts.map((post, index) => (
-                    <Card
-                      key={post.id || index}
-                      variant="outlined"
-                      sx={{
-                        p: 2,
-                        mb: 2,
-                        borderRadius: 2,
-                        border: '2px solid #1976d2',
-                        backgroundColor: '#f8f9ff'
-                      }}
-                    >
-                      <Box sx={{ width: "100%" }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                          <Typography variant="subtitle1" fontWeight="bold">
-                            Top #{index + 1} Performing Post
-                          </Typography>
-                          <Typography variant="body2" sx={{
-                            backgroundColor: '#1976d2',
-                            color: 'white',
-                            px: 1,
-                            py: 0.5,
-                            borderRadius: 1,
-                            fontWeight: 600
-                          }}>
-                            Performance Rank: {index + 1}
-                          </Typography>
-                        </Box>
-
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
-                          {post.caption || post.full_caption || 'No caption'}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                          @{selectedAccountData?.username || selectedAccountData?.page_name || 'Unknown'}
-                        </Typography>
-                        <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.4 }}>
-                          {post.full_caption || 'No description available'}
-                        </Typography>
-
-                        {/* LinkedIn Top Post Details */}
-                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 2 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Media Type:</strong> {post.media_type || 'N/A'}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Content Length:</strong> {post.content_length || 'N/A'} chars
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Engagement:</strong> {post.engagement || 0}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Engagement Rate:</strong> {post.engagement_rate || 0}%
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Has Media:</strong> {post.has_media ? 'Yes' : 'No'}
-                          </Typography>
-                        </Box>
-
-                        {/* Enhanced Stats for Top Posts */}
-                        <Box sx={{ display: "flex", gap: 3, mb: 1 }}>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <FavoriteBorderIcon fontSize="small" />
-                            <Typography variant="body2" fontWeight="600">{post.likes || 0}</Typography>
-                          </Box>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <ChatBubbleOutlineIcon fontSize="small" />
-                            <Typography variant="body2" fontWeight="600">{post.comments || 0}</Typography>
-                          </Box>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <SendIcon fontSize="small" />
-                            <Typography variant="body2" fontWeight="600">{post.shares || 0}</Typography>
-                          </Box>
-                        </Box>
-
-                        {/* Date */}
-                        <Typography variant="body2" color="text.secondary">
-                          {new Date(post.timestamp).toLocaleDateString("en-US", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </Typography>
-                      </Box>
-                    </Card>
-                  ))}
-                </Grid>
-              )}
-
-              <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }}>
+              <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }} style={{ display: platform === "LinkedIn" ? "none" : "block" }}>
                 <Typography variant="body1" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
                   All Brand - Tagged Posts
                 </Typography>
 
-                {selectedAccountData?.analytics?.recent_posts && selectedAccountData?.analytics?.recent_posts.length > 0 ? (selectedAccountData?.analytics?.recent_posts.map((post, index) => (
+                {selectedAccountData?.analytics?.recent_posts.length > 0 ? (selectedAccountData?.analytics?.recent_posts.map((post, index) => (
 
                   <Card
                     key={post.id || index}
@@ -1290,125 +1163,67 @@ const InstagramAnalytics = () => {
                       borderRadius: 2,
                     }}
                   >
-                    {platform === 'LinkedIn' ? (
-                      /* LinkedIn post layout - text only, no images */
-                      <Box sx={{ width: "100%" }}>
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+                    {/* Left Side: Avatar + Post Info */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <CardMedia
+                        component="img"
+                        image={post.media_url || post.url || '/api/placeholder/100/100'}
+                        alt={post.caption || "Post image"}
+                        sx={{ width: 100, height: 100, borderRadius: 2, objectFit: 'cover' }}
+                      />
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight="bold">
                           {post.caption || post.full_caption || 'No caption'}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        <Typography variant="body2" color="text.secondary">
                           @{selectedAccountData?.username || selectedAccountData?.page_name || 'Unknown'}
                         </Typography>
-                        <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.4 }}>
-                          {post.full_caption || 'No description available'}
+                        <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+                          {post.full_caption && post.full_caption.length > 50
+                            ? `${post.full_caption.substring(0, 50)}...`
+                            : post.full_caption || 'No description available'}
                         </Typography>
 
-                        {/* LinkedIn Post Details */}
-                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 2 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Media Type:</strong> {post.media_type || 'N/A'}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Content Length:</strong> {post.content_length || 'N/A'} chars
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Engagement:</strong> {post.engagement || 0}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Engagement Rate:</strong> {post.engagement_rate || 0}%
-                          </Typography>
-                        </Box>
-
                         {/* Stats */}
-                        <Box sx={{ display: "flex", gap: 3, mb: 1 }}>
+                        <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <FavoriteBorderIcon fontSize="small" />
+                            <FavoriteBorderIcon fontSize="small" />{" "}
                             <Typography variant="body2">{post.likes || 0}</Typography>
                           </Box>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <ChatBubbleOutlineIcon fontSize="small" />
+                            <ChatBubbleOutlineIcon fontSize="small" />{" "}
                             <Typography variant="body2">{post.comments || 0}</Typography>
                           </Box>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <SendIcon fontSize="small" />
+                            <SendIcon fontSize="small" />{" "}
                             <Typography variant="body2">{post.shares || 0}</Typography>
                           </Box>
-                        </Box>
-
-                        {/* Date only for LinkedIn */}
-                        <Typography variant="body2" color="text.secondary">
-                          {new Date(post.timestamp).toLocaleDateString("en-US", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </Typography>
-                      </Box>
-                    ) : (
-                      /* Instagram post layout - original with images and analytics link */
-                      <>
-                        {/* Left Side: Avatar + Post Info */}
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                          <CardMedia
-                            component="img"
-                            image={post.media_url || post.url || '/api/placeholder/100/100'}
-                            alt={post.caption || "Post image"}
-                            sx={{ width: 100, height: 100, borderRadius: 2, objectFit: 'cover' }}
-                          />
-                          <Box>
-                            <Typography variant="subtitle1" fontWeight="bold">
-                              {post.caption || post.full_caption || 'No caption'}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              @{selectedAccountData?.username || selectedAccountData?.page_name || 'Unknown'}
-                            </Typography>
-                            <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                              {post.full_caption && post.full_caption.length > 50
-                                ? `${post.full_caption.substring(0, 50)}...`
-                                : post.full_caption || 'No description available'}
-                            </Typography>
-
-                            {/* Stats */}
-                            <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                                <FavoriteBorderIcon fontSize="small" />
-                                <Typography variant="body2">{post.likes || 0}</Typography>
-                              </Box>
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                                <ChatBubbleOutlineIcon fontSize="small" />
-                                <Typography variant="body2">{post.comments || 0}</Typography>
-                              </Box>
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                                <SendIcon fontSize="small" />
-                                <Typography variant="body2">{post.shares || 0}</Typography>
-                              </Box>
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                                <ShareIcon fontSize="small" />
-                                <Typography variant="body2">{post.saved || 0}</Typography>
-                              </Box>
-                            </Box>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                            <ShareIcon fontSize="small" />{" "}
+                            <Typography variant="body2">{post.saved || 0}</Typography>
                           </Box>
                         </Box>
+                      </Box>
+                    </Box>
 
-                        {/* Right Side: Date + Link */}
-                        <Box sx={{ textAlign: "right" }}>
-                          <Typography variant="body2" color="text.secondary">
-                            {new Date(post.timestamp).toLocaleDateString("en-US", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </Typography>
-                          <Link
-                            to={`/FullAnalytics/${post.id}`}
-                            underline="hover"
-                            sx={{ fontWeight: "bold", color: "purple" }}
-                          >
-                            View full Analytics →
-                          </Link>
-                        </Box>
-                      </>
-                    )}
+                    {/* Right Side: Date + Link */}
+                    <Box sx={{ textAlign: "right" }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {new Date(post.timestamp).toLocaleDateString("en-US", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+
+                      </Typography>
+                      <Link
+                        to={`/FullAnalytics/${post.id}`}
+                        underline="hover"
+                        sx={{ fontWeight: "bold", color: "purple" }}
+                      >
+                        View full Analytics →
+                      </Link>
+                    </Box>
                   </Card>
                 ))
                 ) : (
@@ -1416,253 +1231,7 @@ const InstagramAnalytics = () => {
                 )}
               </Grid>
 
-              {/* LinkedIn Advanced Analytics Dashboard */}
-              {platform === 'LinkedIn' && selectedAccountData?.analytics && selectedAccountData?.insights && (
-                <Grid spacing={2} size={{ xs: 12 }} sx={{ mt: 4 }}>
-                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 3, fontSize: '20px', color: '#1976d2' }}>
-                    📊 LinkedIn Analytics Dashboard
-                  </Typography>
 
-                  {/* Row 1: Engagement Stats & Posting Frequency */}
-                  <Grid container spacing={3} sx={{ mb: 3 }}>
-                    {/* Engagement Stats Pie Chart */}
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                          Engagement Distribution
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Box sx={{ width: 150, height: 150 }}>
-                            <ResponsiveContainer width="100%" height="100%">
-                              <PieChart>
-                                <Pie
-                                  data={[
-                                    { name: 'Likes', value: selectedAccountData.analytics.engagement_stats?.likes_percentage || 0, fill: '#1976d2' },
-                                    { name: 'Comments', value: selectedAccountData.analytics.engagement_stats?.comments_percentage || 0, fill: '#42a5f5' },
-                                    { name: 'Shares', value: selectedAccountData.analytics.engagement_stats?.shares_percentage || 0, fill: '#90caf9' }
-                                  ]}
-                                  cx="50%"
-                                  cy="50%"
-                                  innerRadius={40}
-                                  outerRadius={75}
-                                  dataKey="value"
-                                >
-                                  <Cell key="likes" fill="#1976d2" />
-                                  <Cell key="comments" fill="#42a5f5" />
-                                  <Cell key="shares" fill="#90caf9" />
-                                </Pie>
-                              </PieChart>
-                            </ResponsiveContainer>
-                          </Box>
-                          <Box sx={{ ml: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <Box sx={{ width: 12, height: 12, backgroundColor: '#1976d2', borderRadius: '50%', mr: 1 }} />
-                              <Typography variant="body2">Likes {selectedAccountData.analytics.engagement_stats?.likes_percentage || 0}%</Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <Box sx={{ width: 12, height: 12, backgroundColor: '#42a5f5', borderRadius: '50%', mr: 1 }} />
-                              <Typography variant="body2">Comments {selectedAccountData.analytics.engagement_stats?.comments_percentage || 0}%</Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Box sx={{ width: 12, height: 12, backgroundColor: '#90caf9', borderRadius: '50%', mr: 1 }} />
-                              <Typography variant="body2">Shares {selectedAccountData.analytics.engagement_stats?.shares_percentage || 0}%</Typography>
-                            </Box>
-                            <Typography variant="body2" sx={{ mt: 2, fontWeight: 600 }}>
-                              Avg: {selectedAccountData.analytics.average_engagement_per_post || 0} per post
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Card>
-                    </Grid>
-
-                    {/* Posting Frequency */}
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                          Monthly Posting Activity
-                        </Typography>
-                        <ResponsiveContainer width="100%" height={200}>
-                          <BarChart data={Object.entries(selectedAccountData.analytics.posting_frequency?.monthly_breakdown || {}).map(([month, posts]) => ({ month: month.split(' ')[0], posts }))}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar dataKey="posts" fill="#1976d2" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Avg:</strong> {selectedAccountData.analytics.posting_frequency?.average_posts_per_month || 0}/month
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Most Active:</strong> {selectedAccountData.analytics.posting_frequency?.most_active_month?.split(' ')[0] || 'N/A'}
-                          </Typography>
-                        </Box>
-                      </Card>
-                    </Grid>
-                  </Grid>
-
-                  {/* Row 2: Content Analysis & Growth Metrics */}
-                  <Grid container spacing={3} sx={{ mb: 3 }}>
-                    {/* Content Analysis */}
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                          Content Performance Analysis
-                        </Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                          <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="h4" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                              {selectedAccountData.analytics.content_analysis?.media_posts || 0}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">Media Posts</Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {selectedAccountData.analytics.content_analysis?.media_percentage || 0}%
-                            </Typography>
-                          </Box>
-                          <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="h4" sx={{ fontWeight: 600, color: '#42a5f5' }}>
-                              {selectedAccountData.analytics.content_analysis?.text_posts || 0}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">Text Posts</Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {selectedAccountData.analytics.content_analysis?.text_percentage || 0}%
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Box sx={{ backgroundColor: '#f5f5f5', p: 2, borderRadius: 1 }}>
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            <strong>Best Performing:</strong> {selectedAccountData.analytics.content_analysis?.content_performance?.best_performing_type || 'N/A'} Posts
-                          </Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            <strong>Avg Content Length:</strong> {selectedAccountData.analytics.content_analysis?.average_content_length || 0} chars
-                          </Typography>
-                          <Typography variant="body2">
-                            <strong>Media Avg Engagement:</strong> {selectedAccountData.analytics.content_analysis?.content_performance?.media_avg_engagement || 0} vs
-                            <strong> Text:</strong> {selectedAccountData.analytics.content_analysis?.content_performance?.text_avg_engagement || 0}
-                          </Typography>
-                        </Box>
-                      </Card>
-                    </Grid>
-
-                    {/* Growth & Visitor Metrics */}
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                          Growth & Visitor Insights
-                        </Typography>
-                        <Grid container spacing={2}>
-                          <Grid size={6}>
-                            <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#e3f2fd', borderRadius: 1 }}>
-                              <Typography variant="h5" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                                {selectedAccountData.analytics.follower_highlights?.new_followers_30_days || 0}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">New Followers</Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                +{selectedAccountData.analytics.follower_highlights?.follower_growth_percentage || 0}%
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          <Grid size={6}>
-                            <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
-                              <Typography variant="h5" sx={{ fontWeight: 600, color: '#2e7d32' }}>
-                                {selectedAccountData.analytics.visitor_highlights?.page_views || 0}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">Page Views</Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {selectedAccountData.analytics.visitor_highlights?.unique_visitors || 0} unique
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          <Grid size={6}>
-                            <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#fff3e0', borderRadius: 1 }}>
-                              <Typography variant="h5" sx={{ fontWeight: 600, color: '#f57c00' }}>
-                                {selectedAccountData.insights?.audience_growth?.projected_growth?.projected_monthly_growth || 0}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">Projected Growth</Typography>
-                              <Typography variant="body2" color="text.secondary">per month</Typography>
-                            </Box>
-                          </Grid>
-                          <Grid size={6}>
-                            <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#fce4ec', borderRadius: 1 }}>
-                              <Typography variant="h5" sx={{ fontWeight: 600, color: '#c2185b' }}>
-                                {selectedAccountData.analytics.visitor_highlights?.custom_button_clicks || 0}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">Button Clicks</Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {selectedAccountData.analytics.visitor_highlights?.career_page_clicks || 0} career
-                              </Typography>
-                            </Box>
-                          </Grid>
-                        </Grid>
-                      </Card>
-                    </Grid>
-                  </Grid>
-
-                  {/* Row 3: Optimal Posting Times & Recommendations */}
-                  <Grid container spacing={3}>
-                    {/* Optimal Posting Times */}
-                    <Grid size={{ xs: 12, md: 8 }}>
-                      <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                          Optimal Posting Times
-                        </Typography>
-                        <ResponsiveContainer width="100%" height={200}>
-                          <BarChart data={Object.entries(selectedAccountData.insights?.optimal_posting_times?.day_performance || {}).map(([day, data]) => ({ day, engagement: data.average_engagement, posts: data.post_count }))}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="day" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="engagement" fill="#1976d2" name="Avg Engagement" />
-                            <Bar dataKey="posts" fill="#42a5f5" name="Post Count" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Best Day:</strong> {selectedAccountData.insights?.optimal_posting_times?.best_day_of_week || 'N/A'}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Best Hour:</strong> {selectedAccountData.insights?.optimal_posting_times?.best_hour_of_day || 'N/A'}:00
-                          </Typography>
-                        </Box>
-                      </Card>
-                    </Grid>
-
-                    {/* Content Recommendations */}
-                    <Grid size={{ xs: 12, md: 4 }}>
-                      <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', backgroundColor: '#f8f9ff' }}>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#1976d2' }}>
-                          📋 Content Recommendations
-                        </Typography>
-                        {selectedAccountData.insights?.content_performance?.content_recommendations?.map((rec, index) => (
-                          <Box key={index} sx={{ mb: 2, p: 1, backgroundColor: 'white', borderRadius: 1, border: '1px solid #e0e0e0' }}>
-                            <Typography variant="body2" sx={{ lineHeight: 1.4 }}>
-                              💡 {rec}
-                            </Typography>
-                          </Box>
-                        ))}
-
-                        <Box sx={{ mt: 3 }}>
-                          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                            Content Insights:
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            🏷️ Hashtag Usage: {selectedAccountData.insights?.audience_insights?.content_preferences?.hashtag_usage?.percentage || 0}%
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            ❓ Question Posts: {selectedAccountData.insights?.audience_insights?.content_preferences?.question_posts?.percentage || 0}%
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            📝 Preferred Length: {selectedAccountData.insights?.audience_insights?.content_preferences?.content_length_distribution?.preferred_length || 'N/A'}
-                          </Typography>
-                        </Box>
-                      </Card>
-                    </Grid>
-                  </Grid>
-
-                </Grid>
-              )}
 
             </Grid>
           </Box>

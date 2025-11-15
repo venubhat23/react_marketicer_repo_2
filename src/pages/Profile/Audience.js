@@ -16,25 +16,13 @@ import {
 
 const Audience = ({ audienceData }) => {
   // Convert the input audienceData to chart-friendly format
-  let audData = [];
-
-  if (audienceData && Object.keys(audienceData).length > 0) {
-    audData = Object.entries(audienceData).map(([key, value]) => {
-      let parsedValue = 0;
-      if (typeof value === 'string' && value.includes('%')) {
-        parsedValue = parseFloat(value.replace('%', ''));
-      } else if (typeof value === 'number') {
-        parsedValue = value;
-      } else {
-        parsedValue = parseFloat(value) || 0;
-      }
-
-      return {
-        name: key.charAt(0).toUpperCase() + key.slice(1),
-        value: parsedValue,
-      };
-    }).filter(item => item.value > 0); // Only include items with positive values
-  }
+  const audData =
+    audienceData && Object.keys(audienceData).length > 0
+      ? Object.entries(audienceData).map(([key, value]) => ({
+          name: key.charAt(0).toUpperCase() + key.slice(1),
+          value: parseFloat(value.replace("%", "")),
+        }))
+      : [];
 
   const COLORS = ["#882AFF", "#a063ec", "#dcc3fa"];
 
@@ -52,15 +40,8 @@ const Audience = ({ audienceData }) => {
           textAlign: "center",
         }}
       >
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Audience Engagement
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          No engagement data available
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          No engagement data available for analysis.
-          Start engaging with your audience to see metrics here.
+        <Typography variant="h6" color="text.secondary">
+          No audience data available
         </Typography>
       </Card>
     );
@@ -80,17 +61,7 @@ const Audience = ({ audienceData }) => {
         <Typography variant="h6" gutterBottom>
           Audience Engagement
         </Typography>
-
-        {/* Display engagement summary */}
-        <Box sx={{ mb: 2 }}>
-          {audData.map((item, index) => (
-            <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
-              {item.name}: {item.value}%
-            </Typography>
-          ))}
-        </Box>
-
-        <ResponsiveContainer width="100%" height={200}>
+        <ResponsiveContainer width="100%" height={250}>
           <PieChart>
             <Pie
               data={audData}
@@ -98,10 +69,10 @@ const Audience = ({ audienceData }) => {
               nameKey="name"
               cx="50%"
               cy="50%"
-              outerRadius={70}
-              innerRadius={45}
+              outerRadius={80}
+              innerRadius={60}
               paddingAngle={5}
-              label={({ value }) => `${value}%`}
+              label
             >
               {audData.map((entry, index) => (
                 <Cell
@@ -110,12 +81,8 @@ const Audience = ({ audienceData }) => {
                 />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => [`${value}%`, 'Engagement']} />
-            <Legend
-              verticalAlign="bottom"
-              height={36}
-              formatter={(value) => value}
-            />
+            <Tooltip />
+            <Legend verticalAlign="top" height={36} />
           </PieChart>
         </ResponsiveContainer>
       </CardContent>
