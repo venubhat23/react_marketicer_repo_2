@@ -30,6 +30,15 @@ const BrandProfile = ({brand}) => {
   console.log('brand:', brand);
   console.log('brand type:', typeof brand);
   console.log('brand length:', brand?.length);
+  console.log('brand === null:', brand === null);
+  console.log('brand === undefined:', brand === undefined);
+  console.log('Array.isArray(brand):', Array.isArray(brand));
+  if (brand && brand.length > 0) {
+    console.log('First post sample:', brand[0]);
+    console.log('Is showing real data? Caption should be TEST POST or wee:', brand[0].caption);
+  } else {
+    console.log('⚠️ No brand data available, will show dummy posts');
+  }
 
   // If no brand data is available, show a message or use real-time dummy data
   if (!brand || brand.length === 0) {
@@ -88,95 +97,73 @@ const BrandProfile = ({brand}) => {
         {dummyPosts.map((post, index) => (
           <Card
             key={post.id || index}
+            variant="outlined"
             sx={{
-              p: 3,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              p: 2,
               mb: 2,
               borderRadius: 2,
-              border: "1px solid #e0e0e0",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
             }}
           >
-            <CardContent sx={{ p: 0 }}>
-              {/* Post Header */}
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: "#333", mb: 1 }}>
+            {/* Left Side: Post Info */}
+            <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, flex: 1 }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+                  {post.caption || post.full_caption || 'No caption'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  @LinkedIn • {post.media_type || 'MEDIA'} • {post.content_length || 0} chars
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: '0.875rem' }}>
                   Post ID: {post.id}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  <strong>Timestamp:</strong> {new Date(post.timestamp).toLocaleString()}
-                </Typography>
-              </Box>
-
-              {/* Content */}
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
-                  Caption:
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {post.caption || "No caption available"}
-                </Typography>
-
                 {post.full_caption && post.full_caption !== post.caption && (
-                  <>
-                    <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
-                      Full Caption:
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      {post.full_caption}
-                    </Typography>
-                  </>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, maxWidth: 300 }}>
+                    {post.full_caption.length > 100
+                      ? `${post.full_caption.substring(0, 100)}...`
+                      : post.full_caption}
+                  </Typography>
                 )}
-              </Box>
 
-              {/* Media and Content Info */}
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  <strong>Media Type:</strong> {post.media_type || 'Unknown'} |
-                  <strong> Content Length:</strong> {post.content_length || 0} characters |
-                  <strong> Has Media:</strong> {post.has_media ? 'Yes' : 'No'}
+                {/* Stats */}
+                <Box sx={{ display: "flex", gap: 3, mt: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <FavoriteBorderIcon fontSize="small" />
+                    <Typography variant="body2">{post.likes || 0}</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <ChatBubbleOutlineIcon fontSize="small" />
+                    <Typography variant="body2">{post.comments || 0}</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <SendIcon fontSize="small" />
+                    <Typography variant="body2">{post.shares || 0}</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <ShareIcon fontSize="small" />
+                    <Typography variant="body2">{post.engagement || 0}</Typography>
+                  </Box>
+                </Box>
+
+                {/* Engagement Rate */}
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.75rem' }}>
+                  Engagement Rate: {post.engagement_rate || 0}%
                 </Typography>
               </Box>
+            </Box>
 
-              {/* Engagement Metrics */}
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
-                  Engagement Metrics:
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid xs={6} sm={3}>
-                    <Box sx={{ textAlign: "center", p: 1, bgcolor: "#f8f9fa", borderRadius: 1 }}>
-                      <Typography variant="h6" color="#e91e63">{post.likes || 0}</Typography>
-                      <Typography variant="caption" color="text.secondary">Likes</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid xs={6} sm={3}>
-                    <Box sx={{ textAlign: "center", p: 1, bgcolor: "#f8f9fa", borderRadius: 1 }}>
-                      <Typography variant="h6" color="#2196f3">{post.comments || 0}</Typography>
-                      <Typography variant="caption" color="text.secondary">Comments</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid xs={6} sm={3}>
-                    <Box sx={{ textAlign: "center", p: 1, bgcolor: "#f8f9fa", borderRadius: 1 }}>
-                      <Typography variant="h6" color="#4caf50">{post.shares || 0}</Typography>
-                      <Typography variant="caption" color="text.secondary">Shares</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid xs={6} sm={3}>
-                    <Box sx={{ textAlign: "center", p: 1, bgcolor: "#f8f9fa", borderRadius: 1 }}>
-                      <Typography variant="h6" color="#ff9800">{post.engagement || 0}</Typography>
-                      <Typography variant="caption" color="text.secondary">Total Engagement</Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Box>
-
-              {/* Additional Metrics */}
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="body2" color="text.secondary">
-                  <strong>Engagement Rate:</strong> {post.engagement_rate || 0}%
-                </Typography>
-              </Box>
-            </CardContent>
+            {/* Right Side: Date */}
+            <Box sx={{ textAlign: "right", minWidth: 'auto' }}>
+              <Typography variant="body2" color="text.secondary">
+                {new Date(post.timestamp).toLocaleDateString("en-US", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </Typography>
+            </Box>
           </Card>
         ))}
       </Box>
@@ -224,95 +211,73 @@ const BrandProfile = ({brand}) => {
       {brand.map((post, index) => (
         <Card
           key={post.id || index}
+          variant="outlined"
           sx={{
-            p: 3,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            p: 2,
             mb: 2,
             borderRadius: 2,
-            border: "1px solid #e0e0e0",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
           }}
         >
-          <CardContent sx={{ p: 0 }}>
-            {/* Post Header */}
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: "#333", mb: 1 }}>
+          {/* Left Side: Post Info */}
+          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, flex: 1 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+                {post.caption || post.full_caption || 'No caption'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                @LinkedIn • {post.media_type || 'MEDIA'} • {post.content_length || 0} chars
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: '0.875rem' }}>
                 Post ID: {post.id}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                <strong>Timestamp:</strong> {new Date(post.timestamp).toLocaleString()}
-              </Typography>
-            </Box>
-
-            {/* Content */}
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
-                Caption:
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {post.caption || "No caption available"}
-              </Typography>
-
               {post.full_caption && post.full_caption !== post.caption && (
-                <>
-                  <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
-                    Full Caption:
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {post.full_caption}
-                  </Typography>
-                </>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2, maxWidth: 300 }}>
+                  {post.full_caption.length > 100
+                    ? `${post.full_caption.substring(0, 100)}...`
+                    : post.full_caption}
+                </Typography>
               )}
-            </Box>
 
-            {/* Media and Content Info */}
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                <strong>Media Type:</strong> {post.media_type || 'Unknown'} |
-                <strong> Content Length:</strong> {post.content_length || 0} characters |
-                <strong> Has Media:</strong> {post.has_media ? 'Yes' : 'No'}
+              {/* Stats */}
+              <Box sx={{ display: "flex", gap: 3, mt: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <FavoriteBorderIcon fontSize="small" />
+                  <Typography variant="body2">{post.likes || 0}</Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <ChatBubbleOutlineIcon fontSize="small" />
+                  <Typography variant="body2">{post.comments || 0}</Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <SendIcon fontSize="small" />
+                  <Typography variant="body2">{post.shares || 0}</Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <ShareIcon fontSize="small" />
+                  <Typography variant="body2">{post.engagement || 0}</Typography>
+                </Box>
+              </Box>
+
+              {/* Engagement Rate */}
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.75rem' }}>
+                Engagement Rate: {post.engagement_rate || 0}%
               </Typography>
             </Box>
+          </Box>
 
-            {/* Engagement Metrics */}
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
-                Engagement Metrics:
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid xs={6} sm={3}>
-                  <Box sx={{ textAlign: "center", p: 1, bgcolor: "#f8f9fa", borderRadius: 1 }}>
-                    <Typography variant="h6" color="#e91e63">{post.likes || 0}</Typography>
-                    <Typography variant="caption" color="text.secondary">Likes</Typography>
-                  </Box>
-                </Grid>
-                <Grid xs={6} sm={3}>
-                  <Box sx={{ textAlign: "center", p: 1, bgcolor: "#f8f9fa", borderRadius: 1 }}>
-                    <Typography variant="h6" color="#2196f3">{post.comments || 0}</Typography>
-                    <Typography variant="caption" color="text.secondary">Comments</Typography>
-                  </Box>
-                </Grid>
-                <Grid xs={6} sm={3}>
-                  <Box sx={{ textAlign: "center", p: 1, bgcolor: "#f8f9fa", borderRadius: 1 }}>
-                    <Typography variant="h6" color="#4caf50">{post.shares || 0}</Typography>
-                    <Typography variant="caption" color="text.secondary">Shares</Typography>
-                  </Box>
-                </Grid>
-                <Grid xs={6} sm={3}>
-                  <Box sx={{ textAlign: "center", p: 1, bgcolor: "#f8f9fa", borderRadius: 1 }}>
-                    <Typography variant="h6" color="#ff9800">{post.engagement || 0}</Typography>
-                    <Typography variant="caption" color="text.secondary">Total Engagement</Typography>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-
-            {/* Additional Metrics */}
-            <Box sx={{ mb: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Engagement Rate:</strong> {post.engagement_rate || 0}%
-              </Typography>
-            </Box>
-          </CardContent>
+          {/* Right Side: Date */}
+          <Box sx={{ textAlign: "right", minWidth: 'auto' }}>
+            <Typography variant="body2" color="text.secondary">
+              {new Date(post.timestamp).toLocaleDateString("en-US", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            </Typography>
+          </Box>
         </Card>
       ))}
     </Box>

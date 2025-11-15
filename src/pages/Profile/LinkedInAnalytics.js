@@ -94,24 +94,29 @@ const LinkedinAnalytics = () => {
         return;
       }
 
-      console.log('Fetching Instagram analytics...');
-      const response = await axios.get('https://api.marketincer.com/api/v1/linkedin_analytics', {
+      console.log('Fetching LinkedIn analytics from localhost...');
+      const response = await axios.get('http://localhost:3001/api/v1/linkedin_analytics', {
         headers: {
           Authorization: `Bearer ${token}`,
         }
       });
 
       console.log('API Response:', response.data);
-
+      console.log('Recent posts from API:', response.data?.data?.[0]?.analytics?.recent_posts);
 
       if (response.data.success && response.data.data && response.data.data.length > 0) {
         setInstagramData(response.data.data);
         const firstAccount = response.data.data[0];
+        console.log('First account data:', firstAccount);
+        console.log('First account analytics:', firstAccount.analytics);
+        console.log('First account recent_posts:', firstAccount.analytics?.recent_posts);
+
         setSelectedAccount(firstAccount.username);
         setSelectedAccountData(firstAccount);
 
-
         const posts = response.data?.data?.[0]?.analytics?.recent_posts ?? [];
+        console.log('Posts being set:', posts);
+        console.log('Number of posts:', posts.length);
 
         //const posts = accountsArray.map((account) => account.analytics?.recent_posts || []);
         setRecentPosts(posts);
@@ -119,7 +124,8 @@ const LinkedinAnalytics = () => {
 
 
       } else {
-        setError('No Instagram data found');
+        console.log('❌ API Response failed:', response.data);
+        setError('No LinkedIn data found');
         setInstagramData([]);
       }
     } catch (error) {
@@ -228,45 +234,97 @@ const LinkedinAnalytics = () => {
   if (loading) {
     return (
       <Box sx={{
-        flexGrow: 1,
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         display: 'flex',
-        flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh',
-        bgcolor: '#f5edf8'
+        zIndex: 9999
       }}>
-        <Box sx={{ textAlign: 'center', mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#8B5CF6', mb: 1 }}>
-            Marketincer
-          </Typography>
-          <Typography variant="body1" sx={{ color: '#666', mb: 2 }}>
-            Analytics Loading...
-          </Typography>
-        </Box>
-        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-          <CircularProgress
-            variant="determinate"
-            value={loadingProgress}
-            size={60}
-            sx={{ color: '#8B5CF6' }}
-          />
-          <Box
-            sx={{
-              top: 0,
-              left: 0,
-              bottom: 0,
-              right: 0,
-              position: 'absolute',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Typography variant="caption" component="div" color="text.secondary">
-              {`${Math.round(loadingProgress)}%`}
-            </Typography>
+        <Box sx={{
+          backgroundColor: '#fff',
+          borderRadius: '16px',
+          padding: '48px',
+          textAlign: 'center',
+          minWidth: '320px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+        }}>
+          <Box sx={{ position: 'relative', display: 'inline-flex', mb: 3 }}>
+            <CircularProgress
+              variant="determinate"
+              value={100}
+              size={80}
+              thickness={4}
+              sx={{
+                color: '#e5e7eb',
+                position: 'absolute'
+              }}
+            />
+            <CircularProgress
+              variant="determinate"
+              value={loadingProgress}
+              size={80}
+              thickness={4}
+              sx={{
+                color: '#8b5cf6',
+                '& .MuiCircularProgress-circle': {
+                  strokeLinecap: 'round',
+                }
+              }}
+            />
+            <Box
+              sx={{
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                position: 'absolute',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Box sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                backgroundColor: '#8b5cf6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Typography variant="h6" sx={{ color: '#fff', fontWeight: 'bold' }}>
+                  📊
+                </Typography>
+              </Box>
+            </Box>
           </Box>
+
+          <Typography variant="h6" sx={{
+            fontWeight: 600,
+            color: '#1f2937',
+            mb: 1
+          }}>
+            Loading Analytics
+          </Typography>
+
+          <Typography variant="body2" sx={{
+            color: '#6b7280',
+            mb: 2
+          }}>
+            Fetching your analytics data...
+          </Typography>
+
+          <Typography variant="body2" sx={{
+            color: '#8b5cf6',
+            fontWeight: 500
+          }}>
+            {Math.round(loadingProgress)}% Complete
+          </Typography>
         </Box>
       </Box>
     );
@@ -966,6 +1024,10 @@ const LinkedinAnalytics = () => {
               </Grid>
 
               <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }}>
+                {console.log('🔄 selectedAccountData:', selectedAccountData)}
+                {console.log('🔄 analytics object:', selectedAccountData?.analytics)}
+                {console.log('🔄 recent_posts:', selectedAccountData?.analytics?.recent_posts)}
+                {console.log('🔄 Passing to BrandProfile:', selectedAccountData?.analytics?.recent_posts)}
                 <BrandProfile brand={selectedAccountData?.analytics?.recent_posts || []} />
               </Grid>
 

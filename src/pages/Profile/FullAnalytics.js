@@ -53,7 +53,7 @@ const FullAnalytics = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `https://api.marketincer.com/api/instagram/posts/${id}`,
+        `http://localhost:3001/api/instagram/posts/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPost(response?.data?.data);

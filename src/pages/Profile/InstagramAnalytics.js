@@ -55,6 +55,7 @@ const InstagramAnalytics = () => {
   const [selectedAccount, setSelectedAccount] = useState('');
   const [selectedAccountData, setSelectedAccountData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [error, setError] = useState('');
   const [dateRange, setDateRange] = useState('Last 7 days');
   const [platform, setPlatform] = useState('Instagram');
@@ -151,7 +152,19 @@ const InstagramAnalytics = () => {
   const fetchInstagramAnalytics = async () => {
 
     setLoading(true);
+    setLoadingProgress(0);
     setError('');
+
+    // Simulate loading progress
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return 90;
+        }
+        return prev + 10;
+      });
+    }, 200);
 
     try {
       const token = localStorage.getItem("token");
@@ -165,7 +178,7 @@ const InstagramAnalytics = () => {
       }
 
       console.log('Fetching Instagram analytics...');
-      const response = await axios.get(`https://api.marketincer.com/api/v1/${apiEndpoint}?t=${Date.now()}`, {
+      const response = await axios.get(`http://localhost:3001/api/v1/${apiEndpoint}?t=${Date.now()}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Cache-Control': 'no-cache',
@@ -201,7 +214,10 @@ const InstagramAnalytics = () => {
       setError(`API Error: ${error.response?.data?.message || error.message}`);
       setInstagramData([]);
     } finally {
-      setLoading(false);
+      setLoadingProgress(100);
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
     }
   };
 
@@ -343,8 +359,99 @@ const InstagramAnalytics = () => {
   // Show loading state
   if (loading) {
     return (
-      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress sx={{ color: '#8B5CF6' }} />
+      <Box sx={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 9999
+      }}>
+        <Box sx={{
+          backgroundColor: '#fff',
+          borderRadius: '16px',
+          padding: '48px',
+          textAlign: 'center',
+          minWidth: '320px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+        }}>
+          <Box sx={{ position: 'relative', display: 'inline-flex', mb: 3 }}>
+            <CircularProgress
+              variant="determinate"
+              value={100}
+              size={80}
+              thickness={4}
+              sx={{
+                color: '#e5e7eb',
+                position: 'absolute'
+              }}
+            />
+            <CircularProgress
+              variant="determinate"
+              value={loadingProgress}
+              size={80}
+              thickness={4}
+              sx={{
+                color: '#8b5cf6',
+                '& .MuiCircularProgress-circle': {
+                  strokeLinecap: 'round',
+                }
+              }}
+            />
+            <Box
+              sx={{
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                position: 'absolute',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Box sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                backgroundColor: '#8b5cf6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Typography variant="h6" sx={{ color: '#fff', fontWeight: 'bold' }}>
+                  📸
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          <Typography variant="h6" sx={{
+            fontWeight: 600,
+            color: '#1f2937',
+            mb: 1
+          }}>
+            Loading Analytics
+          </Typography>
+
+          <Typography variant="body2" sx={{
+            color: '#6b7280',
+            mb: 2
+          }}>
+            Fetching your Instagram data...
+          </Typography>
+
+          <Typography variant="body2" sx={{
+            color: '#8b5cf6',
+            fontWeight: 500
+          }}>
+            {Math.round(loadingProgress)}% Complete
+          </Typography>
+        </Box>
       </Box>
     );
   }
