@@ -16,7 +16,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import CreatePost from './pages/CreatePost/CreatePost';
 import Analytics  from './pages/Profile/Analytics';
 import InstagramAnalytics from './pages/Profile/InstagramAnalytics';
-import Analytics2 from './pages/Profile/Analytics2';
 import SocialMedia from './pages/SocialMedia';
 import FullAnalytics from './pages/Profile/FullAnalytics';
 import ContractPage from './pages/Contract/ContractPage'
