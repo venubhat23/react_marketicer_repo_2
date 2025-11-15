@@ -9,6 +9,7 @@ import Send from "@mui/icons-material/Send";
 import SendIcon from "@mui/icons-material/Send";
 import ShareIcon from "@mui/icons-material/Share";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import LaunchIcon from "@mui/icons-material/Launch";
 import {
   Box,
   Button,
@@ -25,6 +26,12 @@ import { Link } from "react-router-dom";
 
 const BrandProfile = ({brand}) => {
   const [loading, setLoading] = useState(false);
+
+  const handleViewPost = (postLink) => {
+    if (postLink) {
+      window.open(postLink, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   console.log('🎨 BRAND PROFILE DEBUG:');
   console.log('brand:', brand);
@@ -56,7 +63,8 @@ const BrandProfile = ({brand}) => {
         engagement: 9,
         engagement_rate: 7,
         content_length: 197,
-        has_media: true
+        has_media: true,
+        post_link: "https://www.linkedin.com/feed/update/urn:li:activity:7395405979481403392/"
       },
       {
         id: "urn:li:ugcPost:dummy456",
@@ -70,7 +78,8 @@ const BrandProfile = ({brand}) => {
         engagement: 31,
         engagement_rate: 6,
         content_length: 149,
-        has_media: false
+        has_media: false,
+        post_link: "https://www.linkedin.com/feed/update/urn:li:activity:7395405979481403393/"
       },
       {
         id: "urn:li:ugcPost:dummy789",
@@ -84,7 +93,8 @@ const BrandProfile = ({brand}) => {
         engagement: 22,
         engagement_rate: 6,
         content_length: 156,
-        has_media: true
+        has_media: true,
+        post_link: "https://www.linkedin.com/feed/update/urn:li:activity:7395405979481403394/"
       }
     ];
 
@@ -151,6 +161,25 @@ const BrandProfile = ({brand}) => {
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.75rem' }}>
                   Engagement Rate: {post.engagement_rate || 0}%
                 </Typography>
+
+                {/* View Post Button */}
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<LaunchIcon fontSize="small" />}
+                  onClick={() => handleViewPost(post.post_link)}
+                  sx={{
+                    mt: 2,
+                    borderColor: '#882AFF',
+                    color: '#882AFF',
+                    '&:hover': {
+                      borderColor: '#6B1BA8',
+                      backgroundColor: '#F9F5FF'
+                    }
+                  }}
+                >
+                  View Post
+                </Button>
               </Box>
             </Box>
 
@@ -265,6 +294,25 @@ const BrandProfile = ({brand}) => {
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.75rem' }}>
                 Engagement Rate: {post.engagement_rate || 0}%
               </Typography>
+
+              {/* View Post Button */}
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<LaunchIcon fontSize="small" />}
+                onClick={() => handleViewPost(post.post_link)}
+                sx={{
+                  mt: 2,
+                  borderColor: '#882AFF',
+                  color: '#882AFF',
+                  '&:hover': {
+                    borderColor: '#6B1BA8',
+                    backgroundColor: '#F9F5FF'
+                  }
+                }}
+              >
+                View Post
+              </Button>
             </Box>
           </Box>
 

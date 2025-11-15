@@ -195,7 +195,7 @@ const Sidebar = () => {
             <Link to="/instagram-analytics">
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <TrendingUpIcon fontSize="medium" />
-                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Instagram<br></br> Analytics</Typography>
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Analytics</Typography>
               </Box>
             </Link>
           </ListItemButton>
