@@ -19,7 +19,14 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import SendIcon from "@mui/icons-material/Send";
 import ShareIcon from "@mui/icons-material/Share";
+import LinkIcon from "@mui/icons-material/Link";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import AddIcon from "@mui/icons-material/Add";
+import InsightsIcon from "@mui/icons-material/Insights";
+import LockIcon from "@mui/icons-material/Lock";
 import BrandProfile from "./BrandProfile";
+import EnhancedAudienceInsights from "./EnhancedAudienceInsights";
+import LinkedInAudienceAPI from '../../services/linkedinAudienceApi';
 
 
 function TabPanel(props) {
@@ -58,6 +65,9 @@ const LinkedinAnalytics = () => {
   const [postType, setPostType] = useState('');
   const [value, setValue] = useState(0);
   const [recentPosts, setRecentPosts] = useState([]);
+  const [audienceData, setAudienceData] = useState(null);
+  const [hasAudienceData, setHasAudienceData] = useState(false);
+  const [audienceLoading, setAudienceLoading] = useState(true);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -65,7 +75,36 @@ const LinkedinAnalytics = () => {
 
   useEffect(() => {
     fetchInstagramAnalytics();
+    fetchAudienceInsights();
   }, []);
+
+  const fetchAudienceInsights = async () => {
+    if (!selectedAccountData?.page_id && !selectedAccountData?.username) {
+      setAudienceLoading(false);
+      return;
+    }
+
+    try {
+      setAudienceLoading(true);
+      const organizationId = selectedAccountData?.page_id || selectedAccountData?.username;
+      const data = await LinkedInAudienceAPI.getComprehensiveAudienceData(organizationId);
+
+      if (data.success && data.data) {
+        const hasValidData = Object.values(data.data).some(value => value !== null);
+        setHasAudienceData(hasValidData);
+        setAudienceData(data.data);
+      } else {
+        setHasAudienceData(false);
+        setAudienceData(null);
+      }
+    } catch (error) {
+      console.error('Error fetching audience insights:', error);
+      setHasAudienceData(false);
+      setAudienceData(null);
+    } finally {
+      setAudienceLoading(false);
+    }
+  };
 
   const fetchInstagramAnalytics = async () => {
 
@@ -121,27 +160,64 @@ const LinkedinAnalytics = () => {
         //const posts = accountsArray.map((account) => account.analytics?.recent_posts || []);
         setRecentPosts(posts);
 
+        // Fetch audience insights for the selected account
+        if (firstAccount?.page_id || firstAccount?.username) {
+          const organizationId = firstAccount.page_id || firstAccount.username;
+          try {
+            const audienceResponse = await LinkedInAudienceAPI.getComprehensiveAudienceData(organizationId);
+            if (audienceResponse.success && audienceResponse.data) {
+              const hasValidData = Object.values(audienceResponse.data).some(value => value !== null);
+              setHasAudienceData(hasValidData);
+              setAudienceData(audienceResponse.data);
+            }
+          } catch (audienceError) {
+            console.error('Error fetching audience insights:', audienceError);
+            setHasAudienceData(false);
+            setAudienceData(null);
+          }
+        }
+
 
 
       } else {
         console.log('❌ API Response failed:', response.data);
-        setError('No LinkedIn data found');
-        setInstagramData([]);
+
+        // Check for specific "No LinkedIn pages with organization data found" response
+        if (response.data.message &&
+            response.data.message.includes('No LinkedIn pages with organization data found')) {
+          // Treat this as empty state, not error
+          setError('');
+          setInstagramData([]);
+        } else {
+          // Other types of failures should be treated as errors
+          setError('No LinkedIn data found');
+          setInstagramData([]);
+        }
       }
     } catch (error) {
       console.error('Error fetching Instagram analytics:', error);
-      setError(`API Error: ${error.response?.data?.message || error.message}`);
-      setInstagramData([]);
+
+      // Check if the error is the specific "no LinkedIn pages" message
+      const errorMessage = error.response?.data?.message || error.message;
+      if (errorMessage && errorMessage.includes('No LinkedIn pages with organization data found')) {
+        // Treat this as empty state, not error
+        setError('');
+        setInstagramData([]);
+      } else {
+        setError(`API Error: ${errorMessage}`);
+        setInstagramData([]);
+      }
     } finally {
       setLoadingProgress(100);
       setTimeout(() => {
         setLoading(false);
+        setAudienceLoading(false);
       }, 500);
     }
   };
 
 
-  const handleAccountChange = (e) => {
+  const handleAccountChange = async (e) => {
     const username = e.target.value;
 
     if (!username) {
@@ -151,6 +227,29 @@ const LinkedinAnalytics = () => {
     setSelectedAccount(username);
     const accountData = instagramData.find(account => account.username === username);
     setSelectedAccountData(accountData);
+
+    // Fetch audience insights for the newly selected account
+    if (accountData?.page_id || accountData?.username) {
+      setAudienceLoading(true);
+      const organizationId = accountData.page_id || accountData.username;
+      try {
+        const audienceResponse = await LinkedInAudienceAPI.getComprehensiveAudienceData(organizationId);
+        if (audienceResponse.success && audienceResponse.data) {
+          const hasValidData = Object.values(audienceResponse.data).some(value => value !== null);
+          setHasAudienceData(hasValidData);
+          setAudienceData(audienceResponse.data);
+        } else {
+          setHasAudienceData(false);
+          setAudienceData(null);
+        }
+      } catch (audienceError) {
+        console.error('Error fetching audience insights:', audienceError);
+        setHasAudienceData(false);
+        setAudienceData(null);
+      } finally {
+        setAudienceLoading(false);
+      }
+    }
   };
 
   const formatNumber = (num) => {
@@ -586,6 +685,160 @@ const LinkedinAnalytics = () => {
             </Box>
           </Paper>
           <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '20px', background: '#f6edf8' }}>
+            {/* Connected Pages Banner */}
+            {instagramData && instagramData.length > 0 && (
+              <Box sx={{
+                mb: 2,
+                p: 2,
+                backgroundColor: '#e8f5e8',
+                borderRadius: 2,
+                border: '1px solid #c8e6c9',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2
+              }}>
+                <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 24 }} />
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#2e7d32' }}>
+                    {instagramData.length} LinkedIn page{instagramData.length > 1 ? 's' : ''} connected
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#2e7d32' }}>
+                    You can now view analytics and insights for your connected LinkedIn pages.
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '50vh',
+                textAlign: 'center',
+                p: 4
+              }}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 600,
+                  color: '#d32f2f',
+                  mb: 2
+                }}>
+                  Unable to Load Analytics
+                </Typography>
+                <Typography variant="body1" sx={{
+                  color: '#6b7280',
+                  mb: 4,
+                  maxWidth: 400,
+                }}>
+                  {error}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={() => window.location.reload()}
+                  sx={{
+                    borderColor: '#8b5cf6',
+                    color: '#8b5cf6',
+                    '&:hover': {
+                      borderColor: '#7c3aed',
+                      backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    }
+                  }}
+                >
+                  Try Again
+                </Button>
+              </Box>
+            )}
+
+            {/* Empty State - No Connected Pages */}
+            {!error && (!instagramData || instagramData.length === 0) && !loading && (
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '60vh',
+                textAlign: 'center',
+                p: 4
+              }}>
+                <Box sx={{
+                  width: 120,
+                  height: 120,
+                  borderRadius: '50%',
+                  backgroundColor: '#f3f4f6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mb: 3,
+                  border: '3px dashed #d1d5db'
+                }}>
+                  <LinkIcon sx={{ fontSize: 48, color: '#9ca3af' }} />
+                </Box>
+
+                <Typography variant="h5" sx={{
+                  fontWeight: 600,
+                  color: '#374151',
+                  mb: 2
+                }}>
+                  No Social Pages Connected
+                </Typography>
+
+                <Typography variant="body1" sx={{
+                  color: '#6b7280',
+                  mb: 4,
+                  maxWidth: 500,
+                  lineHeight: 1.6
+                }}>
+                  Connect your LinkedIn pages to start viewing comprehensive analytics and insights.
+                  Track your performance, understand your audience, and optimize your content strategy.
+                </Typography>
+
+                <Link
+                  to="/SocialMedia"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={<AddIcon />}
+                    sx={{
+                      backgroundColor: '#8b5cf6',
+                      color: 'white',
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                      '&:hover': {
+                        backgroundColor: '#7c3aed',
+                        boxShadow: '0 6px 16px rgba(139, 92, 246, 0.4)',
+                      }
+                    }}
+                  >
+                    Connect Social Media
+                  </Button>
+                </Link>
+
+                <Typography variant="body2" sx={{
+                  color: '#9ca3af',
+                  mt: 3
+                }}>
+                  Need help? Check our{' '}
+                  <Link
+                    to="/help"
+                    style={{ color: '#8b5cf6', textDecoration: 'none' }}
+                  >
+                    connection guide
+                  </Link>
+                </Typography>
+              </Box>
+            )}
+
+            {/* Main Content - Only show when pages are connected and no errors */}
+            {!error && instagramData && instagramData.length > 0 && (
             <Grid container spacing={2}>
             <Grid size={{ xs: 2, sm: 4, md: 4 }}>
                 {selectedAccountData && (
@@ -817,210 +1070,100 @@ const LinkedinAnalytics = () => {
               </Grid>
 
               <Grid size={{ xs: 2, sm: 4, md: 12 }}>
-              <Box sx={{ width: "100%" }}>
-                {/* Tabs Header */}
-                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                  <Tabs value={value} onChange={handleChange} aria-label="basic tabs">
-                    <Tab label="Audience Insight" />
-                    {/* <Tab label="Paid Performance" />
-                    <Tab label="Content Insight" /> */}
-                  </Tabs>
-                </Box>
+              {hasAudienceData ? (
+                <Box sx={{ width: "100%" }}>
+                  {/* Tabs Header */}
+                  <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                    <Tabs value={value} onChange={handleChange} aria-label="basic tabs">
+                      <Tab label="Audience Insight" />
+                      {/* <Tab label="Paid Performance" />
+                      <Tab label="Content Insight" /> */}
+                    </Tabs>
+                  </Box>
 
-                {/* Tab Content */}
-                <TabPanel value={value} index={0}>
-                <Box sx={{ display: 'flex', gap:2 }}>
-                <Grid spacing={2} size={{ xs: 2, sm: 4, md: 3 }}>
-                    {/* Audience Age */}
-                  <Card sx={{ p: 2, mb: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
-                    <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>Audience Age</Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2, mr:1 }}>
-                      <Box sx={{
-                        width: 100,
-                        height: 100,
-                        borderRadius: '50%',
-                        border: '4px solid #8B5CF6',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>1,000</Typography>
+                  {/* Tab Content */}
+                  <TabPanel value={value} index={0}>
+                    {audienceLoading ? (
+                      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+                        <CircularProgress />
+                        <Typography sx={{ ml: 2 }}>Loading audience insights...</Typography>
                       </Box>
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
-                      <Typography variant="body2" sx={{ fontSize: '11px' }}>18-24</Typography>
-                      <Typography variant="body2" sx={{ fontSize: '11px' }}>24-30</Typography>
-                      <Typography variant="body2" sx={{ fontSize: '11px' }}>More than 30</Typography>
-                    </Box>
-                  </Card>
+                    ) : (
+                      <EnhancedAudienceInsights
+                        organizationId={selectedAccountData?.page_id || selectedAccountData?.username}
+                        selectedUser={selectedAccountData}
+                      />
+                    )}
+                  </TabPanel>
 
-                    {/* Audience Gender */}
-                    <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
-                    <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>Audience Gender</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Box sx={{ width: 100, height: 100 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={[
-                                { value: 95, color: '#8B5CF6' },
-                                { value: 5, color: '#E5E7EB' }
-                              ]}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={12}
-                              outerRadius={25}
-                              dataKey="value"
-                            >
-                              <Cell fill="#8B5CF6" />
-                              <Cell fill="#E5E7EB" />
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </Box>
-                      <Box sx={{ ml: 2 }}>
-                        <Typography variant="body2" sx={{ fontSize: '11px' }}>
-                          • Female 95%
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '11px' }}>
-                          • Male 5%
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Card>
-                </Grid>
-
-                <Grid spacing={2} size={{ xs: 2, sm: 4, md: 4 }}>
-                  <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
-                    <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>Audience Reachability</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Box sx={{ width: 70, height: 70 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={audienceReachabilityData}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={15}
-                              outerRadius={35}
-                              dataKey="value"
-                            >
-                              {audienceReachabilityData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                              ))}
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </Box>
-                      <Box sx={{ ml: 2 }}>
-                        {audienceReachabilityData.map((item, index) => (
-                          <Typography key={index} variant="body2" sx={{  mb: 0.5 }}>
-                            • {item.name}: {item.value}%
-                          </Typography>
-                        ))}
-                      </Box>
-                    </Box>
-                  </Card>
-
-                  {/* Audience Location */}
-                  <Card sx={{ p: 2, mt: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
-                    <Typography variant="subtitle2" sx={{ mb: 2, fontSize: '14px', fontWeight: 600 }}>Audience Location</Typography>
-                    {audienceLocationData.map((location, index) => (
-                      <Box key={index} sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{  mb: 0.5 }}>
-                          {location.country}
-                        </Typography>
-                        <Box sx={{
-                          width: '100%',
-                          height: 3,
-                          backgroundColor: '#E5E7EB',
-                          borderRadius: 2
-                        }}>
-                          <Box sx={{
-                            width: `${location.percentage}%`,
-                            height: '100%',
-                            backgroundColor: '#8B5CF6',
-                            borderRadius: 2
-                          }} />
-                        </Box>
-                      </Box>
-                    ))}
-                  </Card>
-                </Grid>
-
-                <Grid spacing={2} size={{ xs: 2, sm: 4, md: 5 }}>
-                    {/* Notable Followers */}
-                  <Card sx={{ p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography variant="subtitle2" sx={{ fontSize: '14px', fontWeight: 600 }}>Notable Followers: 132</Typography>
-                      <IconButton size="small">
-                        <TrendingUpIcon sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Box>
-
-                    <Box sx={{ display: 'flex', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                      {notableFollowers.map((follower, index) => (
-                        <Box key={index} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 1 }}>
-                          <Avatar sx={{ width: 28, height: 28, mb: 0.5 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px', fontWeight: 600 }}>
-                            {follower.name}
-                          </Typography>
-                          <Typography variant="body2" sx={{ fontSize: '9px', color: 'text.secondary' }}>
-                            {follower.percentage}
-                          </Typography>
-                        </Box>
-                      ))}
-                    </Box>
-                  </Card>
-
-                  {/* Additional Insights */}
-                  <Box sx={{ mt: 2 }}>
-                  <Card sx={{ p: 2, mt: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
-                  <Typography variant="body2" sx={{  color: 'text.secondary', mb: 1 }}>
-                      <strong>Audience Cities:</strong> Indore, Mumbai, Delhi, Noida
+                  <TabPanel value={value} index={1}>
+                     {/* Paid Performance */}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
+                      Paid Performance
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                      <strong>Audience Language:</strong> Hindi, English
-                    </Typography>
-                    <Typography variant="body2" sx={{  color: 'text.secondary', mb:1 }}>
-                      <strong>Audience Interests:</strong> Beauty, Fashion, Lifestyle
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      <strong>Audience Brand Affinity:</strong> Nykaa, Sephora, Apple
-                    </Typography>
-                  </Card>
 
                   </Box>
-                </Grid>
+                  </TabPanel>
+                  <TabPanel value={value} index={2}>
+                    {/* Content Insight */}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
+                      Content Insight
+                    </Typography>
 
 
 
 
+                  </Box>
+                  </TabPanel>
                 </Box>
-                </TabPanel>
-
-                <TabPanel value={value} index={1}>
-                   {/* Paid Performance */}
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
-                    Paid Performance
-                  </Typography>
-
-                </Box>
-                </TabPanel>
-                <TabPanel value={value} index={2}>
-                  {/* Content Insight */}
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
-                    Content Insight
-                  </Typography>
-
-
-
-
-                </Box>
-                </TabPanel>
-              </Box>
+              ) : (
+                !audienceLoading && (
+                  <Box sx={{
+                    width: "100%",
+                    p: 4,
+                    textAlign: 'center',
+                    backgroundColor: '#f9f9f9',
+                    borderRadius: 2,
+                    border: '1px solid #e0e0e0',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                  }}>
+                    <Box sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: '50%',
+                      backgroundColor: '#f3f4f6',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mb: 2,
+                      border: '2px dashed #d1d5db',
+                      position: 'relative'
+                    }}>
+                      <InsightsIcon sx={{ fontSize: 32, color: '#9ca3af' }} />
+                      <LockIcon sx={{
+                        fontSize: 16,
+                        color: '#6b7280',
+                        position: 'absolute',
+                        bottom: 8,
+                        right: 8,
+                        backgroundColor: 'white',
+                        borderRadius: '50%',
+                        p: 0.25
+                      }} />
+                    </Box>
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      Audience Insights Not Available
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                      Enhanced audience insights require additional LinkedIn API permissions or are not available for this account.
+                    </Typography>
+                  </Box>
+                )
+              )}
               </Grid>
 
               <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }}>
@@ -1034,6 +1177,7 @@ const LinkedinAnalytics = () => {
 
 
             </Grid>
+            )}
           </Box>
 
         </Grid>

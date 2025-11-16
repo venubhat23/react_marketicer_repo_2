@@ -38,7 +38,14 @@ const MyEditor = ({ value, onChange }) => {
         },
       }}
       onEditorChange={(content, editor) => {
-        onChange(content); // Pass the content to the parent component via onChange
+        // Decode HTML entities to prevent displaying &amp; as "amp"
+        const decodedContent = content
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'");
+        onChange(decodedContent); // Pass the decoded content to the parent component
       }}
       
     />

@@ -17,12 +17,9 @@ import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import AnalyticsProfile from '../Profile/AnalyticsProfile'
 import Engagement from '../Profile/Engagement';
 import Audience from '../Profile/Audience';
-import AudienceInsights from '../Profile/AudienceInsights';
 import BrandProfile from '../Profile/BrandProfile'
+import EnhancedAudienceInsights from '../Profile/EnhancedAudienceInsights';
 import Layout from '../../components/Layout'
-import TabComponent from '../../components/TabComponent';
-import PaidPerformance from '../Profile/PaidPerformance';
-import ContentInsight from '../Profile/ContentInsight';
 import {
   Notifications as NotificationsIcon,
   AccountCircle as AccountCircleIcon,
@@ -62,7 +59,6 @@ const Analytics = () => {
   const [brandData, setBrandData] = useState([])
   const [platformOption, setPlatformOption] = useState('')
   const [engagementData, setEngagementData] = useState({});
-  const [audienceInsight, setAudienceInsight] = useState([]);
   const [audienceEngagement, setAudienceEngagement] = useState({})
   const [audienceAge, setAudienceAge] = useState([]);
   const [reachability, setReachability] = useState([]);
@@ -325,12 +321,6 @@ useEffect(() => {
       });
   }, []);
 
-  // Extract additional data for AudienceInsights
-  const notableNo = selectedUser?.audience_reachability?.notable_followers_count || 0;
-  const cities = selectedUser?.audience_location?.cities || [];
-  const language = selectedUser?.audience_details?.languages || [];
-  const intrest = selectedUser?.audience_details?.interests || [];
-  const brand_affinity = selectedUser?.audience_details?.brand_affinity || [];
 
   const handleProfileChange = (e) => {
     const name = e.target.value;
@@ -382,31 +372,6 @@ useEffect(() => {
     }
   };
 
-  const tabs = [
-    {
-      label: 'Audience Insights',
-      content: <div>
-        <AudienceInsights
-          audienceAge={audienceAge}
-          reachability={reachability}
-          brand_affinity={brand_affinity}
-          intrest={intrest} cities={cities}
-          language={language}
-          notableNo={notableNo}
-          gender={gender}
-          location={location}
-        />
-      </div>,
-    },
-    {
-      label: 'Paid Performance',
-      content: <div>< PaidPerformance /></div>,
-    },
-    {
-      label: 'Content Insights',
-      content: <div>< ContentInsight /></div>,
-    },
-  ];
 
   const selectedData = profileData.filter(item => item.name === platformOption);
 
@@ -676,12 +641,16 @@ if (showNoAnalyticsModal) {
                 <Audience audienceData={audienceEngagement} />
               </Grid>
 
-              <Grid size={{ xs: 2, sm: 4, md: 12 }} spacing={2} sx={{ display: 'none' }}>
-                <TabComponent tabs={tabs} defaultIndex={0} />
-              </Grid>
 
               <Grid size={{ xs: 2, sm: 6, md: 12 }} spacing={2}>
                 <BrandProfile brand={brandData} selectedUser={selectedUser} />
+              </Grid>
+
+              <Grid size={{ xs: 12 }} spacing={2} sx={{ mt: 2 }}>
+                <EnhancedAudienceInsights
+                  organizationId={selectedUser?.page_id}
+                  selectedUser={selectedUser}
+                />
               </Grid>
 
             </Grid>
