@@ -47,154 +47,61 @@ const BrandProfile = ({brand}) => {
     console.log('⚠️ No brand data available, will show dummy posts');
   }
 
-  // If no brand data is available, show a message or use real-time dummy data
+  // If no brand data is available, show error message
   if (!brand || brand.length === 0) {
-    // For LinkedIn, show some dummy posts with same format as API using current date
-    const dummyPosts = [
-      {
-        id: "urn:li:ugcPost:dummy123",
-        caption: 'The future of AI in business is here. Our recent project demonstrates the potential...',
-        full_caption: 'The future of AI in business is here. Our recent project demonstrates the potential for transformative solutions.',
-        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-        media_type: 'TEXT',
-        likes: 8,
-        comments: 1,
-        shares: 0,
-        engagement: 9,
-        engagement_rate: 7,
-        content_length: 197,
-        has_media: true,
-        post_link: "https://www.linkedin.com/feed/update/urn:li:activity:7395405979481403392/"
-      },
-      {
-        id: "urn:li:ugcPost:dummy456",
-        caption: 'Great team collaboration leads to innovative solutions. Here\'s what we learned this quarter...',
-        full_caption: 'Technology should enable human potential, not replace it. Here\'s our philosophy...',
-        timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
-        media_type: 'MEDIA',
-        likes: 21,
-        comments: 6,
-        shares: 4,
-        engagement: 31,
-        engagement_rate: 6,
-        content_length: 149,
-        has_media: false,
-        post_link: "https://www.linkedin.com/feed/update/urn:li:activity:7395405979481403393/"
-      },
-      {
-        id: "urn:li:ugcPost:dummy789",
-        caption: 'Innovation starts with curiosity. Our latest research reveals interesting patterns...',
-        full_caption: 'Innovation starts with curiosity. Our latest research reveals interesting patterns in user behavior.',
-        timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week ago
-        media_type: 'MEDIA',
-        likes: 18,
-        comments: 2,
-        shares: 2,
-        engagement: 22,
-        engagement_rate: 6,
-        content_length: 156,
-        has_media: true,
-        post_link: "https://www.linkedin.com/feed/update/urn:li:activity:7395405979481403394/"
-      }
-    ];
-
     return (
       <Box>
         <Typography variant="body1" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
           All Brand - Tagged Posts
         </Typography>
 
-        {dummyPosts.map((post, index) => (
-          <Card
-            key={post.id || index}
-            variant="outlined"
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              p: 2,
-              mb: 2,
-              borderRadius: 2,
-            }}
-          >
-            {/* Left Side: Post Info */}
-            <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, flex: 1 }}>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
-                  {post.caption || post.full_caption || 'No caption'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  @LinkedIn • {post.media_type || 'MEDIA'} • {post.content_length || 0} chars
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: '0.875rem' }}>
-                  Post ID: {post.id}
-                </Typography>
-                {post.full_caption && post.full_caption !== post.caption && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, maxWidth: 300 }}>
-                    {post.full_caption.length > 100
-                      ? `${post.full_caption.substring(0, 100)}...`
-                      : post.full_caption}
-                  </Typography>
-                )}
+        <Card
+          variant="outlined"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            p: 4,
+            mb: 2,
+            borderRadius: 2,
+            textAlign: 'center',
+            backgroundColor: '#fafafa',
+            border: '2px dashed #d1d5db',
+            minHeight: 200
+          }}
+        >
+          <Box sx={{
+            width: 60,
+            height: 60,
+            borderRadius: '50%',
+            backgroundColor: '#fee2e2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 2
+          }}>
+            <Typography variant="h4" sx={{ color: '#dc2626' }}>
+              ⚠️
+            </Typography>
+          </Box>
 
-                {/* Stats */}
-                <Box sx={{ display: "flex", gap: 3, mt: 2 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    <FavoriteBorderIcon fontSize="small" />
-                    <Typography variant="body2">{post.likes || 0}</Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    <ChatBubbleOutlineIcon fontSize="small" />
-                    <Typography variant="body2">{post.comments || 0}</Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    <SendIcon fontSize="small" />
-                    <Typography variant="body2">{post.shares || 0}</Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    <ShareIcon fontSize="small" />
-                    <Typography variant="body2">{post.engagement || 0}</Typography>
-                  </Box>
-                </Box>
+          <Typography variant="h6" sx={{
+            fontWeight: 600,
+            color: '#374151',
+            mb: 1
+          }}>
+            No Posts Available
+          </Typography>
 
-                {/* Engagement Rate */}
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.75rem' }}>
-                  Engagement Rate: {post.engagement_rate || 0}%
-                </Typography>
-
-                {/* View Post Button */}
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<LaunchIcon fontSize="small" />}
-                  onClick={() => handleViewPost(post.post_link)}
-                  sx={{
-                    mt: 2,
-                    borderColor: '#882AFF',
-                    color: '#882AFF',
-                    '&:hover': {
-                      borderColor: '#6B1BA8',
-                      backgroundColor: '#F9F5FF'
-                    }
-                  }}
-                >
-                  View Post
-                </Button>
-              </Box>
-            </Box>
-
-            {/* Right Side: Date */}
-            <Box sx={{ textAlign: "right", minWidth: 'auto' }}>
-              <Typography variant="body2" color="text.secondary">
-                {new Date(post.timestamp).toLocaleDateString("en-US", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })}
-              </Typography>
-            </Box>
-          </Card>
-        ))}
+          <Typography variant="body2" sx={{
+            color: '#6b7280',
+            maxWidth: 400,
+            lineHeight: 1.5
+          }}>
+            API rate limit exceeded or do not have post data
+          </Typography>
+        </Card>
       </Box>
     );
   }

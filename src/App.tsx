@@ -155,7 +155,11 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<InstagramAnalytics />} />
+      <Route path="/" element={
+        <ProtectedRoute>
+          <CreatePost />
+        </ProtectedRoute>
+      } />
       
       
       <Route path="/dashboard" element={

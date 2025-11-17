@@ -90,7 +90,11 @@ const LinkedinAnalytics = () => {
       const data = await LinkedInAudienceAPI.getComprehensiveAudienceData(organizationId);
 
       if (data.success && data.data) {
-        const hasValidData = Object.values(data.data).some(value => value !== null);
+        const hasValidData = Object.values(data.data).some(value => {
+          return value !== null && value !== undefined &&
+                 (Array.isArray(value) ? value.length > 0 :
+                  typeof value === 'object' ? Object.keys(value).length > 0 : true);
+        });
         setHasAudienceData(hasValidData);
         setAudienceData(data.data);
       } else {
@@ -133,7 +137,7 @@ const LinkedinAnalytics = () => {
         return;
       }
 
-      console.log('Fetching LinkedIn analytics from localhost...');
+      console.log('Fetching LinkedIn analytics from API...');
       const response = await axios.get('https://api.marketincer.com/api/v1/linkedin_analytics', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -166,7 +170,11 @@ const LinkedinAnalytics = () => {
           try {
             const audienceResponse = await LinkedInAudienceAPI.getComprehensiveAudienceData(organizationId);
             if (audienceResponse.success && audienceResponse.data) {
-              const hasValidData = Object.values(audienceResponse.data).some(value => value !== null);
+              const hasValidData = Object.values(audienceResponse.data).some(value => {
+                return value !== null && value !== undefined &&
+                       (Array.isArray(value) ? value.length > 0 :
+                        typeof value === 'object' ? Object.keys(value).length > 0 : true);
+              });
               setHasAudienceData(hasValidData);
               setAudienceData(audienceResponse.data);
             }
@@ -235,7 +243,11 @@ const LinkedinAnalytics = () => {
       try {
         const audienceResponse = await LinkedInAudienceAPI.getComprehensiveAudienceData(organizationId);
         if (audienceResponse.success && audienceResponse.data) {
-          const hasValidData = Object.values(audienceResponse.data).some(value => value !== null);
+          const hasValidData = Object.values(audienceResponse.data).some(value => {
+            return value !== null && value !== undefined &&
+                   (Array.isArray(value) ? value.length > 0 :
+                    typeof value === 'object' ? Object.keys(value).length > 0 : true);
+          });
           setHasAudienceData(hasValidData);
           setAudienceData(audienceResponse.data);
         } else {
@@ -272,11 +284,19 @@ const LinkedinAnalytics = () => {
     { day: 'Sun', value: 59 }
   ];
 
-  const audienceEngagementData = [
-    { name: 'Likes', value: 60, color: '#8B5CF6' },
-    { name: 'Comments', value: 35, color: '#A78BFA' },
-    { name: 'Shares', value: 5, color: '#C4B5FD' }
-  ];
+  // Get audience engagement data from selectedAccountData or use empty array
+  const getAudienceEngagementData = () => {
+    if (selectedAccountData?.analytics?.engagement_breakdown) {
+      return [
+        { name: 'Likes', value: selectedAccountData.analytics.engagement_breakdown.likes || 0, color: '#8B5CF6' },
+        { name: 'Comments', value: selectedAccountData.analytics.engagement_breakdown.comments || 0, color: '#A78BFA' },
+        { name: 'Shares', value: selectedAccountData.analytics.engagement_breakdown.shares || 0, color: '#C4B5FD' }
+      ];
+    }
+    return null; // No data available
+  };
+
+  const audienceEngagementData = getAudienceEngagementData();
 
   const audienceReachabilityData = [
     { name: 'Real & Active Followers', value: 76, color: '#8B5CF6' },
@@ -329,103 +349,213 @@ const LinkedinAnalytics = () => {
     }
   };
 
-  // Show loading state
+  // Show loading state with blurred background
   if (loading) {
     return (
-      <Box sx={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 9999
-      }}>
+      <>
+        {/* Blurred background content */}
         <Box sx={{
-          backgroundColor: '#fff',
-          borderRadius: '16px',
-          padding: '48px',
-          textAlign: 'center',
-          minWidth: '320px',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+          flexGrow: 1,
+          bgcolor: '#f5edf8',
+          height: '100%',
+          filter: 'blur(4px)',
+          position: 'relative'
         }}>
-          <Box sx={{ position: 'relative', display: 'inline-flex', mb: 3 }}>
-            <CircularProgress
-              variant="determinate"
-              value={100}
-              size={80}
-              thickness={4}
-              sx={{
-                color: '#e5e7eb',
-                position: 'absolute'
-              }}
-            />
-            <CircularProgress
-              variant="determinate"
-              value={loadingProgress}
-              size={80}
-              thickness={4}
-              sx={{
-                color: '#8b5cf6',
-                '& .MuiCircularProgress-circle': {
-                  strokeLinecap: 'round',
-                }
-              }}
-            />
-            <Box
-              sx={{
-                top: 0,
-                left: 0,
-                bottom: 0,
-                right: 0,
-                position: 'absolute',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Box sx={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                backgroundColor: '#8b5cf6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Typography variant="h6" sx={{ color: '#fff', fontWeight: 'bold' }}>
-                  📊
-                </Typography>
+          <Grid container>
+            <Grid size={{ md: 1 }} className="side_section"> <Sidebar /></Grid>
+            <Grid size={{ md: 11 }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  display: { xs: 'none', md: 'block' },
+                  p: 1,
+                  backgroundColor: '#091a48',
+                  borderBottom: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 0
+                }}
+              >
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <Typography variant="h6" sx={{ color: '#fff' }}>
+                    <IconButton
+                      edge="start"
+                      color="inherit"
+                      aria-label="back"
+                      sx={{ mr: 2, color: '#fff' }}
+                    >
+                      <ArrowLeftIcon />
+                    </IconButton>
+                    LinkedIn Analytics
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton size="large" sx={{ color: '#fff' }}>
+                      <NotificationsIcon />
+                    </IconButton>
+                    <IconButton size="large" sx={{ color: '#fff' }}>
+                      <AccountCircleIcon />
+                    </IconButton>
+                  </Box>
+                </Box>
+              </Paper>
+              {/* Search and Filters Bar */}
+              <Paper
+                elevation={0}
+                sx={{
+                  px: 2,
+                  py: 1.5,
+                  backgroundColor: '#B1C6FF',
+                  border: 'none',
+                  flexShrink: 0
+                }}
+              >
+                <Box display="flex" alignItems="center" gap={1.5} flexWrap="wrap">
+                  <TextField
+                    placeholder="Search"
+                    size="small"
+                    sx={{
+                      width: 250,
+                      '& .MuiInputBase-root': {
+                        height: '36px',
+                        bgcolor: '#fff',
+                        borderRadius: '18px'
+                      }
+                    }}
+                  />
+                </Box>
+              </Paper>
+              <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '20px', background: '#f6edf8' }}>
+                {/* Placeholder content */}
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 2, sm: 4, md: 4 }}>
+                    <Card sx={{ borderRadius: 3, p: 2.5, height: '250px', opacity: 0.7 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
+                        <Avatar sx={{ width: 50, height: 50, mr: 2, bgcolor: '#e0e0e0' }} />
+                        <Box sx={{ flex: 1 }}>
+                          <Box sx={{ height: 20, bgcolor: '#e0e0e0', borderRadius: 1, mb: 1 }} />
+                          <Box sx={{ height: 14, bgcolor: '#e0e0e0', borderRadius: 1, mb: 1, width: '60%' }} />
+                          <Box sx={{ height: 14, bgcolor: '#e0e0e0', borderRadius: 1, width: '80%' }} />
+                        </Box>
+                      </Box>
+                    </Card>
+                  </Grid>
+                  <Grid size={{ xs: 2, sm: 4, md: 8 }}>
+                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                      {Array.from({ length: 4 }).map((_, index) => (
+                        <Card key={index} sx={{ flex: 1, p: 2, height: '80px', opacity: 0.7 }}>
+                          <Box sx={{ height: 16, bgcolor: '#e0e0e0', borderRadius: 1, mb: 1 }} />
+                          <Box sx={{ height: 12, bgcolor: '#e0e0e0', borderRadius: 1, width: '70%' }} />
+                        </Card>
+                      ))}
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+
+        {/* Loading overlay */}
+        <Box sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(2px)'
+        }}>
+          <Box sx={{
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '16px',
+            padding: '48px',
+            textAlign: 'center',
+            minWidth: '320px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <Box sx={{ position: 'relative', display: 'inline-flex', mb: 3 }}>
+              <CircularProgress
+                variant="determinate"
+                value={100}
+                size={80}
+                thickness={4}
+                sx={{
+                  color: '#e5e7eb',
+                  position: 'absolute'
+                }}
+              />
+              <CircularProgress
+                variant="determinate"
+                value={loadingProgress}
+                size={80}
+                thickness={4}
+                sx={{
+                  color: '#8b5cf6',
+                  '& .MuiCircularProgress-circle': {
+                    strokeLinecap: 'round',
+                  }
+                }}
+              />
+              <Box
+                sx={{
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  position: 'absolute',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Box sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  backgroundColor: '#8b5cf6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Typography variant="h6" sx={{ color: '#fff', fontWeight: 'bold' }}>
+                    📊
+                  </Typography>
+                </Box>
               </Box>
             </Box>
+
+            <Typography variant="h6" sx={{
+              fontWeight: 600,
+              color: '#1f2937',
+              mb: 1
+            }}>
+              Loading Analytics
+            </Typography>
+
+            <Typography variant="body2" sx={{
+              color: '#6b7280',
+              mb: 2
+            }}>
+              Fetching your analytics data...
+            </Typography>
+
+            <Typography variant="body2" sx={{
+              color: '#8b5cf6',
+              fontWeight: 500
+            }}>
+              {Math.round(loadingProgress)}% Complete
+            </Typography>
           </Box>
-
-          <Typography variant="h6" sx={{
-            fontWeight: 600,
-            color: '#1f2937',
-            mb: 1
-          }}>
-            Loading Analytics
-          </Typography>
-
-          <Typography variant="body2" sx={{
-            color: '#6b7280',
-            mb: 2
-          }}>
-            Fetching your analytics data...
-          </Typography>
-
-          <Typography variant="body2" sx={{
-            color: '#8b5cf6',
-            fontWeight: 500
-          }}>
-            {Math.round(loadingProgress)}% Complete
-          </Typography>
         </Box>
-      </Box>
+      </>
     );
   }
 
@@ -857,18 +987,18 @@ const LinkedinAnalytics = () => {
                         sx={{ width: 50, height: 50, mr: 2 }} />
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '18px' }}>
-                          {selectedAccountData.page_name || 'Alice'}
+                          {selectedAccountData.page_name || 'N/A'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontSize: '13px' }}>
-                          Beauty & Lifestyle
+                          {selectedAccountData.profile?.category || 'N/A'}
                         </Typography>
                         <Typography variant="body2" sx={{ fontSize: '13px', lineHeight: 1.3 }}>
                           <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                            {formatNumber(selectedAccountData.profile?.followers_count || 32800)}
+                            {selectedAccountData.profile?.followers_count ? formatNumber(selectedAccountData.profile.followers_count) : 'N/A'}
                           </Box>
                           {' Followers '}
                           <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                            {formatNumber(selectedAccountData.profile?.follows_count || 30000)}
+                            {selectedAccountData.profile?.follows_count ? formatNumber(selectedAccountData.profile.follows_count) : 'N/A'}
                           </Box>
                           {' Following'}
                         </Typography>
@@ -877,10 +1007,10 @@ const LinkedinAnalytics = () => {
 
                     {/* Bio */}
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1, lineHeight: 1.4, fontSize: '13px' }}>
-                      {selectedAccountData.profile?.biography || 'Bio: Lorem ipsum dolor sit'}
+                      {selectedAccountData.profile?.biography || 'N/A'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, fontSize: '13px' }}>
-                      USA
+                      {selectedAccountData.profile?.location || 'N/A'}
                     </Typography>
 
                     {/* Stats */}
@@ -890,7 +1020,7 @@ const LinkedinAnalytics = () => {
                           Engagement Rate:
                         </Typography>
                         <Typography variant="body2">
-                          {selectedAccountData.summary?.engagement_rate || '3.1%'}
+                          {selectedAccountData.summary?.engagement_rate || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -898,7 +1028,7 @@ const LinkedinAnalytics = () => {
                           Earned Media:
                         </Typography>
                         <Typography variant="body2">
-                          249
+                          {selectedAccountData.summary?.earned_media || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -906,7 +1036,7 @@ const LinkedinAnalytics = () => {
                           Average Interactions:
                         </Typography>
                         <Typography variant="body2">
-                          3.1%
+                          {selectedAccountData.summary?.average_interactions || 'N/A'}
                         </Typography>
                       </Box>
                     </Box>
@@ -1027,43 +1157,81 @@ const LinkedinAnalytics = () => {
                     <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
                       Audience Engagement
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Box sx={{ width: 100, height: 100 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={audienceEngagementData}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={25}
-                              outerRadius={50}
-                              dataKey="value"
-                            >
-                              {audienceEngagementData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                              ))}
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
+                    {audienceEngagementData ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ width: 100, height: 100 }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={audienceEngagementData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={25}
+                                outerRadius={50}
+                                dataKey="value"
+                              >
+                                {audienceEngagementData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </Box>
+                        <Box sx={{ ml: 2 }}>
+                          {audienceEngagementData.map((item, index) => (
+                            <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                              <Box
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: '50%',
+                                  backgroundColor: item.color,
+                                  mr: 1
+                                }} />
+                              <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                                {item.name} {item.value}%
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
                       </Box>
-                      <Box sx={{ ml: 2 }}>
-                        {audienceEngagementData.map((item, index) => (
-                          <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                            <Box
-                              sx={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: '50%',
-                                backgroundColor: item.color,
-                                mr: 1
-                              }} />
-                            <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                              {item.name} {item.value}%
-                            </Typography>
-                          </Box>
-                        ))}
+                    ) : (
+                      <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: 120,
+                        textAlign: 'center'
+                      }}>
+                        <Typography variant="body1" sx={{
+                          color: '#9ca3af',
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          mb: 1
+                        }}>
+                          No Data Available
+                        </Typography>
+                        <Typography variant="body2" sx={{
+                          color: '#6b7280',
+                          fontSize: '12px'
+                        }}>
+                          Likes: N/A
+                        </Typography>
+                        <Typography variant="body2" sx={{
+                          color: '#6b7280',
+                          fontSize: '12px'
+                        }}>
+                          Comments: N/A
+                        </Typography>
+                        <Typography variant="body2" sx={{
+                          color: '#6b7280',
+                          fontSize: '12px'
+                        }}>
+                          Shares: N/A
+                        </Typography>
                       </Box>
-                    </Box>
+                    )}
                   </Card>
                 </Box>
               </Box>
@@ -1158,8 +1326,8 @@ const LinkedinAnalytics = () => {
                     <Typography variant="h6" color="text.secondary" gutterBottom>
                       Audience Insights Not Available
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                      Enhanced audience insights require additional LinkedIn API permissions or are not available for this account.
+                    <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, textAlign: 'center' }}>
+                      Enhanced audience insights require additional LinkedIn API permissions or are not available for this account. Please contact support to enable this feature.
                     </Typography>
                   </Box>
                 )
