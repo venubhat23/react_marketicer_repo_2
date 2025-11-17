@@ -44,7 +44,11 @@ import {
   MoreVert as MoreVertIcon,
   CalendarViewMonth as CalendarViewMonthIcon,
   ViewWeek as ViewWeekIcon,
-  ViewDay as ViewDayIcon
+  ViewDay as ViewDayIcon,
+  Delete as DeleteIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Schedule as ScheduleIcon
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -62,7 +66,11 @@ const COLORS = {
   scheduled: '#FFA726',
   published: '#66BB6A',
   draft: '#78909C',
-  failed: '#EF5350'
+  failed: '#EF5350',
+  instagram: '#E4405F',
+  facebook: '#4267B2',
+  twitter: '#1DA1F2',
+  linkedin: '#0077B5'
 };
 
 // Status colors mapping
@@ -72,6 +80,18 @@ const getStatusColor = (status) => {
     case 'published': return COLORS.published;
     case 'draft': return COLORS.draft;
     case 'failed': return COLORS.failed;
+    case 'publish': return COLORS.published;
+    default: return COLORS.primary;
+  }
+};
+
+const getPlatformColor = (post) => {
+  const platform = post.page_data?.page_type?.toLowerCase();
+  switch (platform) {
+    case 'instagram': return COLORS.instagram;
+    case 'facebook': return COLORS.facebook;
+    case 'twitter': return COLORS.twitter;
+    case 'linkedin': return COLORS.linkedin;
     default: return COLORS.primary;
   }
 };
@@ -84,21 +104,24 @@ const Calendar = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [contentTypeFilter, setContentTypeFilter] = useState('all');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [scheduledPosts, setScheduledPosts] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openPostDialog, setOpenPostDialog] = useState(false);
   const [selectedDatePosts, setSelectedDatePosts] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
 
-  // Fetch scheduled posts from API
+  // Fetch all posts from API
   const fetchScheduledPosts = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        'https://api.marketincer.com/api/v1/posts/scheduled',
+        'https://api.marketincer.com/api/v1/posts/search',
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -106,13 +129,13 @@ const Calendar = () => {
           }
         }
       );
-      
-      if (response.data && response.data.data) {
-        setScheduledPosts(response.data.data);
+
+      if (response.data && response.data.posts) {
+        setPosts(response.data.posts);
       }
     } catch (error) {
-      console.error('Error fetching scheduled posts:', error);
-      toast.error('Failed to fetch scheduled posts');
+      console.error('Error fetching posts:', error);
+      toast.error('Failed to fetch posts');
     } finally {
       setLoading(false);
     }
@@ -123,13 +146,13 @@ const Calendar = () => {
   }, []);
 
   // Filter posts based on current filters
-  const filteredPosts = scheduledPosts.filter(post => {
-    const matchesSearch = !searchQuery || 
+  const filteredPosts = posts.filter(post => {
+    const matchesSearch = !searchQuery ||
       post.comments?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.brand_name?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesStatus = statusFilter === 'all' || post.status === statusFilter;
-    
+
     const matchesContentType = contentTypeFilter === 'all' ||
       (contentTypeFilter === 'video' && post.s3_url?.includes('video')) ||
       (contentTypeFilter === 'photo' && post.s3_url && !post.s3_url.includes('video'));
@@ -139,9 +162,11 @@ const Calendar = () => {
 
   // Get posts for a specific date
   const getPostsForDate = (date) => {
-    return filteredPosts.filter(post => 
-      dayjs(post.scheduled_at).format('YYYY-MM-DD') === date.format('YYYY-MM-DD')
-    );
+    return filteredPosts.filter(post => {
+      // Use scheduled_at if available and valid, otherwise use created_at
+      const postDate = post.scheduled_at ? dayjs(post.scheduled_at) : dayjs(post.created_at);
+      return postDate.format('YYYY-MM-DD') === date.format('YYYY-MM-DD');
+    });
   };
 
   // Handle date cell click
@@ -156,7 +181,7 @@ const Calendar = () => {
   const handlePostAction = async (postId, action) => {
     try {
       const token = localStorage.getItem('token');
-      
+
       if (action === 'publish') {
         await axios.post(
           `https://api.marketincer.com/api/v1/posts/${postId}/publish`,
@@ -176,6 +201,98 @@ const Calendar = () => {
       toast.error(`Failed to ${action} post`);
     }
     setAnchorEl(null);
+  };
+
+  // Handle opening edit dialog
+  const handleEditPost = (post) => {
+    setEditingPost({
+      ...post,
+      comments: post.comments || '',
+      hashtags: post.hashtags || '',
+      note: post.note || '',
+      brand_name: post.brand_name || '',
+      scheduled_at: post.scheduled_at ? dayjs(post.scheduled_at).format('YYYY-MM-DDTHH:mm') : ''
+    });
+    setOpenEditDialog(true);
+    setIsEditing(false);
+    setAnchorEl(null);
+  };
+
+  // Handle saving edited post
+  const handleSavePost = async () => {
+    if (!editingPost) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const updateData = {
+        post: {
+          comments: editingPost.comments,
+          hashtags: editingPost.hashtags,
+          note: editingPost.note,
+          brand_name: editingPost.brand_name,
+          scheduled_at: editingPost.scheduled_at ? dayjs(editingPost.scheduled_at).toISOString() : null,
+          status: editingPost.status
+        }
+      };
+
+      await axios.put(
+        `https://api.marketincer.com/api/v1/posts/${editingPost.post_id}`,
+        updateData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      toast.success('Post updated successfully!');
+      setOpenEditDialog(false);
+      setEditingPost(null);
+      setIsEditing(false);
+      fetchScheduledPosts(); // Refresh data
+    } catch (error) {
+      console.error('Error updating post:', error);
+      toast.error('Failed to update post');
+    }
+  };
+
+  // Handle deleting post
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+
+      await axios.delete(
+        `https://api.marketincer.com/api/v1/posts/${postId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      toast.success('Post deleted successfully!');
+      setOpenEditDialog(false);
+      setEditingPost(null);
+      setAnchorEl(null);
+      fetchScheduledPosts(); // Refresh data
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast.error('Failed to delete post');
+    }
+  };
+
+  // Handle input changes in edit form
+  const handleEditInputChange = (field, value) => {
+    setEditingPost(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   // Reset all filters
@@ -333,35 +450,73 @@ const Calendar = () => {
                 
                 {/* Posts preview */}
                 <Box sx={{ flex: 1, overflow: 'hidden' }}>
-                  {postsForDay.slice(0, 1).map((post, postIndex) => (
-                    <Box
-                      key={postIndex}
+                  {postsForDay.slice(0, 2).map((post, postIndex) => {
+                    const postDate = post.scheduled_at ? dayjs(post.scheduled_at) : dayjs(post.created_at);
+                    const platformColor = getPlatformColor(post);
+                    return (
+                      <Box
+                        key={postIndex}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPost(post);
+                        }}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.3,
+                          fontSize: '8px',
+                          p: 0.3,
+                          mb: 0.3,
+                          borderRadius: 0.5,
+                          backgroundColor: `${getStatusColor(post.status)}15`,
+                          border: `1px solid ${getStatusColor(post.status)}`,
+                          overflow: 'hidden',
+                          position: 'relative',
+                          cursor: 'pointer',
+                          '&:hover': {
+                            backgroundColor: `${getStatusColor(post.status)}25`,
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                          }
+                        }}
+                      >
+                        {/* Platform indicator */}
+                        <Box
+                          sx={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: '50%',
+                            backgroundColor: platformColor,
+                            flexShrink: 0
+                          }}
+                        />
+                        <Box
+                          sx={{
+                            fontSize: '8px',
+                            color: getStatusColor(post.status),
+                            fontWeight: '600',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {postDate.format('HH:mm')} {post.brand_name ? `- ${post.brand_name.substring(0, 8)}` : ''}
+                        </Box>
+                      </Box>
+                    );
+                  })}
+                  {postsForDay.length > 2 && (
+                    <Typography
+                      variant="caption"
                       sx={{
-                        fontSize: '9px',
-                        p: 0.2,
-                        mb: 0.2,
-                        borderRadius: 0.3,
-                        backgroundColor: getStatusColor(post.status),
-                        color: 'white',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        fontWeight: '500'
-                      }}
-                    >
-                      {dayjs(post.scheduled_at).format('HH:mm')} - {post.comments?.substring(0, 10)}...
-                    </Box>
-                  ))}
-                  {postsForDay.length > 1 && (
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
                         color: COLORS.primary,
                         fontWeight: '600',
-                        fontSize: '8px'
+                        fontSize: '7px',
+                        textAlign: 'center',
+                        mt: 0.2
                       }}
                     >
-                      +{postsForDay.length - 1} more
+                      +{postsForDay.length - 2} more
                     </Typography>
                   )}
                 </Box>
@@ -443,29 +598,69 @@ const Calendar = () => {
                 onClick={() => handleDateClick(day)}
               >
                 <Box sx={{ flex: 1, overflowY: 'auto' }}>
-                  {postsForDay.map((post, postIndex) => (
-                    <Card key={postIndex} sx={{ mb: 1, boxShadow: 1 }}>
-                      <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-                        <Typography variant="caption" color={COLORS.primary} fontWeight="600">
-                          {dayjs(post.scheduled_at).format('HH:mm')}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '12px', mt: 0.5 }}>
-                          {post.comments?.substring(0, 40)}...
-                        </Typography>
-                        <Chip
-                          label={post.status}
-                          size="small"
-                          sx={{
-                            mt: 0.5,
-                            backgroundColor: getStatusColor(post.status),
-                            color: 'white',
-                            fontSize: '9px',
-                            height: '18px'
-                          }}
-                        />
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {postsForDay.map((post, postIndex) => {
+                    const postDate = post.scheduled_at ? dayjs(post.scheduled_at) : dayjs(post.created_at);
+                    const platformColor = getPlatformColor(post);
+                    return (
+                      <Card
+                        key={postIndex}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPost(post);
+                        }}
+                        sx={{
+                          mb: 1,
+                          boxShadow: 1,
+                          borderLeft: `3px solid ${platformColor}`,
+                          cursor: 'pointer',
+                          '&:hover': {
+                            boxShadow: 2,
+                            transform: 'translateY(-1px)'
+                          }
+                        }}
+                      >
+                        <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                          <Box display="flex" alignItems="center" gap={0.5} mb={0.5}>
+                            <Box
+                              sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                backgroundColor: platformColor
+                              }}
+                            />
+                            <Typography variant="caption" color={COLORS.primary} fontWeight="600">
+                              {postDate.format('HH:mm')}
+                            </Typography>
+                            <Typography variant="caption" color="gray" sx={{ ml: 'auto', fontSize: '10px' }}>
+                              {post.page_data?.page_type || 'Unknown'}
+                            </Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontSize: '11px', mb: 0.5, lineHeight: 1.3 }}>
+                            {post.comments?.substring(0, 35)}...
+                          </Typography>
+                          <Box display="flex" alignItems="center" gap={0.5}>
+                            <Chip
+                              label={post.status}
+                              size="small"
+                              sx={{
+                                backgroundColor: getStatusColor(post.status),
+                                color: 'white',
+                                fontSize: '8px',
+                                height: '16px',
+                                '& .MuiChip-label': { px: 0.5 }
+                              }}
+                            />
+                            {post.brand_name && (
+                              <Typography variant="caption" sx={{ fontSize: '9px', color: 'gray' }}>
+                                {post.brand_name}
+                              </Typography>
+                            )}
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </Box>
               </Box>
             );
@@ -507,18 +702,44 @@ const Calendar = () => {
             </Box>
           ) : (
             <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(400px, 1fr))" gap={2}>
-              {postsForDay.map((post, index) => (
-                <Card key={index} sx={{ boxShadow: 2, height: 'fit-content' }}>
-                  <CardContent sx={{ p: 2 }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                      <Box>
-                        <Typography variant="h6" fontWeight="600" color={COLORS.primary}>
-                          {dayjs(post.scheduled_at).format('HH:mm')}
-                        </Typography>
-                        <Typography variant="body2" color="gray">
-                          {post.brand_name}
-                        </Typography>
-                      </Box>
+              {postsForDay.map((post, index) => {
+                const postDate = post.scheduled_at ? dayjs(post.scheduled_at) : dayjs(post.created_at);
+                const platformColor = getPlatformColor(post);
+                return (
+                  <Card
+                    key={index}
+                    onClick={() => handleEditPost(post)}
+                    sx={{
+                      boxShadow: 2,
+                      height: 'fit-content',
+                      borderLeft: `4px solid ${platformColor}`,
+                      cursor: 'pointer',
+                      '&:hover': {
+                        boxShadow: 4,
+                        transform: 'translateY(-2px)'
+                      }
+                    }}
+                  >
+                    <CardContent sx={{ p: 2 }}>
+                      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Box
+                            sx={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: '50%',
+                              backgroundColor: platformColor
+                            }}
+                          />
+                          <Box>
+                            <Typography variant="h6" fontWeight="600" color={COLORS.primary}>
+                              {postDate.format('HH:mm')}
+                            </Typography>
+                            <Typography variant="body2" color="gray" sx={{ fontSize: '12px' }}>
+                              {post.brand_name || 'No Brand'} • {post.page_data?.page_type || 'Unknown Platform'}
+                            </Typography>
+                          </Box>
+                        </Box>
                       <Box display="flex" gap={1} alignItems="center">
                         <Chip
                           label={post.status}
@@ -559,12 +780,13 @@ const Calendar = () => {
                       </Box>
                     )}
                     
-                    <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.6 }}>
-                      {post.comments}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))}
+                      <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.6 }}>
+                        {post.comments}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </Box>
           )}
         </Box>
@@ -740,7 +962,9 @@ const Calendar = () => {
                   <MenuItem value="all" sx={{ fontSize: '14px' }}>All Status</MenuItem>
                   <MenuItem value="scheduled" sx={{ fontSize: '14px' }}>Scheduled</MenuItem>
                   <MenuItem value="published" sx={{ fontSize: '14px' }}>Published</MenuItem>
+                  <MenuItem value="failed" sx={{ fontSize: '14px' }}>Failed</MenuItem>
                   <MenuItem value="draft" sx={{ fontSize: '14px' }}>Draft</MenuItem>
+                  <MenuItem value="publish" sx={{ fontSize: '14px' }}>Publish</MenuItem>
                 </Select>
               </FormControl>
               
@@ -879,7 +1103,19 @@ const Calendar = () => {
             <List>
               {selectedDatePosts.map((post, index) => (
                 <React.Fragment key={index}>
-                  <ListItem alignItems="flex-start">
+                  <ListItem
+                    alignItems="flex-start"
+                    button
+                    onClick={() => {
+                      setOpenPostDialog(false);
+                      handleEditPost(post);
+                    }}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(136, 42, 255, 0.05)'
+                      }
+                    }}
+                  >
                     <ListItemAvatar>
                       {post.s3_url ? (
                         post.s3_url.includes('video') ? (
@@ -895,7 +1131,7 @@ const Calendar = () => {
                       primary={
                         <Box display="flex" justifyContent="space-between" alignItems="center">
                           <Typography variant="subtitle2">
-                            {dayjs(post.scheduled_at).format('HH:mm')} - {post.brand_name}
+                            {(post.scheduled_at ? dayjs(post.scheduled_at) : dayjs(post.created_at)).format('HH:mm')} - {post.brand_name || 'No Brand'}
                           </Typography>
                           <Box display="flex" gap={1}>
                             <Chip
@@ -911,7 +1147,7 @@ const Calendar = () => {
                                 size="small"
                                 variant="contained"
                                 startIcon={<PublishIcon />}
-                                onClick={() => handlePostAction(post.id, 'publish')}
+                                onClick={() => handlePostAction(post.post_id, 'publish')}
                                 sx={{
                                   backgroundColor: COLORS.primary,
                                   '&:hover': {
@@ -950,16 +1186,235 @@ const Calendar = () => {
         onClose={() => setAnchorEl(null)}
       >
         {selectedPost?.status === 'scheduled' && (
-          <MenuItem onClick={() => handlePostAction(selectedPost.id, 'publish')}>
+          <MenuItem onClick={() => handlePostAction(selectedPost.post_id, 'publish')}>
             <PublishIcon sx={{ mr: 1 }} />
             Publish Now
           </MenuItem>
         )}
-        <MenuItem onClick={() => setAnchorEl(null)}>
+        <MenuItem onClick={() => handleEditPost(selectedPost)}>
           <EditIcon sx={{ mr: 1 }} />
           Edit Post
         </MenuItem>
+        <MenuItem
+          onClick={() => handleDeletePost(selectedPost?.post_id)}
+          sx={{ color: 'error.main' }}
+        >
+          <DeleteIcon sx={{ mr: 1 }} />
+          Delete Post
+        </MenuItem>
       </Menu>
+
+      {/* Edit Post Dialog */}
+      <Dialog
+        open={openEditDialog}
+        onClose={() => {
+          if (!isEditing) {
+            setOpenEditDialog(false);
+            setEditingPost(null);
+          }
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6" fontWeight="600">
+              {isEditing ? 'Edit Post' : 'Post Details'}
+            </Typography>
+            <Box display="flex" gap={1}>
+              {!isEditing && (
+                <Button
+                  startIcon={<EditIcon />}
+                  onClick={() => setIsEditing(true)}
+                  sx={{ color: COLORS.primary }}
+                >
+                  Edit
+                </Button>
+              )}
+              <Button
+                startIcon={<DeleteIcon />}
+                onClick={() => handleDeletePost(editingPost?.post_id)}
+                sx={{ color: 'error.main' }}
+              >
+                Delete
+              </Button>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {editingPost && (
+            <Box sx={{ mt: 1 }}>
+              {/* Post Media */}
+              {editingPost.s3_url && (
+                <Box mb={3}>
+                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: '600' }}>
+                    Media
+                  </Typography>
+                  <Box
+                    component="img"
+                    src={editingPost.s3_url}
+                    alt="Post media"
+                    sx={{
+                      width: '100%',
+                      maxHeight: 300,
+                      objectFit: 'cover',
+                      borderRadius: 2,
+                      border: '1px solid #e0e0e0'
+                    }}
+                  />
+                </Box>
+              )}
+
+              {/* Platform Info */}
+              <Box display="flex" alignItems="center" gap={1} mb={3}>
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    backgroundColor: getPlatformColor(editingPost)
+                  }}
+                />
+                <Typography variant="body2" color="gray">
+                  {editingPost.page_data?.name || 'Unknown Page'} • {editingPost.page_data?.page_type || 'Unknown Platform'}
+                </Typography>
+                <Chip
+                  label={editingPost.status}
+                  size="small"
+                  sx={{
+                    backgroundColor: getStatusColor(editingPost.status),
+                    color: 'white',
+                    fontSize: '11px',
+                    height: '20px'
+                  }}
+                />
+              </Box>
+
+              {/* Editable Fields */}
+              <Box sx={{ '& > *': { mb: 2 } }}>
+                <TextField
+                  fullWidth
+                  label="Brand Name"
+                  value={editingPost.brand_name}
+                  onChange={(e) => handleEditInputChange('brand_name', e.target.value)}
+                  disabled={!isEditing}
+                  variant={isEditing ? 'outlined' : 'standard'}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Comments/Caption"
+                  value={editingPost.comments}
+                  onChange={(e) => handleEditInputChange('comments', e.target.value)}
+                  disabled={!isEditing}
+                  variant={isEditing ? 'outlined' : 'standard'}
+                  multiline
+                  rows={3}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Hashtags"
+                  value={editingPost.hashtags}
+                  onChange={(e) => handleEditInputChange('hashtags', e.target.value)}
+                  disabled={!isEditing}
+                  variant={isEditing ? 'outlined' : 'standard'}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Note"
+                  value={editingPost.note}
+                  onChange={(e) => handleEditInputChange('note', e.target.value)}
+                  disabled={!isEditing}
+                  variant={isEditing ? 'outlined' : 'standard'}
+                  multiline
+                  rows={2}
+                />
+
+                {/* Status Selection */}
+                {isEditing && (
+                  <FormControl fullWidth>
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={editingPost.status}
+                      label="Status"
+                      onChange={(e) => handleEditInputChange('status', e.target.value)}
+                    >
+                      <MenuItem value="draft">Draft</MenuItem>
+                      <MenuItem value="scheduled">Scheduled</MenuItem>
+                      <MenuItem value="published">Published</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
+
+                {/* Scheduled Date/Time */}
+                {isEditing && (editingPost.status === 'scheduled' || editingPost.scheduled_at) && (
+                  <TextField
+                    fullWidth
+                    label="Scheduled Date & Time"
+                    type="datetime-local"
+                    value={editingPost.scheduled_at}
+                    onChange={(e) => handleEditInputChange('scheduled_at', e.target.value)}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                )}
+
+                {!isEditing && editingPost.scheduled_at && (
+                  <TextField
+                    fullWidth
+                    label="Scheduled Date & Time"
+                    value={dayjs(editingPost.scheduled_at).format('YYYY-MM-DD HH:mm')}
+                    disabled
+                    variant="standard"
+                  />
+                )}
+
+                {/* Timestamps */}
+                <Box sx={{ bgcolor: '#f8f9fa', p: 2, borderRadius: 1 }}>
+                  <Typography variant="body2" color="gray" sx={{ fontSize: '12px' }}>
+                    Created: {dayjs(editingPost.created_at).format('MMM D, YYYY HH:mm')}
+                  </Typography>
+                  {editingPost.scheduled_at && (
+                    <Typography variant="body2" color="gray" sx={{ fontSize: '12px', mt: 0.5 }}>
+                      Scheduled: {dayjs(editingPost.scheduled_at).format('MMM D, YYYY HH:mm')}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          {isEditing ? (
+            <>
+              <Button
+                onClick={() => {
+                  setIsEditing(false);
+                  // Reset to original values if needed
+                }}
+                startIcon={<CancelIcon />}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSavePost}
+                variant="contained"
+                startIcon={<SaveIcon />}
+                sx={{ backgroundColor: COLORS.primary }}
+              >
+                Save Changes
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => setOpenEditDialog(false)}>
+              Close
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

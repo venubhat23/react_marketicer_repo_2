@@ -134,7 +134,7 @@ const LinkedinAnalytics = () => {
       }
 
       console.log('Fetching LinkedIn analytics from localhost...');
-      const response = await axios.get('http://localhost:3001/api/v1/linkedin_analytics', {
+      const response = await axios.get('https://api.marketincer.com/api/v1/linkedin_analytics', {
         headers: {
           Authorization: `Bearer ${token}`,
         }

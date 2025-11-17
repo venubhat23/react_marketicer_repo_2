@@ -475,6 +475,132 @@ Would you like me to create this as a short handwritten-style note (suitable for
 
   };
 
+  const handleSaveAsDraft = async () => {
+    if ((!uploadedImageUrl && uploadedMedia.length === 0) || !postContent) {
+      alert("Please make sure all fields are filled out!");
+      return;
+    }
+
+    setPosting(true);
+
+    try {
+      const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
+
+      const postData = {
+        social_page_ids: selectedPages,
+        post: {
+          media_urls: uploadedMedia.length > 0 ? uploadedMedia.map(media => media.url) : uploadedImageUrl ? [uploadedImageUrl] : [],
+          media_types: uploadedMedia.length > 0 ? uploadedMedia.map(media => media.type) : uploadedImageUrl ? [isVideoFile ? 'video' : 'image'] : [],
+          primary_media_url: uploadedMedia.length > 0 ? uploadedMedia[0].url : uploadedImageUrl || '',
+          comments: postContent,
+          brand_name: brandName,
+          status: 'draft',
+          post_type: 'post',
+          platform_data: {
+            instagram_type: instagramPostType
+          }
+        }
+      };
+
+      console.log('Saving draft:', postData);
+
+      const response = await fetch('https://api.marketincer.com/api/v1/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(postData),
+      });
+
+      if (response.ok) {
+        alert('Post saved as draft successfully!');
+        // Reset form
+        setPostContent('');
+        setUploadedImageUrl('');
+        setUploadedMedia([]);
+        setFile(null);
+        setUploadedFileName('');
+      } else {
+        const errorData = await response.json();
+        console.error('Error saving draft:', errorData);
+        alert('Failed to save draft. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      alert('Failed to save draft. Please try again.');
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  const handleScheduleSubmit = async () => {
+    if (!selectedDateTime) {
+      alert("Please select a date and time for scheduling!");
+      return;
+    }
+
+    if ((!uploadedImageUrl && uploadedMedia.length === 0) || !postContent) {
+      alert("Please make sure all fields are filled out!");
+      return;
+    }
+
+    setPosting(true);
+    setOpenDateTimePicker(false);
+
+    try {
+      const stripHtmlTags = (postContent) => postContent.replace(/<[^>]*>/g, '').trim();
+
+      const postData = {
+        social_page_ids: selectedPages,
+        post: {
+          media_urls: uploadedMedia.length > 0 ? uploadedMedia.map(media => media.url) : uploadedImageUrl ? [uploadedImageUrl] : [],
+          media_types: uploadedMedia.length > 0 ? uploadedMedia.map(media => media.type) : uploadedImageUrl ? [isVideoFile ? 'video' : 'image'] : [],
+          primary_media_url: uploadedMedia.length > 0 ? uploadedMedia[0].url : uploadedImageUrl || '',
+          comments: postContent,
+          brand_name: brandName,
+          status: 'scheduled',
+          scheduled_at: selectedDateTime.toISOString(),
+          post_type: 'post',
+          platform_data: {
+            instagram_type: instagramPostType
+          }
+        }
+      };
+
+      console.log('Scheduling post:', postData);
+
+      const response = await fetch('https://api.marketincer.com/api/v1/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(postData),
+      });
+
+      if (response.ok) {
+        alert(`Post scheduled successfully for ${selectedDateTime.toLocaleString()}!`);
+        // Reset form
+        setPostContent('');
+        setUploadedImageUrl('');
+        setUploadedMedia([]);
+        setFile(null);
+        setUploadedFileName('');
+        setSelectedDateTime(new Date());
+      } else {
+        const errorData = await response.json();
+        console.error('Error scheduling post:', errorData);
+        alert('Failed to schedule post. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error scheduling post:', error);
+      alert('Failed to schedule post. Please try again.');
+    } finally {
+      setPosting(false);
+    }
+  };
+
   const handleBoxClick = () => {
     fileInputRef.current.click(); //  Triggers the hidden file input
   };
@@ -820,7 +946,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
         ...mediaData,
         comments: stripHtmlTags(postContent),
         brand_name: brandName,
-        status: createPostMode,
+        status: createPostMode || 'published',
         scheduled_at: selectedDateTime,
         post_type: postType,
         platform_data: isInstagram ? {
@@ -3492,15 +3618,31 @@ Would you like me to create this as a short handwritten-style note (suitable for
 
                   {/* Buttons */}
                   <Box display="flex" gap={2}>
-                                    <Button variant="outlined" sx={{ display: 'none' }} >Save as Draft</Button>
-                {/* <Button variant="contained">Schedule Post</Button> */}
+                    <Button
+                      variant="outlined"
+                      sx={{
+                        borderColor: '#7C4DFF',
+                        color: '#7C4DFF',
+                        '&:hover': {
+                          borderColor: '#5E35B1',
+                          color: '#5E35B1',
+                          backgroundColor: 'rgba(124, 77, 255, 0.04)'
+                        }
+                      }}
+                      onClick={() => handleSaveAsDraft()}
+                      disabled={posting || uploading}
+                    >
+                      Save as Draft
+                    </Button>
                     <Button
                       variant="contained"
                       sx={{
-                        margin: "0.09375rem 1px",
-                        display: 'none',
+                        backgroundColor: '#7C4DFF',
+                        color: '#fff',
+                        '&:hover': { backgroundColor: '#5E35B1' }
                       }}
                       onClick={() => draftModelOpen("schedule")}
+                      disabled={posting || uploading}
                     >
                       Schedule Post
                     </Button>
@@ -3659,6 +3801,75 @@ Would you like me to create this as a short handwritten-style note (suitable for
       originalFile={editingMediaIndex !== null ? uploadedMedia[editingMediaIndex]?.file : null}
       onSave={handleSaveEditedImage}
     />
+
+    {/* Schedule Post Modal */}
+    <Modal open={openDateTimePicker} onClose={() => setOpenDateTimePicker(false)}>
+      <Paper
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          p: 4,
+          borderRadius: 2,
+          boxShadow: 24,
+        }}
+      >
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', mb: 2 }}>
+            Schedule Post
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Choose when you want your post to be published
+          </Typography>
+
+          <Flatpickr
+            value={selectedDateTime}
+            onChange={(date) => setSelectedDateTime(date[0])}
+            options={{
+              enableTime: true,
+              dateFormat: "Y-m-d H:i",
+              minDate: "today",
+              time_24hr: false,
+            }}
+            render={({ defaultValue, ...props }, ref) => (
+              <TextField
+                {...props}
+                ref={ref}
+                fullWidth
+                label="Select Date and Time"
+                variant="outlined"
+                value={defaultValue}
+                InputProps={{
+                  readOnly: true,
+                }}
+                sx={{ mb: 3 }}
+              />
+            )}
+          />
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+          <Button
+            variant="outlined"
+            onClick={() => setOpenDateTimePicker(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleScheduleSubmit}
+            sx={{
+              backgroundColor: '#7C4DFF',
+              '&:hover': { backgroundColor: '#5E35B1' }
+            }}
+          >
+            Schedule Post
+          </Button>
+        </Box>
+      </Paper>
+    </Modal>
     </>
   );
 };

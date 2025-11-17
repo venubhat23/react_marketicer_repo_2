@@ -111,7 +111,7 @@ const InstagramAnalytics = () => {
   //       setLoading(true);
   //       const apiEndpoint = platformApiMap[platform.toLowerCase()];
 
-  //       const res = await axios.get(`http://localhost:3001/api/v1/${apiEndpoint}`, {
+  //       const res = await axios.get(`https://api.marketincer.com/api/v1/${apiEndpoint}`, {
   //         headers: {
   //           Authorization: `Bearer ${token}`,
   //         }
@@ -178,7 +178,7 @@ const InstagramAnalytics = () => {
       }
 
       console.log('Fetching Instagram analytics...');
-      const response = await axios.get(`http://localhost:3001/api/v1/${apiEndpoint}?t=${Date.now()}`, {
+      const response = await axios.get(`https://api.marketincer.com/api/v1/${apiEndpoint}?t=${Date.now()}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Cache-Control': 'no-cache',
