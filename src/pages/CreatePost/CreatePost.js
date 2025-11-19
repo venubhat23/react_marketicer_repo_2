@@ -3836,74 +3836,438 @@ Would you like me to create this as a short handwritten-style note (suitable for
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 400,
-          p: 4,
-          borderRadius: 2,
-          boxShadow: 24,
+          width: 650,
+          borderRadius: 3,
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+          overflow: 'hidden'
         }}
       >
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Schedule Post
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Choose when you want your post to be published
-          </Typography>
-
-          <Flatpickr
-            value={selectedDateTime}
-            onChange={(date) => setSelectedDateTime(date[0])}
-            options={{
-              enableTime: true,
-              dateFormat: "Y-m-d H:i",
-              minDate: "today",
-              time_24hr: false,
-              minuteIncrement: 1,
-              allowInput: true,
-              clickOpens: true,
-              enableSeconds: false,
-              static: false,
-              altInput: true,
-              altFormat: "F j, Y at h:i K",
-              parseDate: (datestr, format) => {
-                return new Date(datestr);
+        <Box sx={{ display: 'flex', height: 480 }}>
+          {/* Calendar Section */}
+          <Box sx={{ 
+            flex: 1, 
+            p: 3, 
+            borderRight: '1px solid #e0e0e0',
+            backgroundColor: '#fafafa'
+          }}>
+            {(() => {
+              const today = new Date();
+              const currentDate = selectedDateTime || today;
+              const year = currentDate.getFullYear();
+              const month = currentDate.getMonth();
+              
+              const firstDayOfMonth = new Date(year, month, 1);
+              const lastDayOfMonth = new Date(year, month + 1, 0);
+              const startDate = new Date(firstDayOfMonth);
+              startDate.setDate(startDate.getDate() - firstDayOfMonth.getDay());
+              
+              const endDate = new Date(lastDayOfMonth);
+              endDate.setDate(endDate.getDate() + (6 - lastDayOfMonth.getDay()));
+              
+              const weeks = [];
+              const currentWeek = [];
+              
+              for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                currentWeek.push(new Date(d));
+                if (currentWeek.length === 7) {
+                  weeks.push([...currentWeek]);
+                  currentWeek.length = 0;
+                }
               }
-            }}
-            render={({ defaultValue, ...props }, ref) => (
-              <TextField
-                {...props}
-                ref={ref}
-                fullWidth
-                label="Select Date and Time"
-                variant="outlined"
-                value={defaultValue}
-                placeholder="Click to select date and time"
-                InputProps={{
-                  readOnly: false,
-                }}
-                sx={{ 
-                  mb: 3,
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#7C4DFF',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#7C4DFF',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#7C4DFF',
-                  },
-                }}
-              />
-            )}
-          />
-        </Box>
+              
+              const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+              ];
+              
+              const goToPrevMonth = () => {
+                const newDate = new Date(currentDate);
+                newDate.setMonth(newDate.getMonth() - 1);
+                setSelectedDateTime(newDate);
+              };
+              
+              const goToNextMonth = () => {
+                const newDate = new Date(currentDate);
+                newDate.setMonth(newDate.getMonth() + 1);
+                setSelectedDateTime(newDate);
+              };
 
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+              return (
+                <>
+                  {/* Calendar Header */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <IconButton onClick={goToPrevMonth} sx={{ color: '#666' }}>
+                      <Typography sx={{ transform: 'rotate(180deg)' }}>→</Typography>
+                    </IconButton>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#333' }}>
+                      {monthNames[month]} {year}
+                    </Typography>
+                    <IconButton onClick={goToNextMonth} sx={{ color: '#666' }}>
+                      <Typography>→</Typography>
+                    </IconButton>
+                  </Box>
+                  
+                  {/* Day Headers */}
+                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, mb: 2 }}>
+                    {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                      <Box key={day} sx={{ textAlign: 'center', py: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500, color: '#666' }}>
+                          {day}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                  
+                  {/* Calendar Grid */}
+                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1 }}>
+                    {weeks.flat().map((date, index) => {
+                      const isCurrentMonth = date.getMonth() === month;
+                      const isToday = date.toDateString() === today.toDateString();
+                      const isSelected = selectedDateTime && date.toDateString() === selectedDateTime.toDateString();
+                      const isPast = date < today && !isToday;
+                      
+                      return (
+                        <Box
+                          key={index}
+                          onClick={() => {
+                            if (!isPast) {
+                              const newDateTime = new Date(selectedDateTime || new Date());
+                              newDateTime.setFullYear(date.getFullYear());
+                              newDateTime.setMonth(date.getMonth());
+                              newDateTime.setDate(date.getDate());
+                              setSelectedDateTime(newDateTime);
+                            }
+                          }}
+                          sx={{
+                            aspectRatio: '1',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 1,
+                            cursor: isPast ? 'not-allowed' : 'pointer',
+                            backgroundColor: isSelected ? '#4285f4' : 'transparent',
+                            color: isSelected ? 'white' : 
+                                   isPast ? '#ccc' :
+                                   isCurrentMonth ? '#333' : '#999',
+                            '&:hover': {
+                              backgroundColor: !isPast && !isSelected ? '#f0f0f0' : undefined
+                            },
+                            border: isToday && !isSelected ? '2px solid #4285f4' : 'none',
+                            fontWeight: isSelected || isToday ? 600 : 400
+                          }}
+                        >
+                          <Typography variant="body2">
+                            {date.getDate()}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                </>
+              );
+            })()}
+          </Box>
+          
+          {/* Time Selection Section */}
+          <Box sx={{ width: 240, p: 3, backgroundColor: 'white' }}>
+            {/* Custom Time Input */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body2" sx={{ mb: 2, color: '#666', fontWeight: 500 }}>
+                Custom Time
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center' }}>
+                {/* Hour Input */}
+                <TextField
+                  type="number"
+                  inputProps={{ 
+                    min: 1, 
+                    max: 12,
+                    style: { 
+                      textAlign: 'center',
+                      fontSize: '16px',
+                      fontWeight: '500',
+                      padding: '8px 4px'
+                    }
+                  }}
+                  value={(() => {
+                    const currentTime = selectedDateTime || new Date();
+                    let hour = currentTime.getHours();
+                    return hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                  })()}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    // Allow empty input for easier editing
+                    if (inputValue === '') {
+                      return;
+                    }
+                    
+                    const hour12 = Math.min(12, Math.max(1, parseInt(inputValue) || 1));
+                    const currentTime = selectedDateTime || new Date();
+                    const isAM = currentTime.getHours() < 12;
+                    let hour24 = hour12;
+                    
+                    if (isAM && hour12 === 12) hour24 = 0;
+                    else if (!isAM && hour12 !== 12) hour24 = hour12 + 12;
+                    
+                    const newDateTime = new Date(currentTime);
+                    newDateTime.setHours(hour24);
+                    setSelectedDateTime(newDateTime);
+                  }}
+                  onFocus={(e) => {
+                    // Select all text on focus for easier editing
+                    e.target.select();
+                  }}
+                  sx={{ 
+                    width: 60,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      backgroundColor: '#f8f9fa',
+                      height: '40px',
+                      '& input': {
+                        padding: '8px',
+                        textAlign: 'center',
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        color: '#333'
+                      },
+                      '&:hover fieldset': { 
+                        borderColor: '#4285f4',
+                        borderWidth: '2px'
+                      },
+                      '&.Mui-focused fieldset': { 
+                        borderColor: '#4285f4',
+                        borderWidth: '2px'
+                      },
+                      '& fieldset': {
+                        borderColor: '#ddd'
+                      }
+                    }
+                  }}
+                />
+                
+                <Typography sx={{ 
+                  color: '#333', 
+                  fontSize: '18px', 
+                  fontWeight: '600',
+                  mx: 0.5
+                }}>:</Typography>
+                
+                {/* Minute Input */}
+                <TextField
+                  type="number"
+                  inputProps={{ 
+                    min: 0, 
+                    max: 59,
+                    step: 1,
+                    style: { 
+                      textAlign: 'center',
+                      fontSize: '16px',
+                      fontWeight: '500',
+                      padding: '8px 4px'
+                    }
+                  }}
+                  value={(() => {
+                    const minutes = (selectedDateTime || new Date()).getMinutes();
+                    return minutes === 0 ? '' : minutes;
+                  })()}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    // Allow empty input for easier editing
+                    if (inputValue === '') {
+                      const newDateTime = new Date(selectedDateTime || new Date());
+                      newDateTime.setMinutes(0);
+                      setSelectedDateTime(newDateTime);
+                      return;
+                    }
+                    
+                    const minute = Math.min(59, Math.max(0, parseInt(inputValue) || 0));
+                    const newDateTime = new Date(selectedDateTime || new Date());
+                    newDateTime.setMinutes(minute);
+                    setSelectedDateTime(newDateTime);
+                  }}
+                  onFocus={(e) => {
+                    // Select all text on focus for easier editing
+                    e.target.select();
+                  }}
+                  sx={{ 
+                    width: 60,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      backgroundColor: '#f8f9fa',
+                      height: '40px',
+                      '& input': {
+                        padding: '8px',
+                        textAlign: 'center',
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        color: '#333'
+                      },
+                      '&:hover fieldset': { 
+                        borderColor: '#4285f4',
+                        borderWidth: '2px'
+                      },
+                      '&.Mui-focused fieldset': { 
+                        borderColor: '#4285f4',
+                        borderWidth: '2px'
+                      },
+                      '& fieldset': {
+                        borderColor: '#ddd'
+                      }
+                    }
+                  }}
+                />
+                
+                {/* AM/PM Toggle */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', ml: 2 }}>
+                  {['AM', 'PM'].map((period) => {
+                    const currentTime = selectedDateTime || new Date();
+                    const isSelected = (period === 'AM' && currentTime.getHours() < 12) || 
+                                     (period === 'PM' && currentTime.getHours() >= 12);
+                    
+                    return (
+                      <Box
+                        key={period}
+                        onClick={() => {
+                          const newDateTime = new Date(currentTime);
+                          const currentHour = currentTime.getHours();
+                          
+                          if (period === 'AM' && currentHour >= 12) {
+                            newDateTime.setHours(currentHour - 12);
+                          } else if (period === 'PM' && currentHour < 12) {
+                            newDateTime.setHours(currentHour + 12);
+                          }
+                          
+                          setSelectedDateTime(newDateTime);
+                        }}
+                        sx={{
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 1,
+                          cursor: 'pointer',
+                          backgroundColor: isSelected ? '#4285f4' : '#f8f9fa',
+                          color: isSelected ? 'white' : '#666',
+                          textAlign: 'center',
+                          fontSize: '12px',
+                          fontWeight: isSelected ? 600 : 500,
+                          border: '1px solid',
+                          borderColor: isSelected ? '#4285f4' : '#ddd',
+                          minWidth: '32px',
+                          height: '18px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          '&:hover': {
+                            backgroundColor: !isSelected ? '#e8f0fe' : undefined,
+                            borderColor: !isSelected ? '#4285f4' : undefined
+                          },
+                          mb: period === 'AM' ? 1 : 0
+                        }}
+                      >
+                        {period}
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Divider */}
+            <Box sx={{ borderTop: '1px solid #e0e0e0', mb: 3 }} />
+
+            {/* Quick Time Options */}
+            <Box>
+              <Typography variant="body2" sx={{ mb: 2, color: '#666', fontWeight: 500 }}>
+                Quick Select
+              </Typography>
+              <Box sx={{ 
+                maxHeight: 250, 
+                overflowY: 'auto',
+                '&::-webkit-scrollbar': {
+                  width: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: '#f1f1f1',
+                  borderRadius: '3px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#ccc',
+                  borderRadius: '3px',
+                },
+              }}>
+                {(() => {
+                  const times = [];
+                  for (let hour = 9; hour <= 23; hour++) {
+                    for (let minute of [0, 30]) {
+                      const time24 = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                      const hour12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+                      const ampm = hour >= 12 ? 'PM' : 'AM';
+                      const time12 = `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
+                      
+                      times.push({ time24, time12, hour: hour, minute: minute });
+                    }
+                  }
+                  
+                  const currentTime = selectedDateTime || new Date();
+                  const selectedTime = `${currentTime.getHours().toString().padStart(2, '0')}:${currentTime.getMinutes().toString().padStart(2, '0')}`;
+                  
+                  return times.map(({ time24, time12, hour, minute }) => {
+                    const isSelected = selectedTime === time24;
+                    
+                    return (
+                      <Box
+                        key={time24}
+                        onClick={() => {
+                          const newDateTime = new Date(selectedDateTime || new Date());
+                          newDateTime.setHours(hour);
+                          newDateTime.setMinutes(minute);
+                          setSelectedDateTime(newDateTime);
+                        }}
+                        sx={{
+                          py: 1,
+                          px: 2,
+                          borderRadius: 1,
+                          cursor: 'pointer',
+                          backgroundColor: isSelected ? '#4285f4' : 'transparent',
+                          color: isSelected ? 'white' : '#333',
+                          '&:hover': {
+                            backgroundColor: !isSelected ? '#f5f5f5' : undefined
+                          },
+                          mb: 0.5,
+                          fontSize: '14px'
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ fontWeight: isSelected ? 600 : 400 }}>
+                          {time12}
+                        </Typography>
+                      </Box>
+                    );
+                  });
+                })()}
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+        
+        {/* Action Buttons */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end', 
+          gap: 2, 
+          p: 3, 
+          borderTop: '1px solid #e0e0e0',
+          backgroundColor: '#fafafa'
+        }}>
           <Button
             variant="outlined"
             onClick={() => setOpenDateTimePicker(false)}
+            sx={{
+              color: '#666',
+              borderColor: '#ddd',
+              '&:hover': {
+                borderColor: '#999',
+                backgroundColor: '#f5f5f5'
+              }
+            }}
           >
             Cancel
           </Button>
@@ -3911,11 +4275,13 @@ Would you like me to create this as a short handwritten-style note (suitable for
             variant="contained"
             onClick={handleScheduleSubmit}
             sx={{
-              backgroundColor: '#7C4DFF',
-              '&:hover': { backgroundColor: '#5E35B1' }
+              backgroundColor: '#4285f4',
+              '&:hover': { backgroundColor: '#3367d6' },
+              fontWeight: 600,
+              textTransform: 'none'
             }}
           >
-            Schedule Post
+            Done
           </Button>
         </Box>
       </Paper>
