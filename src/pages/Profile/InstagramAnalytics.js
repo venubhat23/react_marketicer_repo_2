@@ -792,7 +792,7 @@ const InstagramAnalytics = () => {
                       </Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
-                          Earned Media:
+                          Total Posts:
                         </Typography>
                         <Typography variant="body2">
                           {selectedAccountData.profile?.media_count || 'N/A'}

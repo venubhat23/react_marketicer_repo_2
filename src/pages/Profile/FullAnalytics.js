@@ -251,7 +251,7 @@ const FullAnalytics = () => {
                         <CardContent sx={{ textAlign: "center", p: 1 }}>
                           <Typography variant="h6">{post.reach}</Typography>
                           <Typography variant="body2" sx={{ mt: 2 }}>
-                            Total Reach
+                            Accounts Reached
                           </Typography>
                         </CardContent>
                       </Card>
