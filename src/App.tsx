@@ -33,7 +33,6 @@ import Calendar from './pages/Calendar/Calendar';
 import { InvoiceList, InvoiceForm, InvoiceDetail, InvoiceDashboard } from './pages/Invoice';
 import { PurchaseOrderList, PurchaseOrderForm, PurchaseOrderDetail, PurchaseOrderDashboard } from './pages/PurchaseOrder';
 import SystemSettings from './pages/SystemSettings';
-import LinkedinAnalytics from './pages/Profile/LinkedinAnalytics';
 import AutomationsPage from './pages/Automations/AutomationsPage';
 import AutomationRuns from './pages/Automations/AutomationRuns';
 import CreateAutomation from './pages/Automations/CreateAutomation';
