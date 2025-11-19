@@ -20,6 +20,7 @@ import {
   Assessment as AssessmentIcon,
   Close as CloseIcon,
   Monitor as MonitorIcon,
+  AutoMode as AutoModeIcon,
 } from '@mui/icons-material';
 
 import {
@@ -147,6 +148,17 @@ const Sidebar = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <CalendarTodayIcon fontSize="medium" />
                 <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Calendar</Typography>
+              </Box>
+            </Link>
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/automations">
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                <AutoModeIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Automations</Typography>
               </Box>
             </Link>
           </ListItemButton>

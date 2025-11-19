@@ -33,7 +33,10 @@ import Calendar from './pages/Calendar/Calendar';
 import { InvoiceList, InvoiceForm, InvoiceDetail, InvoiceDashboard } from './pages/Invoice';
 import { PurchaseOrderList, PurchaseOrderForm, PurchaseOrderDetail, PurchaseOrderDashboard } from './pages/PurchaseOrder';
 import SystemSettings from './pages/SystemSettings';
-
+import LinkedinAnalytics from './pages/Profile/LinkedinAnalytics';
+import AutomationsPage from './pages/Automations/AutomationsPage';
+import AutomationRuns from './pages/Automations/AutomationRuns';
+import CreateAutomation from './pages/Automations/CreateAutomation';
 
 // Component that renders routes based on user role
 const AppRoutes = () => {
@@ -249,6 +252,23 @@ const AppRoutes = () => {
       <Route path="/calendar" element={
         <ProtectedRoute>
           <Calendar />
+        </ProtectedRoute>
+      } />
+
+      {/* Automation Routes */}
+      <Route path="/automations" element={
+        <ProtectedRoute>
+          <AutomationsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/automations/runs" element={
+        <ProtectedRoute>
+          <AutomationRuns />
+        </ProtectedRoute>
+      } />
+      <Route path="/automations/create" element={
+        <ProtectedRoute>
+          <CreateAutomation />
         </ProtectedRoute>
       } />
 

@@ -3,7 +3,7 @@ import {
   Box, Typography, FormControl, Avatar,
   Grid, Select, MenuItem, Card, CardContent,
   Paper, IconButton, CircularProgress, TextField, Tabs, Tab,
-  Divider, Container, Stack, Button, InputLabel, CardMedia
+  Divider, Container, Stack, Button, InputLabel, CardMedia, Pagination
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -65,6 +65,10 @@ const InstagramAnalytics = () => {
   const [platformData, setPlatformData] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage] = useState(5); // Show 5 posts per page
 
   // const [recentPosts, setRecentPosts] = useState([]);
   // const [audienceGender, setAudienceGender] = useState([]);
@@ -232,6 +236,7 @@ const InstagramAnalytics = () => {
     setSelectedAccount(username);
     const accountData = instagramData.find(account => account.username === username);
     setSelectedAccountData(accountData);
+    setCurrentPage(1); // Reset pagination when account changes
   };
 
   const formatNumber = (num) => {
@@ -1266,90 +1271,143 @@ const InstagramAnalytics = () => {
               </Grid>
 
               <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }} style={{ display: platform === "LinkedIn" ? "none" : "block" }}>
-                <Typography variant="body1" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
-                  All Brand - Tagged Posts
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '16px' }}>
+                    All Brand - Tagged Posts
+                  </Typography>
+                  {selectedAccountData?.analytics?.recent_posts?.length > 0 && (
+                    <Typography variant="body2" color="text.secondary">
+                      Showing {Math.min((currentPage - 1) * postsPerPage + 1, selectedAccountData?.analytics?.recent_posts?.length || 0)}-{Math.min(currentPage * postsPerPage, selectedAccountData?.analytics?.recent_posts?.length || 0)} of {selectedAccountData?.analytics?.recent_posts?.length || 0} posts
+                    </Typography>
+                  )}
+                </Box>
 
-                {selectedAccountData?.analytics?.recent_posts.length > 0 ? (selectedAccountData?.analytics?.recent_posts.map((post, index) => (
+                {(() => {
+                  const posts = selectedAccountData?.analytics?.recent_posts || [];
+                  if (posts.length === 0) {
+                    return <p>No posts available</p>;
+                  }
 
-                  <Card
-                    key={post.id || index}
-                    variant="outlined"
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      p: 2,
-                      mb: 2,
-                      borderRadius: 2,
-                    }}
-                  >
-                    {/* Left Side: Avatar + Post Info */}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <CardMedia
-                        component="img"
-                        image={post.media_url || post.url || '/api/placeholder/100/100'}
-                        alt={post.caption || "Post image"}
-                        sx={{ width: 100, height: 100, borderRadius: 2, objectFit: 'cover' }}
-                      />
-                      <Box>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                          {post.caption || post.full_caption || 'No caption'}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          @{selectedAccountData?.username || selectedAccountData?.page_name || 'Unknown'}
-                        </Typography>
-                        <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                          {post.full_caption && post.full_caption.length > 50
-                            ? `${post.full_caption.substring(0, 50)}...`
-                            : post.full_caption || 'No description available'}
-                        </Typography>
+                  // Calculate pagination
+                  const indexOfLastPost = currentPage * postsPerPage;
+                  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+                  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
+                  const totalPages = Math.ceil(posts.length / postsPerPage);
 
-                        {/* Stats */}
-                        <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <FavoriteBorderIcon fontSize="small" />{" "}
-                            <Typography variant="body2">{post.likes || 0}</Typography>
+                  const handlePageChange = (event, value) => {
+                    setCurrentPage(value);
+                  };
+
+                  return (
+                    <>
+                      {currentPosts.map((post, index) => (
+                        <Card
+                          key={post.id || `${indexOfFirstPost + index}`}
+                          variant="outlined"
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            p: 2,
+                            mb: 2,
+                            borderRadius: 2,
+                          }}
+                        >
+                          {/* Left Side: Avatar + Post Info */}
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                            <CardMedia
+                              component="img"
+                              image={post.media_url || post.url || '/api/placeholder/100/100'}
+                              alt={post.caption || "Post image"}
+                              sx={{ width: 100, height: 100, borderRadius: 2, objectFit: 'cover' }}
+                            />
+                            <Box>
+                              <Typography variant="subtitle1" fontWeight="bold">
+                                {post.caption || post.full_caption || 'No caption'}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                @{selectedAccountData?.username || selectedAccountData?.page_name || 'Unknown'}
+                              </Typography>
+                              <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+                                {post.full_caption && post.full_caption.length > 50
+                                  ? `${post.full_caption.substring(0, 50)}...`
+                                  : post.full_caption || 'No description available'}
+                              </Typography>
+
+                              {/* Stats */}
+                              <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                  <FavoriteBorderIcon fontSize="small" />{" "}
+                                  <Typography variant="body2">{post.likes || 0}</Typography>
+                                </Box>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                  <ChatBubbleOutlineIcon fontSize="small" />{" "}
+                                  <Typography variant="body2">{post.comments || 0}</Typography>
+                                </Box>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                  <SendIcon fontSize="small" />{" "}
+                                  <Typography variant="body2">{post.shares || 0}</Typography>
+                                </Box>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                  <ShareIcon fontSize="small" />{" "}
+                                  <Typography variant="body2">{post.saved || 0}</Typography>
+                                </Box>
+                              </Box>
+                            </Box>
                           </Box>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <ChatBubbleOutlineIcon fontSize="small" />{" "}
-                            <Typography variant="body2">{post.comments || 0}</Typography>
+
+                          {/* Right Side: Date + Link */}
+                          <Box sx={{ textAlign: "right" }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {new Date(post.timestamp).toLocaleDateString("en-US", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </Typography>
+                            <Link
+                              to={`/FullAnalytics/${post.id}`}
+                              underline="hover"
+                              sx={{ fontWeight: "bold", color: "purple" }}
+                            >
+                              View full Analytics →
+                            </Link>
                           </Box>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <SendIcon fontSize="small" />{" "}
-                            <Typography variant="body2">{post.shares || 0}</Typography>
-                          </Box>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <ShareIcon fontSize="small" />{" "}
-                            <Typography variant="body2">{post.saved || 0}</Typography>
-                          </Box>
+                        </Card>
+                      ))}
+
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+                          <Pagination
+                            count={totalPages}
+                            page={currentPage}
+                            onChange={handlePageChange}
+                            color="primary"
+                            size="large"
+                            showFirstButton
+                            showLastButton
+                            sx={{
+                              '& .MuiPaginationItem-root': {
+                                color: '#882AFF',
+                                '&.Mui-selected': {
+                                  backgroundColor: '#882AFF',
+                                  color: 'white',
+                                  '&:hover': {
+                                    backgroundColor: '#7625e6',
+                                  },
+                                },
+                                '&:hover': {
+                                  backgroundColor: 'rgba(136, 42, 255, 0.1)',
+                                },
+                              },
+                            }}
+                          />
                         </Box>
-                      </Box>
-                    </Box>
-
-                    {/* Right Side: Date + Link */}
-                    <Box sx={{ textAlign: "right" }}>
-                      <Typography variant="body2" color="text.secondary">
-                        {new Date(post.timestamp).toLocaleDateString("en-US", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-
-                      </Typography>
-                      <Link
-                        to={`/FullAnalytics/${post.id}`}
-                        underline="hover"
-                        sx={{ fontWeight: "bold", color: "purple" }}
-                      >
-                        View full Analytics →
-                      </Link>
-                    </Box>
-                  </Card>
-                ))
-                ) : (
-                  <p>No posts available</p>
-                )}
+                      )}
+                    </>
+                  );
+                })()}
               </Grid>
 
 

@@ -149,6 +149,30 @@ const SettingPage = () => {
     // Delete Account State
     const [deleteAccountPassword, setDeleteAccountPassword] = useState('');
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    
+    // Social Media Accounts State
+    const [socialAccounts, setSocialAccounts] = useState([]);
+    const [socialAccountsLoading, setSocialAccountsLoading] = useState(false);
+    
+    // Social Media Icons Mapping
+    const socialIcons = {
+      "linkedin": {
+        "name": "LinkedIn",
+        "icon": "https://c.animaapp.com/mayvvv0wua9Y41/img/avatar.png",
+      },
+      "instagram": {
+        "name": "Instagram", 
+        "icon": "https://c.animaapp.com/mayvvv0wua9Y41/img/avatar-1.png",
+      },
+      "facebook": {
+        "name": "Facebook",
+        "icon": "https://c.animaapp.com/mayvvv0wua9Y41/img/avatar-2.png",
+      },
+      "twitter": {
+        "name": "Twitter",
+        "icon": "https://c.animaapp.com/mayvvv0wua9Y41/img/avatar-3.png",
+      }
+    };
 
     // Load data from API when available
     useEffect(() => {
@@ -183,6 +207,11 @@ const SettingPage = () => {
         }
       }
     }, [settingsData]);
+
+    // Fetch social accounts on component mount
+    useEffect(() => {
+      fetchSocialAccounts();
+    }, []);
     
     const handlePersonalChange = (e) => {
         const { name, value } = e.target;
@@ -320,6 +349,46 @@ const SettingPage = () => {
 
       const handleChangePhotoClick = () => {
         fileInputRef.current?.click();
+      };
+
+      // Fetch connected social media accounts
+      const fetchSocialAccounts = async () => {
+        try {
+          setSocialAccountsLoading(true);
+          const response = await axios.get("https://api.marketincer.com/api/v1/social_pages/connected_pages", {
+            headers: {
+              'Authorization': localStorage.getItem('token'),
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          let accounts = response?.data?.data?.accounts;
+          if (accounts) {
+            accounts = accounts.map((account) => {
+              const new_account = {
+                id: account.id,
+                platform: socialIcons[account.page_type]?.name || account.page_type,
+                icon: socialIcons[account.page_type]?.icon,
+                page_type: account.page_type,
+                users: [{
+                  id: account.id,
+                  social_account_id: account.social_account_id,
+                  name: account.name,
+                  username: account.username,
+                  avatar: account.picture_url,
+                  status: "Active",
+                }]
+              };
+              return new_account;
+            });
+            setSocialAccounts(accounts);
+          }
+        } catch (error) {
+          console.error("Failed to fetch social accounts:", error);
+          toast.error("Failed to load social media accounts");
+        } finally {
+          setSocialAccountsLoading(false);
+        }
       };
 
 
@@ -1249,130 +1318,147 @@ const SettingPage = () => {
         </TabPanel>
         <TabPanel value={selectedTab} index={4}>
           <Box maxWidth="700px">
-            <Card sx={{ 
-              p: 3, 
-              borderRadius: 2, 
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-              border: '1px solid #f3f4f6'
-            }}>
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                  <Box sx={{ 
+            {socialAccountsLoading ? (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <CircularProgress size={24} sx={{ color: '#882AFF' }} />
+                <Typography sx={{ mt: 2, color: '#6b7280' }}>
+                  Loading social media accounts...
+                </Typography>
+              </Box>
+            ) : (
+              <>
+                {socialAccounts.length > 0 && (
+                  <Card sx={{ 
                     p: 3, 
-                    backgroundColor: '#f8f9fa', 
                     borderRadius: 2, 
-                    border: '2px dashed #e5e7eb',
-                    textAlign: 'center',
-                    minHeight: 120,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center'
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid #f3f4f6',
+                    mb: 3
                   }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                      Instagram
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                      Connected Accounts
                     </Typography>
-                    <Button 
-                      variant="outlined"
-                        sx={{ 
-                        textTransform: 'none',
-                        borderRadius: 3,
-                        borderColor: '#882AFF',
-                        color: '#882AFF'
-                      }}
-                    >
-                      Connect Account
-                    </Button>
-                  </Box>
-                </Grid>
+                    
+                    <Stack spacing={2}>
+                      {socialAccounts.map((account) => (
+                        account.users.map((user, index) => (
+                          <Box
+                            key={`${account.id}-${index}`}
+                            sx={{ 
+                              display: 'flex', 
+                              alignItems: 'center',
+                              p: 2,
+                              backgroundColor: '#f8f9fa',
+                              borderRadius: 2,
+                              border: '1px solid #e5e7eb'
+                            }}
+                          >
+                            <Avatar
+                              src={account.icon}
+                              sx={{ width: 40, height: 40, mr: 2 }}
+                            />
+                            <Avatar
+                              src={user.avatar}
+                              sx={{ width: 34, height: 34, mr: 2 }}
+                            />
+                            <Box sx={{ flexGrow: 1 }}>
+                              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                {user.name}
+                              </Typography>
+                              <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                                {account.platform} • {user.username}
+                              </Typography>
+                            </Box>
+                            <Chip
+                              size="small"
+                              label={user.status}
+                              sx={{
+                                color: "#21d548",
+                                bgcolor: "white",
+                                border: "1px solid #21d548",
+                                mr: 2
+                              }}
+                              icon={<Box
+                                sx={{
+                                  width: 6,
+                                  height: 6,
+                                  bgcolor: "#21d548",
+                                  borderRadius: "50%",
+                                }}
+                              />}
+                            />
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              sx={{
+                                textTransform: 'none',
+                                borderRadius: 2,
+                                borderColor: '#882AFF',
+                                color: '#882AFF',
+                                '&:hover': {
+                                  borderColor: '#7625e6',
+                                  backgroundColor: 'rgba(136,42,255,0.05)'
+                                }
+                              }}
+                            >
+                              Manage
+                            </Button>
+                          </Box>
+                        ))
+                      ))}
+                    </Stack>
+                  </Card>
+                )}
                 
-                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                  <Box sx={{ 
-                    p: 3, 
-                    backgroundColor: '#f8f9fa', 
-                    borderRadius: 2, 
-                    border: '2px dashed #e5e7eb',
-                    textAlign: 'center',
-                    minHeight: 120,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center'
-                  }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                      Twitter
-                    </Typography>
-                    <Button 
-                      variant="outlined"
-                        sx={{ 
-                        textTransform: 'none',
-                        borderRadius: 3,
-                        borderColor: '#882AFF',
-                        color: '#882AFF'
-                      }}
-                    >
-                      Connect Account
-                    </Button>
-                  </Box>
-                </Grid>
-
-                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                  <Box sx={{ 
-                    p: 3, 
-                    backgroundColor: '#f8f9fa', 
-                    borderRadius: 2, 
-                    border: '2px dashed #e5e7eb',
-                    textAlign: 'center',
-                    minHeight: 120,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center'
-                  }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                      LinkedIn
-                    </Typography>
-                    <Button 
-                      variant="outlined"
-                        sx={{ 
-                        textTransform: 'none',
-                        borderRadius: 3,
-                        borderColor: '#882AFF',
-                        color: '#882AFF'
-                      }}
-                    >
-                      Connect Account
-                    </Button>
-                  </Box>
-                </Grid>
-
-                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                  <Box sx={{ 
-                    p: 3, 
-                    backgroundColor: '#f8f9fa', 
-                    borderRadius: 2, 
-                    border: '2px dashed #e5e7eb',
-                    textAlign: 'center',
-                    minHeight: 120,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center'
-                  }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                      Facebook
-                    </Typography>
-                    <Button 
-                      variant="outlined"
-                        sx={{ 
-                        textTransform: 'none',
-                        borderRadius: 3,
-                        borderColor: '#882AFF',
-                        color: '#882AFF'
-                      }}
-                    >
-                      Connect Account
-                    </Button>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Card>
+                <Card sx={{ 
+                  p: 3, 
+                  borderRadius: 2, 
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid #f3f4f6'
+                }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                    Connect New Account
+                  </Typography>
+                  
+                  <Grid container spacing={2}>
+                    {['Instagram', 'Twitter', 'LinkedIn', 'Facebook'].map((platform) => (
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }} key={platform}>
+                        <Box sx={{ 
+                          p: 3, 
+                          backgroundColor: '#f8f9fa', 
+                          borderRadius: 2, 
+                          border: '2px dashed #e5e7eb',
+                          textAlign: 'center',
+                          minHeight: 120,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
+                        }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                            {platform}
+                          </Typography>
+                          <Button 
+                            variant="outlined"
+                            sx={{ 
+                              textTransform: 'none',
+                              borderRadius: 3,
+                              borderColor: '#882AFF',
+                              color: '#882AFF',
+                              '&:hover': {
+                                borderColor: '#7625e6',
+                                backgroundColor: 'rgba(136,42,255,0.05)'
+                              }
+                            }}
+                          >
+                            Connect Account
+                          </Button>
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Card>
+              </>
+            )}
           </Box>
         </TabPanel>
         <TabPanel value={selectedTab} index={5}>
