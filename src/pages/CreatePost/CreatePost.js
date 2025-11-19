@@ -3617,47 +3617,29 @@ Would you like me to create this as a short handwritten-style note (suitable for
                   />
 
                   {/* Buttons */}
-                  <Box display="flex" gap={2}>
-                    <Button
-                      variant="outlined"
-                      sx={{
-                        borderColor: '#7C4DFF',
-                        color: '#7C4DFF',
-                        '&:hover': {
-                          borderColor: '#5E35B1',
-                          color: '#5E35B1',
-                          backgroundColor: 'rgba(124, 77, 255, 0.04)'
-                        }
-                      }}
-                      onClick={() => handleSaveAsDraft()}
-                      disabled={posting || uploading}
-                    >
-                      Save as Draft
-                    </Button>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        backgroundColor: '#7C4DFF',
-                        color: '#fff',
-                        '&:hover': { backgroundColor: '#5E35B1' }
-                      }}
-                      onClick={() => draftModelOpen("schedule")}
-                      disabled={posting || uploading}
-                    >
-                      Schedule Post
-                    </Button>
-                  </Box>
+                  {/* Primary Action - Publish Now (Top) */}
                   <Button
                     variant="contained"
                     fullWidth
                     onClick={handlePublish}
-                    disabled={posting || uploading} // Disable when posting or uploading
+                    disabled={posting || uploading}
                     sx={{ 
-                      mt: 2, 
+                      mb: 3,
+                      py: 1.5,
+                      fontSize: '1.1rem',
+                      fontWeight: 600,
+                      background: 'linear-gradient(135deg, #7C4DFF 0%, #9C27B0 100%)',
+                      boxShadow: '0 4px 15px rgba(124, 77, 255, 0.3)',
+                      '&:hover': { 
+                        background: 'linear-gradient(135deg, #5E35B1 0%, #7B1FA2 100%)',
+                        boxShadow: '0 6px 20px rgba(124, 77, 255, 0.4)',
+                        transform: 'translateY(-2px)'
+                      },
                       '&:disabled': {
-                        bgcolor: '#9575cd', // Lighter purple when disabled
+                        bgcolor: '#9575cd',
                         color: '#fff'
-                      }
+                      },
+                      transition: 'all 0.3s ease'
                     }}
                   >
                     {posting ? (
@@ -3669,6 +3651,50 @@ Would you like me to create this as a short handwritten-style note (suitable for
                       'Publish Now'
                     )}
                   </Button>
+
+                  {/* Secondary Actions - Save Draft & Schedule (Bottom) */}
+                  <Box display="flex" gap={2} sx={{ mt: 'auto' }}>
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      sx={{
+                        borderColor: '#7C4DFF',
+                        color: '#7C4DFF',
+                        py: 1.2,
+                        fontWeight: 500,
+                        '&:hover': {
+                          borderColor: '#5E35B1',
+                          color: '#5E35B1',
+                          backgroundColor: 'rgba(124, 77, 255, 0.08)',
+                          transform: 'translateY(-1px)'
+                        },
+                        transition: 'all 0.2s ease'
+                      }}
+                      onClick={() => handleSaveAsDraft()}
+                      disabled={posting || uploading}
+                    >
+                      Save as Draft
+                    </Button>
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      sx={{
+                        backgroundColor: '#7C4DFF',
+                        color: '#fff',
+                        py: 1.2,
+                        fontWeight: 500,
+                        '&:hover': { 
+                          backgroundColor: '#5E35B1',
+                          transform: 'translateY(-1px)'
+                        },
+                        transition: 'all 0.2s ease'
+                      }}
+                      onClick={() => draftModelOpen("schedule")}
+                      disabled={posting || uploading}
+                    >
+                      Schedule Post
+                    </Button>
+                  </Box>
           </Grid>
 
           <Grid  size={{ xs: 12, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height:'100%', overflowY: 'auto' }}>
@@ -3832,6 +3858,16 @@ Would you like me to create this as a short handwritten-style note (suitable for
               dateFormat: "Y-m-d H:i",
               minDate: "today",
               time_24hr: false,
+              minuteIncrement: 1,
+              allowInput: true,
+              clickOpens: true,
+              enableSeconds: false,
+              static: false,
+              altInput: true,
+              altFormat: "F j, Y at h:i K",
+              parseDate: (datestr, format) => {
+                return new Date(datestr);
+              }
             }}
             render={({ defaultValue, ...props }, ref) => (
               <TextField
@@ -3841,10 +3877,24 @@ Would you like me to create this as a short handwritten-style note (suitable for
                 label="Select Date and Time"
                 variant="outlined"
                 value={defaultValue}
+                placeholder="Click to select date and time"
                 InputProps={{
-                  readOnly: true,
+                  readOnly: false,
                 }}
-                sx={{ mb: 3 }}
+                sx={{ 
+                  mb: 3,
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: '#7C4DFF',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#7C4DFF',
+                    },
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: '#7C4DFF',
+                  },
+                }}
               />
             )}
           />
