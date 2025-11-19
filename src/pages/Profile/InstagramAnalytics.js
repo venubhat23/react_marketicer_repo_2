@@ -734,80 +734,223 @@ const InstagramAnalytics = () => {
 
                 {selectedAccountData && (
                   <Card sx={{
-                    borderRadius: 3,
-                    p: 2.5,
+                    borderRadius: '24px',
+                    p: 3,
                     height: 'fit-content',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    border: '1px solid #e0e0e0',
-                    minHeight: '250px'
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.03)',
+                    border: '1px solid rgba(139, 92, 246, 0.15)',
+                    minHeight: '320px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: '4px',
+                      background: 'linear-gradient(90deg, #8B5CF6 0%, #A78BFA 50%, #C4B5FD 100%)'
+                    },
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.08)',
+                      border: '1px solid rgba(139, 92, 246, 0.25)'
+                    }
                   }}>
                     {/* Profile Header */}
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                      {platform === "Instagram" ? (
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 3 }}>
+                      <Box sx={{ position: 'relative', mr: 3 }}>
                         <Avatar
                           src={selectedAccountData.profile?.profile_picture_url || '/api/placeholder/48/48'}
-                          sx={{ width: 100, height: 100, mr: 2 }} />
-                      ) : (
-                        <Avatar
-                          src={selectedAccountData.profile?.profile_picture_url || '/api/placeholder/48/48'}
-                          sx={{ width: 100, height: 100, mr: 2 }} />
-                      )}
+                          sx={{ 
+                            width: 120, 
+                            height: 120,
+                            boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+                            border: '4px solid rgba(139, 92, 246, 0.2)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'scale(1.05)',
+                              boxShadow: '0 12px 25px rgba(0,0,0,0.2)'
+                            }
+                          }} 
+                        />
+                        <Box sx={{
+                          position: 'absolute',
+                          bottom: 8,
+                          right: 8,
+                          width: 24,
+                          height: 24,
+                          borderRadius: '50%',
+                          background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)',
+                          border: '3px solid white',
+                          boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)'
+                        }} />
+                      </Box>
 
                       <Box sx={{ flex: 1 }}>
-                        {platform === "Instagram" ? (<Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '18px' }}>
-                          {selectedAccountData.page_name || 'N/A'}
+                        <Typography variant="h5" sx={{ 
+                          fontWeight: 700, 
+                          mb: 1, 
+                          fontSize: '1.4rem',
+                          background: 'linear-gradient(135deg, #1a1a1a 0%, #374151 100%)',
+                          backgroundClip: 'text',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent'
+                        }}>
+                          {selectedAccountData.page_name || selectedAccountData?.page_name || 'N/A'}
                         </Typography>
-                        ) : (
-                          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '18px' }}>
-                            {selectedAccountData?.page_name || 'N/A'}
+
+                        <Box sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          px: 2,
+                          py: 0.5,
+                          borderRadius: '12px',
+                          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)',
+                          border: '1px solid rgba(139, 92, 246, 0.2)',
+                          mb: 1
+                        }}>
+                          <Typography variant="body2" sx={{ 
+                            color: '#8B5CF6',
+                            fontWeight: 600,
+                            fontSize: '0.85rem'
+                          }}>
+                            {selectedAccountData?.profile?.name || 'N/A'}
                           </Typography>
-                        )}
+                        </Box>
 
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontSize: '13px' }}>
-                          {selectedAccountData?.profile?.name || 'N/A'}
-                        </Typography>
-
-                        <Typography variant="body2" sx={{ fontSize: '13px', lineHeight: 1.3 }}>
-                          <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                            {formatNumber(selectedAccountData.profile?.followers_count || 0)} <span style={{ color: "gray" }}>followers</span>
+                        <Box sx={{ display: 'flex', gap: 3, mt: 2 }}>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 700, 
+                              color: '#8B5CF6',
+                              fontSize: '1.1rem'
+                            }}>
+                              {formatNumber(selectedAccountData.profile?.followers_count || 0)}
+                            </Typography>
+                            <Typography variant="caption" sx={{ 
+                              color: '#6b7280',
+                              fontWeight: 500,
+                              textTransform: 'uppercase',
+                              letterSpacing: 0.5
+                            }}>
+                              Followers
+                            </Typography>
                           </Box>
-                          <br />
-                          <Box component="span" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                            {formatNumber(selectedAccountData.profile?.follows_count || 0)} <span style={{ color: "gray" }}>following</span>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 700, 
+                              color: '#06B6D4',
+                              fontSize: '1.1rem'
+                            }}>
+                              {formatNumber(selectedAccountData.profile?.follows_count || 0)}
+                            </Typography>
+                            <Typography variant="caption" sx={{ 
+                              color: '#6b7280',
+                              fontWeight: 500,
+                              textTransform: 'uppercase',
+                              letterSpacing: 0.5
+                            }}>
+                              Following
+                            </Typography>
                           </Box>
-                        </Typography>
+                        </Box>
                       </Box>
                     </Box>
 
                     {/* Bio */}
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.6, lineHeight: 1.4, fontSize: '13px' }}>
-                      {selectedAccountData.profile?.biography || 'N/A'}
-                    </Typography>
+                    <Box sx={{
+                      p: 2.5,
+                      borderRadius: '16px',
+                      background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(167, 139, 250, 0.05) 100%)',
+                      border: '1px solid rgba(139, 92, 246, 0.1)',
+                      mb: 2
+                    }}>
+                      <Typography variant="body2" sx={{ 
+                        color: '#374151', 
+                        lineHeight: 1.6, 
+                        fontSize: '0.9rem',
+                        fontStyle: 'italic'
+                      }}>
+                        {selectedAccountData.profile?.biography || 'No bio available'}
+                      </Typography>
+                    </Box>
 
-                    <hr></hr>
-                    {/* Stats */}
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
-                          Engagement Rate:
-                        </Typography>
-                        <Typography variant="body2">
+                    {/* Enhanced Stats */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      <Box sx={{
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        p: 2,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(252, 165, 165, 0.1) 100%)',
+                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateX(4px)',
+                          boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)'
+                        }
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography sx={{ fontSize: '16px', mr: 1 }}>📈</Typography>
+                          <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#374151' }}>
+                            Engagement Rate
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#EF4444', fontSize: '0.9rem' }}>
                           {selectedAccountData.profile?.engagement_rate || 'N/A'}
                         </Typography>
                       </Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
-                          Total Posts:
-                        </Typography>
-                        <Typography variant="body2">
+                      
+                      <Box sx={{
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        p: 2,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%)',
+                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateX(4px)',
+                          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)'
+                        }
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography sx={{ fontSize: '16px', mr: 1 }}>📷</Typography>
+                          <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#374151' }}>
+                            Total Posts
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#3B82F6', fontSize: '0.9rem' }}>
                           {selectedAccountData.profile?.media_count || 'N/A'}
                         </Typography>
                       </Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
-                          Average Interactions:
-                        </Typography>
-                        <Typography variant="body2">
+                      
+                      <Box sx={{
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        p: 2,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(110, 231, 183, 0.1) 100%)',
+                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateX(4px)',
+                          boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)'
+                        }
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography sx={{ fontSize: '16px', mr: 1 }}>🎯</Typography>
+                          <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#374151' }}>
+                            Avg Interactions
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#10B981', fontSize: '0.9rem' }}>
                           {selectedAccountData.analytics?.total_posts || 'N/A'}
                         </Typography>
                       </Box>
@@ -823,59 +966,87 @@ const InstagramAnalytics = () => {
 
                 {selectedAccountData && (
                   <>
-                    {/* Analytics Cards - First Row */}
-                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                      {getCampaignAnalytics(selectedAccountData).slice(0, 4).map((card, index) => (
-                        <Box key={index} sx={{ flex: 1 }}>
-                          <Card sx={{
-                            p: 2,
-                            textAlign: 'center',
-                            borderRadius: 2,
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                            border: '1px solid #e0e0e0',
-                            height: '80px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center'
-                          }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                              {card.value}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>
-                              {card.label}
-                            </Typography>
-                          </Card>
-                        </Box>
-                      ))}
-                    </Box>
-
-                    {/* Analytics Cards - Second Row */}
-                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                      {getCampaignAnalytics(selectedAccountData).slice(4, 8).map((card, index) => (
-                        <Box key={index + 4} sx={{ flex: 1 }}>
-                          <Card sx={{
-                            p: 2,
-                            textAlign: 'center',
-                            borderRadius: 2,
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                            border: '1px solid #e0e0e0',
-                            height: '80px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center'
-                          }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                              {card.value}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px' }}>
-                              {card.label}
-                            </Typography>
-                          </Card>
-                        </Box>
-                      ))}
-                    </Box>
-
-
+                    {/* Modern Analytics Cards */}
+                    <Grid container spacing={3} sx={{ mb: 3 }}>
+                      {getCampaignAnalytics(selectedAccountData).map((card, index) => {
+                        const colors = [
+                          { main: '#8B5CF6', bg: '#8B5CF615', icon: '❤️' },
+                          { main: '#06B6D4', bg: '#06B6D415', icon: '💬' },
+                          { main: '#F59E0B', bg: '#F59E0B15', icon: '🔥' },
+                          { main: '#10B981', bg: '#10B98115', icon: '📈' },
+                          { main: '#EF4444', bg: '#EF444415', icon: '🔗' },
+                          { main: '#8B5CF6', bg: '#8B5CF615', icon: '💾' },
+                          { main: '#3B82F6', bg: '#3B82F615', icon: '👆' },
+                          { main: '#6366F1', bg: '#6366F115', icon: '👁️' }
+                        ];
+                        const colorConfig = colors[index % colors.length];
+                        
+                        return (
+                          <Grid key={index} item xs={12} sm={6} md={3}>
+                            <Card
+                              sx={{
+                                height: 120,
+                                borderRadius: '16px',
+                                background: `linear-gradient(135deg, ${colorConfig.bg} 0%, ${colorConfig.main}25 100%)`,
+                                border: `2px solid ${colorConfig.main}30`,
+                                transition: 'all 0.3s ease',
+                                cursor: 'pointer',
+                                overflow: 'hidden',
+                                position: 'relative',
+                                '&::before': {
+                                  content: '""',
+                                  position: 'absolute',
+                                  top: 0,
+                                  left: 0,
+                                  right: 0,
+                                  height: '4px',
+                                  background: `linear-gradient(90deg, ${colorConfig.main} 0%, ${colorConfig.main}80 100%)`,
+                                },
+                                '&:hover': {
+                                  transform: 'translateY(-4px)',
+                                  boxShadow: `0 12px 40px ${colorConfig.main}40`,
+                                  border: `2px solid ${colorConfig.main}60`,
+                                }
+                              }}
+                            >
+                              <CardContent sx={{ 
+                                textAlign: "center", 
+                                p: 2, 
+                                height: '100%', 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                              }}>
+                                <Box sx={{ 
+                                  fontSize: '24px', 
+                                  mb: 1,
+                                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                                }}>
+                                  {colorConfig.icon}
+                                </Box>
+                                <Typography variant="h5" sx={{ 
+                                  fontWeight: 700, 
+                                  color: colorConfig.main, 
+                                  mb: 0.5,
+                                  fontSize: '1.25rem'
+                                }}>
+                                  {card.value}
+                                </Typography>
+                                <Typography variant="body2" sx={{ 
+                                  color: '#666', 
+                                  fontWeight: 500,
+                                  fontSize: '0.8rem',
+                                  textAlign: 'center'
+                                }}>
+                                  {card.label}
+                                </Typography>
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        );
+                      })}
+                    </Grid>
                   </>
                 )}
               </Grid>
@@ -885,11 +1056,38 @@ const InstagramAnalytics = () => {
                 <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                   {/* Engagement Over Time */}
                   <Box sx={{ flex: 1 }}>
-                    <Card sx={{ p: 2.5, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
+                    <Card sx={{ 
+                      p: 3, 
+                      borderRadius: '20px', 
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.03)', 
+                      border: '1px solid rgba(139, 92, 246, 0.1)', 
+                      minHeight: '280px',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.08)'
+                      }
+                    }}>
                       {platform === "Instagram" ? (<Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px', mb: 2 }}>
-                          Engagement Over Time
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                          <Box sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            mr: 2,
+                            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+                          }}>
+                            <Typography sx={{ fontSize: '18px' }}>📊</Typography>
+                          </Box>
+                          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px', color: '#1a1a1a' }}>
+                            Engagement Over Time
+                          </Typography>
+                        </Box>
                         <ResponsiveContainer width="100%" height={150}>
                           <AreaChart data={engOverData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                             <defs>
@@ -958,10 +1156,37 @@ const InstagramAnalytics = () => {
 
                   {/* Audience Engagement */}
                   <Box sx={{ flex: 1 }}>
-                    <Card sx={{ p: 2.5, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', minHeight: '215px' }}>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, fontSize: '16px' }}>
-                        Audience Engagement
-                      </Typography>
+                    <Card sx={{ 
+                      p: 3, 
+                      borderRadius: '20px', 
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.03)', 
+                      border: '1px solid rgba(139, 92, 246, 0.1)', 
+                      minHeight: '280px',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.08)'
+                      }
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                        <Box sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: '12px',
+                          background: 'linear-gradient(135deg, #06B6D4 0%, #67E8F9 100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mr: 2,
+                          boxShadow: '0 4px 12px rgba(6, 182, 212, 0.3)'
+                        }}>
+                          <Typography sx={{ fontSize: '18px' }}>🎯</Typography>
+                        </Box>
+                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px', color: '#1a1a1a' }}>
+                          Audience Engagement
+                        </Typography>
+                      </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       {platform === "Instagram" ? (
                          <><Box sx={{ width: 100, height: 100 }}>
@@ -1303,74 +1528,257 @@ const InstagramAnalytics = () => {
                       {currentPosts.map((post, index) => (
                         <Card
                           key={post.id || `${indexOfFirstPost + index}`}
-                          variant="outlined"
                           sx={{
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "center",
-                            p: 2,
-                            mb: 2,
-                            borderRadius: 2,
+                            p: 3,
+                            mb: 3,
+                            borderRadius: '20px',
+                            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                            boxShadow: '0 8px 25px rgba(0,0,0,0.08), 0 3px 10px rgba(0,0,0,0.03)',
+                            border: '1px solid rgba(139, 92, 246, 0.1)',
+                            transition: 'all 0.3s ease',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: '4px',
+                              background: 'linear-gradient(90deg, #8B5CF6 0%, #A78BFA 50%, #C4B5FD 100%)'
+                            },
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.08)',
+                              border: '1px solid rgba(139, 92, 246, 0.3)'
+                            }
                           }}
                         >
                           {/* Left Side: Avatar + Post Info */}
                           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                            <CardMedia
-                              component="img"
-                              image={post.media_url || post.url || '/api/placeholder/100/100'}
-                              alt={post.caption || "Post image"}
-                              sx={{ width: 100, height: 100, borderRadius: 2, objectFit: 'cover' }}
-                            />
-                            <Box>
-                              <Typography variant="subtitle1" fontWeight="bold">
-                                {post.caption || post.full_caption || 'No caption'}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
+                            <Box sx={{ 
+                              position: 'relative',
+                              borderRadius: '16px',
+                              overflow: 'hidden',
+                              boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
+                            }}>
+                              <CardMedia
+                                component="img"
+                                image={post.media_url || post.url || '/api/placeholder/100/100'}
+                                alt={post.caption || "Post image"}
+                                sx={{ 
+                                  width: 120, 
+                                  height: 120, 
+                                  objectFit: 'cover',
+                                  transition: 'transform 0.3s ease'
+                                }}
+                              />
+                              <Box sx={{
+                                position: 'absolute',
+                                top: 8,
+                                right: 8,
+                                background: 'rgba(255,255,255,0.9)',
+                                borderRadius: '50%',
+                                width: 28,
+                                height: 28,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backdropFilter: 'blur(4px)'
+                              }}>
+                                <Typography sx={{ fontSize: '12px' }}>📸</Typography>
+                              </Box>
+                            </Box>
+                            <Box sx={{ flex: 1, ml: 3 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                <Typography variant="h6" sx={{ 
+                                  fontWeight: 700, 
+                                  color: '#1a1a1a',
+                                  fontSize: '1.1rem',
+                                  mr: 2
+                                }}>
+                                  {post.caption || post.full_caption || 'No caption'}
+                                </Typography>
+                                <Box sx={{
+                                  px: 1.5,
+                                  py: 0.5,
+                                  borderRadius: '12px',
+                                  background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)',
+                                  color: 'white',
+                                  fontSize: '10px',
+                                  fontWeight: 600,
+                                  textTransform: 'uppercase',
+                                  letterSpacing: 0.5
+                                }}>
+                                  NEW
+                                </Box>
+                              </Box>
+                              
+                              <Typography variant="body2" sx={{ 
+                                color: '#8B5CF6', 
+                                fontWeight: 600,
+                                mb: 1,
+                                fontSize: '0.9rem'
+                              }}>
                                 @{selectedAccountData?.username || selectedAccountData?.page_name || 'Unknown'}
                               </Typography>
-                              <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                                {post.full_caption && post.full_caption.length > 50
-                                  ? `${post.full_caption.substring(0, 50)}...`
+                              
+                              <Typography variant="body2" sx={{ 
+                                color: '#6b7280',
+                                lineHeight: 1.5,
+                                mb: 2,
+                                maxWidth: 300
+                              }}>
+                                {post.full_caption && post.full_caption.length > 80
+                                  ? `${post.full_caption.substring(0, 80)}...`
                                   : post.full_caption || 'No description available'}
                               </Typography>
 
-                              {/* Stats */}
-                              <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                                  <FavoriteBorderIcon fontSize="small" />{" "}
-                                  <Typography variant="body2">{post.likes || 0}</Typography>
+                              {/* Enhanced Stats */}
+                              <Box sx={{ display: "flex", gap: 4, mt: 2 }}>
+                                <Box sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 1,
+                                  px: 2,
+                                  py: 1,
+                                  borderRadius: '12px',
+                                  background: 'rgba(239, 68, 68, 0.1)',
+                                  transition: 'all 0.2s ease',
+                                  '&:hover': {
+                                    background: 'rgba(239, 68, 68, 0.2)',
+                                    transform: 'scale(1.05)'
+                                  }
+                                }}>
+                                  <FavoriteBorderIcon sx={{ fontSize: 16, color: '#EF4444' }} />
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#EF4444' }}>
+                                    {(post.likes || 0).toLocaleString()}
+                                  </Typography>
                                 </Box>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                                  <ChatBubbleOutlineIcon fontSize="small" />{" "}
-                                  <Typography variant="body2">{post.comments || 0}</Typography>
+                                <Box sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 1,
+                                  px: 2,
+                                  py: 1,
+                                  borderRadius: '12px',
+                                  background: 'rgba(59, 130, 246, 0.1)',
+                                  transition: 'all 0.2s ease',
+                                  '&:hover': {
+                                    background: 'rgba(59, 130, 246, 0.2)',
+                                    transform: 'scale(1.05)'
+                                  }
+                                }}>
+                                  <ChatBubbleOutlineIcon sx={{ fontSize: 16, color: '#3B82F6' }} />
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#3B82F6' }}>
+                                    {(post.comments || 0).toLocaleString()}
+                                  </Typography>
                                 </Box>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                                  <SendIcon fontSize="small" />{" "}
-                                  <Typography variant="body2">{post.shares || 0}</Typography>
+                                <Box sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 1,
+                                  px: 2,
+                                  py: 1,
+                                  borderRadius: '12px',
+                                  background: 'rgba(16, 185, 129, 0.1)',
+                                  transition: 'all 0.2s ease',
+                                  '&:hover': {
+                                    background: 'rgba(16, 185, 129, 0.2)',
+                                    transform: 'scale(1.05)'
+                                  }
+                                }}>
+                                  <SendIcon sx={{ fontSize: 16, color: '#10B981' }} />
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#10B981' }}>
+                                    {(post.shares || 0).toLocaleString()}
+                                  </Typography>
                                 </Box>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                                  <ShareIcon fontSize="small" />{" "}
-                                  <Typography variant="body2">{post.saved || 0}</Typography>
+                                <Box sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 1,
+                                  px: 2,
+                                  py: 1,
+                                  borderRadius: '12px',
+                                  background: 'rgba(139, 92, 246, 0.1)',
+                                  transition: 'all 0.2s ease',
+                                  '&:hover': {
+                                    background: 'rgba(139, 92, 246, 0.2)',
+                                    transform: 'scale(1.05)'
+                                  }
+                                }}>
+                                  <ShareIcon sx={{ fontSize: 16, color: '#8B5CF6' }} />
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#8B5CF6' }}>
+                                    {(post.saved || 0).toLocaleString()}
+                                  </Typography>
                                 </Box>
                               </Box>
                             </Box>
                           </Box>
 
                           {/* Right Side: Date + Link */}
-                          <Box sx={{ textAlign: "right" }}>
-                            <Typography variant="body2" color="text.secondary">
-                              {new Date(post.timestamp).toLocaleDateString("en-US", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })}
-                            </Typography>
+                          <Box sx={{ 
+                            textAlign: "center",
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 2
+                          }}>
+                            <Box sx={{
+                              px: 2,
+                              py: 1,
+                              borderRadius: '12px',
+                              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)',
+                              border: '1px solid rgba(139, 92, 246, 0.2)',
+                              textAlign: 'center'
+                            }}>
+                              <Typography variant="caption" sx={{ 
+                                color: '#8B5CF6',
+                                fontWeight: 600,
+                                fontSize: '0.7rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: 1
+                              }}>
+                                Posted
+                              </Typography>
+                              <Typography variant="body2" sx={{ 
+                                color: '#1a1a1a',
+                                fontWeight: 600,
+                                fontSize: '0.9rem'
+                              }}>
+                                {new Date(post.timestamp).toLocaleDateString("en-US", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })}
+                              </Typography>
+                            </Box>
+                            
                             <Link
                               to={`/FullAnalytics/${post.id}`}
-                              underline="hover"
-                              sx={{ fontWeight: "bold", color: "purple" }}
+                              style={{ textDecoration: 'none' }}
                             >
-                              View full Analytics →
+                              <Box sx={{
+                                px: 3,
+                                py: 1.5,
+                                borderRadius: '16px',
+                                background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)',
+                                color: 'white',
+                                fontWeight: 600,
+                                fontSize: '0.85rem',
+                                transition: 'all 0.3s ease',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                                '&:hover': {
+                                  transform: 'translateY(-2px)',
+                                  boxShadow: '0 8px 20px rgba(139, 92, 246, 0.4)'
+                                }
+                              }}>
+                                View Analytics 📊
+                              </Box>
                             </Link>
                           </Box>
                         </Card>
