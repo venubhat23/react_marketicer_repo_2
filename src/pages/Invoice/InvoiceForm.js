@@ -62,7 +62,7 @@ const InvoiceForm = () => {
     due_date: dayjs().add(30, 'day'),
     notes: '',
     line_items: [
-      { description: '', quantity: 1, unit_price: 0 }
+      { description: '', quantity: 1, unit_price: '' }
     ]
   });
 
@@ -133,7 +133,7 @@ const InvoiceForm = () => {
   const addLineItem = () => {
     setFormData(prev => ({
       ...prev,
-      line_items: [...prev.line_items, { description: '', quantity: 1, unit_price: 0 }]
+      line_items: [...prev.line_items, { description: '', quantity: 1, unit_price: '' }]
     }));
   };
 
@@ -435,7 +435,7 @@ const InvoiceForm = () => {
                           value={formData.customer}
                           onChange={(e) => handleInputChange('customer', e.target.value)}
                           required
-                          placeholder="Sri Suparna Marketing Solutions Private Limited"
+                          placeholder="Enter business name"
                           sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                         <TextField
@@ -445,7 +445,7 @@ const InvoiceForm = () => {
                           label="Address"
                           value={formData.client_address || ''}
                           onChange={(e) => handleInputChange('client_address', e.target.value)}
-                          placeholder="#47 Sri Garuda 2nd cross, 4th main Vittal Nagar, Kumaraswamy Layout, Bangalore South, Bangalore- 560078, Karnataka, Bengaluru, Karnataka, India"
+                          placeholder="Enter address"
                           sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                         <Grid container spacing={2}>
@@ -455,7 +455,7 @@ const InvoiceForm = () => {
                               label="GSTIN"
                               value={formData.client_gstin || ''}
                               onChange={(e) => handleInputChange('client_gstin', e.target.value)}
-                              placeholder="29ABPCS0851C1Z8"
+                              placeholder="Enter GSTIN"
                               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                             />
                           </Grid>
@@ -465,7 +465,7 @@ const InvoiceForm = () => {
                               label="PAN"
                               value={formData.client_pan || ''}
                               onChange={(e) => handleInputChange('client_pan', e.target.value)}
-                              placeholder="ABPCS0851C"
+                              placeholder="Enter PAN"
                               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                             />
                           </Grid>
@@ -543,15 +543,17 @@ const InvoiceForm = () => {
                             <TableCell sx={{ borderBottom: '1px solid #e2e8f0', py: 2 }}>
                               <TextField
                                 fullWidth
-                                variant="standard"
+                                variant="outlined"
+                                size="small"
                                 placeholder="Name/SKU Id (Required)"
                                 value={item.description}
                                 onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
-                                InputProps={{ disableUnderline: true }}
                                 sx={{ 
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: 1
+                                  },
                                   '& input': { 
-                                    fontSize: '14px',
-                                    p: 0
+                                    fontSize: '14px'
                                   }
                                 }}
                               />
@@ -559,16 +561,18 @@ const InvoiceForm = () => {
                             <TableCell sx={{ borderBottom: '1px solid #e2e8f0', py: 2 }}>
                               <TextField
                                 type="number"
-                                variant="standard"
+                                variant="outlined"
+                                size="small"
                                 value={item.quantity}
                                 onChange={(e) => handleLineItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
                                 inputProps={{ min: 0, style: { textAlign: 'center' } }}
-                                InputProps={{ disableUnderline: true }}
                                 sx={{ 
                                   width: 80,
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: 1
+                                  },
                                   '& input': { 
-                                    fontSize: '14px',
-                                    p: 0
+                                    fontSize: '14px'
                                   }
                                 }}
                               />
@@ -578,25 +582,38 @@ const InvoiceForm = () => {
                                 <Typography sx={{ mr: 1, color: '#64748b' }}>₹</Typography>
                                 <TextField
                                   type="number"
-                                  variant="standard"
+                                  variant="outlined"
+                                  size="small"
                                   value={item.unit_price}
-                                  onChange={(e) => handleLineItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                                  onChange={(e) => handleLineItemChange(index, 'unit_price', parseFloat(e.target.value) || '')}
                                   inputProps={{ min: 0, step: 0.01, style: { textAlign: 'right' } }}
-                                  InputProps={{ disableUnderline: true }}
                                   sx={{ 
                                     width: 100,
+                                    '& .MuiOutlinedInput-root': {
+                                      borderRadius: 1
+                                    },
                                     '& input': { 
-                                      fontSize: '14px',
-                                      p: 0
+                                      fontSize: '14px'
                                     }
                                   }}
                                 />
                               </Box>
                             </TableCell>
                             <TableCell sx={{ borderBottom: '1px solid #e2e8f0', py: 2 }}>
-                              <Typography sx={{ fontWeight: 500, color: '#1e293b' }}>
-                                ₹{((parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0)).toFixed(2)}
-                              </Typography>
+                              <Box sx={{ 
+                                border: '1px solid #d1d5db', 
+                                borderRadius: 1, 
+                                px: 2, 
+                                py: 1.5, 
+                                minHeight: 40,
+                                display: 'flex',
+                                alignItems: 'center',
+                                backgroundColor: '#f9fafb'
+                              }}>
+                                <Typography sx={{ fontWeight: 500, color: '#1e293b', fontSize: '14px' }}>
+                                  ₹{((parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0)).toFixed(2)}
+                                </Typography>
+                              </Box>
                             </TableCell>
                             <TableCell sx={{ borderBottom: '1px solid #e2e8f0', py: 2 }}>
                               <IconButton

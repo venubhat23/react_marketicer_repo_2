@@ -52,6 +52,15 @@ const InvoiceAPI = {
     }
   },
 
+  getInvoices: async () => {
+    try {
+      const response = await AxiosManager.get('/api/v1/invoices');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   getInvoiceDashboard: async () => {
     try {
       const response = await AxiosManager.get('/api/v1/invoices/dashboard');

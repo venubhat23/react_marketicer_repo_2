@@ -11,11 +11,20 @@ axiosInstance.interceptors.request.use(
   (config) => {
     // Add any request headers or transformations here
     config.headers['Content-Type'] = 'application/json';
-    config.headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+      console.log(`Making ${config.method.toUpperCase()} request to: ${config.baseURL}${config.url}`);
+    } else {
+      console.warn('No authentication token found in localStorage');
+    }
+    
     return config;
   },
   (error) => {
     // Handle request errors here
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -23,10 +32,26 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => {
     // Handle successful responses here
+    console.log(`Response received for ${response.config.method.toUpperCase()} ${response.config.url}:`, response.status);
     return response;
   },
   (error) => {
     // Handle response errors here
+    console.error('API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    
+    // If it's a 401 error, the token might be expired
+    if (error.response?.status === 401) {
+      console.warn('Authentication failed - token may be expired');
+      // Optionally redirect to login or refresh token
+    }
+    
     return Promise.reject(error);
   }
 );

@@ -54,11 +54,30 @@ const InvoiceList = () => {
   const fetchInvoices = async () => {
     try {
       setLoading(true);
-      const response = await InvoiceAPI.getInvoiceDashboard();
-      setInvoices(response.all_invoices || []);
+      console.log('Fetching invoices...');
+      
+      // Try the main invoices endpoint first
+      let response;
+      try {
+        response = await InvoiceAPI.getInvoices();
+        console.log('Response from getInvoices:', response);
+        setInvoices(response.invoices || response.data || []);
+      } catch (mainError) {
+        console.log('Main endpoint failed, trying dashboard endpoint:', mainError);
+        // Fallback to dashboard endpoint
+        response = await InvoiceAPI.getInvoiceDashboard();
+        console.log('Response from getInvoiceDashboard:', response);
+        setInvoices(response.all_invoices || response.invoices || response.data || []);
+      }
     } catch (error) {
-      toast.error('Failed to fetch invoices');
+      const errorMessage = error.message || error.error || 'Failed to fetch invoices';
+      toast.error(errorMessage);
       console.error('Error fetching invoices:', error);
+      console.error('Error details:', {
+        status: error.status,
+        statusText: error.statusText,
+        data: error.data
+      });
     } finally {
       setLoading(false);
     }
