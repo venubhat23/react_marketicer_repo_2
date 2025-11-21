@@ -60,6 +60,7 @@ const InvoiceForm = () => {
     total_amount: 0,
     status: 'Draft',
     due_date: dayjs().add(30, 'day'),
+    notes: '',
     line_items: [
       { description: '', quantity: 1, unit_price: 0 }
     ]
@@ -653,6 +654,36 @@ const InvoiceForm = () => {
                       </Box>
                     </Box>
                   </Box>
+                </Paper>
+
+                {/* Notes Section */}
+                <Paper 
+                  elevation={0} 
+                  sx={{ 
+                    p: 4, 
+                    mb: 4,
+                    mx: 2,
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 2
+                  }}
+                >
+                  <Typography variant="h6" sx={{ color: '#1e293b', fontWeight: 600, mb: 3 }}>
+                    Notes
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    label="Add notes or additional information"
+                    value={formData.notes}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="Enter any additional notes, terms and conditions, or special instructions..."
+                    sx={{ 
+                      '& .MuiOutlinedInput-root': { 
+                        borderRadius: 2 
+                      }
+                    }}
+                  />
                 </Paper>
 
                 {/* Action Buttons */}
