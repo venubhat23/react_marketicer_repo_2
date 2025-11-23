@@ -3,7 +3,7 @@ import {
   Box, Typography, FormControl, Avatar,
   Grid, Select, MenuItem, Card, CardContent,
   Paper, IconButton, CircularProgress, TextField,Tabs, Tab,
-  Divider, Container, Stack, Button, InputLabel,CardMedia
+  Divider, Container, Stack, Button, InputLabel,CardMedia, Chip
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -11,6 +11,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DownloadIcon from '@mui/icons-material/Download';
 import SearchIcon from '@mui/icons-material/Search';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import Sidebar from '../../components/Sidebar';
 import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
@@ -68,25 +69,214 @@ const LinkedinAnalytics = () => {
   const [audienceData, setAudienceData] = useState(null);
   const [hasAudienceData, setHasAudienceData] = useState(false);
   const [audienceLoading, setAudienceLoading] = useState(true);
+  const [apiCallCount, setApiCallCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showData, setShowData] = useState(false);
+  const [dataSource, setDataSource] = useState(''); // 'fresh', 'cache', or ''
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   useEffect(() => {
-    fetchInstagramAnalytics();
-    fetchAudienceInsights();
+    // Load API call count from localStorage
+    const savedApiCallCount = localStorage.getItem('linkedinApiCallCount');
+    const lastResetDate = localStorage.getItem('linkedinApiCallCountResetDate');
+    const hasEverCalledAPI = localStorage.getItem('linkedinHasEverCalledAPI');
+    const today = new Date().toDateString();
+
+    if (lastResetDate !== today) {
+      // Reset count for new day
+      setApiCallCount(0);
+      localStorage.setItem('linkedinApiCallCount', '0');
+      localStorage.setItem('linkedinApiCallCountResetDate', today);
+    } else {
+      setApiCallCount(parseInt(savedApiCallCount) || 0);
+    }
+
+    // Load data based on API call count
+    const currentCount = parseInt(savedApiCallCount) || 0;
+
+    if (currentCount > 1) {
+      // API count > 1 - use cache API
+      fetchConnectedAccountsFromCache();
+    } else {
+      // API count <= 1 - use fresh API and increment count
+      fetchConnectedAccountsFirstTime();
+    }
   }, []);
 
-  const fetchAudienceInsights = async () => {
-    if (!selectedAccountData?.page_id && !selectedAccountData?.username) {
+  const incrementApiCallCount = () => {
+    const newCount = apiCallCount + 1;
+    setApiCallCount(newCount);
+    localStorage.setItem('linkedinApiCallCount', newCount.toString());
+  };
+
+  const fetchConnectedAccountsFirstTime = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError('No authentication token found');
+        setInstagramData([]);
+        setLoading(false);
+        return;
+      }
+
+      console.log('🚀 API count ≤ 1 - using fresh data');
+      // API count <= 1 - use fresh API and increment count
+      const response = await axios.get('https://api.marketincer.com/api/v1/linkedin_analytics', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+
+      if (response.data.success && response.data.data && response.data.data.length > 0) {
+        setInstagramData(response.data.data);
+        const firstAccount = response.data.data[0];
+        setSelectedAccount(firstAccount.username);
+        setSelectedAccountData(firstAccount);
+
+        // Increment count and mark data source
+        incrementApiCallCount();
+        setDataSource('fresh');
+        setShowData(true);
+
+        console.log('✅ Fresh API call successful, count incremented');
+      } else {
+        setInstagramData([]);
+      }
+    } catch (error) {
+      console.error('Error fetching connected accounts (first time):', error);
+      setError('Failed to load connected accounts');
+      setInstagramData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchConnectedAccountsFromCache = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError('No authentication token found');
+        setInstagramData([]);
+        setLoading(false);
+        return;
+      }
+
+      console.log('💾 API count > 1 - using cached data');
+      // API count > 1 - use cache API (no count increment)
+      const response = await axios.get('https://api.marketincer.com/api/v1/linkedin_analytics_cache', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+
+      if (response.data.success && response.data.data && response.data.data.length > 0) {
+        setInstagramData(response.data.data);
+        const firstAccount = response.data.data[0];
+        setSelectedAccount(firstAccount.username);
+        setSelectedAccountData(firstAccount);
+        setDataSource('cache');
+        setShowData(true);
+
+        console.log('✅ Cached data loaded successfully');
+      } else {
+        setInstagramData([]);
+      }
+    } catch (error) {
+      console.error('Error fetching cached accounts:', error);
+      setError('Failed to load cached accounts');
+      setInstagramData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAnalyticsData = async () => {
+    if (apiCallCount >= 20) {
+      alert('Daily API limit reached (20/20). Please try again tomorrow.');
+      return;
+    }
+
+    if (!selectedAccountData) {
+      alert('Please select a profile first');
+      return;
+    }
+
+    setRefreshing(true);
+    setShowData(false);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError('No authentication token found');
+        return;
+      }
+
+      // Increment API call count for fresh data refresh
+      incrementApiCallCount();
+
+      console.log('🔄 Manual refresh - fetching fresh data and updating cache...');
+      // Manual refresh always uses fresh API to update cache
+      const response = await axios.get('https://api.marketincer.com/api/v1/linkedin_analytics', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+
+      console.log('API Response:', response.data);
+
+      if (response.data.success && response.data.data && response.data.data.length > 0) {
+        const updatedData = response.data.data;
+        setInstagramData(updatedData);
+
+        const currentAccount = updatedData.find(account => account.username === selectedAccount);
+        if (currentAccount) {
+          setSelectedAccountData(currentAccount);
+          const posts = currentAccount?.analytics?.recent_posts ?? [];
+          setRecentPosts(posts);
+        }
+
+        // Fetch audience insights if available (also increments count)
+        await fetchAudienceInsights(currentAccount || selectedAccountData);
+
+        setDataSource('fresh');
+        setShowData(true);
+        console.log('✅ Fresh data loaded and cache updated');
+      } else {
+        setError('No LinkedIn data found');
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      setError(`API Error: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const fetchAudienceInsights = async (accountData = selectedAccountData) => {
+    if (!accountData?.page_id && !accountData?.username) {
       setAudienceLoading(false);
       return;
     }
 
     try {
       setAudienceLoading(true);
-      const organizationId = selectedAccountData?.page_id || selectedAccountData?.username;
+      const organizationId = accountData?.page_id || accountData?.username;
+
+      // Increment API call count for audience insights
+      incrementApiCallCount();
+
       const data = await LinkedInAudienceAPI.getComprehensiveAudienceData(organizationId);
 
       if (data.success && data.data) {
@@ -110,122 +300,9 @@ const LinkedinAnalytics = () => {
     }
   };
 
-  const fetchInstagramAnalytics = async () => {
-
-    setLoading(true);
-    setLoadingProgress(0);
-    setError('');
-
-    // Simulate loading progress
-    const progressInterval = setInterval(() => {
-      setLoadingProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(progressInterval);
-          return 90;
-        }
-        return prev + 10;
-      });
-    }, 200);
-
-    try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        setError('No authentication token found');
-        setInstagramData([]);
-        setLoading(false);
-        return;
-      }
-
-      console.log('Fetching LinkedIn analytics from API...');
-      const response = await axios.get('https://api.marketincer.com/api/v1/linkedin_analytics', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
-
-      console.log('API Response:', response.data);
-      console.log('Recent posts from API:', response.data?.data?.[0]?.analytics?.recent_posts);
-
-      if (response.data.success && response.data.data && response.data.data.length > 0) {
-        setInstagramData(response.data.data);
-        const firstAccount = response.data.data[0];
-        console.log('First account data:', firstAccount);
-        console.log('First account analytics:', firstAccount.analytics);
-        console.log('First account recent_posts:', firstAccount.analytics?.recent_posts);
-
-        setSelectedAccount(firstAccount.username);
-        setSelectedAccountData(firstAccount);
-
-        const posts = response.data?.data?.[0]?.analytics?.recent_posts ?? [];
-        console.log('Posts being set:', posts);
-        console.log('Number of posts:', posts.length);
-
-        //const posts = accountsArray.map((account) => account.analytics?.recent_posts || []);
-        setRecentPosts(posts);
-
-        // Fetch audience insights for the selected account
-        if (firstAccount?.page_id || firstAccount?.username) {
-          const organizationId = firstAccount.page_id || firstAccount.username;
-          try {
-            const audienceResponse = await LinkedInAudienceAPI.getComprehensiveAudienceData(organizationId);
-            if (audienceResponse.success && audienceResponse.data) {
-              const hasValidData = Object.values(audienceResponse.data).some(value => {
-                return value !== null && value !== undefined &&
-                       (Array.isArray(value) ? value.length > 0 :
-                        typeof value === 'object' ? Object.keys(value).length > 0 : true);
-              });
-              setHasAudienceData(hasValidData);
-              setAudienceData(audienceResponse.data);
-            }
-          } catch (audienceError) {
-            console.error('Error fetching audience insights:', audienceError);
-            setHasAudienceData(false);
-            setAudienceData(null);
-          }
-        }
 
 
-
-      } else {
-        console.log('❌ API Response failed:', response.data);
-
-        // Check for specific "No LinkedIn pages with organization data found" response
-        if (response.data.message &&
-            response.data.message.includes('No LinkedIn pages with organization data found')) {
-          // Treat this as empty state, not error
-          setError('');
-          setInstagramData([]);
-        } else {
-          // Other types of failures should be treated as errors
-          setError('No LinkedIn data found');
-          setInstagramData([]);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching Instagram analytics:', error);
-
-      // Check if the error is the specific "no LinkedIn pages" message
-      const errorMessage = error.response?.data?.message || error.message;
-      if (errorMessage && errorMessage.includes('No LinkedIn pages with organization data found')) {
-        // Treat this as empty state, not error
-        setError('');
-        setInstagramData([]);
-      } else {
-        setError(`API Error: ${errorMessage}`);
-        setInstagramData([]);
-      }
-    } finally {
-      setLoadingProgress(100);
-      setTimeout(() => {
-        setLoading(false);
-        setAudienceLoading(false);
-      }, 500);
-    }
-  };
-
-
-  const handleAccountChange = async (e) => {
+  const handleAccountChange = (e) => {
     const username = e.target.value;
 
     if (!username) {
@@ -236,32 +313,11 @@ const LinkedinAnalytics = () => {
     const accountData = instagramData.find(account => account.username === username);
     setSelectedAccountData(accountData);
 
-    // Fetch audience insights for the newly selected account
-    if (accountData?.page_id || accountData?.username) {
-      setAudienceLoading(true);
-      const organizationId = accountData.page_id || accountData.username;
-      try {
-        const audienceResponse = await LinkedInAudienceAPI.getComprehensiveAudienceData(organizationId);
-        if (audienceResponse.success && audienceResponse.data) {
-          const hasValidData = Object.values(audienceResponse.data).some(value => {
-            return value !== null && value !== undefined &&
-                   (Array.isArray(value) ? value.length > 0 :
-                    typeof value === 'object' ? Object.keys(value).length > 0 : true);
-          });
-          setHasAudienceData(hasValidData);
-          setAudienceData(audienceResponse.data);
-        } else {
-          setHasAudienceData(false);
-          setAudienceData(null);
-        }
-      } catch (audienceError) {
-        console.error('Error fetching audience insights:', audienceError);
-        setHasAudienceData(false);
-        setAudienceData(null);
-      } finally {
-        setAudienceLoading(false);
-      }
-    }
+    // Clear previous data when changing accounts
+    setShowData(false);
+    setRecentPosts([]);
+    setAudienceData(null);
+    setHasAudienceData(false);
   };
 
   const formatNumber = (num) => {
@@ -812,6 +868,63 @@ const LinkedinAnalytics = () => {
                   <MenuItem value="carousel">Carousel</MenuItem>
                 </Select>
               </FormControl>
+
+              {/* Refresh Button */}
+              <Button
+                variant="contained"
+                size="small"
+                onClick={fetchAnalyticsData}
+                disabled={refreshing || !selectedAccount || apiCallCount >= 20}
+                startIcon={refreshing ? <CircularProgress size={16} /> : <RefreshIcon />}
+                sx={{
+                  height: '36px',
+                  backgroundColor: apiCallCount >= 20 ? '#ccc' : '#8b5cf6',
+                  color: 'white',
+                  borderRadius: '18px',
+                  px: 3,
+                  fontSize: '14px',
+                  textTransform: 'none',
+                  '&:hover': {
+                    backgroundColor: apiCallCount >= 20 ? '#ccc' : '#7c3aed',
+                  },
+                  '&:disabled': {
+                    backgroundColor: '#ccc',
+                    color: '#666'
+                  }
+                }}
+              >
+                {refreshing ? 'Loading...' : 'Refresh Data'}
+              </Button>
+
+              {/* API Usage Counter */}
+              <Chip
+                label={`API Calls: ${apiCallCount}/20`}
+                variant="outlined"
+                sx={{
+                  height: '36px',
+                  backgroundColor: apiCallCount >= 20 ? '#ffebee' : '#f3f4f6',
+                  borderColor: apiCallCount >= 20 ? '#f44336' : '#d1d5db',
+                  color: apiCallCount >= 20 ? '#d32f2f' : '#374151',
+                  fontWeight: 600,
+                  fontSize: '14px'
+                }}
+              />
+
+              {/* Data Source Indicator */}
+              {dataSource && (
+                <Chip
+                  label={dataSource === 'fresh' ? '🔄 Fresh Data' : '💾 Cached Data'}
+                  variant="outlined"
+                  sx={{
+                    height: '36px',
+                    backgroundColor: dataSource === 'fresh' ? '#e8f5e8' : '#f0f9ff',
+                    borderColor: dataSource === 'fresh' ? '#4caf50' : '#2196f3',
+                    color: dataSource === 'fresh' ? '#2e7d32' : '#1565c0',
+                    fontWeight: 500,
+                    fontSize: '12px'
+                  }}
+                />
+              )}
             </Box>
           </Paper>
           <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '20px', background: '#f6edf8' }}>
@@ -967,8 +1080,60 @@ const LinkedinAnalytics = () => {
               </Box>
             )}
 
-            {/* Main Content - Only show when pages are connected and no errors */}
-            {!error && instagramData && instagramData.length > 0 && (
+            {/* Instruction message when no data loaded */}
+            {!error && instagramData && instagramData.length > 0 && selectedAccountData && !showData && (
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '30vh',
+                textAlign: 'center',
+                p: 4,
+                backgroundColor: '#f8f9fa',
+                borderRadius: 2,
+                border: '2px dashed #d1d5db',
+                mb: 2
+              }}>
+                <RefreshIcon sx={{ fontSize: 48, color: '#8b5cf6', mb: 2 }} />
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#374151', mb: 1 }}>
+                  Ready to Load Analytics Data
+                </Typography>
+                <Typography variant="body1" sx={{ color: '#6b7280', mb: 3, maxWidth: 500 }}>
+                  Click the "Refresh Data" button above to load analytics for {selectedAccountData.page_name || selectedAccountData.username}.
+                  This will use {apiCallCount >= 20 ? '0' : '1-2'} of your daily API calls ({apiCallCount}/20 used).
+                </Typography>
+                {apiCallCount >= 20 ? (
+                  <Typography variant="body2" sx={{ color: '#d32f2f', fontWeight: 600 }}>
+                    Daily API limit reached. Please try again tomorrow.
+                  </Typography>
+                ) : (
+                  <Button
+                    variant="contained"
+                    onClick={fetchAnalyticsData}
+                    disabled={refreshing}
+                    startIcon={refreshing ? <CircularProgress size={20} /> : <RefreshIcon />}
+                    sx={{
+                      backgroundColor: '#8b5cf6',
+                      color: 'white',
+                      px: 4,
+                      py: 1,
+                      borderRadius: 2,
+                      fontSize: '16px',
+                      textTransform: 'none',
+                      '&:hover': {
+                        backgroundColor: '#7c3aed',
+                      }
+                    }}
+                  >
+                    {refreshing ? 'Loading Analytics...' : 'Refresh Data'}
+                  </Button>
+                )}
+              </Box>
+            )}
+
+            {/* Main Content - Only show when pages are connected, no errors, and data loaded */}
+            {!error && instagramData && instagramData.length > 0 && showData && (
             <Grid container spacing={2}>
             <Grid size={{ xs: 2, sm: 4, md: 4 }}>
                 {selectedAccountData && (

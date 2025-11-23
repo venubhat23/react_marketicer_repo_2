@@ -59,7 +59,7 @@ const Login = () => {
       
       // Pass token, role, and user ID to login function
       login(res.data.token, userRole, userId);
-      navigate('/createPost');
+      navigate('/');
       
     } catch (error) {
       //console.error("Login failed", error);
