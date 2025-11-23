@@ -637,7 +637,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
       formData.append("file", file);
 
       const response = await fetch(
-        "https://atmanirbharfarmbangalore.com/api/upload",
+        "https://api.marketincer.com/api/v1/upload/",
         {
           method: "POST",
           body: formData,
