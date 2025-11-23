@@ -102,7 +102,9 @@ const Calendar = () => {
   const [calendarView, setCalendarView] = useState('month'); // month, week, day
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [contentTypeFilter, setContentTypeFilter] = useState('all');
+  const [dateRangeFilter, setDateRangeFilter] = useState({ from: null, to: null });
+  const [accountsFilter, setAccountsFilter] = useState([""]);
+  const [connectedAccounts, setConnectedAccounts] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -115,13 +117,12 @@ const Calendar = () => {
   const [isEditing, setIsEditing] = useState(false);
 
 
-  // Fetch all posts from API
-  const fetchScheduledPosts = async () => {
-    setLoading(true);
+  // Fetch connected accounts
+  const fetchConnectedAccounts = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        'https://api.marketincer.com/api/v1/posts/search',
+        'https://api.marketincer.com/api/v1/social_pages/connected_pages',
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -129,6 +130,58 @@ const Calendar = () => {
           }
         }
       );
+
+      if (response.data && response.data.data && response.data.data.accounts) {
+        setConnectedAccounts(response.data.data.accounts);
+        console.log('Connected accounts loaded:', response.data.data.accounts);
+      }
+    } catch (error) {
+      console.error('Error fetching connected accounts:', error);
+    }
+  };
+
+  // Fetch all posts from API with filters
+  const fetchScheduledPosts = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+
+      // Build query parameters
+      const params = new URLSearchParams();
+
+      // Add search query
+      if (searchQuery) {
+        params.append('query', searchQuery);
+      }
+
+      // Add status filter
+      if (statusFilter && statusFilter !== 'all') {
+        params.append('status', statusFilter);
+      }
+
+      // Add date range filter
+      if (dateRangeFilter.from && dateRangeFilter.to) {
+        params.append('from', dateRangeFilter.from.format('YYYY-MM-DD'));
+        params.append('to', dateRangeFilter.to.format('YYYY-MM-DD'));
+      }
+
+      // Add account filters (only if specific accounts are selected, not "All Accounts")
+      const specificAccounts = accountsFilter.filter(accountId => accountId !== "");
+      if (specificAccounts.length > 0) {
+        specificAccounts.forEach(accountId => {
+          params.append('account_ids[]', accountId);
+        });
+      }
+
+      const queryString = params.toString();
+      const url = `https://api.marketincer.com/api/v1/posts/search${queryString ? `?${queryString}` : ''}`;
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
       if (response.data && response.data.posts) {
         setPosts(response.data.posts);
@@ -142,23 +195,17 @@ const Calendar = () => {
   };
 
   useEffect(() => {
+    fetchConnectedAccounts();
     fetchScheduledPosts();
   }, []);
 
-  // Filter posts based on current filters
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch = !searchQuery ||
-      post.comments?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.brand_name?.toLowerCase().includes(searchQuery.toLowerCase());
+  // Trigger API call when filters change
+  useEffect(() => {
+    fetchScheduledPosts();
+  }, [searchQuery, statusFilter, dateRangeFilter, accountsFilter]);
 
-    const matchesStatus = statusFilter === 'all' || post.status === statusFilter;
-
-    const matchesContentType = contentTypeFilter === 'all' ||
-      (contentTypeFilter === 'video' && post.s3_url?.includes('video')) ||
-      (contentTypeFilter === 'photo' && post.s3_url && !post.s3_url.includes('video'));
-
-    return matchesSearch && matchesStatus && matchesContentType;
-  });
+  // Since we're doing server-side filtering, we can use posts directly
+  const filteredPosts = posts;
 
   // Get posts for a specific date
   const getPostsForDate = (date) => {
@@ -289,6 +336,11 @@ const Calendar = () => {
 
   // Handle input changes in edit form
   const handleEditInputChange = (field, value) => {
+    // Prevent any changes if the post is already published
+    if (editingPost?.status === 'published') {
+      return;
+    }
+
     setEditingPost(prev => ({
       ...prev,
       [field]: value
@@ -299,7 +351,8 @@ const Calendar = () => {
   const resetFilters = () => {
     setSearchQuery('');
     setStatusFilter('all');
-    setContentTypeFilter('all');
+    setDateRangeFilter({ from: null, to: null });
+    setAccountsFilter([""]);
     setCurrentDate(dayjs());
     setCalendarView('month');
   };
@@ -968,14 +1021,86 @@ const Calendar = () => {
                 </Select>
               </FormControl>
               
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel sx={{ fontSize: '14px', color: '#666' }}>Content Type</InputLabel>
+              {/* Date Range Filter */}
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="From Date"
+                  value={dateRangeFilter.from}
+                  onChange={(newValue) => setDateRangeFilter(prev => ({ ...prev, from: newValue }))}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      sx: {
+                        width: 150,
+                        '& .MuiInputBase-root': {
+                          height: '36px',
+                          bgcolor: '#fff',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }
+                      }
+                    }
+                  }}
+                />
+              </LocalizationProvider>
+
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="To Date"
+                  value={dateRangeFilter.to}
+                  onChange={(newValue) => setDateRangeFilter(prev => ({ ...prev, to: newValue }))}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      sx: {
+                        width: 150,
+                        '& .MuiInputBase-root': {
+                          height: '36px',
+                          bgcolor: '#fff',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }
+                      }
+                    }
+                  }}
+                />
+              </LocalizationProvider>
+
+              {/* Accounts Filter */}
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel sx={{ fontSize: '14px', color: '#666' }}>Accounts</InputLabel>
                 <Select
-                  value={contentTypeFilter}
-                  label="Content Type"
-                  onChange={(e) => setContentTypeFilter(e.target.value)}
-                  sx={{ 
-                    height: '36px', 
+                  multiple
+                  value={accountsFilter}
+                  label="Accounts"
+                  onChange={(e) => setAccountsFilter(e.target.value)}
+                  renderValue={(selected) => {
+                    if (selected.length === 0 || (selected.length === 1 && selected[0] === "")) {
+                      return "All Accounts";
+                    }
+                    // Filter out empty string for "All Accounts"
+                    const filteredSelected = selected.filter(value => value !== "");
+                    if (filteredSelected.length === 0) {
+                      return "All Accounts";
+                    }
+                    return (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {filteredSelected.map((value) => {
+                          const account = connectedAccounts.find(acc => acc.social_id === value);
+                          return (
+                            <Chip
+                              key={value}
+                              label={account?.name || 'Unknown'}
+                              size="small"
+                              sx={{ height: '20px', fontSize: '11px' }}
+                            />
+                          );
+                        })}
+                      </Box>
+                    );
+                  }}
+                  sx={{
+                    height: '36px',
                     fontSize: '14px',
                     bgcolor: '#fff',
                     borderRadius: '8px',
@@ -997,9 +1122,36 @@ const Calendar = () => {
                     }
                   }}
                 >
-                  <MenuItem value="all" sx={{ fontSize: '14px' }}>All Types</MenuItem>
-                  <MenuItem value="photo" sx={{ fontSize: '14px' }}>Photo</MenuItem>
-                  <MenuItem value="video" sx={{ fontSize: '14px' }}>Video</MenuItem>
+                  <MenuItem value="" sx={{ fontSize: '14px' }}>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          backgroundColor: COLORS.primary
+                        }}
+                      />
+                      All Accounts
+                    </Box>
+                  </MenuItem>
+                  {connectedAccounts.map((account) => (
+                    <MenuItem key={account.social_id} value={account.social_id} sx={{ fontSize: '14px' }}>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Box
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            backgroundColor: account.page_type === 'instagram' ? COLORS.instagram :
+                                            account.page_type === 'facebook' ? COLORS.facebook :
+                                            account.page_type === 'linkedin' ? COLORS.linkedin : COLORS.primary
+                          }}
+                        />
+                        {account.name}
+                      </Box>
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               
@@ -1191,10 +1343,12 @@ const Calendar = () => {
             Publish Now
           </MenuItem>
         )}
-        <MenuItem onClick={() => handleEditPost(selectedPost)}>
-          <EditIcon sx={{ mr: 1 }} />
-          Edit Post
-        </MenuItem>
+        {selectedPost?.status !== 'published' && (
+          <MenuItem onClick={() => handleEditPost(selectedPost)}>
+            <EditIcon sx={{ mr: 1 }} />
+            Edit Post
+          </MenuItem>
+        )}
         <MenuItem
           onClick={() => handleDeletePost(selectedPost?.post_id)}
           sx={{ color: 'error.main' }}
@@ -1222,7 +1376,7 @@ const Calendar = () => {
               {isEditing ? 'Edit Post' : 'Post Details'}
             </Typography>
             <Box display="flex" gap={1}>
-              {!isEditing && (
+              {!isEditing && editingPost?.status !== 'published' && (
                 <Button
                   startIcon={<EditIcon />}
                   onClick={() => setIsEditing(true)}
@@ -1297,8 +1451,8 @@ const Calendar = () => {
                   label="Brand Name"
                   value={editingPost.brand_name}
                   onChange={(e) => handleEditInputChange('brand_name', e.target.value)}
-                  disabled={!isEditing}
-                  variant={isEditing ? 'outlined' : 'standard'}
+                  disabled={!isEditing || editingPost.status === 'published'}
+                  variant={isEditing && editingPost.status !== 'published' ? 'outlined' : 'standard'}
                 />
 
                 <TextField
@@ -1306,8 +1460,8 @@ const Calendar = () => {
                   label="Comments/Caption"
                   value={editingPost.comments}
                   onChange={(e) => handleEditInputChange('comments', e.target.value)}
-                  disabled={!isEditing}
-                  variant={isEditing ? 'outlined' : 'standard'}
+                  disabled={!isEditing || editingPost.status === 'published'}
+                  variant={isEditing && editingPost.status !== 'published' ? 'outlined' : 'standard'}
                   multiline
                   rows={3}
                 />
@@ -1317,8 +1471,8 @@ const Calendar = () => {
                   label="Hashtags"
                   value={editingPost.hashtags}
                   onChange={(e) => handleEditInputChange('hashtags', e.target.value)}
-                  disabled={!isEditing}
-                  variant={isEditing ? 'outlined' : 'standard'}
+                  disabled={!isEditing || editingPost.status === 'published'}
+                  variant={isEditing && editingPost.status !== 'published' ? 'outlined' : 'standard'}
                 />
 
                 <TextField
@@ -1326,14 +1480,14 @@ const Calendar = () => {
                   label="Note"
                   value={editingPost.note}
                   onChange={(e) => handleEditInputChange('note', e.target.value)}
-                  disabled={!isEditing}
-                  variant={isEditing ? 'outlined' : 'standard'}
+                  disabled={!isEditing || editingPost.status === 'published'}
+                  variant={isEditing && editingPost.status !== 'published' ? 'outlined' : 'standard'}
                   multiline
                   rows={2}
                 />
 
                 {/* Status Selection */}
-                {isEditing && (
+                {isEditing && editingPost.status !== 'published' && (
                   <FormControl fullWidth>
                     <InputLabel>Status</InputLabel>
                     <Select
@@ -1348,8 +1502,25 @@ const Calendar = () => {
                   </FormControl>
                 )}
 
+                {/* Display status as read-only for published posts */}
+                {editingPost.status === 'published' && (
+                  <TextField
+                    fullWidth
+                    label="Status"
+                    value="Published"
+                    disabled
+                    variant="standard"
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        color: getStatusColor('published'),
+                        fontWeight: 'bold'
+                      }
+                    }}
+                  />
+                )}
+
                 {/* Scheduled Date/Time */}
-                {isEditing && (editingPost.status === 'scheduled' || editingPost.scheduled_at) && (
+                {isEditing && editingPost.status !== 'published' && (editingPost.status === 'scheduled' || editingPost.scheduled_at) && (
                   <TextField
                     fullWidth
                     label="Scheduled Date & Time"

@@ -47,7 +47,7 @@ const Login = () => {
     }
 
     try {
-      const res = await axios.post("https://api.marketincer.com/api/v1/login", form);
+      const res = await axios.post("http://localhost:3001/api/v1/login", form);
       //localStorage.setItem("token", res.data.token); // Save token
       
       // Extract user data from the API response
@@ -59,7 +59,7 @@ const Login = () => {
       
       // Pass token, role, and user ID to login function
       login(res.data.token, userRole, userId);
-      navigate('/createPost');
+      navigate('/');
       
     } catch (error) {
       //console.error("Login failed", error);
