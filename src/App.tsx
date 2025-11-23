@@ -21,6 +21,7 @@ import SocialMedia from './pages/SocialMedia';
 import FullAnalytics from './pages/Profile/FullAnalytics';
 import ContractPage from './pages/Contract/ContractPage'
 import Discover from './pages/Discover';
+import InfluencerAnalytics from './pages/InfluencerAnalytics';
 import AIContractGenerator from './pages/Contract/AIContractGenerator';
 import MarketplaceModule from './pages/MarketPlace/MarketplaceModule';
 import MarketplacePostDetail from './pages/MarketPlace/MarketplacePostDetail';
@@ -204,6 +205,11 @@ const AppRoutes = () => {
       <Route path="/discover" element={
         <ProtectedRoute>
         <Discover />
+        </ProtectedRoute>
+        } />
+      <Route path="/influencer-analytics/:id" element={
+        <ProtectedRoute>
+        <InfluencerAnalytics />
         </ProtectedRoute>
         } />
       <Route path="/contracts" element={

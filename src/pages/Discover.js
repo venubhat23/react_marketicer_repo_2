@@ -29,16 +29,18 @@ import {
   AccordionDetails,
   Chip,
   Divider,
-  Slider
+  Tabs,
+  Tab,
+  Drawer
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { YouTube, Instagram, Facebook, WhatsApp, ExpandMore } from '@mui/icons-material';
-import { Menu as MenuIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
+import { Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon, } from '@mui/icons-material';
 import CloseIcon from "@mui/icons-material/Close";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import TuneIcon from '@mui/icons-material/Tune';
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import Sidebar from '../components/Sidebar'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 
 
 // Create theme
@@ -133,6 +135,7 @@ const getPlatformIcons = (platforms) => {
 };
 
 const Discover = () => {
+  const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState({});
@@ -143,6 +146,9 @@ const Discover = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [expandedAccordions, setExpandedAccordions] = useState({});
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const [quickFilters, setQuickFilters] = useState([]);
 
   const handleOpen = (row) => {
     setSelectedRow(row);
@@ -190,6 +196,54 @@ const Discover = () => {
       ...prev,
       [panel]: isExpanded
     }));
+  };
+
+  // Quick filter presets for easy selection
+  const quickFilterPresets = {
+    'Micro Influencers': {
+      'Influencer:Influencer Size': ['Micro (10K-100K)']
+    },
+    'Beauty & Fashion': {
+      'Audience:Audience Interest': ['Beauty', 'Fashion']
+    },
+    'Tech & Gaming': {
+      'Audience:Audience Interest': ['Technology', 'Gaming']
+    },
+    'Fitness & Health': {
+      'Audience:Audience Interest': ['Fitness', 'Health']
+    },
+    'High Engagement': {
+      'Performance:Recent Post 2': ['High Engagement']
+    },
+    'US Influencers': {
+      'Influencer:Influencer Location': ['United States']
+    }
+  };
+
+  const applyQuickFilter = (presetName) => {
+    const preset = quickFilterPresets[presetName];
+    if (quickFilters.includes(presetName)) {
+      // Remove the preset
+      setQuickFilters(prev => prev.filter(f => f !== presetName));
+      setSelectedFilters(prev => {
+        const newFilters = { ...prev };
+        Object.keys(preset).forEach(key => {
+          delete newFilters[key];
+        });
+        return newFilters;
+      });
+    } else {
+      // Add the preset
+      setQuickFilters(prev => [...prev, presetName]);
+      setSelectedFilters(prev => ({
+        ...prev,
+        ...preset
+      }));
+    }
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
   };
 
 
@@ -411,15 +465,27 @@ const Discover = () => {
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'row',
-            gap: 2, // spacing between items
-            alignItems: 'center',bgcolor: '#B1C6FF',padding: '10px',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: 2,
+            alignItems: { xs: 'stretch', md: 'center' },
+            bgcolor: '#e4d4f4',
+            padding: '15px',
+            flexWrap: 'wrap'
           }}>
-                    
+              
+              {/* Filter Controls Container */}
+              <Box sx={{ 
+                display: 'flex',
+                gap: 2,
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                flexWrap: 'wrap'
+              }}>
+                {/* Left side - Search Field */}
                 <TextField
                   placeholder="Search..."
                   variant="outlined"
-                  fullWidth
                   size="small"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -431,241 +497,446 @@ const Discover = () => {
                     ),
                   }}
                   sx={{ 
-                    borderRadius: '50px',
+                    minWidth: '200px',
                     '& .MuiOutlinedInput-root': {
                       bgcolor: 'white',
                       borderRadius: 10,
                     }
                   }}
                 />
-              
-              <FormControl fullWidth>
-                  <Select
-                    labelId="filter-label"
-                    value={""}
-                    size="small"
-                    open={filterDropdownOpen}
-                    onOpen={() => setFilterDropdownOpen(true)}
-                    onClose={() => setFilterDropdownOpen(false)}
-                    onClick={handleSelectChange}
-                    displayEmpty
-                    renderValue={() => (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography color="#882AFF">Filter</Typography>
-                        {getSelectedFiltersCount() > 0 && (
-                          <Box sx={{
-                            bgcolor: '#882AFF',
-                            color: 'white',
-                            borderRadius: '50%',
-                            width: 20,
-                            height: 20,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '12px'
-                          }}>
-                            {getSelectedFiltersCount()}
-                          </Box>
-                        )}
-                      </Box>
-                    )}
-                    sx={{
-                      borderRadius: 10,
-                      bgcolor: 'white'
-                    }}
-                  >
-                    <Box sx={{ width: 800, maxHeight: 600, overflow: 'auto', p: 2 }}>
-                      {Object.entries(filterCategories).map(([categoryName, filters]) => (
-                        <Accordion 
-                          key={categoryName}
-                          expanded={expandedAccordions[categoryName] || false}
-                          onChange={handleAccordionChange(categoryName)}
-                          sx={{ mb: 1, boxShadow: 1 }}
-                        >
-                          <AccordionSummary expandIcon={<ExpandMore />}>
-                            <Typography variant="h6" sx={{ fontWeight: 600, color: '#882AFF' }}>
-                              {categoryName}
-                            </Typography>
-                          </AccordionSummary>
-                          <AccordionDetails>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                              {Object.entries(filters).map(([filterName, filterConfig]) => (
-                                <Box key={filterName}>
-                                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                                    {filterName}
-                                  </Typography>
-                                  
-                                  {filterConfig.type === 'checkbox' && (
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                      {filterConfig.options.map((option) => (
-                                        <FormControlLabel
-                                          key={option}
-                                          control={
-                                            <Checkbox
-                                              checked={isSelected(categoryName, filterName, option)}
-                                              onChange={() => handleToggleFilter(categoryName, filterName, option)}
-                                              sx={{ 
-                                                color: '#882AFF',
-                                                '&.Mui-checked': { color: '#882AFF' }
-                                              }}
-                                            />
-                                          }
-                                          label={<Typography variant="body2">{option}</Typography>}
-                                        />
-                                      ))}
-                                    </Box>
-                                  )}
-                                  
-                                  {filterConfig.type === 'dropdown' && (
-                                    <Select
-                                      multiple
-                                      value={selectedFilters[`${categoryName}:${filterName}`] || []}
-                                      onChange={(e) => {
-                                        const values = e.target.value;
-                                        setSelectedFilters(prev => ({
-                                          ...prev,
-                                          [`${categoryName}:${filterName}`]: values
-                                        }));
-                                      }}
-                                      size="small"
-                                      sx={{ minWidth: 200 }}
-                                      renderValue={(selected) => (
-                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                          {selected.map((value) => (
-                                            <Chip key={value} label={value} size="small" />
-                                          ))}
-                                        </Box>
-                                      )}
-                                    >
-                                      {filterConfig.options.map((option) => (
-                                        <MenuItem key={option} value={option}>
-                                          {option}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
-                                  )}
-                                  
-                                  {filterConfig.type === 'range' && (
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                      {filterConfig.options.map((option) => (
-                                        <Chip
-                                          key={option}
-                                          label={option}
-                                          clickable
-                                          variant={isSelected(categoryName, filterName, option) ? 'filled' : 'outlined'}
-                                          onClick={() => handleToggleFilter(categoryName, filterName, option)}
-                                          sx={{
-                                            bgcolor: isSelected(categoryName, filterName, option) ? '#882AFF' : 'transparent',
-                                            color: isSelected(categoryName, filterName, option) ? 'white' : '#882AFF',
-                                            borderColor: '#882AFF',
-                                            '&:hover': {
-                                              bgcolor: isSelected(categoryName, filterName, option) ? '#7625e6' : 'rgba(136,42,255,0.1)'
-                                            }
-                                          }}
-                                        />
-                                      ))}
-                                    </Box>
-                                  )}
-                                  
-                                  <Divider sx={{ mt: 1 }} />
-                                </Box>
-                              ))}
-                            </Box>
-                          </AccordionDetails>
-                        </Accordion>
-                      ))}
-                      
-                      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3, p: 2, borderTop: '1px solid #e0e0e0' }}>
-                        <Button variant="text" onClick={handleClear} sx={{ color: '#882AFF' }}>
-                          Clear All
-                        </Button>
-                        <Button 
-                          variant="contained" 
-                          onClick={handleSearch}
-                          sx={{ 
-                            bgcolor: '#882AFF',
-                            '&:hover': { bgcolor: '#7625e6' }
-                          }}
-                        >
-                          Search
-                        </Button>
-                      </Box>
-                    </Box>
-                 
-                </Select>
-              </FormControl>
 
-              <FormControl fullWidth>
-                <Select
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  displayEmpty
-                  size="small"
-                  renderValue={(selected) =>
-                    selected !== '' ? selected : <Typography color="#882AFF">Sort by</Typography>
-                  }
+                {/* Center - Active Filters */}
+                <Box sx={{ 
+                  flex: 1, 
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  justifyContent: 'center',
+                  maxHeight: '60px',
+                  overflow: 'auto'
+                }}>
+                  {getSelectedFiltersCount() > 0 && getSelectedFiltersArray().map((filterItem, index) => (
+                    <Box
+                      key={`${filterItem.key}-${filterItem.value}-${index}`}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        bgcolor: '#882AFF',
+                        color: 'white',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: '15px',
+                        fontSize: '12px',
+                        maxWidth: '200px'
+                      }}
+                    >
+                      <Typography variant="caption" sx={{ fontSize: '11px', mr: 0.5 }}>
+                        {filterItem.filterName}: {filterItem.value}
+                      </Typography>
+                      <CloseIcon
+                        sx={{ 
+                          fontSize: 14, 
+                          cursor: 'pointer',
+                          '&:hover': { bgcolor: 'rgba(255,255,255,0.2)', borderRadius: '50%' }
+                        }}
+                        onClick={() => handleToggleFilter(filterItem.category, filterItem.filterName, filterItem.value)}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+
+                {/* Right side - Advanced Filter Button */}
+                <Button
+                  variant={filterDrawerOpen ? "contained" : "outlined"}
+                  startIcon={<TuneIcon />}
+                  onClick={() => {
+                    console.log('Button clicked, current filterDrawerOpen state:', filterDrawerOpen);
+                    setFilterDrawerOpen(!filterDrawerOpen);
+                  }}
                   sx={{
-                    backgroundColor: '#fff',
+                    borderColor: filterDrawerOpen ? '#d0d0d0' : '#e4d4f4',
+                    color: filterDrawerOpen ? '#333' : '#666',
+                    bgcolor: filterDrawerOpen ? '#e8e9ea' : '#f8f9fa',
                     borderRadius: 10,
-                    
+                    minWidth: { md: '140px' },
+                    '&:hover': {
+                      bgcolor: '#e8e9ea',
+                      borderColor: '#d0d0d0',
+                      color: '#333'
+                    }
                   }}
                 >
-                  <MenuItem value="Option 1">All</MenuItem>
-                  <MenuItem value="Option 2">Option 2</MenuItem>
-                  <MenuItem value="Option 3">Option 3</MenuItem>
-                </Select>
-              </FormControl>
+                  <Box sx={{ display: { xs: 'none', sm: 'inline' } }}>Advanced </Box>Filters
+                  {getSelectedFiltersCount() > 0 && (
+                    <Box sx={{
+                      bgcolor: '#666',
+                      color: 'white',
+                      borderRadius: '50%',
+                      width: 18,
+                      height: 18,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px',
+                      ml: 1
+                    }}>
+                      {getSelectedFiltersCount()}
+                    </Box>
+                  )}
+                </Button>
+              </Box>
 
                
               </Box>
+
+              {/* Advanced Filters Drawer */}
+              <Drawer
+                anchor="right"
+                open={filterDrawerOpen}
+                onClose={() => {
+                  console.log('Closing drawer via overlay');
+                  setFilterDrawerOpen(false);
+                }}
+                sx={{
+                  '& .MuiDrawer-paper': {
+                    width: { xs: '100%', sm: 450, md: 500 },
+                    p: 0
+                  }
+                }}
+              >
+                <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  {/* Drawer Header */}
+                  <Box sx={{ 
+                    p: 2, 
+                    borderBottom: '1px solid #e0e0e0', 
+                    bgcolor: '#091a48',
+                    color: 'white',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      Advanced Filters
+                    </Typography>
+                    <IconButton 
+                      onClick={() => {
+                        console.log('Closing drawer via X button');
+                        setFilterDrawerOpen(false);
+                      }}
+                      sx={{ color: 'white' }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Box>
+
+                  {/* Filter Tabs */}
+                  <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <Tabs
+                      value={activeTab}
+                      onChange={handleTabChange}
+                      variant="fullWidth"
+                      sx={{
+                        '& .MuiTab-root': {
+                          color: '#666',
+                          '&.Mui-selected': {
+                            color: '#091a48'
+                          }
+                        },
+                        '& .MuiTabs-indicator': {
+                          backgroundColor: '#091a48'
+                        }
+                      }}
+                    >
+                      <Tab label="Influencer" />
+                      <Tab label="Audience" />
+                      <Tab label="Performance" />
+                    </Tabs>
+                  </Box>
+
+                  {/* Filter Content */}
+                  <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+                    {activeTab === 0 && (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {Object.entries(filterCategories.Influencer).map(([filterName, filterConfig]) => (
+                          <Box key={filterName}>
+                            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, color: '#091a48' }}>
+                              {filterName}
+                            </Typography>
+                            
+                            {filterConfig.type === 'checkbox' && (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                {filterConfig.options.map((option) => (
+                                  <Chip
+                                    key={option}
+                                    label={option}
+                                    clickable
+                                    size="small"
+                                    variant={isSelected('Influencer', filterName, option) ? 'filled' : 'outlined'}
+                                    onClick={() => handleToggleFilter('Influencer', filterName, option)}
+                                    sx={{
+                                      bgcolor: isSelected('Influencer', filterName, option) ? '#091a48' : 'transparent',
+                                      color: isSelected('Influencer', filterName, option) ? 'white' : '#091a48',
+                                      borderColor: '#091a48',
+                                      '&:hover': {
+                                        bgcolor: isSelected('Influencer', filterName, option) ? '#1e3a8a' : 'rgba(9,26,72,0.1)'
+                                      }
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                            )}
+
+                            {filterConfig.type === 'dropdown' && (
+                              <Select
+                                multiple
+                                value={selectedFilters[`Influencer:${filterName}`] || []}
+                                onChange={(e) => {
+                                  const values = e.target.value;
+                                  setSelectedFilters(prev => ({
+                                    ...prev,
+                                    [`Influencer:${filterName}`]: values
+                                  }));
+                                }}
+                                size="small"
+                                fullWidth
+                                renderValue={(selected) => (
+                                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    {selected.map((value) => (
+                                      <Chip key={value} label={value} size="small" />
+                                    ))}
+                                  </Box>
+                                )}
+                              >
+                                {filterConfig.options.map((option) => (
+                                  <MenuItem key={option} value={option}>
+                                    {option}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            )}
+
+                            {filterConfig.type === 'range' && (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                {filterConfig.options.map((option) => (
+                                  <Chip
+                                    key={option}
+                                    label={option}
+                                    clickable
+                                    size="small"
+                                    variant={isSelected('Influencer', filterName, option) ? 'filled' : 'outlined'}
+                                    onClick={() => handleToggleFilter('Influencer', filterName, option)}
+                                    sx={{
+                                      bgcolor: isSelected('Influencer', filterName, option) ? '#091a48' : 'transparent',
+                                      color: isSelected('Influencer', filterName, option) ? 'white' : '#091a48',
+                                      borderColor: '#091a48',
+                                      '&:hover': {
+                                        bgcolor: isSelected('Influencer', filterName, option) ? '#1e3a8a' : 'rgba(9,26,72,0.1)'
+                                      }
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+
+                    {activeTab === 1 && (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {Object.entries(filterCategories.Audience).map(([filterName, filterConfig]) => (
+                          <Box key={filterName}>
+                            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, color: '#091a48' }}>
+                              {filterName}
+                            </Typography>
+                            
+                            {filterConfig.type === 'checkbox' && (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                {filterConfig.options.map((option) => (
+                                  <Chip
+                                    key={option}
+                                    label={option}
+                                    clickable
+                                    size="small"
+                                    variant={isSelected('Audience', filterName, option) ? 'filled' : 'outlined'}
+                                    onClick={() => handleToggleFilter('Audience', filterName, option)}
+                                    sx={{
+                                      bgcolor: isSelected('Audience', filterName, option) ? '#091a48' : 'transparent',
+                                      color: isSelected('Audience', filterName, option) ? 'white' : '#091a48',
+                                      borderColor: '#091a48',
+                                      '&:hover': {
+                                        bgcolor: isSelected('Audience', filterName, option) ? '#1e3a8a' : 'rgba(9,26,72,0.1)'
+                                      }
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                            )}
+
+                            {filterConfig.type === 'dropdown' && (
+                              <Select
+                                multiple
+                                value={selectedFilters[`Audience:${filterName}`] || []}
+                                onChange={(e) => {
+                                  const values = e.target.value;
+                                  setSelectedFilters(prev => ({
+                                    ...prev,
+                                    [`Audience:${filterName}`]: values
+                                  }));
+                                }}
+                                size="small"
+                                fullWidth
+                                renderValue={(selected) => (
+                                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    {selected.map((value) => (
+                                      <Chip key={value} label={value} size="small" />
+                                    ))}
+                                  </Box>
+                                )}
+                              >
+                                {filterConfig.options.map((option) => (
+                                  <MenuItem key={option} value={option}>
+                                    {option}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            )}
+
+                            {filterConfig.type === 'range' && (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                {filterConfig.options.map((option) => (
+                                  <Chip
+                                    key={option}
+                                    label={option}
+                                    clickable
+                                    size="small"
+                                    variant={isSelected('Audience', filterName, option) ? 'filled' : 'outlined'}
+                                    onClick={() => handleToggleFilter('Audience', filterName, option)}
+                                    sx={{
+                                      bgcolor: isSelected('Audience', filterName, option) ? '#091a48' : 'transparent',
+                                      color: isSelected('Audience', filterName, option) ? 'white' : '#091a48',
+                                      borderColor: '#091a48',
+                                      '&:hover': {
+                                        bgcolor: isSelected('Audience', filterName, option) ? '#1e3a8a' : 'rgba(9,26,72,0.1)'
+                                      }
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+
+                    {activeTab === 2 && (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {Object.entries(filterCategories.Performance).map(([filterName, filterConfig]) => (
+                          <Box key={filterName}>
+                            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, color: '#091a48' }}>
+                              {filterName}
+                            </Typography>
+                            
+                            {filterConfig.type === 'checkbox' && (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                {filterConfig.options.map((option) => (
+                                  <Chip
+                                    key={option}
+                                    label={option}
+                                    clickable
+                                    size="small"
+                                    variant={isSelected('Performance', filterName, option) ? 'filled' : 'outlined'}
+                                    onClick={() => handleToggleFilter('Performance', filterName, option)}
+                                    sx={{
+                                      bgcolor: isSelected('Performance', filterName, option) ? '#091a48' : 'transparent',
+                                      color: isSelected('Performance', filterName, option) ? 'white' : '#091a48',
+                                      borderColor: '#091a48',
+                                      '&:hover': {
+                                        bgcolor: isSelected('Performance', filterName, option) ? '#1e3a8a' : 'rgba(9,26,72,0.1)'
+                                      }
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                            )}
+
+                            {filterConfig.type === 'range' && (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                {filterConfig.options.map((option) => (
+                                  <Chip
+                                    key={option}
+                                    label={option}
+                                    clickable
+                                    size="small"
+                                    variant={isSelected('Performance', filterName, option) ? 'filled' : 'outlined'}
+                                    onClick={() => handleToggleFilter('Performance', filterName, option)}
+                                    sx={{
+                                      bgcolor: isSelected('Performance', filterName, option) ? '#091a48' : 'transparent',
+                                      color: isSelected('Performance', filterName, option) ? 'white' : '#091a48',
+                                      borderColor: '#091a48',
+                                      '&:hover': {
+                                        bgcolor: isSelected('Performance', filterName, option) ? '#1e3a8a' : 'rgba(9,26,72,0.1)'
+                                      }
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+
+                  {/* Drawer Footer */}
+                  <Box sx={{ 
+                    p: 2, 
+                    borderTop: '1px solid #e0e0e0',
+                    bgcolor: '#f8f9fa',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 2
+                  }}>
+                    <Button 
+                      variant="outlined" 
+                      onClick={handleClear}
+                      sx={{ 
+                        borderColor: '#091a48',
+                        color: '#091a48',
+                        flex: 1
+                      }}
+                    >
+                      Clear All
+                    </Button>
+                    <Button 
+                      variant="contained" 
+                      onClick={() => {
+                        console.log('Closing drawer via Apply Filters button');
+                        handleSearch();
+                        setFilterDrawerOpen(false);
+                      }}
+                      sx={{ 
+                        bgcolor: '#091a48',
+                        '&:hover': { bgcolor: '#1e3a8a' },
+                        flex: 1
+                      }}
+                    >
+                      Apply Filters
+                    </Button>
+                  </Box>
+                </Box>
+              </Drawer>
               <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, padding:'20px'}}>
                 <Grid container spacing={2}>
                   
                   <Grid size={{ xs: 2, sm: 4, md: 12 }}>
                   <Box >
                     <Typography variant="h6" gutterBottom>{filteredInfluencers.length} Influencer Found</Typography>
-                    
-                    {/* Selected Filters Display */}
-                    {getSelectedFiltersCount() > 0 && (
-                      <Box sx={{ mb: 2 }}>
-                        <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>Active Filters:</Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                          {getSelectedFiltersArray().map((filterItem, index) => (
-                            <Box
-                              key={`${filterItem.key}-${filterItem.value}-${index}`}
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                bgcolor: '#882AFF',
-                                color: 'white',
-                                px: 2,
-                                py: 0.5,
-                                borderRadius: '20px',
-                                fontSize: '14px'
-                              }}
-                            >
-                              <Typography variant="caption" sx={{ fontSize: '12px' }}>
-                                {filterItem.filterName}: {filterItem.value}
-                              </Typography>
-                              <CloseIcon
-                                sx={{ 
-                                  ml: 1, 
-                                  fontSize: 16, 
-                                  cursor: 'pointer',
-                                  '&:hover': { bgcolor: 'rgba(255,255,255,0.2)', borderRadius: '50%' }
-                                }}
-                                onClick={() => handleToggleFilter(filterItem.category, filterItem.filterName, filterItem.value)}
-                              />
-                            </Box>
-                          ))}
-                        </Box>
-                      </Box>
-                    )}
                     <>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#B1C6FF', color:'#fff' }}>
+            <TableRow sx={{ backgroundColor: '#091a48', color:'#fff' }}>
               <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Name</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Tags</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Followers</TableCell>
@@ -695,7 +966,14 @@ const Discover = () => {
                   <Box display="flex">{getPlatformIcons(row.platforms)}</Box>
                 </TableCell>
                 <TableCell>
-                  <Button variant="text" size="small">View full analytics</Button>
+                  <Button 
+                    variant="text" 
+                    size="small"
+                    onClick={() => navigate(`/influencer-analytics/${row.name}`)}
+                    sx={{ color: '#882AFF' }}
+                  >
+                    View full analytics
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

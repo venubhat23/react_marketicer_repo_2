@@ -95,14 +95,15 @@ const AutomationsPage = () => {
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <Typography variant="h6" sx={{ color: '#fff' }}>
+              <Typography variant="subtitle1" sx={{ color: '#fff', fontSize: '16px' }}>
                 <IconButton
                   edge="start"
                   color="inherit"
                   aria-label="back"
-                  sx={{ mr: 2, color: '#fff' }}
+                  sx={{ mr: 1, color: '#fff' }}
+                  size="small"
                 >
-                  <ArrowLeftIcon />
+                  <ArrowLeftIcon fontSize="small" />
                 </IconButton>
                 Automations
               </Typography>
@@ -120,19 +121,21 @@ const AutomationsPage = () => {
           </Paper>
 
           {/* Action Buttons */}
-          <Box sx={{ p: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
+          <Box sx={{ p: 2, display: 'flex', gap: 1, justifyContent: 'center' }}>
             <Button
               variant="contained"
-              startIcon={<AddIcon />}
+              startIcon={<AddIcon fontSize="small" />}
               onClick={handleCreateAutomation}
+              size="small"
               sx={{
                 bgcolor: '#000',
                 color: 'white',
-                borderRadius: '50px',
-                px: 3,
-                py: 1,
+                borderRadius: '20px',
+                px: 2,
+                py: 0.5,
                 textTransform: 'none',
-                fontWeight: 600,
+                fontWeight: 500,
+                fontSize: '12px',
                 '&:hover': {
                   bgcolor: '#333'
                 }
@@ -142,16 +145,18 @@ const AutomationsPage = () => {
             </Button>
             <Button
               variant="outlined"
-              startIcon={<HomeIcon />}
+              startIcon={<HomeIcon fontSize="small" />}
               onClick={handleViewRuns}
+              size="small"
               sx={{
                 borderColor: '#666',
                 color: '#666',
-                borderRadius: '50px',
-                px: 3,
-                py: 1,
+                borderRadius: '20px',
+                px: 2,
+                py: 0.5,
                 textTransform: 'none',
-                fontWeight: 600,
+                fontWeight: 500,
+                fontSize: '12px',
                 '&:hover': {
                   borderColor: '#333',
                   bgcolor: '#f5f5f5'
@@ -163,32 +168,32 @@ const AutomationsPage = () => {
           </Box>
 
           {/* Stats Cards */}
-          <Box sx={{ p: 3, pt: 0 }}>
-            <Grid container spacing={3}>
+          <Box sx={{ p: 2, pt: 0 }}>
+            <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 4 }}>
                 <Card sx={{
-                  p: 3,
-                  borderRadius: 3,
+                  p: 2,
+                  borderRadius: 2,
                   bgcolor: 'white',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
                 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Box sx={{
                       bgcolor: '#e3f2fd',
-                      borderRadius: 2,
-                      p: 1,
-                      mr: 2
+                      borderRadius: 1,
+                      p: 0.5,
+                      mr: 1
                     }}>
-                      <AutoModeIcon sx={{ color: '#1976d2' }} />
+                      <AutoModeIcon sx={{ color: '#1976d2', fontSize: '16px' }} />
                     </Box>
-                    <Typography variant="h6" sx={{ color: '#666' }}>
+                    <Typography variant="body1" sx={{ color: '#666', fontSize: '12px', fontWeight: 500 }}>
                       Total Automations
                     </Typography>
                   </Box>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5, fontSize: '20px' }}>
                     {stats.totalAutomations}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#666' }}>
+                  <Typography variant="caption" sx={{ color: '#666', fontSize: '10px' }}>
                     Across all integrations
                   </Typography>
                 </Card>
@@ -196,28 +201,28 @@ const AutomationsPage = () => {
 
               <Grid size={{ xs: 12, md: 4 }}>
                 <Card sx={{
-                  p: 3,
-                  borderRadius: 3,
+                  p: 2,
+                  borderRadius: 2,
                   bgcolor: 'white',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
                 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Box sx={{
                       bgcolor: '#e8f5e8',
-                      borderRadius: 2,
-                      p: 1,
-                      mr: 2
+                      borderRadius: 1,
+                      p: 0.5,
+                      mr: 1
                     }}>
-                      <CheckCircleIcon sx={{ color: '#4caf50' }} />
+                      <CheckCircleIcon sx={{ color: '#4caf50', fontSize: '16px' }} />
                     </Box>
-                    <Typography variant="h6" sx={{ color: '#666' }}>
+                    <Typography variant="body1" sx={{ color: '#666', fontSize: '12px', fontWeight: 500 }}>
                       Active Automations
                     </Typography>
                   </Box>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5, fontSize: '20px' }}>
                     {stats.activeAutomations}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#666' }}>
+                  <Typography variant="caption" sx={{ color: '#666', fontSize: '10px' }}>
                     Currently running
                   </Typography>
                 </Card>
@@ -225,28 +230,28 @@ const AutomationsPage = () => {
 
               <Grid size={{ xs: 12, md: 4 }}>
                 <Card sx={{
-                  p: 3,
-                  borderRadius: 3,
+                  p: 2,
+                  borderRadius: 2,
                   bgcolor: 'white',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
                 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Box sx={{
                       bgcolor: '#f3e5f5',
-                      borderRadius: 2,
-                      p: 1,
-                      mr: 2
+                      borderRadius: 1,
+                      p: 0.5,
+                      mr: 1
                     }}>
-                      <TrendingUpIcon sx={{ color: '#882AFF' }} />
+                      <TrendingUpIcon sx={{ color: '#882AFF', fontSize: '16px' }} />
                     </Box>
-                    <Typography variant="h6" sx={{ color: '#666' }}>
+                    <Typography variant="body1" sx={{ color: '#666', fontSize: '12px', fontWeight: 500 }}>
                       Success Rate
                     </Typography>
                   </Box>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5, fontSize: '20px' }}>
                     {stats.successRate}%
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#666' }}>
+                  <Typography variant="caption" sx={{ color: '#666', fontSize: '10px' }}>
                     Average across all automations
                   </Typography>
                 </Card>
@@ -255,33 +260,33 @@ const AutomationsPage = () => {
           </Box>
 
           {/* Your Automations Section */}
-          <Box sx={{ p: 3, pt: 0 }}>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, color: '#333' }}>
+          <Box sx={{ p: 2, pt: 0 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#333', fontSize: '16px' }}>
               Your Automations
             </Typography>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={2}>
               {automations.map((automation) => (
                 <Grid size={{ xs: 12, md: 6, lg: 4 }} key={automation.id}>
                   <Card sx={{
-                    p: 3,
-                    borderRadius: 3,
+                    p: 2,
+                    borderRadius: 2,
                     bgcolor: 'white',
                     boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
                     position: 'relative'
                   }}>
                     {/* Header with icon and switch */}
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Box sx={{
                           bgcolor: '#e3f2fd',
-                          borderRadius: 2,
-                          p: 1,
-                          mr: 2
+                          borderRadius: 1,
+                          p: 0.5,
+                          mr: 1
                         }}>
-                          <AutoModeIcon sx={{ color: '#1976d2' }} />
+                          <AutoModeIcon sx={{ color: '#1976d2', fontSize: '16px' }} />
                         </Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '14px' }}>
                           {automation.name}
                         </Typography>
                       </Box>
@@ -300,20 +305,20 @@ const AutomationsPage = () => {
                     </Box>
 
                     {/* Description */}
-                    <Typography variant="body2" sx={{ color: '#666', mb: 2, lineHeight: 1.4 }}>
+                    <Typography variant="caption" sx={{ color: '#666', mb: 1.5, lineHeight: 1.3, fontSize: '11px', display: 'block' }}>
                       {automation.description}
                     </Typography>
 
                     {/* Frequency and Last Run */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <ScheduleIcon sx={{ fontSize: 16, color: '#666', mr: 1 }} />
-                      <Typography variant="body2" sx={{ color: '#666' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <ScheduleIcon sx={{ fontSize: 12, color: '#666', mr: 0.5 }} />
+                      <Typography variant="caption" sx={{ color: '#666', fontSize: '11px' }}>
                         {automation.frequency}
                       </Typography>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                      <Typography variant="body2" sx={{ color: '#4caf50', fontWeight: 500 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Typography variant="caption" sx={{ color: '#4caf50', fontWeight: 500, fontSize: '11px' }}>
                         $ Last run: {automation.lastRun}
                       </Typography>
                     </Box>

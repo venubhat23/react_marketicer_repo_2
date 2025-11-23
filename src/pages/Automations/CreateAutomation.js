@@ -139,7 +139,7 @@ const CreateAutomation = () => {
       case 0:
         return (
           <Box>
-            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 500, fontSize: '14px' }}>
               Basic Information
             </Typography>
             <Grid container spacing={3}>
@@ -186,7 +186,7 @@ const CreateAutomation = () => {
       case 1:
         return (
           <Box>
-            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 500, fontSize: '14px' }}>
               Schedule Settings
             </Typography>
             <Grid container spacing={3}>

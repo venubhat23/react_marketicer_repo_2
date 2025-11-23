@@ -57,8 +57,10 @@ const AutomationRuns = () => {
         sx={{
           color: config.color,
           bgcolor: config.bgcolor,
-          fontWeight: 600,
-          border: 'none'
+          fontWeight: 500,
+          border: 'none',
+          fontSize: '10px',
+          height: '20px'
         }}
       />
     );
@@ -116,15 +118,16 @@ const AutomationRuns = () => {
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <Typography variant="h6" sx={{ color: '#fff' }}>
+              <Typography variant="subtitle1" sx={{ color: '#fff', fontSize: '16px' }}>
                 <IconButton
                   edge="start"
                   color="inherit"
                   aria-label="back"
                   onClick={handleBackToAutomations}
-                  sx={{ mr: 2, color: '#fff' }}
+                  sx={{ mr: 1, color: '#fff' }}
+                  size="small"
                 >
-                  <ArrowBackIcon />
+                  <ArrowBackIcon fontSize="small" />
                 </IconButton>
                 Automation Runs
               </Typography>
@@ -142,28 +145,30 @@ const AutomationRuns = () => {
           </Paper>
 
           {/* Page Title and Description */}
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: '#333' }}>
+          <Box sx={{ textAlign: 'center', py: 2 }}>
+            <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, color: '#333', fontSize: '20px' }}>
               Automation Runs
             </Typography>
-            <Typography variant="h6" sx={{ color: '#666', mb: 4, fontWeight: 400 }}>
+            <Typography variant="body1" sx={{ color: '#666', mb: 2, fontWeight: 400, fontSize: '14px' }}>
               Monitor and track your automation execution history
             </Typography>
 
             {/* Action Buttons */}
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
               <Button
                 variant="contained"
-                startIcon={<ArrowBackIcon />}
+                startIcon={<ArrowBackIcon fontSize="small" />}
                 onClick={handleBackToAutomations}
+                size="small"
                 sx={{
                   bgcolor: '#000',
                   color: 'white',
-                  borderRadius: '50px',
-                  px: 3,
-                  py: 1,
+                  borderRadius: '20px',
+                  px: 2,
+                  py: 0.5,
                   textTransform: 'none',
-                  fontWeight: 600,
+                  fontWeight: 500,
+                  fontSize: '12px',
                   '&:hover': {
                     bgcolor: '#333'
                   }
@@ -173,16 +178,18 @@ const AutomationRuns = () => {
               </Button>
               <Button
                 variant="outlined"
-                startIcon={<AddIcon />}
+                startIcon={<AddIcon fontSize="small" />}
                 onClick={handleCreateAutomation}
+                size="small"
                 sx={{
                   borderColor: '#666',
                   color: '#666',
-                  borderRadius: '50px',
-                  px: 3,
-                  py: 1,
+                  borderRadius: '20px',
+                  px: 2,
+                  py: 0.5,
                   textTransform: 'none',
-                  fontWeight: 600,
+                  fontWeight: 500,
+                  fontSize: '12px',
                   '&:hover': {
                     borderColor: '#333',
                     bgcolor: '#f5f5f5'
@@ -195,11 +202,11 @@ const AutomationRuns = () => {
           </Box>
 
           {/* Runs Table */}
-          <Box sx={{ p: 3 }}>
+          <Box sx={{ p: 2 }}>
             <TableContainer 
               component={Paper} 
               sx={{ 
-                borderRadius: 3,
+                borderRadius: 2,
                 boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
                 overflow: 'hidden'
               }}
@@ -207,19 +214,19 @@ const AutomationRuns = () => {
               <Table>
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#666', fontSize: '14px', textTransform: 'uppercase' }}>
+                    <TableCell sx={{ fontWeight: 600, color: '#666', fontSize: '11px', textTransform: 'uppercase', py: 1 }}>
                       AUTOMATION
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#666', fontSize: '14px', textTransform: 'uppercase' }}>
+                    <TableCell sx={{ fontWeight: 600, color: '#666', fontSize: '11px', textTransform: 'uppercase', py: 1 }}>
                       STATUS
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#666', fontSize: '14px', textTransform: 'uppercase' }}>
+                    <TableCell sx={{ fontWeight: 600, color: '#666', fontSize: '11px', textTransform: 'uppercase', py: 1 }}>
                       CREATED
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#666', fontSize: '14px', textTransform: 'uppercase' }}>
+                    <TableCell sx={{ fontWeight: 600, color: '#666', fontSize: '11px', textTransform: 'uppercase', py: 1 }}>
                       FAILURE REASON
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#666', fontSize: '14px', textTransform: 'uppercase' }}>
+                    <TableCell sx={{ fontWeight: 600, color: '#666', fontSize: '11px', textTransform: 'uppercase', py: 1 }}>
                       ACTIONS
                     </TableCell>
                   </TableRow>
@@ -233,12 +240,12 @@ const AutomationRuns = () => {
                         borderBottom: '1px solid #e0e0e0'
                       }}
                     >
-                      <TableCell>
+                      <TableCell sx={{ py: 1.5 }}>
                         <Box>
-                          <Typography variant="body1" sx={{ fontWeight: 600, color: '#333', mb: 0.5 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 500, color: '#333', mb: 0.3, fontSize: '13px' }}>
                             {run.automation}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#666', fontSize: '13px' }}>
+                          <Typography variant="caption" sx={{ color: '#666', fontSize: '11px' }}>
                             {run.description}
                           </Typography>
                         </Box>
@@ -246,18 +253,18 @@ const AutomationRuns = () => {
                       <TableCell>
                         {getStatusChip(run.status)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ py: 1.5 }}>
                         <Box>
-                          <Typography variant="body2" sx={{ color: '#333', fontWeight: 500 }}>
+                          <Typography variant="caption" sx={{ color: '#333', fontWeight: 500, fontSize: '12px', display: 'block' }}>
                             {run.created}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: '#666' }}>
+                          <Typography variant="caption" sx={{ color: '#666', fontSize: '10px' }}>
                             {run.createdDate}
                           </Typography>
                         </Box>
                       </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ color: '#666' }}>
+                      <TableCell sx={{ py: 1.5 }}>
+                        <Typography variant="caption" sx={{ color: '#666', fontSize: '11px' }}>
                           {run.failureReason || '-'}
                         </Typography>
                       </TableCell>
