@@ -1374,7 +1374,30 @@ const InstagramAnalytics = () => {
                             </Link>
                             <Typography 
                               variant="body2"
-                              onClick={() => window.open(post.permalink || `https://www.instagram.com/p/${post.id}/`, '_blank')}
+                              onClick={() => {
+                                // Use permalink if available, otherwise construct URL from shortcode or direct Instagram link
+                                let postUrl = post.permalink;
+                                
+                                if (!postUrl) {
+                                  // Try different URL formats
+                                  if (post.shortcode) {
+                                    postUrl = `https://www.instagram.com/p/${post.shortcode}/`;
+                                  } else if (post.media_url && post.media_url.includes('instagram.com')) {
+                                    // If media_url contains instagram.com, extract shortcode or use direct link
+                                    postUrl = post.media_url;
+                                  } else if (post.url) {
+                                    postUrl = post.url;
+                                  } else {
+                                    // Fallback - try to find the post via username and timestamp
+                                    const username = selectedAccountData?.username || selectedAccount;
+                                    postUrl = `https://www.instagram.com/${username}/`;
+                                  }
+                                }
+                                
+                                console.log('Post data:', post);
+                                console.log('Opening Instagram post:', postUrl);
+                                window.open(postUrl, '_blank');
+                              }}
                               sx={{ 
                                 fontWeight: "bold", 
                                 color: "purple", 
