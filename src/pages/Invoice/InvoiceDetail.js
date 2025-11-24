@@ -15,14 +15,21 @@ import {
   Chip,
   IconButton,
   Divider,
-  Paper
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  CircularProgress
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Print as PrintIcon,
-  Download as DownloadIcon
+  Download as DownloadIcon,
+  Email as EmailIcon
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import InvoiceAPI from '../../services/invoiceApi';
@@ -36,6 +43,13 @@ const InvoiceDetail = () => {
   const { id } = useParams();
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [emailDialog, setEmailDialog] = useState({ 
+    open: false,
+    email: '',
+    subject: '',
+    message: '',
+    sending: false 
+  });
 
   useEffect(() => {
     fetchInvoice();
@@ -139,6 +153,60 @@ const InvoiceDetail = () => {
     return (subtotal * (parseFloat(invoice?.gst_percentage) || 0)) / 100;
   };
 
+  const handleOpenEmailDialog = () => {
+    if (!invoice) return;
+    
+    setEmailDialog({
+      open: true,
+      email: invoice.work_email || '',
+      subject: `Invoice #${invoice.invoice_number || invoice.id} from ${invoice.company_name || 'Your Company'}`,
+      message: `Dear ${invoice.customer || 'Customer'},\n\nPlease find attached your invoice #${invoice.invoice_number || invoice.id}.\n\nInvoice Details:\n- Amount: $${parseFloat(invoice.total_amount || 0).toFixed(2)}\n- Due Date: ${invoice.due_date}\n- Status: ${invoice.status}\n\nThank you for your business!\n\nBest regards,\n${invoice.company_name || 'Your Company'}`,
+      sending: false
+    });
+  };
+
+  const handleCloseEmailDialog = () => {
+    setEmailDialog({
+      open: false,
+      email: '',
+      subject: '',
+      message: '',
+      sending: false
+    });
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailDialog.email || !emailDialog.subject) {
+      toast.error('Please fill in email and subject fields');
+      return;
+    }
+
+    setEmailDialog(prev => ({ ...prev, sending: true }));
+
+    try {
+      await InvoiceAPI.sendInvoiceEmail({
+        invoice_id: invoice.id,
+        email: emailDialog.email,
+        subject: emailDialog.subject,
+        message: emailDialog.message
+      });
+      
+      toast.success('Invoice email sent successfully!');
+      handleCloseEmailDialog();
+    } catch (error) {
+      console.error('API Error sending email:', error);
+      
+      // Fallback to mailto link if API fails
+      const mailtoLink = `mailto:${emailDialog.email}?subject=${encodeURIComponent(emailDialog.subject)}&body=${encodeURIComponent(emailDialog.message)}`;
+      window.open(mailtoLink, '_blank');
+      
+      toast.info('Opened email client. Please send manually until email service is configured.');
+      handleCloseEmailDialog();
+    } finally {
+      setEmailDialog(prev => ({ ...prev, sending: false }));
+    }
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -217,6 +285,14 @@ const InvoiceDetail = () => {
             sx={{ mr: 1, color: '#882AFF' }}
           >
             Edit
+          </Button>
+          <Button
+            startIcon={<EmailIcon />}
+            variant="outlined"
+            onClick={handleOpenEmailDialog}
+            sx={{ mr: 1, borderColor: '#882AFF', color: '#882AFF', '&:hover': { borderColor: '#7C3AED', color: '#7C3AED' } }}
+          >
+            Send Email
           </Button>
           <Button
             startIcon={<DeleteIcon />}
@@ -738,6 +814,74 @@ const InvoiceDetail = () => {
           </Box>
         </Grid>
       </Grid>
+
+      {/* Email Invoice Dialog */}
+      <Dialog
+        open={emailDialog.open}
+        onClose={handleCloseEmailDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ bgcolor: '#882AFF', color: 'white', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <EmailIcon />
+          Send Invoice Email
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Invoice: #{invoice?.invoice_number || invoice?.id} - {invoice?.customer}
+            </Typography>
+          </Box>
+          
+          <TextField
+            fullWidth
+            label="Recipient Email"
+            type="email"
+            value={emailDialog.email}
+            onChange={(e) => setEmailDialog(prev => ({ ...prev, email: e.target.value }))}
+            margin="normal"
+            required
+            helperText="Customer's email address"
+          />
+          
+          <TextField
+            fullWidth
+            label="Subject"
+            value={emailDialog.subject}
+            onChange={(e) => setEmailDialog(prev => ({ ...prev, subject: e.target.value }))}
+            margin="normal"
+            required
+          />
+          
+          <TextField
+            fullWidth
+            label="Message"
+            multiline
+            rows={8}
+            value={emailDialog.message}
+            onChange={(e) => setEmailDialog(prev => ({ ...prev, message: e.target.value }))}
+            margin="normal"
+            helperText="Email body content (invoice will be attached as PDF)"
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleCloseEmailDialog} disabled={emailDialog.sending}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSendEmail} 
+            variant="contained"
+            disabled={emailDialog.sending || !emailDialog.email || !emailDialog.subject}
+            sx={{ 
+              backgroundColor: '#882AFF',
+              '&:hover': { backgroundColor: '#7C3AED' }
+            }}
+            startIcon={emailDialog.sending ? <CircularProgress size={16} color="inherit" /> : <EmailIcon />}
+          >
+            {emailDialog.sending ? 'Sending...' : 'Send Email'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

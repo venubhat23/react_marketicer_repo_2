@@ -68,6 +68,20 @@ const InvoiceAPI = {
     } catch (error) {
       throw error.response?.data || error.message;
     }
+  },
+
+  sendInvoiceEmail: async (emailData) => {
+    try {
+      const response = await AxiosManager.post('/api/v1/invoices/send_email', {
+        invoice_id: emailData.invoice_id,
+        recipient_email: emailData.email,
+        subject: emailData.subject,
+        message: emailData.message
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
   }
 };
 

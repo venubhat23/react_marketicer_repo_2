@@ -466,18 +466,38 @@ Would you like me to create this as a short handwritten-style note (suitable for
   }, []);
 
   const draftModelOpen = async (action) => {
-    if ((!uploadedImageUrl && uploadedMedia.length === 0) || !postContent) {
-      alert("Please make sure all fields are filled out!");
+    // Check if content is required
+    if (!postContent) {
+      alert("Please add some content to your post!");
       return;
     }
+    
+    // Check if media is required (LinkedIn allows text-only posts)
+    const isLinkedIn = tabValue === 1; // LinkedIn is tab index 1
+    const hasMedia = uploadedImageUrl || uploadedMedia.length > 0;
+    
+    if (!isLinkedIn && !hasMedia) {
+      alert("Please upload media for this platform!");
+      return;
+    }
+    
     setCreatePostMode(action);
     setOpenDateTimePicker(true);
-
   };
 
   const handleSaveAsDraft = async () => {
-    if ((!uploadedImageUrl && uploadedMedia.length === 0) || !postContent) {
-      alert("Please make sure all fields are filled out!");
+    // Check if content is required
+    if (!postContent) {
+      alert("Please add some content to your post!");
+      return;
+    }
+    
+    // Check if media is required (LinkedIn allows text-only posts)
+    const isLinkedIn = tabValue === 1; // LinkedIn is tab index 1
+    const hasMedia = uploadedImageUrl || uploadedMedia.length > 0;
+    
+    if (!isLinkedIn && !hasMedia) {
+      alert("Please upload media for this platform!");
       return;
     }
 
@@ -540,8 +560,18 @@ Would you like me to create this as a short handwritten-style note (suitable for
       return;
     }
 
-    if ((!uploadedImageUrl && uploadedMedia.length === 0) || !postContent) {
-      alert("Please make sure all fields are filled out!");
+    // Check if content is required
+    if (!postContent) {
+      alert("Please add some content to your post!");
+      return;
+    }
+    
+    // Check if media is required (LinkedIn allows text-only posts)
+    const isLinkedIn = tabValue === 1; // LinkedIn is tab index 1
+    const hasMedia = uploadedImageUrl || uploadedMedia.length > 0;
+    
+    if (!isLinkedIn && !hasMedia) {
+      alert("Please upload media for this platform!");
       return;
     }
 
@@ -769,8 +799,20 @@ Would you like me to create this as a short handwritten-style note (suitable for
   };
 
   const handlePublish = async () => {
-    if ((!uploadedImageUrl && uploadedMedia.length === 0) || !postContent) {
-      alert("Please make sure all fields are filled out!");
+    console.log("Publishing to selected pages:", selectedPages);
+    
+    // Check if content is required
+    if (!postContent) {
+      alert("Please add some content to your post!");
+      return;
+    }
+    
+    // Check if media is required (LinkedIn allows text-only posts)
+    const isLinkedIn = tabValue === 1; // LinkedIn is tab index 1
+    const hasMedia = uploadedImageUrl || uploadedMedia.length > 0;
+    
+    if (!isLinkedIn && !hasMedia) {
+      alert("Please upload media for this platform!");
       return;
     }
 
@@ -908,8 +950,18 @@ Would you like me to create this as a short handwritten-style note (suitable for
   };
 
   const draftHandler = async () => {
-    if ((!uploadedImageUrl && uploadedMedia.length === 0) || !postContent) {
-      alert("Please make sure all fields are filled out!");
+    // Check if content is required
+    if (!postContent) {
+      alert("Please add some content to your post!");
+      return;
+    }
+    
+    // Check if media is required (LinkedIn allows text-only posts)
+    const isLinkedIn = tabValue === 1; // LinkedIn is tab index 1
+    const hasMedia = uploadedImageUrl || uploadedMedia.length > 0;
+    
+    if (!isLinkedIn && !hasMedia) {
+      alert("Please upload media for this platform!");
       return;
     }
 
@@ -3050,10 +3102,21 @@ Would you like me to create this as a short handwritten-style note (suitable for
                           onChange={(e) => {
                             if (e.target.checked) {
                               // Add user to selection
-                              setSelectedUsers(prev => [...prev, user]);
+                              const updatedUsers = [...selectedUsers, user];
+                              setSelectedUsers(updatedUsers);
+                              
+                              // Sync selectedPages
+                              const updatedSocialIds = updatedUsers.map(u => u.social_id);
+                              setSelectedPages(updatedSocialIds);
                             } else {
                               // Remove user from selection
-                              setSelectedUsers(prev => prev.filter(u => u.id !== user.id));
+                              const updatedUsers = selectedUsers.filter(u => u.id !== user.id);
+                              setSelectedUsers(updatedUsers);
+                              
+                              // Sync selectedPages
+                              const updatedSocialIds = updatedUsers.map(u => u.social_id);
+                              setSelectedPages(updatedSocialIds);
+                              
                               // Also clear from preview if it was the selected user
                               if (selectedChipId === user.social_id) {
                                 setSelectedChipId(null);
@@ -3084,7 +3147,15 @@ Would you like me to create this as a short handwritten-style note (suitable for
                       setSelectUser(user); // Set the selected user for preview
                     }}
                     onDelete={() => { 
-                      setSelectedUsers(prev => prev.filter(u => u.id !== user.id));
+                      // Remove from selectedUsers
+                      const updatedUsers = selectedUsers.filter(u => u.id !== user.id);
+                      setSelectedUsers(updatedUsers);
+                      
+                      // Sync selectedPages with updated users
+                      const updatedSocialIds = updatedUsers.map(u => u.social_id);
+                      setSelectedPages(updatedSocialIds);
+                      
+                      // Clear chip selection if needed
                       if (selectedChipId === user.social_id) {
                         setSelectedChipId(null);
                         setSelectUser('');

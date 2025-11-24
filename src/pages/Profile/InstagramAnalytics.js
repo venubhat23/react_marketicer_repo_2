@@ -1356,8 +1356,8 @@ const InstagramAnalytics = () => {
                             </Box>
                           </Box>
 
-                          {/* Right Side: Date + Link */}
-                          <Box sx={{ textAlign: "right" }}>
+                          {/* Right Side: Date + Links */}
+                          <Box sx={{ textAlign: "right", display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                             <Typography variant="body2" color="text.secondary">
                               {new Date(post.timestamp).toLocaleDateString("en-US", {
                                 day: "numeric",
@@ -1368,10 +1368,25 @@ const InstagramAnalytics = () => {
                             <Link
                               to={`/FullAnalytics/${post.id}`}
                               underline="hover"
-                              sx={{ fontWeight: "bold", color: "purple" }}
+                              sx={{ fontWeight: "bold", color: "purple", fontSize: '14px' }}
                             >
                               View full Analytics →
                             </Link>
+                            <Typography 
+                              variant="body2"
+                              onClick={() => window.open(post.permalink || `https://www.instagram.com/p/${post.id}/`, '_blank')}
+                              sx={{ 
+                                fontWeight: "bold", 
+                                color: "purple", 
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                '&:hover': {
+                                  textDecoration: 'underline'
+                                }
+                              }}
+                            >
+                              View Post →
+                            </Typography>
                           </Box>
                         </Card>
                       ))}
