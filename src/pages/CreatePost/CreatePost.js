@@ -50,6 +50,7 @@ import MarketincerIcon from '../../assets/images/marketincerlogo.png';
 import { Link } from "react-router-dom";
 import SimpleImageEditor from '../../components/SimpleImageEditor';
 
+
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -3330,7 +3331,10 @@ Would you like me to create this as a short handwritten-style note (suitable for
   )}
   
   <Box sx={{ position: 'relative' }}>
-    <Editor value={postContent} onChange={handleContentChange} />
+    <Editor 
+      value={postContent} 
+      onChange={handleContentChange}
+    />
     
     {/* Mention Suggestions Dropdown */}
     {showMentions && getMentionSuggestions().length > 0 && (
@@ -3387,6 +3391,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
     )}
   </Box>
 </Box>
+
 
 {/* Document Name Input for PDF Mode */}
 {isPdfMode && tabValue === 1 && (

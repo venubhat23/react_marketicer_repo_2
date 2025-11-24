@@ -3,7 +3,7 @@ import axios from 'axios';
 // Create an instance of axios with default configuration
 const axiosInstance = axios.create({
   baseURL: 'https://api.marketincer.com',
-  timeout: 5000,
+  timeout: 10000, // Increased to 10 seconds for better stability
 });
 
 // Add middleware to intercept requests and responses

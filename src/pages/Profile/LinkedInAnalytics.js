@@ -711,7 +711,7 @@ const LinkedinAnalytics = () => {
                 >
                   <ArrowLeftIcon />
                 </IconButton>
-                LinkenIn Analytics
+                LinkedIn Analytics
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <IconButton size="large" sx={{ color: '#fff' }}>

@@ -181,10 +181,36 @@ const InvoiceForm = () => {
   const handleSaveAndContinue = async () => {
     setLoading(true);
     try {
+      // Validate required fields
+      if (!formData.company_name || !formData.customer) {
+        toast.error('Please fill in required fields: Company Name and Business Name');
+        return;
+      }
+
+      // Validate line items
+      const hasValidItems = formData.line_items.some(item => 
+        item.description && item.quantity > 0 && parseFloat(item.unit_price) > 0
+      );
+      
+      if (!hasValidItems) {
+        toast.error('Please add at least one valid item with description, quantity, and rate');
+        return;
+      }
+
+      // Clean and prepare data for submission
+      const cleanedLineItems = formData.line_items.map(item => ({
+        ...item,
+        quantity: parseFloat(item.quantity) || 0,
+        unit_price: parseFloat(item.unit_price) || 0
+      }));
+
       const submitData = {
         ...formData,
+        line_items: cleanedLineItems,
         due_date: formData.due_date.format('YYYY-MM-DD')
       };
+
+      console.log('Submitting invoice data:', submitData);
 
       if (isEdit) {
         await InvoiceAPI.updateInvoice(id, submitData);
@@ -196,8 +222,15 @@ const InvoiceForm = () => {
       
       navigate('/invoices');
     } catch (error) {
-      toast.error(`Failed to ${isEdit ? 'update' : 'create'} invoice`);
+      const errorMessage = error.message || error.error || `Failed to ${isEdit ? 'update' : 'create'} invoice`;
+      toast.error(errorMessage);
       console.error(`Error ${isEdit ? 'updating' : 'creating'} invoice:`, error);
+      console.error('Error details:', {
+        status: error.status,
+        statusText: error.statusText,
+        data: error.data,
+        response: error.response?.data
+      });
     } finally {
       setLoading(false);
     }
@@ -402,7 +435,7 @@ const InvoiceForm = () => {
                         </Grid>
                         <TextField
                           fullWidth
-                          label="Company Website"
+                          label="Work Email"
                           value={formData.company_website}
                           onChange={(e) => handleInputChange('company_website', e.target.value)}
                           sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}

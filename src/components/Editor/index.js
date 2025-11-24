@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { Editor } from '@tinymce/tinymce-react';
+import React, { useRef } from 'react';
+import { Editor as TinyMCEEditor } from '@tinymce/tinymce-react';
 
-const MyEditor = ({ value, onChange }) => {
+const Editor = ({ value, onChange }) => {
   // You can add TinyMCE plugins and configuration here if needed
   const editorRef = useRef(null);
 
@@ -12,7 +12,7 @@ const MyEditor = ({ value, onChange }) => {
   };
 
   return (
-    <Editor
+    <TinyMCEEditor
       apiKey="lr517sywoeyu3m8oui2nykf4dxhz0f86mlxhanfmpj2bd99m"
       value={value} // Bind the value to the parent state (postContent)
       init={{
@@ -27,7 +27,7 @@ const MyEditor = ({ value, onChange }) => {
             color:#882AFF; 
           }
         `,
-        // Adding custome AI 
+        // Adding custom AI button
         setup: (editor) => {
           editor.ui.registry.addButton('generate_ai_button', {
             text: 'Generate with AI',
@@ -49,8 +49,7 @@ const MyEditor = ({ value, onChange }) => {
       }}
       
     />
-
   );
 };
 
-export default MyEditor;
+export default Editor;

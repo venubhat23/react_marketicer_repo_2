@@ -67,27 +67,34 @@ const InvoiceList = () => {
       console.log('Fetching invoices...');
       
       // Try the main invoices endpoint first
-      let response;
-      try {
-        response = await InvoiceAPI.getInvoices();
-        console.log('Response from getInvoices:', response);
-        setInvoices(response.invoices || response.data || []);
-      } catch (mainError) {
-        console.log('Main endpoint failed, trying dashboard endpoint:', mainError);
-        // Fallback to dashboard endpoint
-        response = await InvoiceAPI.getInvoiceDashboard();
-        console.log('Response from getInvoiceDashboard:', response);
-        setInvoices(response.all_invoices || response.invoices || response.data || []);
-      }
+      const response = await InvoiceAPI.getInvoices();
+      console.log('Response from getInvoices:', response);
+      
+      // Handle different response structures
+      const invoiceData = response.invoices || response.data || response.all_invoices || [];
+      setInvoices(Array.isArray(invoiceData) ? invoiceData : []);
+      
+      console.log('Successfully loaded', invoiceData.length, 'invoices');
+      
     } catch (error) {
-      const errorMessage = error.message || error.error || 'Failed to fetch invoices';
-      toast.error(errorMessage);
-      console.error('Error fetching invoices:', error);
-      console.error('Error details:', {
-        status: error.status,
-        statusText: error.statusText,
-        data: error.data
-      });
+      console.log('Primary endpoint failed, trying fallback...', error);
+      
+      // Fallback to dashboard endpoint only if necessary
+      try {
+        const fallbackResponse = await InvoiceAPI.getInvoiceDashboard();
+        console.log('Fallback response:', fallbackResponse);
+        
+        const fallbackData = fallbackResponse.all_invoices || fallbackResponse.invoices || fallbackResponse.data || [];
+        setInvoices(Array.isArray(fallbackData) ? fallbackData : []);
+        
+        console.log('Successfully loaded', fallbackData.length, 'invoices from fallback');
+        
+      } catch (fallbackError) {
+        console.error('Both endpoints failed:', fallbackError);
+        const errorMessage = fallbackError.message || fallbackError.error || 'Failed to fetch invoices. Please try again later.';
+        toast.error(errorMessage);
+        setInvoices([]); // Set empty array to prevent UI issues
+      }
     } finally {
       setLoading(false);
     }
@@ -113,6 +120,31 @@ const InvoiceList = () => {
     } catch (error) {
       toast.error('Failed to update invoice status');
       console.error('Error updating invoice status:', error);
+    }
+  };
+
+  const handleSendEmail = async (invoice) => {
+    try {
+      // Prepare email data
+      const emailData = {
+        to: invoice.work_email || invoice.customer_email,  // Billed To email
+        cc: invoice.company_website || invoice.company_email,  // Billed By email (we changed the field name but kept the data field)
+        subject: `Invoice ${invoice.invoice_number} from ${invoice.company_name}`,
+        invoice_id: invoice.id
+      };
+
+      // Validate email addresses
+      if (!emailData.to) {
+        toast.error('Customer email address is required to send invoice');
+        return;
+      }
+
+      await InvoiceAPI.sendInvoiceEmail(invoice.id, emailData);
+      toast.success('Invoice sent successfully!');
+    } catch (error) {
+      const errorMessage = error.message || error.error || 'Failed to send invoice email';
+      toast.error(errorMessage);
+      console.error('Error sending invoice email:', error);
     }
   };
 
@@ -206,8 +238,63 @@ const InvoiceList = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <Typography>Loading invoices...</Typography>
+      <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100vh' }}>
+        <Grid container>
+          <Grid size={{ md: 1 }} className="side_section"> 
+            <Sidebar />
+          </Grid>
+          <Grid size={{ md: 11 }}>
+            <Paper
+              elevation={0}
+              sx={{
+                display: { xs: 'none', md: 'block' },
+                p: 1,
+                backgroundColor: '#091a48',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 0
+              }}
+            >
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <Typography variant="h6" sx={{ color: '#fff' }}>
+                  <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="back"
+                    sx={{ mr: 2, color: '#fff' }}
+                  >
+                    <ArrowLeftIcon />
+                  </IconButton>
+                  Invoices
+                </Typography>
+              </Box>
+            </Paper>
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+              <Box textAlign="center">
+                <Typography variant="h6" sx={{ mb: 2 }}>Loading invoices...</Typography>
+                <Box sx={{ 
+                  width: 40, 
+                  height: 40, 
+                  border: '4px solid #e0e0e0',
+                  borderTop: '4px solid #882AFF',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  margin: '0 auto'
+                }} />
+                <style>{`
+                  @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                  }
+                `}</style>
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
       </Box>
     );
   }
@@ -334,7 +421,35 @@ const InvoiceList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {paginatedInvoices.map((invoice) => (
+                  {paginatedInvoices.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
+                        <Box>
+                          <Typography variant="h6" sx={{ mb: 2, color: '#64748b' }}>
+                            No invoices found
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 3, color: '#94a3b8' }}>
+                            {invoices.length === 0 
+                              ? "Get started by creating your first invoice"
+                              : "Try adjusting your search or filter criteria"
+                            }
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={() => navigate('/invoices/create')}
+                            sx={{
+                              backgroundColor: '#882AFF',
+                              '&:hover': { backgroundColor: '#7C3AED' }
+                            }}
+                          >
+                            Create Invoice
+                          </Button>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedInvoices.map((invoice) => (
                     <TableRow key={invoice.id} hover>
                       <TableCell>#{invoice.id}</TableCell>
                       <TableCell>{invoice.company_name}</TableCell>
@@ -390,7 +505,8 @@ const InvoiceList = () => {
                         </IconButton>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    ))
+                  )}
                 </TableBody>
               </Table>
                 </TableContainer>
