@@ -201,30 +201,11 @@ const BrandProfile = ({brand}) => {
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.75rem' }}>
                 Engagement Rate: {post.engagement_rate || 0}%
               </Typography>
-
-              {/* View Post Button */}
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<LaunchIcon fontSize="small" />}
-                onClick={() => handleViewPost(post.post_link)}
-                sx={{
-                  mt: 2,
-                  borderColor: '#882AFF',
-                  color: '#882AFF',
-                  '&:hover': {
-                    borderColor: '#6B1BA8',
-                    backgroundColor: '#F9F5FF'
-                  }
-                }}
-              >
-                View Post
-              </Button>
             </Box>
           </Box>
 
-          {/* Right Side: Date */}
-          <Box sx={{ textAlign: "right", minWidth: 'auto' }}>
+          {/* Right Side: Date and View Analytics */}
+          <Box sx={{ textAlign: "right", minWidth: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
             <Typography variant="body2" color="text.secondary">
               {new Date(post.timestamp).toLocaleDateString("en-US", {
                 day: "numeric",
@@ -232,6 +213,35 @@ const BrandProfile = ({brand}) => {
                 year: "numeric",
               })}
             </Typography>
+            
+            {/* View Post Button */}
+            <Box 
+              onClick={() => handleViewPost(post.post_link)}
+              sx={{ 
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+                cursor: 'pointer',
+                color: '#8B5CF6',
+                fontSize: '14px',
+                fontWeight: 500,
+                '&:hover': {
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: '#8B5CF6',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}
+              >
+                View Post
+              </Typography>
+              <KeyboardArrowRightIcon sx={{ fontSize: '16px', color: '#8B5CF6' }} />
+            </Box>
           </Box>
         </Card>
       ))}

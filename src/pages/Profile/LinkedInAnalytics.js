@@ -278,6 +278,13 @@ const LinkedinAnalytics = () => {
       });
 
       console.log('API Response:', response.data);
+      console.log('LinkedIn Accounts Data:', response.data.data?.map(account => ({
+        username: account.username,
+        page_name: account.page_name,
+        account_type: account.account_type,
+        type: account.type,
+        profile: account.profile
+      })));
 
       // Update API quota info from response
       setApiCallsUsed(response.data.api_calls_used || 0);
@@ -586,7 +593,7 @@ const LinkedinAnalytics = () => {
           left: 0,
           width: '100vw',
           height: '100vh',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          backgroundColor: 'transparent',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -883,12 +890,39 @@ const LinkedinAnalytics = () => {
                     }
                   }}
                 >
-                  <MenuItem value="" disabled>Influencer</MenuItem>
-                  {instagramData.map((account, index) => (
-                    <MenuItem key={`${account.username}-${index}`} value={account.username}>
-                      {account.page_name || account.username}
-                    </MenuItem>
-                  ))}
+                  <MenuItem value="" disabled>
+                    {platform === 'LinkedIn' && postType ? 
+                      `Select ${postType.charAt(0).toUpperCase() + postType.slice(1)}` : 
+                      'Influencer'
+                    }
+                  </MenuItem>
+                  {instagramData
+                    .filter(account => {
+                      if (platform === 'LinkedIn' && postType) {
+                        // Filter based on account type for LinkedIn
+                        if (postType === 'profile') {
+                          // Check if it's a personal profile (has username but limited page_name, or has specific profile indicators)
+                          return !account.page_name || account.page_name === account.username || 
+                                 account.account_type === 'profile' || account.type === 'profile';
+                        } else if (postType === 'page') {
+                          // Check if it's a company page (has page_name different from username, or has specific page indicators)
+                          return account.page_name && account.page_name !== account.username ||
+                                 account.account_type === 'page' || account.type === 'page';
+                        }
+                      }
+                      return true; // Show all for other platforms or when no type selected
+                    })
+                    .map((account, index) => (
+                      <MenuItem key={`${account.username}-${index}`} value={account.username}>
+                        {account.page_name || account.username}
+                        {platform === 'LinkedIn' && (
+                          <span style={{ fontSize: '12px', color: '#666', marginLeft: '8px' }}>
+                            ({account.page_name && account.page_name !== account.username ? 'Page' : 'Profile'})
+                          </span>
+                        )}
+                      </MenuItem>
+                    ))
+                  }
                 </Select>
               </FormControl>
 
@@ -896,7 +930,14 @@ const LinkedinAnalytics = () => {
               <FormControl size="small" sx={{ minWidth: 250 }}>
                 <Select
                   value={postType}
-                  onChange={(e) => setPostType(e.target.value)}
+                  onChange={(e) => {
+                    setPostType(e.target.value);
+                    // Reset selected account when account type filter changes for LinkedIn
+                    if (platform === 'LinkedIn') {
+                      setSelectedAccount('');
+                      setSelectedAccountData(null);
+                    }
+                  }}
                   displayEmpty
                   sx={{
                     height: '36px',
@@ -927,10 +968,20 @@ const LinkedinAnalytics = () => {
                     }
                   }}
                 >
-                  <MenuItem value="">Post Type</MenuItem>
-                  <MenuItem value="image">Image</MenuItem>
-                  <MenuItem value="video">Video</MenuItem>
-                  <MenuItem value="carousel">Carousel</MenuItem>
+                  {platform === 'LinkedIn' ? (
+                    <>
+                      <MenuItem value="">Account Type</MenuItem>
+                      <MenuItem value="profile">Profile</MenuItem>
+                      <MenuItem value="page">Page</MenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <MenuItem value="">Post Type</MenuItem>
+                      <MenuItem value="image">Image</MenuItem>
+                      <MenuItem value="video">Video</MenuItem>
+                      <MenuItem value="carousel">Carousel</MenuItem>
+                    </>
+                  )}
                 </Select>
               </FormControl>
 
@@ -1009,29 +1060,6 @@ const LinkedinAnalytics = () => {
             </Box>
           </Paper>
           <Box sx={{ flexGrow: 1, mt: { xs: 8, md: 0 }, padding: '20px', background: '#f6edf8' }}>
-            {/* Connected Pages Banner */}
-            {instagramData && instagramData.length > 0 && (
-              <Box sx={{
-                mb: 2,
-                p: 2,
-                backgroundColor: '#e8f5e8',
-                borderRadius: 2,
-                border: '1px solid #c8e6c9',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2
-              }}>
-                <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 24 }} />
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#2e7d32' }}>
-                    {instagramData.length} LinkedIn page{instagramData.length > 1 ? 's' : ''} connected
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#2e7d32' }}>
-                    You can now view analytics and insights for your connected LinkedIn pages.
-                  </Typography>
-                </Box>
-              </Box>
-            )}
 
             {/* Error State */}
             {error && !loading && (

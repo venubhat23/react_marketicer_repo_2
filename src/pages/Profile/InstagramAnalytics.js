@@ -24,6 +24,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import SendIcon from "@mui/icons-material/Send";
 import ShareIcon from "@mui/icons-material/Share";
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { useSearchParams } from "react-router-dom";
 
 
@@ -370,7 +371,7 @@ const InstagramAnalytics = () => {
         left: 0,
         width: '100vw',
         height: '100vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'transparent',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -1284,6 +1285,11 @@ const InstagramAnalytics = () => {
 
                 {(() => {
                   const posts = selectedAccountData?.analytics?.recent_posts || [];
+                  console.log('📊 POSTS DEBUG INFO:');
+                  console.log('Total posts available:', posts.length);
+                  console.log('Expected posts: 44, Actual posts:', posts.length);
+                  console.log('Posts data:', posts);
+                  
                   if (posts.length === 0) {
                     return <p>No posts available</p>;
                   }
@@ -1356,8 +1362,8 @@ const InstagramAnalytics = () => {
                             </Box>
                           </Box>
 
-                          {/* Right Side: Date + Links */}
-                          <Box sx={{ textAlign: "right", display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                          {/* Right Side: Date and View Buttons */}
+                          <Box sx={{ textAlign: "right", minWidth: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
                             <Typography variant="body2" color="text.secondary">
                               {new Date(post.timestamp).toLocaleDateString("en-US", {
                                 day: "numeric",
@@ -1365,15 +1371,42 @@ const InstagramAnalytics = () => {
                                 year: "numeric",
                               })}
                             </Typography>
+                            
+                            {/* View Full Analytics Button */}
                             <Link
                               to={`/FullAnalytics/${post.id}`}
-                              underline="hover"
-                              sx={{ fontWeight: "bold", color: "purple", fontSize: '14px' }}
+                              style={{ textDecoration: 'none' }}
                             >
-                              View full Analytics →
+                              <Box 
+                                sx={{ 
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 0.5,
+                                  cursor: 'pointer',
+                                  color: '#8B5CF6',
+                                  fontSize: '14px',
+                                  fontWeight: 500,
+                                  '&:hover': {
+                                    textDecoration: 'underline'
+                                  }
+                                }}
+                              >
+                                <Typography 
+                                  variant="body2" 
+                                  sx={{ 
+                                    color: '#8B5CF6',
+                                    fontSize: '14px',
+                                    fontWeight: 500
+                                  }}
+                                >
+                                  View full Analytics
+                                </Typography>
+                                <KeyboardArrowRightIcon sx={{ fontSize: '16px', color: '#8B5CF6' }} />
+                              </Box>
                             </Link>
-                            <Typography 
-                              variant="body2"
+                            
+                            {/* View Post Button */}
+                            <Box 
                               onClick={() => {
                                 // Use permalink if available, otherwise construct URL from shortcode or direct Instagram link
                                 let postUrl = post.permalink;
@@ -1399,17 +1432,30 @@ const InstagramAnalytics = () => {
                                 window.open(postUrl, '_blank');
                               }}
                               sx={{ 
-                                fontWeight: "bold", 
-                                color: "purple", 
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5,
                                 cursor: 'pointer',
+                                color: '#8B5CF6',
                                 fontSize: '14px',
+                                fontWeight: 500,
                                 '&:hover': {
                                   textDecoration: 'underline'
                                 }
                               }}
                             >
-                              View Post →
-                            </Typography>
+                              <Typography 
+                                variant="body2" 
+                                sx={{ 
+                                  color: '#8B5CF6',
+                                  fontSize: '14px',
+                                  fontWeight: 500
+                                }}
+                              >
+                                View Post
+                              </Typography>
+                              <KeyboardArrowRightIcon sx={{ fontSize: '16px', color: '#8B5CF6' }} />
+                            </Box>
                           </Box>
                         </Card>
                       ))}
