@@ -3,7 +3,8 @@ import {
   Box, Typography, FormControl, Avatar,
   Grid, Select, MenuItem, Card, CardContent,
   Paper, IconButton, CircularProgress, TextField,Tabs, Tab,
-  Divider, Container, Stack, Button, InputLabel,CardMedia, Chip
+  Divider, Container, Stack, Button, InputLabel,CardMedia, Chip,
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -73,38 +74,82 @@ const LinkedinAnalytics = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showData, setShowData] = useState(false);
   const [dataSource, setDataSource] = useState(''); // 'fresh', 'cache', or ''
+  const [showNoDataModal, setShowNoDataModal] = useState(false);
+  const [refreshLimitExceeded, setRefreshLimitExceeded] = useState(false);
+  const [refreshButtonDisabled, setRefreshButtonDisabled] = useState(false);
+  const [apiCallsUsed, setApiCallsUsed] = useState(0);
+  const [apiCallsRemaining, setApiCallsRemaining] = useState(0);
+  const [quotaExceeded, setQuotaExceeded] = useState(false);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   useEffect(() => {
-    // Load API call count from localStorage
-    const savedApiCallCount = localStorage.getItem('linkedinApiCallCount');
-    const lastResetDate = localStorage.getItem('linkedinApiCallCountResetDate');
-    const hasEverCalledAPI = localStorage.getItem('linkedinHasEverCalledAPI');
-    const today = new Date().toDateString();
-
-    if (lastResetDate !== today) {
-      // Reset count for new day
-      setApiCallCount(0);
-      localStorage.setItem('linkedinApiCallCount', '0');
-      localStorage.setItem('linkedinApiCallCountResetDate', today);
-    } else {
-      setApiCallCount(parseInt(savedApiCallCount) || 0);
-    }
-
-    // Load data based on API call count
-    const currentCount = parseInt(savedApiCallCount) || 0;
-
-    if (currentCount > 1) {
-      // API count > 1 - use cache API
-      fetchConnectedAccountsFromCache();
-    } else {
-      // API count <= 1 - use fresh API and increment count
-      fetchConnectedAccountsFirstTime();
-    }
+    // When page loads, always call cache endpoint first
+    fetchCachedAnalyticsOnLoad();
   }, []);
+
+  const fetchCachedAnalyticsOnLoad = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError('No authentication token found');
+        setLoading(false);
+        return;
+      }
+
+      console.log('🔄 Page load - checking for cached data');
+
+      // Call cache endpoint on page load
+      const response = await axios.get('https://api.marketincer.com/api/v1/linkedin_analytics?cache=true', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+
+      // Update API quota info from response
+      setApiCallsUsed(response.data.api_calls_used || 0);
+      setApiCallsRemaining(response.data.api_calls_remaining || 0);
+
+      // Check if quota exceeded
+      if (response.data.api_calls_remaining === 0) {
+        setQuotaExceeded(true);
+        setRefreshButtonDisabled(true);
+      }
+
+      if (response.data.success && response.data.data && response.data.data.length > 0) {
+        // A: Cached data exists → show analytics
+        setInstagramData(response.data.data);
+        const firstAccount = response.data.data[0];
+        setSelectedAccount(firstAccount.username);
+        setSelectedAccountData(firstAccount);
+        setDataSource('cache');
+        setShowData(true);
+        console.log('✅ Cached data loaded successfully');
+      } else {
+        // B: Cached data empty → show modal popup
+        setInstagramData([]);
+        setShowNoDataModal(true);
+        console.log('📭 No cached data available - showing modal');
+      }
+    } catch (error) {
+      console.error('Error fetching cached analytics:', error);
+      if (error.response?.data?.data === null) {
+        // Handle null data case
+        setShowNoDataModal(true);
+      } else {
+        setError('Failed to load analytics data');
+      }
+      setInstagramData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const incrementApiCallCount = () => {
     const newCount = apiCallCount + 1;
@@ -202,18 +247,19 @@ const LinkedinAnalytics = () => {
   };
 
   const fetchAnalyticsData = async () => {
-    if (apiCallCount >= 20) {
-      alert('Daily API limit reached (20/20). Please try again tomorrow.');
+    // Check if quota exceeded before making call
+    if (quotaExceeded || apiCallsRemaining === 0) {
+      setError('API quota exceeded. No remaining calls available.');
       return;
     }
 
-    if (!selectedAccountData) {
-      alert('Please select a profile first');
+    if (refreshButtonDisabled) {
       return;
     }
 
     setRefreshing(true);
     setShowData(false);
+    setError('');
 
     try {
       const token = localStorage.getItem("token");
@@ -223,11 +269,8 @@ const LinkedinAnalytics = () => {
         return;
       }
 
-      // Increment API call count for fresh data refresh
-      incrementApiCallCount();
-
-      console.log('🔄 Manual refresh - fetching fresh data and updating cache...');
-      // Manual refresh always uses fresh API to update cache
+      console.log('🔄 Manual refresh - fetching fresh data...');
+      // Manual refresh calls fresh API endpoint
       const response = await axios.get('https://api.marketincer.com/api/v1/linkedin_analytics', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -236,29 +279,51 @@ const LinkedinAnalytics = () => {
 
       console.log('API Response:', response.data);
 
+      // Update API quota info from response
+      setApiCallsUsed(response.data.api_calls_used || 0);
+      setApiCallsRemaining(response.data.api_calls_remaining || 0);
+
+      // Check if quota exceeded after this call
+      if (response.data.api_calls_remaining === 0) {
+        setQuotaExceeded(true);
+        setRefreshButtonDisabled(true);
+      }
+
       if (response.data.success && response.data.data && response.data.data.length > 0) {
         const updatedData = response.data.data;
         setInstagramData(updatedData);
 
-        const currentAccount = updatedData.find(account => account.username === selectedAccount);
-        if (currentAccount) {
-          setSelectedAccountData(currentAccount);
-          const posts = currentAccount?.analytics?.recent_posts ?? [];
-          setRecentPosts(posts);
-        }
+        const currentAccount = updatedData.find(account => account.username === selectedAccount) || updatedData[0];
+        setSelectedAccount(currentAccount.username);
+        setSelectedAccountData(currentAccount);
+        const posts = currentAccount?.analytics?.recent_posts ?? [];
+        setRecentPosts(posts);
 
-        // Fetch audience insights if available (also increments count)
-        await fetchAudienceInsights(currentAccount || selectedAccountData);
+        // Fetch audience insights if available
+        await fetchAudienceInsights(currentAccount);
 
         setDataSource('fresh');
         setShowData(true);
+        setShowNoDataModal(false); // Close modal if it was open
         console.log('✅ Fresh data loaded and cache updated');
       } else {
         setError('No LinkedIn data found');
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
-      setError(`API Error: ${error.response?.data?.message || error.message}`);
+
+      // Check for refresh limit exceeded error
+      if (error.response?.data?.error === 'Refresh limit exceeded' ||
+          error.response?.status === 429 ||
+          error.response?.data?.message?.includes('limit exceeded') ||
+          error.response?.data?.api_calls_remaining === 0) {
+        setRefreshLimitExceeded(true);
+        setRefreshButtonDisabled(true);
+        setQuotaExceeded(true);
+        setError('API quota exceeded. Please try again later.');
+      } else {
+        setError(`API Error: ${error.response?.data?.message || error.message}`);
+      }
     } finally {
       setRefreshing(false);
     }
@@ -870,41 +935,57 @@ const LinkedinAnalytics = () => {
               </FormControl>
 
               {/* Refresh Button */}
-              <Button
-                variant="contained"
-                size="small"
-                onClick={fetchAnalyticsData}
-                disabled={refreshing || !selectedAccount || apiCallCount >= 20}
-                startIcon={refreshing ? <CircularProgress size={16} /> : <RefreshIcon />}
-                sx={{
-                  height: '36px',
-                  backgroundColor: apiCallCount >= 20 ? '#ccc' : '#8b5cf6',
-                  color: 'white',
-                  borderRadius: '18px',
-                  px: 3,
-                  fontSize: '14px',
-                  textTransform: 'none',
-                  '&:hover': {
-                    backgroundColor: apiCallCount >= 20 ? '#ccc' : '#7c3aed',
-                  },
-                  '&:disabled': {
-                    backgroundColor: '#ccc',
-                    color: '#666'
-                  }
-                }}
-              >
-                {refreshing ? 'Loading...' : 'Refresh Data'}
-              </Button>
+              {!quotaExceeded && apiCallsRemaining > 0 ? (
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={fetchAnalyticsData}
+                  disabled={refreshing || refreshButtonDisabled}
+                  startIcon={refreshing ? <CircularProgress size={16} /> : <RefreshIcon />}
+                  sx={{
+                    height: '36px',
+                    backgroundColor: refreshButtonDisabled ? '#ccc' : '#8b5cf6',
+                    color: 'white',
+                    borderRadius: '18px',
+                    px: 3,
+                    fontSize: '14px',
+                    textTransform: 'none',
+                    '&:hover': {
+                      backgroundColor: refreshButtonDisabled ? '#ccc' : '#7c3aed',
+                    },
+                    '&:disabled': {
+                      backgroundColor: '#ccc',
+                      color: '#666'
+                    }
+                  }}
+                >
+                  {refreshing ? 'Loading...' : 'Refresh Data'}
+                </Button>
+              ) : (
+                <Chip
+                  label="Quota Exceeded"
+                  variant="filled"
+                  sx={{
+                    height: '36px',
+                    backgroundColor: '#ffebee',
+                    borderColor: '#f44336',
+                    color: '#d32f2f',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    border: '2px solid #f44336'
+                  }}
+                />
+              )}
 
               {/* API Usage Counter */}
               <Chip
-                label={`API Calls: ${apiCallCount}/20`}
+                label={`API Calls: ${apiCallsUsed} used | ${apiCallsRemaining} remaining`}
                 variant="outlined"
                 sx={{
                   height: '36px',
-                  backgroundColor: apiCallCount >= 20 ? '#ffebee' : '#f3f4f6',
-                  borderColor: apiCallCount >= 20 ? '#f44336' : '#d1d5db',
-                  color: apiCallCount >= 20 ? '#d32f2f' : '#374151',
+                  backgroundColor: apiCallsRemaining === 0 ? '#ffebee' : '#f3f4f6',
+                  borderColor: apiCallsRemaining === 0 ? '#f44336' : '#d1d5db',
+                  color: apiCallsRemaining === 0 ? '#d32f2f' : '#374151',
                   fontWeight: 600,
                   fontSize: '14px'
                 }}
@@ -1515,6 +1596,185 @@ const LinkedinAnalytics = () => {
 
         </Grid>
       </Grid>
+
+      {/* Attractive Modal Popup for "Data not present" */}
+      <Dialog
+        open={showNoDataModal}
+        onClose={() => {}}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 2,
+            background: 'linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%)',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }
+        }}
+      >
+        <DialogContent sx={{ textAlign: 'center', py: 4 }}>
+          {/* Animated Icon */}
+          <Box sx={{
+            width: 120,
+            height: 120,
+            borderRadius: '50%',
+            backgroundColor: '#fee2e2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 24px',
+            border: '3px solid #fecaca',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <Typography variant="h2" sx={{
+              color: '#dc2626',
+              fontSize: '48px',
+              animation: 'pulse 2s infinite'
+            }}>
+              📊
+            </Typography>
+            <Box sx={{
+              position: 'absolute',
+              top: -2,
+              left: -2,
+              right: -2,
+              bottom: -2,
+              borderRadius: '50%',
+              background: 'linear-gradient(45deg, transparent 30%, rgba(220, 38, 38, 0.1) 50%, transparent 70%)',
+              animation: 'rotate 3s linear infinite'
+            }} />
+          </Box>
+
+          {/* Title */}
+          <Typography variant="h4" sx={{
+            fontWeight: 700,
+            color: '#1f2937',
+            mb: 2,
+            background: 'linear-gradient(45deg, #1f2937 30%, #374151 90%)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            No Data Available
+          </Typography>
+
+          {/* Message */}
+          <Typography variant="h6" sx={{
+            color: '#6b7280',
+            mb: 4,
+            lineHeight: 1.6,
+            maxWidth: 400,
+            margin: '0 auto 32px'
+          }}>
+            {quotaExceeded || apiCallsRemaining === 0
+              ? 'Data not present. API quota exceeded - no remaining calls available.'
+              : 'Data not present. Please refresh data to fetch the latest LinkedIn analytics.'
+            }
+          </Typography>
+
+          {/* Decorative Elements */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 1,
+            mb: 3,
+            opacity: 0.6
+          }}>
+            {[...Array(3)].map((_, i) => (
+              <Box
+                key={i}
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  backgroundColor: '#8b5cf6',
+                  animation: `bounce 1.5s infinite ${i * 0.2}s`
+                }}
+              />
+            ))}
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+          {!quotaExceeded && apiCallsRemaining > 0 ? (
+            <Button
+              onClick={fetchAnalyticsData}
+              disabled={refreshing || refreshButtonDisabled}
+              variant="contained"
+              size="large"
+              startIcon={refreshing ? <CircularProgress size={20} /> : <RefreshIcon />}
+              sx={{
+                backgroundColor: refreshButtonDisabled ? '#ccc' : '#8b5cf6',
+                color: 'white',
+                px: 4,
+                py: 1.5,
+                borderRadius: 3,
+                fontSize: '16px',
+                fontWeight: 600,
+                textTransform: 'none',
+                boxShadow: '0 10px 25px rgba(139, 92, 246, 0.3)',
+                '&:hover': {
+                  backgroundColor: refreshButtonDisabled ? '#ccc' : '#7c3aed',
+                  boxShadow: '0 15px 35px rgba(139, 92, 246, 0.4)',
+                  transform: 'translateY(-2px)',
+                },
+                '&:disabled': {
+                  backgroundColor: '#ccc',
+                  color: '#666',
+                  boxShadow: 'none'
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {refreshing ? 'Loading...' : 'Refresh Data'}
+            </Button>
+          ) : (
+            <Chip
+              label="API Quota Exceeded"
+              variant="filled"
+              sx={{
+                height: '48px',
+                backgroundColor: '#ffebee',
+                borderColor: '#f44336',
+                color: '#d32f2f',
+                fontWeight: 600,
+                fontSize: '16px',
+                px: 3,
+                border: '2px solid #f44336'
+              }}
+            />
+          )}
+
+          {/* Show quota info */}
+          <Box sx={{ textAlign: 'center', mt: 2, opacity: 0.8 }}>
+            <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '14px' }}>
+              API Calls: {apiCallsUsed} used | {apiCallsRemaining} remaining
+            </Typography>
+          </Box>
+        </DialogActions>
+      </Dialog>
+
+      {/* CSS Animations */}
+      <style>
+        {`
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+          }
+          @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+          }
+        `}
+      </style>
     </Box>
 
   );
