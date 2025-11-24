@@ -132,30 +132,6 @@ const InvoiceDetail = () => {
     }
   };
 
-  const handleSendEmail = async () => {
-    try {
-      // Prepare email data
-      const emailData = {
-        to: invoice.work_email || invoice.customer_email,  // Billed To email
-        cc: invoice.company_website || invoice.company_email,  // Billed By email
-        subject: `Invoice ${invoice.invoice_number} from ${invoice.company_name}`,
-        invoice_id: invoice.id
-      };
-
-      // Validate email addresses
-      if (!emailData.to) {
-        toast.error('Customer email address is required to send invoice');
-        return;
-      }
-
-      await InvoiceAPI.sendInvoiceEmail(invoice.id, emailData);
-      toast.success('Invoice sent successfully!');
-    } catch (error) {
-      const errorMessage = error.message || error.error || 'Failed to send invoice email';
-      toast.error(errorMessage);
-      console.error('Error sending invoice email:', error);
-    }
-  };
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
