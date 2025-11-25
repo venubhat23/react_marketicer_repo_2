@@ -390,6 +390,15 @@ const LinkedinAnalytics = () => {
     setRecentPosts([]);
     setAudienceData(null);
     setHasAudienceData(false);
+
+    // Auto-load data for the selected account if it exists
+    if (accountData && accountData.analytics) {
+      setRecentPosts(accountData.analytics.recent_posts || []);
+      setShowData(true);
+
+      // Fetch audience insights for the new account
+      fetchAudienceInsights(accountData);
+    }
   };
 
   const formatNumber = (num) => {
@@ -468,13 +477,23 @@ const LinkedinAnalytics = () => {
 
   const handlePlatformChange = (event) => {
     const selectedPlatform = event.target.value;
+
+    // Update platform state first
     setPlatform(selectedPlatform);
 
-    if (selectedPlatform === 'Instagram') {
-      navigate('/instagram-analytics?type=Instagram');
-    } else if (selectedPlatform === 'LinkedIn') {
-      navigate('/linkedin-analytics');
-    }
+    // Add a small delay before navigation to allow UI to update
+    setTimeout(() => {
+      if (selectedPlatform === 'Instagram') {
+        navigate('/instagram-analytics?type=Instagram');
+      } else if (selectedPlatform === 'LinkedIn') {
+        // If already on LinkedIn page, just refresh data instead of navigating
+        if (window.location.pathname === '/linkedin-analytics') {
+          window.location.reload();
+        } else {
+          navigate('/linkedin-analytics');
+        }
+      }
+    }, 100);
   };
 
   // Show loading state with blurred background
@@ -923,6 +942,20 @@ const LinkedinAnalytics = () => {
                       </MenuItem>
                     ))
                   }
+                  //  
+                  // {instagramData.length > 0 ? 'Select LinkedIn Account' : 'Loading LinkedIn Accounts...'}
+                  // </MenuItem>
+                  // {loading ? (
+                  //   <MenuItem value="" disabled>Loading accounts...</MenuItem>
+                  // ) : instagramData.length > 0 ? (
+                  //   instagramData.map((account, index) => (
+                  //     <MenuItem key={`${account.username}-${index}`} value={account.username}>
+                  //       {account.page_name || account.username}
+                  //     </MenuItem>
+                  //   ))
+                  // ) : (
+                  //   <MenuItem value="" disabled>No LinkedIn accounts found</MenuItem>
+                  // )}
                 </Select>
               </FormControl>
 
