@@ -942,20 +942,6 @@ const LinkedinAnalytics = () => {
                       </MenuItem>
                     ))
                   }
-                  //  
-                  // {instagramData.length > 0 ? 'Select LinkedIn Account' : 'Loading LinkedIn Accounts...'}
-                  // </MenuItem>
-                  // {loading ? (
-                  //   <MenuItem value="" disabled>Loading accounts...</MenuItem>
-                  // ) : instagramData.length > 0 ? (
-                  //   instagramData.map((account, index) => (
-                  //     <MenuItem key={`${account.username}-${index}`} value={account.username}>
-                  //       {account.page_name || account.username}
-                  //     </MenuItem>
-                  //   ))
-                  // ) : (
-                  //   <MenuItem value="" disabled>No LinkedIn accounts found</MenuItem>
-                  // )}
                 </Select>
               </FormControl>
 
