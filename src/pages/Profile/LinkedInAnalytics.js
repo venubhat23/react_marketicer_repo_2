@@ -971,6 +971,7 @@ const LinkedinAnalytics = () => {
                       setSelectedAccountData(null);
                     }
                   }}
+                  
                   displayEmpty
                   sx={{
                     height: '36px',
