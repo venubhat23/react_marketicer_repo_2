@@ -4,7 +4,7 @@ import {
   Grid, Select, MenuItem, Card, CardContent,
   Paper, IconButton, CircularProgress, TextField,Tabs, Tab,
   Divider, Container, Stack, Button, InputLabel,CardMedia, Chip,
-  Dialog, DialogTitle, DialogContent, DialogActions
+  Dialog, DialogTitle, DialogContent, DialogActions, Tooltip
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowBack";
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -26,6 +26,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AddIcon from "@mui/icons-material/Add";
 import InsightsIcon from "@mui/icons-material/Insights";
 import LockIcon from "@mui/icons-material/Lock";
+import InfoIcon from "@mui/icons-material/Info";
 import BrandProfile from "./BrandProfile";
 import EnhancedAudienceInsights from "./EnhancedAudienceInsights";
 import LinkedInAudienceAPI from '../../services/linkedinAudienceApi';
@@ -1634,6 +1635,330 @@ const LinkedinAnalytics = () => {
                 {console.log('🔄 recent_posts:', selectedAccountData?.analytics?.recent_posts)}
                 {console.log('🔄 Passing to BrandProfile:', selectedAccountData?.analytics?.recent_posts)}
                 <BrandProfile brand={selectedAccountData?.analytics?.recent_posts || []} />
+              </Grid>
+
+              {/* Top Countries Section */}
+              <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }} sx={{ mt: 3 }}>
+                <Card sx={{
+                  borderRadius: 3,
+                  p: 3,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  border: '1px solid #e0e0e0',
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px', mr: 1 }}>
+                      Top Countries
+                    </Typography>
+                    <Tooltip title="Countries where more followers are located">
+                      <IconButton size="small" sx={{ color: '#666' }}>
+                        <InfoIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+
+                  {(() => {
+                    // Prepare and validate chart data
+                    const chartData = selectedAccountData?.demographics?.geographic_breakdown
+                      ? selectedAccountData.demographics.geographic_breakdown
+                          .filter(country =>
+                            country &&
+                            country.country &&
+                            country.percentage !== null &&
+                            country.percentage !== undefined &&
+                            !isNaN(Number(country.percentage))
+                          )
+                          .map(country => ({
+                            country: String(country.country).trim() || 'Unknown',
+                            percentage: Math.max(0, Math.min(100, Number(country.percentage) || 0)),
+                            followers: Math.max(0, Number(country.followers) || 0)
+                          }))
+                      : [];
+
+                    return chartData.length > 0 ? (
+                      <Box sx={{ width: '100%', py: 2 }}>
+                        {/* Chart Container */}
+                        <Box sx={{ position: 'relative', mb: 3 }}>
+                          {/* X-axis labels */}
+                          <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mb: 1,
+                            pl: '80px',
+                            pr: '20px'
+                          }}>
+                            <Typography variant="caption" sx={{ color: '#888', fontSize: '11px' }}>0</Typography>
+                            <Typography variant="caption" sx={{ color: '#888', fontSize: '11px' }}>20</Typography>
+                            <Typography variant="caption" sx={{ color: '#888', fontSize: '11px' }}>40</Typography>
+                            <Typography variant="caption" sx={{ color: '#888', fontSize: '11px' }}>60</Typography>
+                            <Typography variant="caption" sx={{ color: '#888', fontSize: '11px' }}>80</Typography>
+                            <Typography variant="caption" sx={{ color: '#888', fontSize: '11px' }}>100</Typography>
+                          </Box>
+
+                          {/* Chart bars */}
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {chartData.map((country, index) => (
+                              <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
+                                {/* Country name */}
+                                <Box sx={{
+                                  width: '70px',
+                                  pr: 1,
+                                  textAlign: 'right'
+                                }}>
+                                  <Typography variant="body2" sx={{
+                                    fontSize: '13px',
+                                    color: '#333',
+                                    fontWeight: 500
+                                  }}>
+                                    {country.country}
+                                  </Typography>
+                                </Box>
+
+                                {/* Bar container */}
+                                <Box sx={{
+                                  flex: 1,
+                                  height: '30px',
+                                  backgroundColor: '#f5f5f5',
+                                  borderRadius: '0 6px 6px 0',
+                                  position: 'relative',
+                                  overflow: 'hidden'
+                                }}>
+                                  {/* Bar fill */}
+                                  <Box sx={{
+                                    width: `${country.percentage}%`,
+                                    height: '100%',
+                                    backgroundColor: '#2196F3',
+                                    borderRadius: '0 6px 6px 0',
+                                    transition: 'width 0.3s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'flex-end',
+                                    pr: 1
+                                  }}>
+                                    {country.percentage > 15 && (
+                                      <Typography variant="caption" sx={{
+                                        color: 'white',
+                                        fontSize: '11px',
+                                        fontWeight: 600
+                                      }}>
+                                        {country.percentage.toFixed(1)}%
+                                      </Typography>
+                                    )}
+                                  </Box>
+
+                                  {/* Percentage label outside bar for small values */}
+                                  {country.percentage <= 15 && (
+                                    <Typography variant="caption" sx={{
+                                      position: 'absolute',
+                                      right: -35,
+                                      top: '50%',
+                                      transform: 'translateY(-50%)',
+                                      color: '#666',
+                                      fontSize: '11px'
+                                    }}>
+                                      {country.percentage.toFixed(1)}%
+                                    </Typography>
+                                  )}
+                                </Box>
+                              </Box>
+                            ))}
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : null;
+                  })()}
+
+                  {(() => {
+                    const hasValidData = selectedAccountData?.demographics?.geographic_breakdown &&
+                      Array.isArray(selectedAccountData.demographics.geographic_breakdown) &&
+                      selectedAccountData.demographics.geographic_breakdown.some(country =>
+                        country &&
+                        country.country &&
+                        country.percentage !== null &&
+                        country.percentage !== undefined &&
+                        !isNaN(Number(country.percentage))
+                      );
+
+                    return !hasValidData ? (
+                      <Box sx={{
+                        textAlign: 'center',
+                        py: 4,
+                        color: 'text.secondary'
+                      }}>
+                        <Typography variant="body2">
+                          No geographic data available
+                        </Typography>
+                      </Box>
+                    ) : null;
+                  })()}
+                </Card>
+              </Grid>
+
+              {/* Company Information Section */}
+              <Grid spacing={2} size={{ xs: 2, sm: 4, md: 12 }} sx={{ mt: 3 }}>
+                <Card sx={{
+                  borderRadius: 3,
+                  p: 3,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  border: '1px solid #e0e0e0',
+                }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px', mb: 3 }}>
+                    Company Information
+                  </Typography>
+
+                  {selectedAccountData?.profile && (
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+                      {/* Left Column */}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5 }}>
+                            COMPANY NAME
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                            {selectedAccountData.profile.name || 'N/A'}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5 }}>
+                            VANITY NAME
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                            {selectedAccountData.profile.vanity_name || 'N/A'}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5 }}>
+                            CATEGORY
+                          </Typography>
+                          <Chip
+                            label={selectedAccountData.profile.category || 'N/A'}
+                            sx={{
+                              backgroundColor: '#e3f2fd',
+                              color: '#1976d2',
+                              fontSize: '13px',
+                              height: '28px'
+                            }}
+                          />
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5 }}>
+                            WEBSITE
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                            {selectedAccountData.profile.website || 'Not specified'}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5 }}>
+                            COMPANY SIZE
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                            {selectedAccountData.profile.company_size || 'N/A'}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Right Column */}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5 }}>
+                            ORGANIZATION TYPE
+                          </Typography>
+                          <Chip
+                            label={selectedAccountData.profile.organization_type?.replace(/_/g, ' ') || 'N/A'}
+                            sx={{
+                              backgroundColor: '#f3e5f5',
+                              color: '#7b1fa2',
+                              fontSize: '13px',
+                              height: '28px'
+                            }}
+                          />
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5 }}>
+                            STATUS
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              backgroundColor: selectedAccountData.profile.organization_status === 'Operating' ? '#4caf50' : '#f44336'
+                            }} />
+                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                              {selectedAccountData.profile.organization_status || 'N/A'}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5 }}>
+                            ACCOUNT TYPE
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 500, textTransform: 'capitalize' }}>
+                            {selectedAccountData.profile.account_type || 'N/A'}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5 }}>
+                            VERIFIED
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {selectedAccountData.profile.verified ? (
+                              <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 18 }} />
+                            ) : (
+                              <Box sx={{
+                                width: 18,
+                                height: 18,
+                                borderRadius: '50%',
+                                border: '2px solid #ccc',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <Box sx={{
+                                  width: 4,
+                                  height: 4,
+                                  backgroundColor: '#ccc',
+                                  borderRadius: '50%'
+                                }} />
+                              </Box>
+                            )}
+                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                              {selectedAccountData.profile.verified ? 'Verified' : 'Not Verified'}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5 }}>
+                            DATA SOURCE
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 500, textTransform: 'capitalize' }}>
+                            {selectedAccountData.profile.data_source?.replace(/_/g, ' ') || 'N/A'}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  )}
+
+                  {!selectedAccountData?.profile && (
+                    <Box sx={{
+                      textAlign: 'center',
+                      py: 4,
+                      color: 'text.secondary'
+                    }}>
+                      <Typography variant="body2">
+                        No company information available
+                      </Typography>
+                    </Box>
+                  )}
+                </Card>
               </Grid>
 
 
