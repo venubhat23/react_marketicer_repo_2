@@ -937,7 +937,7 @@ const LinkedinAnalytics = () => {
                         {account.page_name || account.username}
                         {platform === 'LinkedIn' && (
                           <span style={{ fontSize: '12px', color: '#666', marginLeft: '8px' }}>
-                            ({account.page_name && account.page_name !== account.username ? 'Page' : 'Profile'})
+                            ({account.account_type === 'page' ? 'Page' : 'Profile'})
                           </span>
                         )}
                       </MenuItem>
