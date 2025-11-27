@@ -3758,8 +3758,8 @@ Would you like me to create this as a short handwritten-style note (suitable for
                     )}
                   </Button>
 
-                  {/* Secondary Actions - Save Draft & Schedule (Bottom) */}
-                  <Box display="flex" gap={2} sx={{ mt: 'auto' }}>
+                  {/* Secondary Actions - Save Draft & Schedule */}
+                  <Box display="flex" gap={2} sx={{ mt: 1 }}>
                     <Button
                       variant="outlined"
                       fullWidth
