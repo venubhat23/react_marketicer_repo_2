@@ -37,6 +37,7 @@ import SystemSettings from './pages/SystemSettings';
 import AutomationsPage from './pages/Automations/AutomationsPage';
 import AutomationRuns from './pages/Automations/AutomationRuns';
 import CreateAutomation from './pages/Automations/CreateAutomation';
+import MediaPage from './pages/Media/MediaPage';
 
 // Component that renders routes based on user role
 const AppRoutes = () => {
@@ -257,6 +258,12 @@ const AppRoutes = () => {
       <Route path="/calendar" element={
         <ProtectedRoute>
           <Calendar />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/media" element={
+        <ProtectedRoute>
+          <MediaPage />
         </ProtectedRoute>
       } />
 

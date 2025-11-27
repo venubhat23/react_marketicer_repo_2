@@ -219,18 +219,18 @@ const LinkAnalytics = ({ url, onClose }) => {
 
   const getCountryFlag = (country) => {
     const flags = {
-      'USA': '🇺🇸',
-      'India': '🇮🇳',
-      'Germany': '🇩🇪',
-      'UK': '🇬🇧',
-      'Canada': '🇨🇦',
-      'Australia': '🇦🇺',
-      'France': '🇫🇷',
-      'Japan': '🇯🇵',
-      'Brazil': '🇧🇷',
-      'Others': '🌍'
+      'USA': <PublicIcon sx={{ fontSize: 16, color: '#666' }} />,
+      'India': <PublicIcon sx={{ fontSize: 16, color: '#666' }} />,
+      'Germany': <PublicIcon sx={{ fontSize: 16, color: '#666' }} />,
+      'UK': <PublicIcon sx={{ fontSize: 16, color: '#666' }} />,
+      'Canada': <PublicIcon sx={{ fontSize: 16, color: '#666' }} />,
+      'Australia': <PublicIcon sx={{ fontSize: 16, color: '#666' }} />,
+      'France': <PublicIcon sx={{ fontSize: 16, color: '#666' }} />,
+      'Japan': <PublicIcon sx={{ fontSize: 16, color: '#666' }} />,
+      'Brazil': <PublicIcon sx={{ fontSize: 16, color: '#666' }} />,
+      'Others': <PublicIcon sx={{ fontSize: 16, color: '#666' }} />
     };
-    return flags[country] || '🌍';
+    return flags[country] || <PublicIcon sx={{ fontSize: 16, color: '#666' }} />;
   };
 
   const renderTabButtons = () => (
@@ -553,13 +553,13 @@ const LinkAnalytics = ({ url, onClose }) => {
           </Typography>
           <TableContainer>
             <Table size="small">
-              <TableHead>
+              <TableHead sx={{ backgroundColor: '#091a48' }}>
                 <TableRow>
-                  <TableCell>Time</TableCell>
-                  <TableCell>Location</TableCell>
-                  <TableCell>Device</TableCell>
-                  <TableCell>Browser</TableCell>
-                  <TableCell>Referrer</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Time</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Location</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Device</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Browser</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Referrer</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -813,7 +813,7 @@ const LinkAnalytics = ({ url, onClose }) => {
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
-          📊 Analytics Dashboard
+          Analytics Dashboard
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {analytics.title || 'Untitled URL'}

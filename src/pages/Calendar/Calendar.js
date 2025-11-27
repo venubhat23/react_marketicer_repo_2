@@ -377,6 +377,16 @@ const Calendar = () => {
       day = day.add(1, 'day');
     }
     
+    // Debug logging for November 2025
+    if (currentDate.month() === 10 && currentDate.year() === 2025) {
+      const novemberDays = days.filter(d => d.month() === 10);
+      console.log('November 2025 Debug:');
+      console.log('Total days:', days.length);
+      console.log('November days count:', novemberDays.length);
+      console.log('November days:', novemberDays.map(d => d.format('YYYY-MM-DD')));
+      console.log('Days in November 2025:', currentDate.daysInMonth());
+    }
+    
     return days;
   };
 

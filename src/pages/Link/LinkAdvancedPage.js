@@ -1210,7 +1210,7 @@ const LinkAdvancedPage = () => {
                     </Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                       <Chip 
-                        label="🔗 Short Link" 
+                        label="Short Link" 
                         size="small" 
                         sx={{ 
                           bgcolor: '#e3f2fd', 
@@ -1222,7 +1222,8 @@ const LinkAdvancedPage = () => {
                       />
                       {enableQR && (
                         <Chip 
-                          label="📱 QR Code" 
+                          icon={<QrCodeIcon sx={{ fontSize: '14px' }} />}
+                          label="QR Code" 
                           size="small" 
                           sx={{ 
                             bgcolor: '#f3e5f5', 
@@ -1235,7 +1236,7 @@ const LinkAdvancedPage = () => {
                       )}
                       {enableUTM && (
                         <Chip 
-                          label="📊 UTM Tracking" 
+                          label="UTM Tracking" 
                           size="small" 
                           sx={{ 
                             bgcolor: '#e8f5e8', 

@@ -542,7 +542,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                       fontWeight: 'bold',
                       fontSize: '18px'
                     }}>
-                      📊 Your Short URLs
+                      Your Short URLs
                     </Typography>
                     <Typography variant="body2" sx={{
                       color: '#64748b',
@@ -788,7 +788,7 @@ const ShortLinkPage = ({ noLayout = false }) => {
                 <>
                   <TableContainer>
                     <Table>
-                      <TableHead sx={{ bgcolor: '#882AFF' }}>
+                      <TableHead sx={{ backgroundColor: '#091a48' }}>
                         <TableRow>
                           <TableCell sx={{ 
                             fontWeight: 'bold', 

@@ -238,41 +238,36 @@ const InvoiceDetail = () => {
           <Paper
             elevation={0}
             sx={{
-              display: { xs: 'none', md: 'block' },
               p: 1,
-              backgroundColor: '#ffffff',
-              borderBottom: '1px solid #e2e8f0',
-              borderRadius: 0
-            }}
-          >
-            <Box sx={{
+              backgroundColor: '#091a48',
+              borderRadius: 0,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
-            }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <IconButton
-                  edge="start"
-                  sx={{ mr: 2, color: '#475569' }}
-                  onClick={() => navigate('/invoices')}
-                >
-                  <ArrowBackIcon />
-                </IconButton>
-                <Typography variant="h5" sx={{ color: '#1e293b', fontWeight: 600 }}>
-                  Invoice Preview - #{invoice.invoice_number || invoice.id}
-                </Typography>
-              </Box>
+            }}
+          >
+            <Typography variant="h6" sx={{ color: '#fff' }}>
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="back"
+                sx={{ mr: 2, color: '#fff' }}
+                onClick={() => navigate('/invoices')}
+              >
+                <ArrowBackIcon />
+              </IconButton>
+              Invoice Preview - #{invoice.invoice_number || invoice.id}
+            </Typography>
 
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <IconButton size="large" sx={{ color: '#64748b' }}>
-                  <NotificationsIcon />
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <IconButton size="large" sx={{ color: 'white' }}>
+                <NotificationsIcon />
+              </IconButton>
+              <Link to="/SettingPage">
+                <IconButton size="large" sx={{ color: 'white' }}>
+                  <AccountCircleIcon />
                 </IconButton>
-                <Link to="/SettingPage">
-                  <IconButton size="large" sx={{ color: '#64748b' }}>
-                    <AccountCircleIcon />
-                  </IconButton>
-                </Link>
-              </Box>
+              </Link>
             </Box>
           </Paper>
 
@@ -363,7 +358,8 @@ const InvoiceDetail = () => {
                 fontWeight: 'bold', 
                 mb: 1,
                 fontSize: { xs: '2rem', sm: '3rem' },
-                letterSpacing: '2px'
+                letterSpacing: '2px',
+                textAlign: 'left'
               }}
             >
               INVOICE
@@ -373,24 +369,23 @@ const InvoiceDetail = () => {
               sx={{ 
                 color: '#666',
                 fontSize: '1.2rem',
-                fontWeight: 500
+                fontWeight: 500,
+                textAlign: 'left',
+                mb: 3
               }}
             >
-              #{invoice.invoice_number || invoice.id}
+              #{invoice.invoice_number}
             </Typography>
-          </Box>
-          <Box sx={{ 
-            textAlign: 'right',
-            flex: 1,
-            maxWidth: '250px'
-          }}>
+            
+            {/* Date Information on Left */}
             <Typography 
               variant="body1" 
               sx={{ 
                 mb: 1,
                 fontSize: '14px',
                 display: 'flex',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                maxWidth: '200px'
               }}
             >
               <span style={{ fontWeight: 'bold' }}>Date:</span>
@@ -402,13 +397,14 @@ const InvoiceDetail = () => {
                 mb: 2,
                 fontSize: '14px',
                 display: 'flex',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                maxWidth: '200px'
               }}
             >
               <span style={{ fontWeight: 'bold' }}>Due Date:</span>
               <span>{invoice.due_date}</span>
             </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
               <Chip 
                 label={invoice.status} 
                 color={getStatusColor(invoice.status)}
@@ -419,6 +415,60 @@ const InvoiceDetail = () => {
                 }}
               />
             </Box>
+          </Box>
+
+          {/* BILL FROM section on Right */}
+          <Box sx={{ 
+            flex: 1,
+            textAlign: 'left',
+            maxWidth: '300px'
+          }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: '#882AFF', 
+                fontWeight: 'bold', 
+                mb: 2,
+                fontSize: '16px'
+              }}
+            >
+              BILL FROM:
+            </Typography>
+            <Typography variant="body1" sx={{ color: '#1e293b', fontWeight: 600, mb: 1 }}>
+              {invoice.company_name || 'Company Name'}
+            </Typography>
+            {invoice.address && (
+              <Typography variant="body2" sx={{ color: '#64748b', mb: 1, lineHeight: 1.4 }}>
+                {invoice.address}
+              </Typography>
+            )}
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 0.5 }}>
+              {invoice.gst_number && (
+                <Typography variant="caption" sx={{ color: '#64748b' }}>
+                  GST: {invoice.gst_number}
+                </Typography>
+              )}
+              {invoice.phone_number && (
+                <Typography variant="caption" sx={{ color: '#64748b' }}>
+                  Ph: {invoice.phone_number}
+                </Typography>
+              )}
+            </Box>
+            {invoice.job_title && (
+              <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.5 }}>
+                {invoice.job_title}
+              </Typography>
+            )}
+            {invoice.work_email && (
+              <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.5 }}>
+                {invoice.work_email}
+              </Typography>
+            )}
+            {invoice.company_website && (
+              <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.5 }}>
+                {invoice.company_website}
+              </Typography>
+            )}
           </Box>
         </Box>
 
@@ -500,6 +550,34 @@ const InvoiceDetail = () => {
                 }}
               >
                 <span>Phone:</span> <span>{invoice.phone_number}</span>
+              </Typography>
+            )}
+            {invoice.job_title && (
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  mb: 1, 
+                  color: '#666',
+                  fontSize: '12px',
+                  display: 'flex',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <span>Job Title:</span> <span>{invoice.job_title}</span>
+              </Typography>
+            )}
+            {invoice.work_email && (
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  mb: 1, 
+                  color: '#666',
+                  fontSize: '12px',
+                  display: 'flex',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <span>Work Email:</span> <span>{invoice.work_email}</span>
               </Typography>
             )}
             {invoice.company_website && (
@@ -588,6 +666,20 @@ const InvoiceDetail = () => {
                 }}
               >
                 <span>PAN:</span> <span>{invoice.client_pan}</span>
+              </Typography>
+            )}
+            {invoice.client_phone_number && (
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  mb: 1, 
+                  color: '#666',
+                  fontSize: '12px',
+                  display: 'flex',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <span>Phone:</span> <span>{invoice.client_phone_number}</span>
               </Typography>
             )}
             {invoice.work_email && (
@@ -811,6 +903,42 @@ const InvoiceDetail = () => {
             </Box>
           </Box>
         </Box>
+
+        {/* Notes Section */}
+        {invoice.notes && (
+          <Box sx={{ 
+            mt: 3, 
+            p: 2, 
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            bgcolor: '#f8fafc'
+          }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: '#882AFF', 
+                fontWeight: 'bold', 
+                mb: 2,
+                fontSize: '16px',
+                borderBottom: '1px solid #e2e8f0',
+                pb: 1
+              }}
+            >
+              NOTES:
+            </Typography>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: '#666',
+                fontSize: '13px',
+                lineHeight: 1.5,
+                whiteSpace: 'pre-wrap'
+              }}
+            >
+              {invoice.notes}
+            </Typography>
+          </Box>
+        )}
       </Box>
           </Box>
         </Grid>

@@ -28,6 +28,7 @@ import {
   Visibility as VisibilityIcon,
   Language as LanguageIcon,
   Devices as DevicesIcon,
+  Public as PublicIcon,
   Web as WebIcon,
   Launch as LaunchIcon,
   GetApp as DownloadIcon,
@@ -116,19 +117,7 @@ const AnalyticsSummary = () => {
   };
 
   const getCountryFlag = (country) => {
-    const flags = {
-      'USA': '🇺🇸',
-      'India': '🇮🇳',
-      'Germany': '🇩🇪',
-      'UK': '🇬🇧',
-      'Canada': '🇨🇦',
-      'Australia': '🇦🇺',
-      'France': '🇫🇷',
-      'Japan': '🇯🇵',
-      'Brazil': '🇧🇷',
-      'Others': '🌍'
-    };
-    return flags[country] || '🌍';
+    return <PublicIcon sx={{ fontSize: 16, color: '#666' }} />;
   };
 
   if (loading) {
@@ -157,7 +146,7 @@ const AnalyticsSummary = () => {
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-          📊 Analytics Overview
+          Analytics Overview
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
           Comprehensive analytics for all your shortened URLs

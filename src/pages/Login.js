@@ -1,11 +1,12 @@
 import React,{useState} from 'react'
-import { Button, TextField, Box, Typography, Grid , Divider, InputLabel} from "@mui/material";
+import { Button, TextField, Box, Typography, Grid , Divider, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Link} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import LoginBg from '../assets/images/loginBG.png';
 import axios from "axios";
 import GoogleIcon from '../assets/images/google_icon.png'
 import { useAuth } from '../authContext/AuthContext';
 import { setUserRole } from '../utils/userUtils';
+import { toast } from "react-toastify";
 
 
 
@@ -17,6 +18,13 @@ const Login = () => {
   
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
+  
+  // Forgot password states
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+  const [forgotPasswordMessage, setForgotPasswordMessage] = useState("");
+  const [forgotPasswordError, setForgotPasswordError] = useState("");
 
   
   
@@ -86,7 +94,116 @@ const Login = () => {
   const handleSignupRedirect = () => {
     navigate('/sign-up'); // or the path you have set in routes
   };
+
+  const handleForgotPasswordOpen = () => {
+    setForgotPasswordOpen(true);
+    setForgotPasswordEmail("");
+    setForgotPasswordMessage("");
+    setForgotPasswordError("");
+  };
+
+  const handleForgotPasswordClose = () => {
+    setForgotPasswordOpen(false);
+    setForgotPasswordEmail("");
+    setForgotPasswordMessage("");
+    setForgotPasswordError("");
+    setForgotPasswordLoading(false);
+  };
+
+  const handleForgotPasswordSubmit = async () => {
+    if (!forgotPasswordEmail) {
+      setForgotPasswordError("Email is required");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(forgotPasswordEmail)) {
+      setForgotPasswordError("Invalid email address");
+      return;
+    }
+
+    setForgotPasswordLoading(true);
+    setForgotPasswordError("");
+
+    try {
+      // Try different possible endpoints and data structures for forgot password
+      const possibleEndpoints = [
+        "https://api.marketincer.com/api/v1/forgot-password",
+        "https://api.marketincer.com/api/v1/password/forgot",
+        "https://api.marketincer.com/api/v1/auth/forgot-password",
+        "https://api.marketincer.com/api/v1/password-reset",
+        "https://api.marketincer.com/api/v1/reset-password"
+      ];
+      
+      const possiblePayloads = [
+        { email: forgotPasswordEmail },
+        { user: { email: forgotPasswordEmail } },
+        { reset: { email: forgotPasswordEmail } }
+      ];
+      
+      console.log("🔐 FORGOT PASSWORD DEBUG:");
+      console.log("Email:", forgotPasswordEmail);
+      console.log("Timestamp:", new Date().toISOString());
+      
+      // Try the most likely combination first
+      let apiEndpoint = possibleEndpoints[0];
+      let payload = possiblePayloads[0];
+      
+      console.log("📡 API Call Details:");
+      console.log("Endpoint:", apiEndpoint);
+      console.log("Payload:", JSON.stringify(payload, null, 2));
+      console.log("Headers:", { 'Content-Type': 'application/json' });
+      
+      await axios.post(apiEndpoint, payload);
+
+      setForgotPasswordMessage("Password reset link has been sent to your email address.");
+      toast.success("Password reset link has been sent to your email address!");
+      setForgotPasswordEmail("");
+      
+      // Auto close dialog after 2 seconds
+      setTimeout(() => {
+        handleForgotPasswordClose();
+      }, 2000);
+
+    } catch (error) {
+      console.error("Forgot password failed", error);
+      console.error("Error response:", error.response);
+      console.error("Error message:", error.message);
+      console.error("Error status:", error.response?.status);
+      console.error("Error data:", error.response?.data);
+      
+      if (error.response && error.response.data) {
+        const { message } = error.response.data;
+        const errorMsg = message || "Failed to send reset email. Please try again.";
+        setForgotPasswordError(errorMsg);
+        toast.error(errorMsg);
+      } else if (error.response) {
+        // Server responded with error status
+        let errorMsg;
+        if (error.response.status === 404) {
+          errorMsg = "Forgot password feature is not yet available. Please contact support.";
+        } else if (error.response.status === 500) {
+          errorMsg = "Server error. Please try again later.";
+        } else {
+          errorMsg = `Server error: ${error.response.status}. Please try again.`;
+        }
+        setForgotPasswordError(errorMsg);
+        toast.error(errorMsg);
+      } else if (error.request) {
+        // Request was made but no response received
+        const errorMsg = "Network error. Please check your connection and try again.";
+        setForgotPasswordError(errorMsg);
+        toast.error(errorMsg);
+      } else {
+        const errorMsg = "Something went wrong. Please try again later.";
+        setForgotPasswordError(errorMsg);
+        toast.error(errorMsg);
+      }
+    } finally {
+      setForgotPasswordLoading(false);
+    }
+  };
   return (
+    <>
     <Grid container spacing={2} className="login_section"
     sx={{
       backgroundImage: `url(${LoginBg})`,
@@ -161,6 +278,25 @@ const Login = () => {
             InputProps={{ style: { backgroundColor: '#fff', borderRadius:'5px'} }}
           />
 
+          <Box sx={{ textAlign: 'right', mt: 1 }}>
+            <Link
+              component="button"
+              variant="body2"
+              onClick={handleForgotPasswordOpen}
+              sx={{
+                color: '#90caf9',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                '&:hover': {
+                  color: '#bbdefb'
+                }
+              }}
+            >
+              Forgot Password?
+            </Link>
+          </Box>
+
           <Button
             fullWidth
             variant="contained"
@@ -192,7 +328,7 @@ const Login = () => {
 
 
           <Typography variant="body2" align="center" sx={{color:'#fff'}}>
-            Don’t have an account?{' '}
+            Don't have an account?{' '}
             <span style={{ color: '#90caf9', cursor: 'pointer' }} onClick={handleSignupRedirect}>Signup</span>
           </Typography>
       
@@ -201,7 +337,112 @@ const Login = () => {
     
     </Grid>
     </Grid>
-   
+
+    {/* Forgot Password Dialog */}
+    <Dialog 
+      open={forgotPasswordOpen} 
+      onClose={handleForgotPasswordClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          p: 1
+        }
+      }}
+    >
+      <DialogTitle sx={{ 
+        textAlign: 'center', 
+        fontWeight: 'bold',
+        color: '#882AFF',
+        pb: 1
+      }}>
+        Reset Password
+      </DialogTitle>
+      
+      <DialogContent sx={{ px: 3, py: 2 }}>
+        <Typography 
+          variant="body2" 
+          color="text.secondary" 
+          sx={{ mb: 3, textAlign: 'center' }}
+        >
+          Enter your email address and we'll send you a link to reset your password.
+        </Typography>
+
+        {forgotPasswordError && (
+          <Typography 
+            color="error" 
+            variant="body2" 
+            sx={{ mb: 2, textAlign: 'center' }}
+          >
+            {forgotPasswordError}
+          </Typography>
+        )}
+
+        {forgotPasswordMessage && (
+          <Typography 
+            color="success.main" 
+            variant="body2" 
+            sx={{ mb: 2, textAlign: 'center' }}
+          >
+            {forgotPasswordMessage}
+          </Typography>
+        )}
+
+        <TextField
+          autoFocus
+          fullWidth
+          label="Email Address"
+          type="email"
+          variant="outlined"
+          value={forgotPasswordEmail}
+          onChange={(e) => setForgotPasswordEmail(e.target.value)}
+          disabled={forgotPasswordLoading}
+          error={!!forgotPasswordError && !forgotPasswordMessage}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '&.Mui-focused fieldset': {
+                borderColor: '#882AFF',
+              },
+            },
+            '& .MuiInputLabel-root.Mui-focused': {
+              color: '#882AFF',
+            },
+          }}
+        />
+      </DialogContent>
+      
+      <DialogActions sx={{ px: 3, pb: 3, pt: 1, gap: 1 }}>
+        <Button 
+          onClick={handleForgotPasswordClose}
+          disabled={forgotPasswordLoading}
+          sx={{ color: '#666' }}
+        >
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleForgotPasswordSubmit}
+          variant="contained"
+          disabled={forgotPasswordLoading || forgotPasswordMessage}
+          sx={{
+            bgcolor: '#882AFF',
+            '&:hover': {
+              bgcolor: '#7C3AED'
+            },
+            '&:disabled': {
+              bgcolor: '#ccc'
+            }
+          }}
+        >
+          {forgotPasswordLoading ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : (
+            'Send Reset Link'
+          )}
+        </Button>
+      </DialogActions>
+    </Dialog>
+    </>
   );
 };
 

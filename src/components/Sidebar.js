@@ -21,6 +21,7 @@ import {
   Close as CloseIcon,
   Monitor as MonitorIcon,
   AutoMode as AutoModeIcon,
+  PermMedia as MediaIcon,
 } from '@mui/icons-material';
 
 import {
@@ -226,6 +227,17 @@ const Sidebar = () => {
 
         <ListItem disablePadding>
           <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Link to="/media">
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
+                <MediaIcon fontSize="medium" />
+                <Typography variant="body2" sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>Media</Typography>
+              </Box>
+            </Link>
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton sx={{ display: 'flex', justifyContent: 'center' }}>
             <Link to="/social-monitoring">
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <MonitorIcon fontSize="medium" />
@@ -306,7 +318,7 @@ const Sidebar = () => {
           ))}
 
           <ListItem disablePadding >
-            <ListItemButton sx={{ display: 'flex', justifyContent: 'center', display:'none' }}>
+            <ListItemButton sx={{ display: 'none', justifyContent: 'center' }}>
             <Link to="/settingPage">
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cbaef7' }}>
                 <SettingsIcon fontSize="medium" />

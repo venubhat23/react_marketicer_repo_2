@@ -134,19 +134,7 @@ const IndividualLinkAnalytics = ({ url, onClose }) => {
   };
 
   const getCountryFlag = (country) => {
-    const flags = {
-      'USA': '🇺🇸',
-      'India': '🇮🇳',
-      'Germany': '🇩🇪',
-      'UK': '🇬🇧',
-      'Canada': '🇨🇦',
-      'Australia': '🇦🇺',
-      'France': '🇫🇷',
-      'Japan': '🇯🇵',
-      'Brazil': '🇧🇷',
-      'Others': '🌍'
-    };
-    return flags[country] || '🌍';
+    return <PublicIcon sx={{ fontSize: 16, color: '#666' }} />;
   };
 
   const getDeviceIcon = (device) => {
@@ -365,12 +353,12 @@ const IndividualLinkAnalytics = ({ url, onClose }) => {
         
         <TableContainer>
           <Table>
-            <TableHead>
+            <TableHead sx={{ backgroundColor: '#091a48' }}>
               <TableRow>
-                <TableCell>#</TableCell>
-                <TableCell>Country</TableCell>
-                <TableCell align="center">Engagements</TableCell>
-                <TableCell align="center">%</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#fff' }}>#</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Country</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600, color: '#fff' }}>Engagements</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600, color: '#fff' }}>%</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -378,7 +366,7 @@ const IndividualLinkAnalytics = ({ url, onClose }) => {
                 <TableCell>1</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>🇮🇳</span>
+                    {getCountryFlag('India')}
                     <Typography>India</Typography>
                   </Box>
                 </TableCell>
@@ -478,12 +466,12 @@ const IndividualLinkAnalytics = ({ url, onClose }) => {
         <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold' }}>Changes to bit.ly/LoginURL</Typography>
         <TableContainer>
           <Table>
-            <TableHead>
+            <TableHead sx={{ backgroundColor: '#091a48' }}>
               <TableRow>
-                <TableCell>Action</TableCell>
-                <TableCell>Destination URL</TableCell>
-                <TableCell align="center">Engagements</TableCell>
-                <TableCell>Dates active</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Action</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Destination URL</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600, color: '#fff' }}>Engagements</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Dates active</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

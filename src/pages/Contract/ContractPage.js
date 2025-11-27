@@ -60,13 +60,13 @@ const ContractPage = () => {
       return {
         text: 'Draft',
         bgcolor: '#f3e5f5',
-        color: '#7b1fa2'
+        color: '#882AFF'
       };
     } else {
       return {
         text: 'Active',
-        bgcolor: '#e8f5e8',
-        color: '#388e3c'
+        bgcolor: '#f0e7ff',
+        color: '#882AFF'
       };
     }
   };
@@ -365,7 +365,7 @@ const ContractPage = () => {
   const renderTableHeaders = () => {
     if (showTemplates) {
       return (
-        <TableRow sx={{ bgcolor: '#B1C6FF', padding:'0 20px' }}>
+        <TableRow sx={{ backgroundColor: '#091a48', color:'#fff' }}>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Template Name</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Type</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Date Created</TableCell>
@@ -374,7 +374,7 @@ const ContractPage = () => {
       );
     } else {
       return (
-        <TableRow sx={{ bgcolor: '#B1C6FF', padding:'0 20px'}}>
+        <TableRow sx={{ backgroundColor: '#091a48', color:'#fff' }}>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Contract Name</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Type</TableCell>
           <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Status</TableCell>
@@ -404,7 +404,7 @@ const ContractPage = () => {
             <Typography
               component="span"
               sx={{
-                color: '#882AFF',
+                color: '#000',
                 cursor: 'pointer',
                 fontWeight: 500,
                 '&:hover': {
@@ -416,7 +416,7 @@ const ContractPage = () => {
               {item.name}
             </Typography>
           </TableCell>
-          <TableCell sx={{ color: '#666' }}>
+          <TableCell sx={{ color: '#000' }}>
             {showTemplates 
               ? (item.type || 'N/A')
               : (item.type || item.contract_type || 'Template')
@@ -436,7 +436,7 @@ const ContractPage = () => {
               />
             </TableCell>
           )}
-          <TableCell sx={{ color: '#666' }}>
+          <TableCell sx={{ color: '#000' }}>
             {item.date_created 
               ? (typeof item.date_created === 'string' 
                   ? item.date_created 
@@ -455,16 +455,12 @@ const ContractPage = () => {
                   variant="contained"
                   onClick={() => handleItemAction('create-from-template', item.id, item)}
                   sx={{ 
-                    bgcolor: 'white',
+                    bgcolor: '#882AFF',
+                    color: 'white',
                     textTransform: 'none',
-                    //px: 2,
-                    //py: 0.5,
-                    
                     borderRadius: 1,
-                    
                     '&:hover': { 
-                      bgcolor: '#f5f5f5',
-                      borderColor: '#ccc'
+                      bgcolor: '#7625e6'
                     }
                   }}
                   startIcon={<AddIcon fontSize="small" />}
@@ -478,8 +474,8 @@ const ContractPage = () => {
                     size="small" 
                     onClick={() => handleItemAction('edit', item.id, item)}
                     sx={{ 
-                      color: '#1976d2',
-                      '&:hover': { bgcolor: 'rgba(25, 118, 210, 0.1)' }
+                      color: '#882AFF',
+                      '&:hover': { bgcolor: 'rgba(136, 42, 255, 0.1)' }
                     }}
                     title="Edit Contract"
                   >
@@ -489,8 +485,8 @@ const ContractPage = () => {
                     size="small" 
                     onClick={() => handleItemAction('delete', item.id, item)}
                     sx={{ 
-                      color: '#d32f2f',
-                      '&:hover': { bgcolor: 'rgba(211, 47, 47, 0.1)' }
+                      color: '#882AFF',
+                      '&:hover': { bgcolor: 'rgba(136, 42, 255, 0.1)' }
                     }}
                     title="Delete Contract"
                   >

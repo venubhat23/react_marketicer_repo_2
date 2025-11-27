@@ -56,6 +56,7 @@ const InvoiceForm = () => {
     client_address: '',
     client_gstin: '',
     client_pan: '',
+    client_phone_number: '',
     gst_percentage: 18,
     total_amount: 0,
     status: 'Draft',
@@ -259,41 +260,36 @@ const InvoiceForm = () => {
           <Paper
             elevation={0}
             sx={{
-              display: { xs: 'none', md: 'block' },
-              p: 2,
-              backgroundColor: '#ffffff',
-              borderBottom: '1px solid #e2e8f0',
-              borderRadius: 0
-            }}
-          >
-            <Box sx={{
+              p: 1,
+              backgroundColor: '#091a48',
+              borderRadius: 0,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
-            }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <IconButton
-                  edge="start"
-                  sx={{ mr: 2, color: '#475569' }}
-                  onClick={() => navigate('/invoices')}
-                >
-                  <ArrowLeftIcon />
-                </IconButton>
-                <Typography variant="h5" sx={{ color: '#1e293b', fontWeight: 600 }}>
-                  {isEdit ? 'Edit Invoice' : 'Create Invoice'}
-                </Typography>
-              </Box>
+            }}
+          >
+            <Typography variant="h6" sx={{ color: '#fff' }}>
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="back"
+                sx={{ mr: 2, color: '#fff' }}
+                onClick={() => navigate('/invoices')}
+              >
+                <ArrowLeftIcon />
+              </IconButton>
+              {isEdit ? 'Edit Invoice' : 'Create Invoice'}
+            </Typography>
 
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <IconButton size="large" sx={{ color: '#64748b' }}>
-                  <NotificationsIcon />
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <IconButton size="large" sx={{ color: 'white' }}>
+                <NotificationsIcon />
+              </IconButton>
+              <Link to="/SettingPage">
+                <IconButton size="large" sx={{ color: 'white' }}>
+                  <AccountCircleIcon />
                 </IconButton>
-                <Link to="/SettingPage">
-                  <IconButton size="large" sx={{ color: '#64748b' }}>
-                    <AccountCircleIcon />
-                  </IconButton>
-                </Link>
-              </Box>
+              </Link>
             </Box>
           </Paper>
 
@@ -312,15 +308,7 @@ const InvoiceForm = () => {
                   }}
                 >
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
-                    <Box>
-                      <Typography variant="h4" sx={{ color: '#1e293b', fontWeight: 700, mb: 1 }}>
-                        Invoice
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: '#64748b' }}>
-                        {isEdit ? 'Edit invoice details' : 'Create a new invoice'}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 200 }}>
                       <TextField
                         label="Invoice No *"
                         value={formData.invoice_number}
@@ -328,18 +316,9 @@ const InvoiceForm = () => {
                         required
                         size="small"
                         sx={{ 
-                          mb: 2,
                           '& .MuiOutlinedInput-root': { borderRadius: 2 }
                         }}
                       />
-                      <Typography variant="body2" sx={{ color: '#64748b' }}>
-                        Date: {dayjs().format('MMM DD, YYYY')}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
                       <DatePicker
                         label="Due Date"
                         value={formData.due_date}
@@ -347,7 +326,7 @@ const InvoiceForm = () => {
                         renderInput={(params) => (
                           <TextField 
                             {...params} 
-                            fullWidth 
+                            size="small"
                             sx={{
                               '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
@@ -356,9 +335,7 @@ const InvoiceForm = () => {
                           />
                         )}
                       />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth>
+                      <FormControl size="small">
                         <InputLabel>Status</InputLabel>
                         <Select
                           value={formData.status}
@@ -372,8 +349,88 @@ const InvoiceForm = () => {
                           <MenuItem value="Cancelled">Cancelled</MenuItem>
                         </Select>
                       </FormControl>
-                    </Grid>
-                  </Grid>
+                    </Box>
+                    
+                    <Box sx={{ flex: 1, textAlign: 'center' }}>
+                      <Typography variant="h4" sx={{ color: '#1e293b', fontWeight: 700, mb: 2 }}>
+                        Invoice
+                      </Typography>
+                      {/* Billed By Details Display */}
+                      <Box sx={{ 
+                        mt: 2, 
+                        textAlign: 'left', 
+                        maxWidth: 280, 
+                        mx: 'auto',
+                        wordWrap: 'break-word',
+                        overflow: 'hidden'
+                      }}>
+                        <Typography variant="body1" sx={{ 
+                          color: '#1e293b', 
+                          fontWeight: 600, 
+                          mb: 1,
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word'
+                        }}>
+                          {formData.company_name || 'Company Name'}
+                        </Typography>
+                        {formData.address && (
+                          <Typography variant="body2" sx={{ 
+                            color: '#64748b', 
+                            mb: 0.5,
+                            lineHeight: 1.4,
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            whiteSpace: 'normal'
+                          }}>
+                            {formData.address}
+                          </Typography>
+                        )}
+                        <Box sx={{ 
+                          display: 'flex', 
+                          gap: 1, 
+                          flexWrap: 'wrap',
+                          justifyContent: 'flex-start'
+                        }}>
+                          {formData.gst_number && (
+                            <Typography variant="caption" sx={{ 
+                              color: '#64748b',
+                              wordWrap: 'break-word',
+                              maxWidth: '120px'
+                            }}>
+                              GST: {formData.gst_number}
+                            </Typography>
+                          )}
+                          {formData.phone_number && (
+                            <Typography variant="caption" sx={{ 
+                              color: '#64748b',
+                              wordWrap: 'break-word',
+                              maxWidth: '120px'
+                            }}>
+                              Ph: {formData.phone_number}
+                            </Typography>
+                          )}
+                        </Box>
+                        {formData.company_website && (
+                          <Typography variant="caption" sx={{ 
+                            color: '#64748b', 
+                            display: 'block', 
+                            mt: 0.5,
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            lineHeight: 1.3
+                          }}>
+                            {formData.company_website}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ textAlign: 'right', minWidth: 200 }}>
+                      <Typography variant="body2" sx={{ color: '#64748b' }}>
+                        Date: {dayjs().format('MMM DD, YYYY')}
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Paper>
 
                 {/* Billed By & Billed To */}
@@ -391,9 +448,6 @@ const InvoiceForm = () => {
                       <Typography variant="h6" sx={{ color: '#1e293b', fontWeight: 600, mb: 3 }}>
                         Billed By
                       </Typography>
-                      <Typography variant="body2" sx={{ color: '#64748b', mb: 2 }}>
-                        Your Details
-                      </Typography>
                       
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <TextField
@@ -402,6 +456,13 @@ const InvoiceForm = () => {
                           value={formData.company_name}
                           onChange={(e) => handleInputChange('company_name', e.target.value)}
                           required
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="Job Title"
+                          value={formData.job_title}
+                          onChange={(e) => handleInputChange('job_title', e.target.value)}
                           sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                         <TextField
@@ -436,8 +497,9 @@ const InvoiceForm = () => {
                         <TextField
                           fullWidth
                           label="Work Email"
-                          value={formData.company_website}
-                          onChange={(e) => handleInputChange('company_website', e.target.value)}
+                          type="email"
+                          value={formData.work_email}
+                          onChange={(e) => handleInputChange('work_email', e.target.value)}
                           sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                       </Box>
@@ -456,9 +518,6 @@ const InvoiceForm = () => {
                     >
                       <Typography variant="h6" sx={{ color: '#1e293b', fontWeight: 600, mb: 3 }}>
                         Billed To
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: '#64748b', mb: 3 }}>
-                        Client's Details
                       </Typography>
                       
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -503,6 +562,14 @@ const InvoiceForm = () => {
                             />
                           </Grid>
                         </Grid>
+                        <TextField
+                          fullWidth
+                          label="Phone Number"
+                          value={formData.client_phone_number || ''}
+                          onChange={(e) => handleInputChange('client_phone_number', e.target.value)}
+                          placeholder="Enter phone number"
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
                         <TextField
                           fullWidth
                           label="Work Email"
@@ -699,7 +766,7 @@ const InvoiceForm = () => {
                           Total (INR)
                         </Typography>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                          ₹{formData.total_amount.toFixed(2)}
+                          ₹{(parseFloat(formData.total_amount) || 0).toFixed(2)}
                         </Typography>
                       </Box>
                     </Box>
