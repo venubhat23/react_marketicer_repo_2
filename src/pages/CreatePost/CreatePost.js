@@ -1258,9 +1258,16 @@ Would you like me to create this as a short handwritten-style note (suitable for
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                       Created: {new Date(post.post.created_at).toLocaleString()}
                     </Typography>
-                    {post.post.brand_name && (
+                    {post.post.platform && (
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        Brand: {post.post.brand_name}
+                        Platform: {post.post.platform}
+                        {post.post.account_username && ` • @${post.post.account_username}`}
+                        {post.post.account_name && !post.post.account_username && ` • ${post.post.account_name}`}
+                      </Typography>
+                    )}
+                    {!post.post.platform && post.post.account_name && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        Account: {post.post.account_name}
                       </Typography>
                     )}
                     {post.publish_log && (
