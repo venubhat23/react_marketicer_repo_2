@@ -17,6 +17,7 @@ import {
   Grid,
   Alert,
   CircularProgress,
+  TablePagination,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -47,9 +48,10 @@ const ContractPage = () => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  const [page, setPage] = useState(0); // Changed to 0-based for Material-UI
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalContracts, setTotalContracts] = useState(0);
+  const [totalTemplates, setTotalTemplates] = useState(0);
 
   const API_BASE_URL = 'https://api.marketincer.com/api/v1';
   const navigate = useNavigate();
@@ -79,8 +81,8 @@ const ContractPage = () => {
       
       const params = new URLSearchParams({
         category: 'created',
-        page: page.toString(),
-        per_page: perPage.toString(),
+        page: (page + 1).toString(), // Convert back to 1-based for API
+        per_page: rowsPerPage.toString(),
       });
 
       if (searchQuery.trim()) {
@@ -110,7 +112,16 @@ const ContractPage = () => {
       setLoading(true);
       setError('');
       
-      const response = await fetch(`${API_BASE_URL}/contracts/templates`);
+      const params = new URLSearchParams({
+        page: (page + 1).toString(), // Convert back to 1-based for API
+        per_page: rowsPerPage.toString(),
+      });
+
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/contracts/templates?${params}`);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch templates: ${response.statusText}`);
@@ -118,6 +129,7 @@ const ContractPage = () => {
       
       const data = await response.json();
       setTemplates(data.templates || []);
+      setTotalTemplates(data.total || 0);
     } catch (err) {
       setError(`Error fetching templates: ${err.message}`);
       console.error('Error fetching templates:', err);
@@ -303,7 +315,7 @@ const ContractPage = () => {
     } else {
       fetchContracts();
     }
-  }, [showTemplates, page, perPage]);
+  }, [showTemplates, page, rowsPerPage]);
 
   // Debounced search effect
   useEffect(() => {
@@ -331,6 +343,16 @@ const ContractPage = () => {
     } else {
       fetchContracts();
     }
+  };
+
+  // Pagination handlers
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   const handleItemAction = (action, itemId, item) => {
@@ -617,7 +639,10 @@ const ContractPage = () => {
             >
               <Button
                 variant={!showTemplates ? "contained" : "text"}
-                onClick={() => setShowTemplates(false)}
+                onClick={() => {
+                  setShowTemplates(false);
+                  setPage(0);
+                }}
                 sx={{
                   borderRadius: '50px',
                   px: 1.5,
@@ -640,7 +665,10 @@ const ContractPage = () => {
               
               <Button
                 variant={showTemplates ? "contained" : "text"}
-                onClick={() => setShowTemplates(true)}
+                onClick={() => {
+                  setShowTemplates(true);
+                  setPage(0);
+                }}
                 sx={{
                   borderRadius: '50px',
                   px: 1.5,
@@ -744,26 +772,37 @@ const ContractPage = () => {
             )}
 
             {/* Pagination Controls */}
-            {!showTemplates && totalContracts > perPage && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                <Button
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                  sx={{ mr: 2 }}
-                >
-                  Previous
-                </Button>
-                <Typography sx={{ display: 'flex', alignItems: 'center', mx: 2 }}>
-                  Page {page} of {Math.ceil(totalContracts / perPage)}
-                </Typography>
-                <Button
-                  disabled={page >= Math.ceil(totalContracts / perPage)}
-                  onClick={() => setPage(page + 1)}
-                  sx={{ ml: 2 }}
-                >
-                  Next
-                </Button>
-              </Box>
+            {filteredData.length > 0 && (
+              <TablePagination
+                component="div"
+                count={showTemplates ? totalTemplates : totalContracts}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                sx={{
+                  mt: 2,
+                  borderTop: '1px solid #e0e0e0',
+                  '& .MuiTablePagination-toolbar': {
+                    padding: '8px 16px',
+                  },
+                  '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                    fontSize: '14px',
+                    color: '#666',
+                  },
+                  '& .MuiTablePagination-select': {
+                    fontSize: '14px',
+                  },
+                  '& .MuiTablePagination-actions button': {
+                    color: '#882AFF',
+                  },
+                }}
+                labelDisplayedRows={({ from, to, count }) =>
+                  `${from}–${to} of ${count !== -1 ? count : `more than ${to}`} ${showTemplates ? 'templates' : 'contracts'}`
+                }
+                labelRowsPerPage={`${showTemplates ? 'Templates' : 'Contracts'} per page:`}
+              />
             )}
           </Box>
             </Grid>

@@ -163,7 +163,7 @@ const InvoiceList = () => {
       invoice: invoice,
       email: invoice.work_email || '',
       subject: `Invoice #${invoice.invoice_number || invoice.id} from ${invoice.company_name || 'Your Company'}`,
-      message: `Dear ${invoice.customer || 'Customer'},\n\nPlease find attached your invoice #${invoice.invoice_number || invoice.id}.\n\nInvoice Details:\n- Amount: $${parseFloat(invoice.total_amount || 0).toFixed(2)}\n- Due Date: ${invoice.due_date}\n- Status: ${invoice.status}\n\nThank you for your business!\n\nBest regards,\n${invoice.company_name || 'Your Company'}`,
+      message: `Dear ${invoice.customer || 'Customer'},\n\nPlease find attached your invoice #${invoice.invoice_number || invoice.id}.\n\nInvoice Details:\n- Amount: ₹${parseFloat(invoice.total_amount || 0).toFixed(2)}\n- Due Date: ${invoice.due_date}\n- Status: ${invoice.status}\n\nThank you for your business!\n\nBest regards,\n${invoice.company_name || 'Your Company'}`,
       sending: false
     });
   };
@@ -276,8 +276,7 @@ const InvoiceList = () => {
   }
 
   return (
-
-    <><Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', height: '100vh' }}>
+    <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
       <Grid container>
         <Grid size={{ md: 1 }} className="side_section"> <Sidebar /></Grid>
         <Grid size={{ md: 11 }}>
@@ -380,13 +379,13 @@ const InvoiceList = () => {
 
 
           </Box>
-          <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, padding:'20px'}}>
+          <Box sx={{ mt: { xs: 8, md: 0 }, padding:'20px', minHeight: 'calc(100vh - 120px)', overflow: 'auto' }}>
             <Grid container spacing={2}>
               <Grid size={{ xs: 2, sm: 4, md: 12 }}>
                 <TableContainer component={Paper}>
               <Table>
-                <TableHead sx={{ bgcolor: '#B1C6FF', color:'#fff' }}>
-                  <TableRow>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#091a48', color:'#fff' }}>
                     <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Invoice ID</TableCell>
                     <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Company</TableCell>
                     <TableCell sx={{ fontWeight: 600, color: '#fff' }}>Customer</TableCell>
@@ -430,7 +429,7 @@ const InvoiceList = () => {
                       <TableCell>#{invoice.id}</TableCell>
                       <TableCell>{invoice.company_name}</TableCell>
                       <TableCell>{invoice.customer}</TableCell>
-                      <TableCell>${typeof invoice.total_amount === 'number' ? invoice.total_amount.toFixed(2) : (parseFloat(invoice.total_amount) || 0).toFixed(2)}</TableCell>
+                      <TableCell>₹{typeof invoice.total_amount === 'number' ? invoice.total_amount.toFixed(2) : (parseFloat(invoice.total_amount) || 0).toFixed(2)}</TableCell>
                       <TableCell>
                         <FormControl size="small" sx={{ minWidth: 100 }}>
                           <Select
@@ -499,10 +498,8 @@ const InvoiceList = () => {
           </Box>
         </Grid>
       </Grid>
-    </Box>
-    
-    <Box sx={{ p: 3, bgcolor: '#FFFFFF', minHeight: '100vh' }}>
-        {/* Delete Confirmation Dialog */}
+
+      {/* Delete Confirmation Dialog */}
         <Dialog
           open={deleteDialog.open}
           onClose={() => setDeleteDialog({ open: false, invoiceId: null })}
@@ -528,7 +525,7 @@ const InvoiceList = () => {
           maxWidth="md"
           fullWidth
         >
-          <DialogTitle sx={{ bgcolor: '#882AFF', color: 'white', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <DialogTitle sx={{ bgcolor: '#091a48', color: 'white', display: 'flex', alignItems: 'center', gap: 1 }}>
             <EmailIcon />
             Send Invoice Email
           </DialogTitle>
@@ -588,8 +585,7 @@ const InvoiceList = () => {
             </Button>
           </DialogActions>
         </Dialog>
-      </Box></>
-
+    </Box>
   );
 };
 

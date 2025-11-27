@@ -161,7 +161,7 @@ const InvoiceDetail = () => {
       open: true,
       email: invoice.work_email || '',
       subject: `Invoice #${invoice.invoice_number || invoice.id} from ${invoice.company_name || 'Your Company'}`,
-      message: `Dear ${invoice.customer || 'Customer'},\n\nPlease find attached your invoice #${invoice.invoice_number || invoice.id}.\n\nInvoice Details:\n- Amount: $${parseFloat(invoice.total_amount || 0).toFixed(2)}\n- Due Date: ${invoice.due_date}\n- Status: ${invoice.status}\n\nThank you for your business!\n\nBest regards,\n${invoice.company_name || 'Your Company'}`,
+      message: `Dear ${invoice.customer || 'Customer'},\n\nPlease find attached your invoice #${invoice.invoice_number || invoice.id}.\n\nInvoice Details:\n- Amount: ₹${parseFloat(invoice.total_amount || 0).toFixed(2)}\n- Due Date: ${invoice.due_date}\n- Status: ${invoice.status}\n\nThank you for your business!\n\nBest regards,\n${invoice.company_name || 'Your Company'}`,
       sending: false
     });
   };

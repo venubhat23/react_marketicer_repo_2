@@ -48,6 +48,7 @@ const InvoiceForm = () => {
     company_name: '',
     customer: '',
     gst_number: '',
+    pan_number: '',
     phone_number: '',
     address: '',
     company_website: '',
@@ -57,6 +58,7 @@ const InvoiceForm = () => {
     client_gstin: '',
     client_pan: '',
     client_phone_number: '',
+    client_email: '',
     gst_percentage: 18,
     total_amount: 0,
     status: 'Draft',
@@ -359,7 +361,7 @@ const InvoiceForm = () => {
                       <Box sx={{ 
                         mt: 2, 
                         textAlign: 'left', 
-                        maxWidth: 280, 
+                        maxWidth: 350, 
                         mx: 'auto',
                         wordWrap: 'break-word',
                         overflow: 'hidden'
@@ -380,36 +382,46 @@ const InvoiceForm = () => {
                             lineHeight: 1.4,
                             wordWrap: 'break-word',
                             overflowWrap: 'break-word',
-                            whiteSpace: 'normal'
+                            whiteSpace: 'pre-line'
                           }}>
                             {formData.address}
                           </Typography>
                         )}
-                        <Box sx={{ 
-                          display: 'flex', 
-                          gap: 1, 
-                          flexWrap: 'wrap',
-                          justifyContent: 'flex-start'
-                        }}>
-                          {formData.gst_number && (
-                            <Typography variant="caption" sx={{ 
-                              color: '#64748b',
-                              wordWrap: 'break-word',
-                              maxWidth: '120px'
-                            }}>
-                              GST: {formData.gst_number}
-                            </Typography>
-                          )}
-                          {formData.phone_number && (
-                            <Typography variant="caption" sx={{ 
-                              color: '#64748b',
-                              wordWrap: 'break-word',
-                              maxWidth: '120px'
-                            }}>
-                              Ph: {formData.phone_number}
-                            </Typography>
-                          )}
-                        </Box>
+                        {formData.gst_number && (
+                          <Typography variant="caption" sx={{ 
+                            color: '#64748b',
+                            display: 'block',
+                            mb: 0.5,
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            lineHeight: 1.3
+                          }}>
+                            GST: {formData.gst_number}
+                          </Typography>
+                        )}
+                        {formData.pan_number && (
+                          <Typography variant="caption" sx={{ 
+                            color: '#64748b',
+                            display: 'block',
+                            mb: 0.5,
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            lineHeight: 1.3
+                          }}>
+                            PAN: {formData.pan_number}
+                          </Typography>
+                        )}
+                        {formData.phone_number && (
+                          <Typography variant="caption" sx={{ 
+                            color: '#64748b',
+                            display: 'block',
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            lineHeight: 1.3
+                          }}>
+                            Ph: {formData.phone_number}
+                          </Typography>
+                        )}
                         {formData.company_website && (
                           <Typography variant="caption" sx={{ 
                             color: '#64748b', 
@@ -460,13 +472,6 @@ const InvoiceForm = () => {
                         />
                         <TextField
                           fullWidth
-                          label="Job Title"
-                          value={formData.job_title}
-                          onChange={(e) => handleInputChange('job_title', e.target.value)}
-                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                        />
-                        <TextField
-                          fullWidth
                           multiline
                           rows={3}
                           label="Address"
@@ -487,13 +492,20 @@ const InvoiceForm = () => {
                           <Grid item xs={6}>
                             <TextField
                               fullWidth
-                              label="Phone Number"
-                              value={formData.phone_number}
-                              onChange={(e) => handleInputChange('phone_number', e.target.value)}
+                              label="PAN Number"
+                              value={formData.pan_number}
+                              onChange={(e) => handleInputChange('pan_number', e.target.value)}
                               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                             />
                           </Grid>
                         </Grid>
+                        <TextField
+                          fullWidth
+                          label="Phone Number"
+                          value={formData.phone_number}
+                          onChange={(e) => handleInputChange('phone_number', e.target.value)}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
                         <TextField
                           fullWidth
                           label="Work Email"
@@ -572,10 +584,11 @@ const InvoiceForm = () => {
                         />
                         <TextField
                           fullWidth
-                          label="Work Email"
+                          label="Client Email"
                           type="email"
-                          value={formData.work_email}
-                          onChange={(e) => handleInputChange('work_email', e.target.value)}
+                          value={formData.client_email || ''}
+                          onChange={(e) => handleInputChange('client_email', e.target.value)}
+                          placeholder="Enter client email"
                           sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                       </Box>

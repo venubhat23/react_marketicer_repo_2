@@ -563,7 +563,7 @@ const Calendar = () => {
                             whiteSpace: 'nowrap'
                           }}
                         >
-                          {postDate.format('HH:mm')} {post.brand_name ? `- ${post.brand_name.substring(0, 8)}` : ''}
+                          {postDate.format('h:mm A')} {post.brand_name ? `- ${post.brand_name.substring(0, 8)}` : ''}
                         </Box>
                       </Box>
                     );
@@ -693,7 +693,7 @@ const Calendar = () => {
                               }}
                             />
                             <Typography variant="caption" color={COLORS.primary} fontWeight="600">
-                              {postDate.format('HH:mm')}
+                              {postDate.format('h:mm A')}
                             </Typography>
                             <Typography variant="caption" color="gray" sx={{ ml: 'auto', fontSize: '10px' }}>
                               {post.page_data?.page_type || 'Unknown'}
@@ -796,7 +796,7 @@ const Calendar = () => {
                           />
                           <Box>
                             <Typography variant="h6" fontWeight="600" color={COLORS.primary}>
-                              {postDate.format('HH:mm')}
+                              {postDate.format('h:mm A')}
                             </Typography>
                             <Typography variant="body2" color="gray" sx={{ fontSize: '12px' }}>
                               {post.brand_name || 'No Brand'} • {post.page_data?.page_type || 'Unknown Platform'}
@@ -1293,7 +1293,7 @@ const Calendar = () => {
                       primary={
                         <Box display="flex" justifyContent="space-between" alignItems="center">
                           <Typography variant="subtitle2">
-                            {(post.scheduled_at ? dayjs(post.scheduled_at) : dayjs(post.created_at)).format('HH:mm')} - {post.brand_name || 'No Brand'}
+                            {(post.scheduled_at ? dayjs(post.scheduled_at) : dayjs(post.created_at)).format('h:mm A')} - {post.brand_name || 'No Brand'}
                           </Typography>
                           <Box display="flex" gap={1}>
                             <Chip
@@ -1547,7 +1547,7 @@ const Calendar = () => {
                   <TextField
                     fullWidth
                     label="Scheduled Date & Time"
-                    value={dayjs(editingPost.scheduled_at).format('YYYY-MM-DD HH:mm')}
+                    value={dayjs(editingPost.scheduled_at).format('YYYY-MM-DD h:mm A')}
                     disabled
                     variant="standard"
                   />
@@ -1556,11 +1556,11 @@ const Calendar = () => {
                 {/* Timestamps */}
                 <Box sx={{ bgcolor: '#f8f9fa', p: 2, borderRadius: 1 }}>
                   <Typography variant="body2" color="gray" sx={{ fontSize: '12px' }}>
-                    Created: {dayjs(editingPost.created_at).format('MMM D, YYYY HH:mm')}
+                    Created: {dayjs(editingPost.created_at).format('MMM D, YYYY h:mm A')}
                   </Typography>
                   {editingPost.scheduled_at && (
                     <Typography variant="body2" color="gray" sx={{ fontSize: '12px', mt: 0.5 }}>
-                      Scheduled: {dayjs(editingPost.scheduled_at).format('MMM D, YYYY HH:mm')}
+                      Scheduled: {dayjs(editingPost.scheduled_at).format('MMM D, YYYY h:mm A')}
                     </Typography>
                   )}
                 </Box>

@@ -2904,7 +2904,23 @@ Would you like me to create this as a short handwritten-style note (suitable for
 
   return (
     <>
-      <Box sx={{ flexGrow: 1, bgcolor:'#f5edf8', height:'100vh' }} > 
+      <style>{`
+        html, body {
+          overflow-x: hidden !important;
+          scroll-behavior: smooth !important;
+        }
+        body {
+          position: relative !important;
+        }
+      `}</style>
+      <Box sx={{ 
+        flexGrow: 1, 
+        bgcolor:'#f5edf8', 
+        minHeight:'100vh',
+        position: 'relative',
+        overflowX: 'hidden',
+        scrollBehavior: 'smooth'
+      }} > 
       <Grid container>
       <Grid size={{ md: 1 }} className="side_section"> <Sidebar/></Grid>
       <Grid size={{ md: 11 }}>
@@ -2951,9 +2967,30 @@ Would you like me to create this as a short handwritten-style note (suitable for
                 </Box>
               </Box>
         </Paper>
-        <Box sx={{flexGrow:1, mt: { xs: 8, md: 0 }, height: '100vh', overflow: 'hidden !important', padding:'20px'}}>
-        <Grid container spacing={2} sx={{ height: '100%', overflow: 'hidden !important' }}>
-          <Grid size={{ xs: 12, sm: 8, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)' ,height:'100%', overflowY: 'auto' }}>
+        <Box sx={{
+          flexGrow:1, 
+          mt: { xs: 8, md: 0 }, 
+          padding:'20px',
+          position: 'relative',
+          width: '100%'
+        }}>
+        <Grid container spacing={2} sx={{ 
+          minHeight: 'fit-content',
+          position: 'relative',
+          zIndex: 1 
+        }}>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }} sx={{ 
+            padding:'15px', 
+            bgcolor: '#fff', 
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', 
+            borderRadius: '12px',
+            border: '1px solid #e1e5e9',
+            display: 'flex', 
+            flexDirection: 'column',
+            alignSelf: 'flex-start',
+            minHeight: '781.93px',
+            height: 'fit-content'
+          }}>
               {/* Dropdowns */}
               <Box display="flex" gap={2} mb={2} >
                 <FormControl fullWidth>
@@ -3444,27 +3481,13 @@ Would you like me to create this as a short handwritten-style note (suitable for
                   Upload Media
                 </Typography>
                 
-                {/* Horizontal scrolling container */}
+                {/* Media container with flex wrap */}
                 <Box sx={{ 
                   display: 'flex', 
                   gap: 2, 
-                  overflowX: 'auto',
+                  flexWrap: 'wrap',
                   pb: 1,
-                  maxWidth: '100%',
-                  '&::-webkit-scrollbar': {
-                    height: '6px',
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    backgroundColor: '#f1f1f1',
-                    borderRadius: '3px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: '#c1c1c1',
-                    borderRadius: '3px',
-                    '&:hover': {
-                      backgroundColor: '#a1a1a1',
-                    }
-                  }
+                  width: '100%'
                 }}>
                   {/* Display uploaded media */}
                   {uploadedMedia.map((media, index) => (
@@ -3780,7 +3803,18 @@ Would you like me to create this as a short handwritten-style note (suitable for
                   </Box>
           </Grid>
 
-          <Grid  size={{ xs: 12, sm: 4, md: 6 }} spacing={2} sx={{ padding:'10px', bgcolor: '#fff', boxShadow: '2px 2px 2px 1px rgb(0 0 0 / 20%)', height:'100%', overflowY: 'auto' }}>
+          <Grid size={{ xs: 12, sm: 5.5, md: 5.5 }} sx={{ 
+            padding:'15px', 
+            bgcolor: '#fff', 
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', 
+            borderRadius: '12px',
+            border: '1px solid #e1e5e9',
+            display: 'flex', 
+            flexDirection: 'column',
+            alignSelf: 'flex-start',
+            minHeight: '781.93px',
+            height: 'fit-content'
+          }}>
           <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
                   <Tab label="Instagram" />
                   <Tab label="Linkedin" />
