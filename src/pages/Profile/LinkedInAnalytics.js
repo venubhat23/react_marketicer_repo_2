@@ -1315,7 +1315,7 @@ const LinkedinAnalytics = () => {
                           Engagement Rate:
                         </Typography>
                         <Typography variant="body2">
-                          {selectedAccountData.summary?.engagement_rate || 'N/A'}
+                          {selectedAccountData.summary?.engagement_rate || '0'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1323,7 +1323,7 @@ const LinkedinAnalytics = () => {
                           Earned Media:
                         </Typography>
                         <Typography variant="body2">
-                          {selectedAccountData.summary?.earned_media || 'N/A'}
+                          {selectedAccountData.summary?.earned_media || '0'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1331,9 +1331,78 @@ const LinkedinAnalytics = () => {
                           Average Interactions:
                         </Typography>
                         <Typography variant="body2">
-                          {selectedAccountData.summary?.average_interactions || 'N/A'}
+                          {selectedAccountData.summary?.average_interactions || '0'}
                         </Typography>
                       </Box>
+
+                      {/* Additional Profile Fields for LinkedIn Profile accounts */}
+                      {selectedAccountData.account_type === 'profile' && selectedAccountData.profile && (
+                        <>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
+                              Last Updated:
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                              {selectedAccountData.profile.last_updated ?
+                                new Date(selectedAccountData.profile.last_updated).toLocaleDateString() : 'N/A'}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
+                              Account Type:
+                            </Typography>
+                            <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
+                              {selectedAccountData.profile.account_type || 'N/A'}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
+                              Vanity Name:
+                            </Typography>
+                            <Typography variant="body2">
+                              {selectedAccountData.profile.vanity_name || 'N/A'}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
+                              Email Verified:
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              {selectedAccountData.profile.email_verified ? (
+                                <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 14 }} />
+                              ) : (
+                                <Box sx={{
+                                  width: 14,
+                                  height: 14,
+                                  borderRadius: '50%',
+                                  border: '2px solid #f44336',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}>
+                                  <Box sx={{
+                                    width: 4,
+                                    height: 4,
+                                    backgroundColor: '#f44336',
+                                    borderRadius: '50%'
+                                  }} />
+                                </Box>
+                              )}
+                              <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                                {selectedAccountData.profile.email_verified ? 'Yes' : 'No'}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '13px' }}>
+                              Family Name:
+                            </Typography>
+                            <Typography variant="body2">
+                              {selectedAccountData.profile.family_name || 'N/A'}
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
                     </Box>
                   </Card>
                 )}
