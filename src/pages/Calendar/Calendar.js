@@ -409,13 +409,13 @@ const Calendar = () => {
     const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     
     return (
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', minHeight: '700px' }}>
         {/* Week headers */}
         <Box 
           display="grid" 
           gridTemplateColumns="repeat(7, 1fr)" 
           gap={0}
-          sx={{ borderBottom: '2px solid #e0e0e0', mb: 0.5 }}
+          sx={{ borderBottom: '2px solid #e0e0e0', mb: 0.5, position: 'sticky', top: 0, zIndex: 1, bgcolor: '#fff' }}
         >
           {weekDays.map((day) => (
             <Box 
@@ -441,7 +441,7 @@ const Calendar = () => {
           gridTemplateColumns="repeat(7, 1fr)" 
           gridTemplateRows="repeat(6, minmax(120px, 1fr))"
           gap={0}
-          sx={{ flex: 1, border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'hidden', minHeight: '600px' }}
+          sx={{ flex: 1, border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'visible', minHeight: '720px' }}
         >
           {days.map((day, index) => {
             const postsForDay = getPostsForDate(day);
@@ -596,13 +596,13 @@ const Calendar = () => {
     const days = generateWeekDays();
     
     return (
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', minHeight: '600px' }}>
         {/* Week header */}
         <Box 
           display="grid" 
           gridTemplateColumns="repeat(7, 1fr)" 
           gap={0}
-          sx={{ borderBottom: '2px solid #e0e0e0', mb: 1 }}
+          sx={{ borderBottom: '2px solid #e0e0e0', mb: 1, position: 'sticky', top: 0, zIndex: 1, bgcolor: '#fff' }}
         >
           {days.map((day) => {
             const isToday = day.isSame(dayjs(), 'day');
@@ -638,7 +638,7 @@ const Calendar = () => {
           display="grid" 
           gridTemplateColumns="repeat(7, 1fr)" 
           gap={0}
-          sx={{ flex: 1, border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'hidden' }}
+          sx={{ flex: 1, border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'visible', minHeight: '500px' }}
         >
           {days.map((day, index) => {
             const postsForDay = getPostsForDate(day);
@@ -660,7 +660,7 @@ const Calendar = () => {
                 }}
                 onClick={() => handleDateClick(day)}
               >
-                <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '450px' }}>
                   {postsForDay.map((post, postIndex) => {
                     const postDate = post.scheduled_at ? dayjs(post.scheduled_at) : dayjs(post.created_at);
                     const platformColor = getPlatformColor(post);
@@ -738,14 +738,14 @@ const Calendar = () => {
     const postsForDay = getPostsForDate(currentDate);
     
     return (
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Box sx={{ mb: 2, p: 2, bgcolor: COLORS.background, borderRadius: 1, border: '1px solid #e0e0e0' }}>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', minHeight: '600px' }}>
+        <Box sx={{ mb: 2, p: 2, bgcolor: COLORS.background, borderRadius: 1, border: '1px solid #e0e0e0', position: 'sticky', top: 0, zIndex: 1 }}>
           <Typography variant="h5" fontWeight="500" color={COLORS.secondary} textAlign="center">
             {currentDate.format('dddd, MMMM D, YYYY')}
           </Typography>
         </Box>
         
-        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: 'calc(100vh - 300px)' }}>
           {postsForDay.length === 0 ? (
             <Box 
               display="flex" 
@@ -867,7 +867,7 @@ const Calendar = () => {
         display: 'flex', 
         flexDirection: 'column', 
         height: '100vh', 
-        overflow: 'hidden'
+        overflow: 'auto'
       }}>
         {/* Header */}
         <Paper
@@ -1231,7 +1231,7 @@ const Calendar = () => {
         </Paper>
 
         {/* Main Calendar Content */}
-        <Box sx={{ flex: 1, overflow: 'hidden', px: 3, pt: 1, pb: 3, height: 'calc(100vh - 180px)' }}>
+        <Box sx={{ flex: 1, overflow: 'auto', px: 3, pt: 1, pb: 3, height: 'calc(100vh - 180px)' }}>
           {loading ? (
             <Box display="flex" justifyContent="center" alignItems="center" height="100%">
               <CircularProgress sx={{ color: COLORS.primary }} />
