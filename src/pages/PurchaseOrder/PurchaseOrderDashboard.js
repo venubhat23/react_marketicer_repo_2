@@ -13,18 +13,23 @@ import {
   TableHead,
   TableRow,
   Button,
-  Chip
+  Chip,
+  IconButton
 } from '@mui/material';
 import {
   TrendingUp,
   AttachMoney,
   Receipt,
-  PendingActions
+  PendingActions,
+  Add as AddIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import PurchaseOrderAPI from '../../services/purchaseOrderApi';
 import { toast } from 'react-toastify';
 import Layout from '../../components/Layout';
+import Sidebar from '../../components/Sidebar';
+import { ArrowBack as ArrowLeftIcon, Notifications as NotificationsIcon, AccountCircle as AccountCircleIcon } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 
 const PurchaseOrderDashboard = () => {
   const navigate = useNavigate();
@@ -101,20 +106,65 @@ const PurchaseOrderDashboard = () => {
   const partiallyPaidCount = dashboardData.purchase_orders.filter(po => po.status?.toLowerCase() === 'partially paid').length;
 
   return (
-    <Layout>
-    <Box sx={{ p: 3, bgcolor: '#FFFFFF', minHeight: '100vh' }}>
-      <Box display="flex" justifyContent="between" alignItems="center" mb={3}>
-        <Typography variant="h4" sx={{ color: '#091A48', fontWeight: 'bold' }}>
-          Purchase Order Dashboard
-        </Typography>
-        <Button
-          variant="contained"
-          onClick={() => navigate('/purchase-orders/create')}
-          sx={{ bgcolor: '#882AFF', '&:hover': { bgcolor: '#7020CC' } }}
-        >
-          Create Purchase Order
-        </Button>
-      </Box>
+    <Box sx={{ flexGrow: 1, bgcolor: '#f5edf8', minHeight: '100vh' }}>
+      <Grid container>
+        <Grid size={{ md: 1 }} className="side_section"> <Sidebar /></Grid>
+        <Grid size={{ md: 11 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              display: { xs: 'none', md: 'block' },
+              p: 1,
+              backgroundColor: '#091a48',
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 0
+            }}
+          >
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <Typography variant="h6" sx={{ color: '#fff' }}>
+                <IconButton
+                  edge="start"
+                  color="inherit"
+                  aria-label="back"
+                  sx={{ mr: 2, color: '#fff' }}
+                >
+                  <ArrowLeftIcon />
+                </IconButton>
+                Purchase Order Dashboard
+              </Typography>
+
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => navigate('/purchase-orders/create')}
+                  sx={{
+                    px: 3,
+                    py: 1,
+                    borderRadius: 2,
+                    lineHeight:0,
+                  }}
+                >
+                  Create Purchase Order
+                </Button>
+                <IconButton size="large" sx={{ color: '#fff' }}>
+                  <NotificationsIcon />
+                </IconButton>
+
+                <Link to="/SettingPage">
+                  <IconButton size="large" sx={{ color: '#fff' }}>
+                    <AccountCircleIcon />
+                  </IconButton>
+                </Link>
+              </Box>
+            </Box>
+          </Paper>
+          <Box sx={{ mt: { xs: 8, md: 0 }, padding:'20px', minHeight: 'calc(100vh - 120px)', overflow: 'auto' }}>
 
       <Grid container spacing={3} mb={4}>
         <Grid item xs={12} sm={6} md={3}>
@@ -136,7 +186,7 @@ const PurchaseOrderDashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Total Paid"
-            value={`$${parseFloat(dashboardData.total_paid || 0).toFixed(2)}`}
+            value={`₹${parseFloat(dashboardData.total_paid || 0).toFixed(2)}`}
             icon={<AttachMoney sx={{ fontSize: 40 }} />}
             color="#4CAF50"
           />
@@ -144,7 +194,7 @@ const PurchaseOrderDashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Total Outstanding"
-            value={`$${parseFloat(dashboardData.total_pending || 0).toFixed(2)}`}
+            value={`₹${parseFloat(dashboardData.total_pending || 0).toFixed(2)}`}
             icon={<TrendingUp sx={{ fontSize: 40 }} />}
             color="#FF9800"
           />
@@ -168,13 +218,13 @@ const PurchaseOrderDashboard = () => {
               </Box>
               <TableContainer>
                 <Table>
-                  <TableHead sx={{ bgcolor: '#F5F5F5' }}>
+                  <TableHead sx={{ bgcolor: '#091a48' }}>
                     <TableRow>
-                      <TableCell><strong>PO ID</strong></TableCell>
-                      <TableCell><strong>Order Number</strong></TableCell>
-                      <TableCell><strong>Customer</strong></TableCell>
-                      <TableCell><strong>Amount</strong></TableCell>
-                      <TableCell><strong>Status</strong></TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#fff', fontSize: '16px' }}>PO ID</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#fff', fontSize: '16px' }}>Order Number</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#fff', fontSize: '16px' }}>Customer</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#fff', fontSize: '16px' }}>Amount</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#fff', fontSize: '16px' }}>Status</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -188,7 +238,7 @@ const PurchaseOrderDashboard = () => {
                         <TableCell>#{po.id}</TableCell>
                         <TableCell>{po.order_number}</TableCell>
                         <TableCell>{po.customer}</TableCell>
-                        <TableCell>${parseFloat(po.total_amount || 0).toFixed(2)}</TableCell>
+                        <TableCell>₹{parseFloat(po.total_amount || 0).toFixed(2)}</TableCell>
                         <TableCell>
                           <Chip 
                             label={po.status} 
@@ -221,7 +271,7 @@ const PurchaseOrderDashboard = () => {
                   Total PO Value
                 </Typography>
                 <Typography variant="h5" sx={{ color: '#091A48', fontWeight: 'bold' }}>
-                  ${parseFloat(dashboardData.total_amount || 0).toFixed(2)}
+                  ₹{parseFloat(dashboardData.total_amount || 0).toFixed(2)}
                 </Typography>
               </Box>
               <Box mb={2}>
@@ -254,8 +304,10 @@ const PurchaseOrderDashboard = () => {
           </Paper>
         </Grid>
       </Grid>
+          </Box>
+        </Grid>
+      </Grid>
     </Box>
-    </Layout>
   );
 };
 
