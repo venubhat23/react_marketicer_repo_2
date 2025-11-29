@@ -140,7 +140,9 @@ const CreatePost = () => {
     return videoExtensions.some(ext => uploadedImageUrl.toLowerCase().includes(ext.toLowerCase()));
   };
 
-  console.log('hereree', selectUser)
+  console.log('Current selectUser state:', selectUser)
+  console.log('Current selectedUsers:', selectedUsers)
+  console.log('Current selectedChipId:', selectedChipId)
   console.log('isVideoFile:', isVideoFile, 'uploadedImageUrl:', uploadedImageUrl)
   console.log('isCurrentMediaVideo():', isCurrentMediaVideo())
 
@@ -415,6 +417,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
 
     setLoading(true);
     const token = localStorage.getItem("token");
+    console.log('Fetching accounts from API, token:', token ? 'present' : 'missing');
 
     try {
       // Fetch the accounts from the dummy API
@@ -427,9 +430,44 @@ Would you like me to create this as a short handwritten-style note (suitable for
           },
         }
       );
+      
+      console.log('API Response status:', response.status);
 
       const data = await response.json();
-      setPages(data.data.accounts); // Store the fetched accounts in the state
+      
+      // Transform the data to ensure proper field mapping for different platforms
+      const transformedAccounts = data.data.accounts.map(account => {
+        // Create a standardized account object
+        const transformedAccount = {
+          ...account,
+          // Ensure we have the basic fields
+          id: account.id,
+          name: account.name,
+          page_type: account.page_type,
+          picture_url: account.picture_url,
+          social_id: account.social_id
+        };
+
+        // Platform-specific field mapping
+        if (account.page_type === 'instagram') {
+          // For Instagram, prioritize username and media_url fields
+          transformedAccount.username = account.username || account.name?.toLowerCase().replace(/\s+/g, '_') || 'username';
+          transformedAccount.media_url = account.media_url || account.picture_url;
+        } else if (account.page_type === 'linkedin') {
+          // For LinkedIn, ensure proper professional data
+          transformedAccount.name = account.name || account.username || 'Professional Name';
+          transformedAccount.picture_url = account.picture_url || account.media_url;
+        } else if (account.page_type === 'facebook') {
+          // For Facebook, use standard name and picture fields
+          transformedAccount.name = account.name || 'Page Name';
+          transformedAccount.picture_url = account.picture_url;
+        }
+
+        return transformedAccount;
+      });
+      
+      setPages(transformedAccounts); // Store the transformed accounts in the state
+      console.log('Transformed accounts:', transformedAccounts); // Debug log
 
 
     } catch (error) {
@@ -1604,12 +1642,12 @@ Would you like me to create this as a short handwritten-style note (suitable for
           {/* LinkedIn Post Header */}
           <Box display="flex" alignItems="center" mb={2}>
             <Avatar 
-              src={selectUser?.picture_url || "https://via.placeholder.com/40"} 
+              src={selectUser?.picture_url || selectUser?.media_url || "https://via.placeholder.com/40"} 
               sx={{ width: 40, height: 40, mr: 2 }}
             />
             <Box>
               <Typography variant="body1" fontWeight="600" color="#000">
-                {selectUser?.name || 'User Name'}
+                {selectUser?.name || selectUser?.username || 'User Name'}
               </Typography>
               <Typography variant="body2" color="#666" sx={{ fontSize: '12px' }}>
                 Professional Title • 1st
@@ -1904,12 +1942,12 @@ Would you like me to create this as a short handwritten-style note (suitable for
           {/* Instagram Post Header */}
           <Box display="flex" alignItems="center" p={2} pb={1}>
             <Avatar 
-              src={selectUser?.picture_url || "https://via.placeholder.com/40"} 
+              src={selectUser?.media_url || selectUser?.picture_url || "https://via.placeholder.com/40"} 
               sx={{ width: 32, height: 32, mr: 1.5 }}
             />
             <Box>
               <Typography variant="body2" fontWeight="600" color="#000">
-                {selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
+                {selectUser?.username || selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
               </Typography>
               <Typography variant="body2" color="#8e8e8e" sx={{ fontSize: '12px' }}>
                 Location
@@ -2081,7 +2119,7 @@ Would you like me to create this as a short handwritten-style note (suitable for
             {postContent && (
               <Typography variant="body2" color="#000" sx={{ lineHeight: 1.4 }}>
                 <span style={{ fontWeight: 600, marginRight: '4px' }}>
-                  {selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
+                  {selectUser?.username || selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
                 </span>
                 <span dangerouslySetInnerHTML={{ __html: processMentions(postContent) }} />
               </Typography>
@@ -2313,11 +2351,11 @@ Would you like me to create this as a short handwritten-style note (suitable for
             {/* Bottom user info and caption */}
             <Box display="flex" alignItems="center" mb={1}>
               <Avatar 
-                src={selectUser?.picture_url || "https://via.placeholder.com/40"} 
+                src={selectUser?.media_url || selectUser?.picture_url || "https://via.placeholder.com/40"} 
                 sx={{ width: 32, height: 32, mr: 1.5 }}
               />
               <Typography variant="body2" fontWeight="600" color="white">
-                {selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
+                {selectUser?.username || selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
               </Typography>
             </Box>
             
@@ -2396,11 +2434,11 @@ Would you like me to create this as a short handwritten-style note (suitable for
         }}>
           <Box display="flex" alignItems="center">
             <Avatar 
-              src={selectUser?.picture_url || "https://via.placeholder.com/40"} 
+              src={selectUser?.media_url || selectUser?.picture_url || "https://via.placeholder.com/40"} 
               sx={{ width: 32, height: 32, mr: 1, border: '2px solid white' }}
             />
             <Typography variant="body2" fontWeight="600" color="white">
-              {selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
+              {selectUser?.username || selectUser?.name?.toLowerCase().replace(/\s+/g, '_') || 'username'}
             </Typography>
             <Typography variant="body2" color="rgba(255,255,255,0.7)" sx={{ ml: 1 }}>
               2h
@@ -3188,8 +3226,9 @@ Would you like me to create this as a short handwritten-style note (suitable for
                     label={user.name}
                     onClick={() => {
                       //handleAvatarClick(user.social_id);
-                      //setSelectedChipId(user.social_id);
+                      setSelectedChipId(user.social_id);
                       setSelectUser(user); // Set the selected user for preview
+                      console.log('Chip clicked, setting selectUser:', user);
                     }}
                     onDelete={() => { 
                       // Remove from selectedUsers
